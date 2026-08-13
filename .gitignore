@@ -1,0 +1,14 @@
+node_modules/
+dist/
+build/
+.env
+*.log
+coverage/
+.vitest/
+test-results/
+playwright-report/
+*.tsbuildinfo
+
+# OS junk
+.DS_Store
+Thumbs.db

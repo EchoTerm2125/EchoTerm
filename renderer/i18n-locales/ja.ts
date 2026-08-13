@@ -1,0 +1,324 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   EchoTerm — Japanese / 日本語 translations
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+(function () {
+  'use strict';
+
+  window.App.i18n.registerLocale('ja', {
+
+    // ── Locale metadata ─────────────────────────────────────────────────────
+    _langName: '日本語',
+
+    // ── App / Shells ─────────────────────────────────────────────────────────
+    appTitle: 'EchoTerm',
+    gitBashNotFound: '⚠ Git Bash が見つかりません',
+    shellPowerShell: 'PowerShell',
+    shellCmd: 'CMD',
+    shellGitBash: 'Git Bash',
+    shellSsh: 'SSH',
+
+    // ── Toolbar ──────────────────────────────────────────────────────────────
+    toolbarSidebarToggle: 'サイドバー (Ctrl+Shift+S)',
+    toolbarSettings: '設定',
+    winMinimizeTitle: '最小化',
+    winMaximizeTitle: '最大化',
+    winRestoreTitle: '元のサイズに戻す',
+
+    // ── New Terminal Dropdown ────────────────────────────────────────────────
+    newTerminalTitle: '新しいターミナル (Ctrl+Shift+N)',
+    newTermDropdownTitle: 'ターミナルの種類を選択',
+    powershellLabel: 'PowerShell',
+    cmdLabel: 'CMD',
+    gitBashLabel: 'Git Bash',
+
+    // ── Echo buttons ─────────────────────────────────────────────────────────
+    echoEnableAll: 'すべて有効化',
+    echoDisableAll: 'すべて無効化',
+    echoToggleAll: 'すべて切り替え',
+    echoPasteAll: 'すべて貼り付け',
+    echoLabel: 'エコー',
+    echoLabelOn: 'エコー ON',
+    echoModeTitleOff: 'エコーモード',
+    echoEnableAllTitle: 'すべてのターミナルでエコーを有効化',
+    echoToggleAllTitle: '各ターミナルのエコー状態を切り替え',
+    echoPasteAllTitle: 'エコーが有効なすべてのターミナルに貼り付け',
+
+    // ── Group bar ────────────────────────────────────────────────────────────
+    groupDefaultName: 'グループ {n}',
+    newGroupTitle: '新しいグループ',
+    closeGroupTitle: 'グループを閉じる',
+
+    // ── Tab ──────────────────────────────────────────────────────────────────
+    tabCloseTitle: '閉じる',
+
+    // ── Pane titlebar ────────────────────────────────────────────────────────
+    panePasteTitle: '貼り付け',
+    paneEchoTitle: 'このターミナルに入力をエコー',
+    paneEchoLabel: 'エコー',
+    paneCloseTitle: '閉じる',
+    paneDismissTitle: '閉じる',
+
+    // ── Status bar ───────────────────────────────────────────────────────────
+    statusTerminalCount: '{count} 台のターミナル',
+    statusTerminalPlural: '',
+    statusEchoOff: 'エコー: オフ',
+    statusEchoOn: 'エコー: オン',
+    statusEchoOnSelected: 'エコー: オン ({count} 台選択中)',
+    statusShell: 'シェル: {shell}',
+
+    // ── Toast messages ───────────────────────────────────────────────────────
+    toastDefaultShell: 'デフォルト: {shell}',
+    toastGitBashNotFound: 'Git Bash が見つかりません。Git Bash ターミナルを開くには bash.exe を指定してください。',
+    toastTerminalExited: 'ターミナルが終了しました。新しいターミナルを起動しています...',
+    toastNeedTwoTerminals: 'エコーモードを使用するには、このグループに 2 つ以上のターミナルが必要です。',
+    toastCannotDeleteLastGroup: '最後のグループは削除できません。',
+    toastError: 'エラー: {message}',
+    toastSshError: 'SSH エラー: {message}',
+    toastSshErrorNamed: 'SSH エラー ({name}): {message}',
+    toastSkipped: '{name} をスキップしました: {message}',
+    toastImported: '{list} をインポートしました。',
+    toastImportedNew: '{count} 件の新規',
+    toastImportedUpdated: '{count} 件を更新',
+    toastSshExported: 'SSH 設定を {path} にエクスポートしました。',
+    toastAlreadyRunning: 'EchoTerm は既に起動しています。',
+
+    // ── Context menus ────────────────────────────────────────────────────────
+    ctxCopy: 'コピー',
+    ctxPaste: '貼り付け',
+    ctxPasteAll: 'すべて貼り付け',
+    ctxToggleEcho: 'エコー切り替え',
+    ctxClosePane: 'ペインを閉じる',
+    tabCtxRename: 'タブ名を変更',
+    tabCtxClose: 'タブを閉じる',
+    tabCtxCloseSelected: '選択したタブを閉じる',
+    tabCtxCloseOthers: '他のタブを閉じる',
+    tabCtxMoveToGroup: 'グループへ移動',
+    tabCtxSubmenuArrow: '▶',
+    groupCtxRename: 'グループ名を変更',
+    groupCtxDelete: 'グループを閉じる',
+    groupCtxCloseTerminals: 'すべてのターミナルを閉じる',
+
+    // ── Confirm dialogs ──────────────────────────────────────────────────────
+    confirmCancel: 'キャンセル',
+    confirmClose: '閉じる',
+    confirmDelete: '削除',
+    confirmDontShowAgain: '今後表示しない',
+    confirmCloseTerminal: 'このターミナルを閉じますか？\nセッションが終了します。',
+    confirmCloseSelectedTerminals: '選択した {count} 台のターミナルを閉じますか？\nすべてのセッションが終了します。',
+    confirmCloseOtherTerminals: '他の {count} 台のターミナルを閉じますか？\nすべてのセッションが終了します。',
+    confirmCloseGroup: 'グループ「{name}」を閉じますか？',
+    confirmCloseGroupWithTerminals: 'グループ「{name}」を閉じますか？\n{count} 台のターミナルが閉じられます。',
+    confirmCloseApp: 'EchoTerm を閉じますか？\nすべてのターミナルセッションが終了します。',
+    confirmCloseAllGroupTerminals: 'グループ「{name}」の {count} 台すべてのターミナルを閉じますか？\nすべてのセッションが終了します。',
+    confirmDeleteSshConnection: 'SSH 接続「{name}」を削除しますか？',
+    confirmDeleteSshFolder: 'SSH フォルダ「{name}」を削除しますか？\nサブフォルダも削除されます。接続は削除されません。',
+    confirmDeleteSshUser: 'SSH ユーザー「{name}」を削除しますか？\nこのユーザーを使用している接続は再割り当てが必要になります。',
+    confirmDeleteMultiSsh: 'SSH {type} を {count} 件削除しますか？',
+    confirmJumpHostsMissing: '次のジャンプホストが選択されていません：\n\n{names}\n\nそれでもインポートしますか？',
+
+    // ── SSH Sidebar ──────────────────────────────────────────────────────────
+    sshSidebarTitle: 'SSH',
+    sshPasswordBtnTitle: 'マスターパスワードを設定/変更',
+    sshImportBtnTitle: '~/.ssh/config から新規インポート',
+    sshUpdateBtnTitle: '~/.ssh/config から既存を更新',
+    sshExportBtnTitle: '接続を SSH 設定ファイルにエクスポート',
+    sshNewConnBtnTitle: '新しい接続',
+    sshNewFolderBtnTitle: '新しいフォルダ',
+    sshNewUserBtnTitle: '新しいユーザー',
+    sshMenuTitle: '操作',
+    sshSearchPlaceholder: '検索...',
+    sshSectionConnections: '接続',
+    sshSectionUsers: 'ユーザー',
+    sshNoConnections: '接続がまだありません。\n+ をクリックして追加。',
+    sshNoUsers: 'ユーザーがまだありません。\n+ をクリックして追加。',
+    sshFolderOpenAllTitle: 'すべて開く',
+    sshFolderEditTitle: '編集',
+    sshFolderDeleteTitle: '削除',
+    sshItemConnectTitle: '接続',
+    sshItemEditTitle: '編集',
+    sshItemDeleteTitle: '削除',
+    sshItemAuthKeyfile: '🔑',
+    sshItemAuthPassword: '🔒',
+    sshItemConnIcon: '🖥️',
+
+    // ── SSH Dialogs ──────────────────────────────────────────────────────────
+    sshDialogTitleNewConn: '新しい接続',
+    sshDialogTitleEditConn: '接続を編集',
+    sshDialogTitleNewFolder: '新しいフォルダ',
+    sshDialogTitleEditFolder: 'フォルダを編集',
+    sshDialogTitleNewUser: '新しいユーザー',
+    sshDialogTitleEditUser: 'ユーザーを編集',
+    sshDialogSave: '保存',
+    sshDialogCancel: 'キャンセル',
+    sshFormName: '名前',
+    sshFormHost: 'ホスト',
+    sshFormPort: 'ポート',
+    sshFormUser: 'ユーザー',
+    sshFolderOptional: 'フォルダ（省略可）',
+    sshFormSelectUser: '-- ユーザーを選択 --',
+    sshFormNone: '-- なし --',
+    sshFormJumpHostOptional: 'ジャンプホスト（省略可）',
+    sshFormJumpType: '種類',
+    sshFormJumpNone: 'なし（直接接続）',
+    sshFormJumpManual: '手動で入力',
+    sshFormJumpReference: '保存済みの接続を選択',
+    sshFormJumpHost: 'ジャンプホスト',
+    sshFormJumpPort: 'ジャンプポート',
+    sshFormJumpUsername: 'ジャンプユーザー名',
+    sshFormJumpViaConnection: '接続経由でジャンプ',
+    sshFormSelectConnection: '-- 接続を選択 --',
+    sshFormAdvancedOptional: '詳細オプション（任意）',
+    sshFormHostKeyAlgorithms: 'ホスト鍵アルゴリズム',
+    sshFormKexAlgorithms: '鍵交換アルゴリズム',
+    sshFormPubkeyAcceptedAlgorithms: '公開鍵アルゴリズム',
+    sshFormUsername: 'ユーザー名',
+    sshFormAuthType: '認証',
+    sshFormAuthPassword: 'パスワード',
+    sshFormAuthKeyfile: '鍵ファイル',
+    sshFormPassword: 'パスワード',
+    sshFormPasswordUnchanged: '（空欄なら変更なし）',
+    sshFormKeyFilePath: '鍵ファイルのパス',
+    sshFormKeyPassphrase: '鍵のパスフレーズ',
+    sshFormKeyPassphraseOptional: '（省略可）',
+    sshFolderName: 'フォルダ名',
+    sshFolderParent: '親フォルダ',
+    sshFolderParentNone: '（なし — ルートレベル）',
+    sshPasswordUnlockTitle: 'SSH 接続のロック解除',
+    sshPasswordSetupTitle: 'SSH 接続の保護',
+    sshPasswordChangeTitle: 'マスターパスワードの変更',
+    sshPasswordLabel: 'マスターパスワード',
+    sshPasswordPlaceholderUnlock: 'マスターパスワードを入力',
+    sshPasswordPlaceholderNew: '新しいマスターパスワードを入力',
+    sshPasswordConfirmLabel: 'パスワードの確認',
+    sshPasswordConfirmPlaceholder: 'マスターパスワードを確認',
+    sshPasswordBtnUnlock: 'ロック解除',
+    sshPasswordBtnSet: 'パスワードを設定',
+    sshPasswordBtnChange: 'パスワードを変更',
+    sshPasswordBtnUseOs: 'OS の暗号化を使用',
+    sshPasswordEmpty: 'パスワードは空にできません。',
+    sshPasswordMismatch: 'パスワードが一致しません。',
+    sshPasswordIncorrect: 'パスワードが正しくありません。',
+    sshPasswordDecryptFailed: 'データの復号に失敗しました。ファイルが破損している可能性があります。',
+    sshMasterPasswordRequired: 'マスターパスワードが必要です。データは暗号化されています。',
+    sshPasswordLockedIcon: '🔒',
+    sshPasswordUnlockedIcon: '🔓',
+    sshPasswordBtnChangeTitle: 'マスターパスワードを変更',
+    sshPasswordBtnSetTitle: 'マスターパスワードを設定',
+
+    // ── SSH Import ───────────────────────────────────────────────────────────
+    sshImportTitle: '~/.ssh/config からインポート',
+    sshImportUpdateTitle: '~/.ssh/config から更新',
+    sshImportBtnImport: '選択項目をインポート',
+    sshImportBtnUpdate: '選択項目を更新',
+    sshImportUpdateFieldsTitle: '次のフィールドを更新:',
+    sshImportFieldHost: 'ホスト名 / ポート',
+    sshImportFieldUser: 'ユーザー',
+    sshImportFieldJump: 'ジャンプホスト',
+    sshImportFieldOptions: 'アルゴリズムオプション',
+    sshImportAuthKeyfile: '鍵: {file}',
+    sshImportAuthPassword: 'パスワード',
+    sshImportJumpVia: '↪ {host} 経由',
+    sshImportJumpNotInConfig: ' （設定にありません）',
+    sshImportNoNewHosts: '新しいホストはありません。すべてインポート済みです。',
+    sshImportNoExistingToUpdate: '更新できる既存の接続が SSH 設定に見つかりません。',
+    sshImportNoHosts: 'SSH 設定にホストが見つかりません。',
+
+    // ── SSH Context Menu ─────────────────────────────────────────────────────
+    sshCtxConnect: '接続',
+    sshCtxEdit: '編集',
+    sshCtxMoveToFolder: 'フォルダへ移動',
+    sshCtxDelete: '削除',
+    sshCtxOpenAll: 'すべての接続を開く',
+    sshCtxConnectAll: 'すべて接続 ({count})',
+    sshCtxDeleteSelected: '選択項目を削除 ({count})',
+    sshCtxOpenAllMulti: 'すべて開く ({count})',
+    sshCtxDuplicate: '複製',
+    sshCtxDuplicateSelected: '選択項目を複製 ({count})',
+    sshCtxNoOtherFolders: '他のフォルダはありません',
+
+    // ── Settings / Options Panel ──────────────────────────────────────────────
+    optionsTitleAppearance: '外観',
+    optionsThemeDark: 'ダーク',
+    optionsThemeLight: 'ライト',
+    optionsUiFontSize: 'UIフォントサイズ',
+    optionsTermFontSize: 'ターミナルのフォントサイズ',
+    optionsTitleDefaultShell: 'デフォルトシェル',
+    optionsTitleWarnings: '警告',
+    optionsTitleMouse: 'マウス',
+    optionsTabCloseConfirm: 'タブを閉じる前に確認',
+    optionsWindowCloseConfirm: 'ウィンドウを閉じる前に確認',
+    optionsGroupCloseConfirm: 'グループを削除する前に確認',
+    optionsSshJumpWarn: 'SSH インポート時に未選択のジャンプホストを警告',
+    optionsPastePreview: '複数行の内容を貼り付ける前に確認',
+    optionsRightClickPaste: '右クリックでコピー / 貼り付け',
+
+    // ── Danger Zone ──────────────────────────────────────────────────────────
+    optionsTitleDanger: '危険ゾーン',
+    optionsResetSettings: 'すべての設定をリセット',
+    optionsClearSshData: 'すべての SSH 接続を削除',
+    confirmResetSettings: 'すべての設定を初期状態に戻しますか？\nこの操作は元に戻せません。',
+    confirmClearSshData: '保存済みの SSH 接続・ユーザー・フォルダーをすべて削除しますか？\nこの操作は元に戻せません。',
+    confirmReset: 'リセット',
+    toastSettingsReset: 'すべての設定がリセットされました。',
+    toastSshDataCleared: 'すべての SSH 接続を削除しました。',
+    optionsClearAllData: 'すべてのデータを削除して再起動',
+    confirmClearAllData: 'すべてのデータを削除して EchoTerm を再起動しますか？\nすべての設定と SSH 接続が完全に削除されます。',
+    optionsClearCache: 'すべてのキャッシュを削除',
+    confirmClearCache: 'アプリのキャッシュを削除しますか？\n設定や SSH 接続には影響しません。',
+    confirmClear: '削除',
+    toastCacheCleared: 'アプリのキャッシュを削除しました。',
+
+    // ── Paste Preview ─────────────────────────────────────────────────────────
+    pastePreviewTitle: '貼り付けプレビュー',
+    pastePreviewLines: '{count} 行',
+    pastePreviewDontShow: '今後表示しない',
+    pastePreviewCancel: 'キャンセル',
+    pastePreviewPaste: '貼り付け',
+
+    // ── Error messages ───────────────────────────────────────────────────────
+    errorUnknownShell: '不明なシェル: {shell}',
+    errorConnectionNotFound: '接続が見つかりません。',
+    errorGroupNotFound: 'グループが見つかりません。',
+    errorConfigNotFound: '設定ファイルが見つかりません: {path}',
+    errorNoMasterPassword: 'マスターパスワードが設定されていません。',
+
+    // ── Language ─────────────────────────────────────────────────────────────
+    optionsTitleLanguage: '言語',
+
+    // ── About ────────────────────────────────────────────────────────────────
+    optionsTitleAbout: '情報',
+    aboutDescription: 'EchoTerm — エコー入力対応の分割ビュー・ターミナルアプリ',
+    aboutVersion: 'バージョン',
+
+    // ── Dialog buttons ───────────────────────────────────────────────────────
+    genericSave: '保存',
+    genericCancel: 'キャンセル',
+
+    // ── SSH Header Dropdown ─────────────────────────────────────────────────
+    sshDropdownSshLabel: '.SSH',
+    sshDropdownCreate: '作成',
+    sshDropdownImportBtn: 'インポート',
+    sshDropdownUpdateBtn: '更新',
+    sshDropdownExportBtn: 'エクスポート',
+    sshDropdownConnBtn: '接続',
+    sshDropdownFolderBtn: 'フォルダ',
+    sshDropdownUserBtn: 'ユーザー',
+
+    // ── SSH Import Diff Labels ──────────────────────────────────────────────
+    sshImportDiffHost: 'ホスト',
+    sshImportDiffUser: 'ユーザー',
+    sshImportDiffJump: 'ジャンプ',
+    sshImportDiffOptions: 'オプション',
+    sshImportDiffNone: '（なし）',
+    sshImportDefaultUserName: 'デフォルト',
+
+    // ── SSH Delete Type Labels ──────────────────────────────────────────────
+    sshDeleteTypeFolder: 'フォルダ',
+    sshDeleteTypeConnection: '接続',
+    sshDeleteTypeUser: 'ユーザー',
+  });
+
+})();
+
+export {};

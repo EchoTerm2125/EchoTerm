@@ -1,0 +1,324 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   EchoTerm — Turkish / Türkçe translations
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+(function () {
+  'use strict';
+
+  window.App.i18n.registerLocale('tr', {
+
+    // ── Locale metadata ─────────────────────────────────────────────────────
+    _langName: 'Türkçe',
+
+    // ── App / Shells ─────────────────────────────────────────────────────────
+    appTitle: 'EchoTerm',
+    gitBashNotFound: '⚠ Git Bash bulunamadı',
+    shellPowerShell: 'PowerShell',
+    shellCmd: 'CMD',
+    shellGitBash: 'Git Bash',
+    shellSsh: 'SSH',
+
+    // ── Toolbar ──────────────────────────────────────────────────────────────
+    toolbarSidebarToggle: 'Kenar Çubuğu (Ctrl+Shift+S)',
+    toolbarSettings: 'Ayarlar',
+    winMinimizeTitle: 'Küçült',
+    winMaximizeTitle: 'Ekranı Kapla',
+    winRestoreTitle: 'Geri Yükle',
+
+    // ── New Terminal Dropdown ────────────────────────────────────────────────
+    newTerminalTitle: 'Yeni Terminal (Ctrl+Shift+N)',
+    newTermDropdownTitle: 'Terminal türünü seç',
+    powershellLabel: 'PowerShell',
+    cmdLabel: 'CMD',
+    gitBashLabel: 'Git Bash',
+
+    // ── Echo buttons ─────────────────────────────────────────────────────────
+    echoEnableAll: 'Tümünü Etkinleştir',
+    echoDisableAll: 'Tümünü Devre Dışı Bırak',
+    echoToggleAll: 'Tümünü Değiştir',
+    echoPasteAll: 'Tümüne Yapıştır',
+    echoLabel: 'Yankı',
+    echoLabelOn: 'Yankı AÇIK',
+    echoModeTitleOff: 'Yankı Modu',
+    echoEnableAllTitle: 'Tüm terminallerde yankıyı etkinleştir',
+    echoToggleAllTitle: 'Her terminalin yankı durumunu değiştir',
+    echoPasteAllTitle: 'Yankı etkin tüm terminallere yapıştır',
+
+    // ── Group bar ────────────────────────────────────────────────────────────
+    groupDefaultName: 'Grup {n}',
+    newGroupTitle: 'Yeni Grup',
+    closeGroupTitle: 'Grubu Kapat',
+
+    // ── Tab ──────────────────────────────────────────────────────────────────
+    tabCloseTitle: 'Kapat',
+
+    // ── Pane titlebar ────────────────────────────────────────────────────────
+    panePasteTitle: 'Yapıştır',
+    paneEchoTitle: 'Girişi bu terminale yankıla',
+    paneEchoLabel: 'Yankı',
+    paneCloseTitle: 'Kapat',
+    paneDismissTitle: 'Kapat',
+
+    // ── Status bar ───────────────────────────────────────────────────────────
+    statusTerminalCount: 'Terminal: {count}',
+    statusTerminalPlural: '',
+    statusEchoOff: 'Yankı: KAPALI',
+    statusEchoOn: 'Yankı: AÇIK',
+    statusEchoOnSelected: 'Yankı: AÇIK ({count} seçili)',
+    statusShell: 'Kabuk: {shell}',
+
+    // ── Toast messages ───────────────────────────────────────────────────────
+    toastDefaultShell: 'Varsayılan: {shell}',
+    toastGitBashNotFound: 'Git Bash bulunamadı. Git Bash terminali açmak için lütfen bash.exe yolunu belirtin.',
+    toastTerminalExited: 'Terminal sona erdi. Yeni bir tane başlatılıyor...',
+    toastNeedTwoTerminals: 'Yankı modu için bu grupta en az 2 terminal gerekir.',
+    toastCannotDeleteLastGroup: 'Son grup silinemez.',
+    toastError: 'Hata: {message}',
+    toastSshError: 'SSH Hatası: {message}',
+    toastSshErrorNamed: 'SSH Hatası ({name}): {message}',
+    toastSkipped: '{name} atlandı: {message}',
+    toastImported: '{list} içe aktarıldı.',
+    toastImportedNew: '{count} yeni',
+    toastImportedUpdated: '{count} güncellendi',
+    toastSshExported: 'SSH yapılandırması {path} konumuna dışa aktarıldı.',
+    toastAlreadyRunning: 'EchoTerm zaten çalışıyor.',
+
+    // ── Context menus ────────────────────────────────────────────────────────
+    ctxCopy: 'Kopyala',
+    ctxPaste: 'Yapıştır',
+    ctxPasteAll: 'Tümüne Yapıştır',
+    ctxToggleEcho: 'Yankıyı Değiştir',
+    ctxClosePane: 'Bölmeyi Kapat',
+    tabCtxRename: 'Sekmeyi Yeniden Adlandır',
+    tabCtxClose: 'Sekmeyi Kapat',
+    tabCtxCloseSelected: 'Seçilenleri Kapat',
+    tabCtxCloseOthers: 'Diğerlerini Kapat',
+    tabCtxMoveToGroup: 'Gruba Taşı',
+    tabCtxSubmenuArrow: '▶',
+    groupCtxRename: 'Grubu Yeniden Adlandır',
+    groupCtxDelete: 'Grubu Kapat',
+    groupCtxCloseTerminals: 'Tüm Terminalleri Kapat',
+
+    // ── Confirm dialogs ──────────────────────────────────────────────────────
+    confirmCancel: 'İptal',
+    confirmClose: 'Kapat',
+    confirmDelete: 'Sil',
+    confirmDontShowAgain: 'Bir daha gösterme',
+    confirmCloseTerminal: 'Bu terminal kapatılsın mı?\nOturum sonlandırılacak.',
+    confirmCloseSelectedTerminals: 'Seçili terminaller ({count}) kapatılsın mı?\nTüm oturumlar sonlandırılacak.',
+    confirmCloseOtherTerminals: 'Diğer terminaller ({count}) kapatılsın mı?\nTüm oturumlar sonlandırılacak.',
+    confirmCloseGroup: '"{name}" grubu kapatılsın mı?',
+    confirmCloseGroupWithTerminals: '"{name}" grubu kapatılsın mı?\n{count} terminal kapatılacak.',
+    confirmCloseApp: 'EchoTerm kapatılsın mı?\nTüm terminal oturumları sonlandırılacak.',
+    confirmCloseAllGroupTerminals: '"{name}" grubundaki {count} terminalin tamamı kapatılsın mı?\nTüm oturumlar sonlandırılacak.',
+    confirmDeleteSshConnection: 'SSH bağlantısı "{name}" silinsin mi?',
+    confirmDeleteSshFolder: 'SSH klasörü "{name}" silinsin mi?\nAlt klasörler de silinecek. Bağlantılar silinmeyecek.',
+    confirmDeleteSshUser: 'SSH kullanıcısı "{name}" silinsin mi?\nBu kullanıcıyı kullanan bağlantıların yeniden atanması gerekecek.',
+    confirmDeleteMultiSsh: '{count} SSH öğesi silinsin mi?',
+    confirmJumpHostsMissing: 'Aşağıdaki atlama sunucuları seçili değil:\n\n{names}\n\nYine de içe aktarılsın mı?',
+
+    // ── SSH Sidebar ──────────────────────────────────────────────────────────
+    sshSidebarTitle: 'SSH',
+    sshPasswordBtnTitle: 'Ana parolayı belirle/değiştir',
+    sshImportBtnTitle: '~/.ssh/config konumundan yenileri içe aktar',
+    sshUpdateBtnTitle: '~/.ssh/config konumundan mevcutları güncelle',
+    sshExportBtnTitle: 'Bağlantıları SSH yapılandırma dosyasına dışa aktar',
+    sshNewConnBtnTitle: 'Yeni Bağlantı',
+    sshNewFolderBtnTitle: 'Yeni Klasör',
+    sshNewUserBtnTitle: 'Yeni Kullanıcı',
+    sshMenuTitle: 'İşlemler',
+    sshSearchPlaceholder: 'Ara...',
+    sshSectionConnections: 'Bağlantılar',
+    sshSectionUsers: 'Kullanıcılar',
+    sshNoConnections: 'Henüz bağlantı yok.\nEklemek için + işaretine tıklayın.',
+    sshNoUsers: 'Henüz kullanıcı yok.\nEklemek için + işaretine tıklayın.',
+    sshFolderOpenAllTitle: 'Tümünü aç',
+    sshFolderEditTitle: 'Düzenle',
+    sshFolderDeleteTitle: 'Sil',
+    sshItemConnectTitle: 'Bağlan',
+    sshItemEditTitle: 'Düzenle',
+    sshItemDeleteTitle: 'Sil',
+    sshItemAuthKeyfile: '🔑',
+    sshItemAuthPassword: '🔒',
+    sshItemConnIcon: '🖥️',
+
+    // ── SSH Dialogs ──────────────────────────────────────────────────────────
+    sshDialogTitleNewConn: 'Yeni Bağlantı',
+    sshDialogTitleEditConn: 'Bağlantıyı Düzenle',
+    sshDialogTitleNewFolder: 'Yeni Klasör',
+    sshDialogTitleEditFolder: 'Klasörü Düzenle',
+    sshDialogTitleNewUser: 'Yeni Kullanıcı',
+    sshDialogTitleEditUser: 'Kullanıcıyı Düzenle',
+    sshDialogSave: 'Kaydet',
+    sshDialogCancel: 'İptal',
+    sshFormName: 'Ad',
+    sshFormHost: 'Sunucu',
+    sshFormPort: 'Port',
+    sshFormUser: 'Kullanıcı',
+    sshFolderOptional: 'Klasör (isteğe bağlı)',
+    sshFormSelectUser: '-- Kullanıcı Seç --',
+    sshFormNone: '-- Yok --',
+    sshFormJumpHostOptional: 'Atlama Sunucusu (isteğe bağlı)',
+    sshFormJumpType: 'Tür',
+    sshFormJumpNone: 'Yok (doğrudan bağlantı)',
+    sshFormJumpManual: 'Elle gir',
+    sshFormJumpReference: 'Kayıtlı bir bağlantı seç',
+    sshFormJumpHost: 'Atlama Sunucusu',
+    sshFormJumpPort: 'Atlama Portu',
+    sshFormJumpUsername: 'Atlama Kullanıcı Adı',
+    sshFormJumpViaConnection: 'Bağlantı üzerinden atla',
+    sshFormSelectConnection: '-- Bağlantı Seç --',
+    sshFormAdvancedOptional: 'Gelişmiş Seçenekler (isteğe bağlı)',
+    sshFormHostKeyAlgorithms: 'Ana Makine Anahtarı Algoritmaları',
+    sshFormKexAlgorithms: 'Anahtar Değişimi Algoritmaları',
+    sshFormPubkeyAcceptedAlgorithms: 'Genel Anahtar Algoritmaları',
+    sshFormUsername: 'Kullanıcı Adı',
+    sshFormAuthType: 'Kimlik Doğrulama',
+    sshFormAuthPassword: 'Parola',
+    sshFormAuthKeyfile: 'Anahtar Dosyası',
+    sshFormPassword: 'Parola',
+    sshFormPasswordUnchanged: '(boş bırakılırsa değişmez)',
+    sshFormKeyFilePath: 'Anahtar Dosyası Yolu',
+    sshFormKeyPassphrase: 'Anahtar Parolası',
+    sshFormKeyPassphraseOptional: '(isteğe bağlı)',
+    sshFolderName: 'Klasör Adı',
+    sshFolderParent: 'Üst klasör',
+    sshFolderParentNone: '(yok — kök düzey)',
+    sshPasswordUnlockTitle: 'SSH Bağlantılarının Kilidini Aç',
+    sshPasswordSetupTitle: 'SSH Bağlantılarını Koru',
+    sshPasswordChangeTitle: 'Ana Parolayı Değiştir',
+    sshPasswordLabel: 'Ana Parola',
+    sshPasswordPlaceholderUnlock: 'Ana parolayı girin',
+    sshPasswordPlaceholderNew: 'Yeni ana parolayı girin',
+    sshPasswordConfirmLabel: 'Parolayı Onayla',
+    sshPasswordConfirmPlaceholder: 'Ana parolayı onaylayın',
+    sshPasswordBtnUnlock: 'Kilidi Aç',
+    sshPasswordBtnSet: 'Parolayı Belirle',
+    sshPasswordBtnChange: 'Parolayı Değiştir',
+    sshPasswordBtnUseOs: 'İşletim Sistemi Şifrelemesini Kullan',
+    sshPasswordEmpty: 'Parola boş olamaz.',
+    sshPasswordMismatch: 'Parolalar eşleşmiyor.',
+    sshPasswordIncorrect: 'Parola hatalı.',
+    sshPasswordDecryptFailed: 'Verilerin şifresi çözülemedi. Dosya bozuk olabilir.',
+    sshMasterPasswordRequired: 'Ana parola gerekli. Veriler şifrelidir.',
+    sshPasswordLockedIcon: '🔒',
+    sshPasswordUnlockedIcon: '🔓',
+    sshPasswordBtnChangeTitle: 'Ana parolayı değiştir',
+    sshPasswordBtnSetTitle: 'Ana parolayı belirle',
+
+    // ── SSH Import ───────────────────────────────────────────────────────────
+    sshImportTitle: '~/.ssh/config konumundan içe aktar',
+    sshImportUpdateTitle: '~/.ssh/config konumundan güncelle',
+    sshImportBtnImport: 'Seçilenleri İçe Aktar',
+    sshImportBtnUpdate: 'Seçilenleri Güncelle',
+    sshImportUpdateFieldsTitle: 'Bu alanları güncelle:',
+    sshImportFieldHost: 'Sunucu Adı / Port',
+    sshImportFieldUser: 'Kullanıcı',
+    sshImportFieldJump: 'Atlama Sunucusu',
+    sshImportFieldOptions: 'Algoritma Seçenekleri',
+    sshImportAuthKeyfile: 'anahtar: {file}',
+    sshImportAuthPassword: 'parola',
+    sshImportJumpVia: '↪ {host} üzerinden',
+    sshImportJumpNotInConfig: ' (yapılandırmada yok)',
+    sshImportNoNewHosts: 'Yeni sunucu bulunamadı. Tümü zaten içe aktarıldı.',
+    sshImportNoExistingToUpdate: 'Güncellenecek mevcut bağlantı SSH yapılandırmasında bulunamadı.',
+    sshImportNoHosts: 'SSH yapılandırmasında sunucu bulunamadı.',
+
+    // ── SSH Context Menu ─────────────────────────────────────────────────────
+    sshCtxConnect: 'Bağlan',
+    sshCtxEdit: 'Düzenle',
+    sshCtxMoveToFolder: 'Klasöre Taşı',
+    sshCtxDelete: 'Sil',
+    sshCtxOpenAll: 'Tüm Bağlantıları Aç',
+    sshCtxConnectAll: 'Tümünü Bağla ({count})',
+    sshCtxDeleteSelected: 'Seçilenleri Sil ({count})',
+    sshCtxOpenAllMulti: 'Tümünü Aç ({count})',
+    sshCtxDuplicate: 'Çoğalt',
+    sshCtxDuplicateSelected: 'Seçilenleri Çoğalt ({count})',
+    sshCtxNoOtherFolders: 'Başka klasör yok',
+
+    // ── Settings / Options Panel ──────────────────────────────────────────────
+    optionsTitleAppearance: 'Görünüm',
+    optionsThemeDark: 'Koyu',
+    optionsThemeLight: 'Açık',
+    optionsUiFontSize: 'Arayüz yazı tipi boyutu',
+    optionsTermFontSize: 'Terminal yazı tipi boyutu',
+    optionsTitleDefaultShell: 'Varsayılan Kabuk',
+    optionsTitleWarnings: 'Uyarılar',
+    optionsTitleMouse: 'Fare',
+    optionsTabCloseConfirm: 'Sekme kapatılmadan önce onayla',
+    optionsWindowCloseConfirm: 'Pencere kapatılmadan önce onayla',
+    optionsGroupCloseConfirm: 'Grup silinmeden önce onayla',
+    optionsSshJumpWarn: 'SSH içe aktarımında seçilmemiş atlama sunucuları hakkında uyar',
+    optionsPastePreview: 'Çok satırlı içerik yapıştırılmadan önce onayla',
+    optionsRightClickPaste: 'Kopyalamak / yapıştırmak için sağ tıklayın',
+
+    // ── Danger Zone ──────────────────────────────────────────────────────────
+    optionsTitleDanger: 'Tehlikeli Bölge',
+    optionsResetSettings: 'Tüm ayarları sıfırla',
+    optionsClearSshData: 'Tüm SSH bağlantılarını temizle',
+    confirmResetSettings: 'Tüm ayarlar varsayılan değerlere sıfırlansın mı?\nBu işlem geri alınamaz.',
+    confirmClearSshData: 'Kayıtlı tüm SSH bağlantıları, kullanıcılar ve klasörler silinsin mi?\nBu işlem geri alınamaz.',
+    confirmReset: 'Sıfırla',
+    toastSettingsReset: 'Tüm ayarlar sıfırlandı.',
+    toastSshDataCleared: 'Tüm SSH bağlantıları temizlendi.',
+    optionsClearAllData: 'Tüm verileri temizle ve yeniden başlat',
+    confirmClearAllData: 'Tüm veriler temizlenip EchoTerm yeniden başlatılsın mı?\nTüm ayarlar ve SSH bağlantıları kalıcı olarak silinecek.',
+    optionsClearCache: 'Tüm önbelleği temizle',
+    confirmClearCache: 'Uygulama önbelleği temizlensin mi?\nAyarlarınızı veya SSH bağlantılarınızı etkilemez.',
+    confirmClear: 'Temizle',
+    toastCacheCleared: 'Uygulama önbelleği temizlendi.',
+
+    // ── Paste Preview ─────────────────────────────────────────────────────────
+    pastePreviewTitle: 'Yapıştırma Önizlemesi',
+    pastePreviewLines: '{count} satır',
+    pastePreviewDontShow: 'Bir daha gösterme',
+    pastePreviewCancel: 'İptal',
+    pastePreviewPaste: 'Yapıştır',
+
+    // ── Error messages ───────────────────────────────────────────────────────
+    errorUnknownShell: 'Bilinmeyen kabuk: {shell}',
+    errorConnectionNotFound: 'Bağlantı bulunamadı.',
+    errorGroupNotFound: 'Grup bulunamadı.',
+    errorConfigNotFound: 'Yapılandırma dosyası bulunamadı: {path}',
+    errorNoMasterPassword: 'Ana parola ayarlanmamış.',
+
+    // ── Language ─────────────────────────────────────────────────────────────
+    optionsTitleLanguage: 'Dil',
+
+    // ── About ────────────────────────────────────────────────────────────────
+    optionsTitleAbout: 'Hakkında',
+    aboutDescription: 'EchoTerm — bölünmüş görünüm ve yankı girişli terminal uygulaması',
+    aboutVersion: 'Sürüm',
+
+    // ── Dialog buttons ───────────────────────────────────────────────────────
+    genericSave: 'Kaydet',
+    genericCancel: 'İptal',
+
+    // ── SSH Header Dropdown ─────────────────────────────────────────────────
+    sshDropdownSshLabel: '.SSH',
+    sshDropdownCreate: 'Oluştur',
+    sshDropdownImportBtn: 'İçe Aktar',
+    sshDropdownUpdateBtn: 'Güncelle',
+    sshDropdownExportBtn: 'Dışa Aktar',
+    sshDropdownConnBtn: 'Bağlantı',
+    sshDropdownFolderBtn: 'Klasör',
+    sshDropdownUserBtn: 'Kullanıcı',
+
+    // ── SSH Import Diff Labels ──────────────────────────────────────────────
+    sshImportDiffHost: 'Sunucu',
+    sshImportDiffUser: 'Kullanıcı',
+    sshImportDiffJump: 'Atlama',
+    sshImportDiffOptions: 'Seçenekler',
+    sshImportDiffNone: '(yok)',
+    sshImportDefaultUserName: 'varsayılan',
+
+    // ── SSH Delete Type Labels ──────────────────────────────────────────────
+    sshDeleteTypeFolder: 'klasör',
+    sshDeleteTypeConnection: 'bağlantı',
+    sshDeleteTypeUser: 'kullanıcı',
+  });
+
+})();
+
+export {};

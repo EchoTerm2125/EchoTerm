@@ -1,0 +1,324 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   EchoTerm — Polish / Polski translations
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+(function () {
+  'use strict';
+
+  window.App.i18n.registerLocale('pl', {
+
+    // ── Locale metadata ─────────────────────────────────────────────────────
+    _langName: 'Polski',
+
+    // ── App / Shells ─────────────────────────────────────────────────────────
+    appTitle: 'EchoTerm',
+    gitBashNotFound: '⚠ Nie znaleziono Git Bash',
+    shellPowerShell: 'PowerShell',
+    shellCmd: 'CMD',
+    shellGitBash: 'Git Bash',
+    shellSsh: 'SSH',
+
+    // ── Toolbar ──────────────────────────────────────────────────────────────
+    toolbarSidebarToggle: 'Panel boczny (Ctrl+Shift+S)',
+    toolbarSettings: 'Ustawienia',
+    winMinimizeTitle: 'Minimalizuj',
+    winMaximizeTitle: 'Maksymalizuj',
+    winRestoreTitle: 'Przywróć',
+
+    // ── New Terminal Dropdown ────────────────────────────────────────────────
+    newTerminalTitle: 'Nowy terminal (Ctrl+Shift+N)',
+    newTermDropdownTitle: 'Wybierz typ terminala',
+    powershellLabel: 'PowerShell',
+    cmdLabel: 'CMD',
+    gitBashLabel: 'Git Bash',
+
+    // ── Echo buttons ─────────────────────────────────────────────────────────
+    echoEnableAll: 'Włącz wszystkie',
+    echoDisableAll: 'Wyłącz wszystkie',
+    echoToggleAll: 'Przełącz wszystkie',
+    echoPasteAll: 'Wklej do wszystkich',
+    echoLabel: 'Echo',
+    echoLabelOn: 'Echo WŁ.',
+    echoModeTitleOff: 'Tryb echo',
+    echoEnableAllTitle: 'Włącz echo na wszystkich terminalach',
+    echoToggleAllTitle: 'Przełącz stan echo każdego terminala',
+    echoPasteAllTitle: 'Wklej do wszystkich terminali z włączonym echo',
+
+    // ── Group bar ────────────────────────────────────────────────────────────
+    groupDefaultName: 'Grupa {n}',
+    newGroupTitle: 'Nowa grupa',
+    closeGroupTitle: 'Zamknij grupę',
+
+    // ── Tab ──────────────────────────────────────────────────────────────────
+    tabCloseTitle: 'Zamknij',
+
+    // ── Pane titlebar ────────────────────────────────────────────────────────
+    panePasteTitle: 'Wklej',
+    paneEchoTitle: 'Echo wejścia do tego terminala',
+    paneEchoLabel: 'Echo',
+    paneCloseTitle: 'Zamknij',
+    paneDismissTitle: 'Zamknij',
+
+    // ── Status bar ───────────────────────────────────────────────────────────
+    statusTerminalCount: 'Terminali: {count}',
+    statusTerminalPlural: '',
+    statusEchoOff: 'Echo: WYŁ.',
+    statusEchoOn: 'Echo: WŁ.',
+    statusEchoOnSelected: 'Echo: WŁ. (wybrano: {count})',
+    statusShell: 'Powłoka: {shell}',
+
+    // ── Toast messages ───────────────────────────────────────────────────────
+    toastDefaultShell: 'Domyślnie: {shell}',
+    toastGitBashNotFound: 'Nie znaleziono Git Bash. Wskaż lokalizację bash.exe, aby otworzyć terminal Git Bash.',
+    toastTerminalExited: 'Terminal zakończył działanie. Uruchamianie nowego...',
+    toastNeedTwoTerminals: 'Do trybu echo w tej grupie potrzebne są co najmniej 2 terminale.',
+    toastCannotDeleteLastGroup: 'Nie można usunąć ostatniej grupy.',
+    toastError: 'Błąd: {message}',
+    toastSshError: 'Błąd SSH: {message}',
+    toastSshErrorNamed: 'Błąd SSH ({name}): {message}',
+    toastSkipped: 'Pominięto {name}: {message}',
+    toastImported: 'Zaimportowano: {list}.',
+    toastImportedNew: 'nowych: {count}',
+    toastImportedUpdated: 'zaktualizowano: {count}',
+    toastSshExported: 'Konfiguracja SSH wyeksportowana do {path}.',
+    toastAlreadyRunning: 'EchoTerm jest już uruchomiony.',
+
+    // ── Context menus ────────────────────────────────────────────────────────
+    ctxCopy: 'Kopiuj',
+    ctxPaste: 'Wklej',
+    ctxPasteAll: 'Wklej do wszystkich',
+    ctxToggleEcho: 'Przełącz echo',
+    ctxClosePane: 'Zamknij panel',
+    tabCtxRename: 'Zmień nazwę karty',
+    tabCtxClose: 'Zamknij kartę',
+    tabCtxCloseSelected: 'Zamknij zaznaczone',
+    tabCtxCloseOthers: 'Zamknij pozostałe',
+    tabCtxMoveToGroup: 'Przenieś do grupy',
+    tabCtxSubmenuArrow: '▶',
+    groupCtxRename: 'Zmień nazwę grupy',
+    groupCtxDelete: 'Zamknij grupę',
+    groupCtxCloseTerminals: 'Zamknij wszystkie terminale',
+
+    // ── Confirm dialogs ──────────────────────────────────────────────────────
+    confirmCancel: 'Anuluj',
+    confirmClose: 'Zamknij',
+    confirmDelete: 'Usuń',
+    confirmDontShowAgain: 'Nie pokazuj więcej',
+    confirmCloseTerminal: 'Zamknąć ten terminal?\nSesja zostanie zakończona.',
+    confirmCloseSelectedTerminals: 'Zamknąć zaznaczone terminale ({count})?\nWszystkie sesje zostaną zakończone.',
+    confirmCloseOtherTerminals: 'Zamknąć pozostałe terminale ({count})?\nWszystkie sesje zostaną zakończone.',
+    confirmCloseGroup: 'Zamknąć grupę „{name}”?',
+    confirmCloseGroupWithTerminals: 'Zamknąć grupę „{name}”?\nTerminali do zamknięcia: {count}.',
+    confirmCloseApp: 'Zamknąć EchoTerm?\nWszystkie sesje terminala zostaną zakończone.',
+    confirmCloseAllGroupTerminals: 'Zamknąć wszystkie terminale ({count}) w grupie „{name}”?\nWszystkie sesje zostaną zakończone.',
+    confirmDeleteSshConnection: 'Usunąć połączenie SSH „{name}”?',
+    confirmDeleteSshFolder: 'Usunąć folder SSH „{name}”?\nPodfoldery również zostaną usunięte. Połączenia nie zostaną usunięte.',
+    confirmDeleteSshUser: 'Usunąć użytkownika SSH „{name}”?\nPołączenia korzystające z tego użytkownika będą wymagały ponownego przypisania.',
+    confirmDeleteMultiSsh: 'Usunąć {count} elementów SSH?',
+    confirmJumpHostsMissing: 'Następujące hosty pośrednie nie są wybrane:\n\n{names}\n\nZaimportować mimo to?',
+
+    // ── SSH Sidebar ──────────────────────────────────────────────────────────
+    sshSidebarTitle: 'SSH',
+    sshPasswordBtnTitle: 'Ustaw/Zmień hasło główne',
+    sshImportBtnTitle: 'Importuj nowe z ~/.ssh/config',
+    sshUpdateBtnTitle: 'Zaktualizuj istniejące z ~/.ssh/config',
+    sshExportBtnTitle: 'Eksportuj połączenia do pliku konfiguracji SSH',
+    sshNewConnBtnTitle: 'Nowe połączenie',
+    sshNewFolderBtnTitle: 'Nowy folder',
+    sshNewUserBtnTitle: 'Nowy użytkownik',
+    sshMenuTitle: 'Akcje',
+    sshSearchPlaceholder: 'Szukaj...',
+    sshSectionConnections: 'Połączenia',
+    sshSectionUsers: 'Użytkownicy',
+    sshNoConnections: 'Brak połączeń.\nKliknij +, aby dodać.',
+    sshNoUsers: 'Brak użytkowników.\nKliknij +, aby dodać.',
+    sshFolderOpenAllTitle: 'Otwórz wszystkie',
+    sshFolderEditTitle: 'Edytuj',
+    sshFolderDeleteTitle: 'Usuń',
+    sshItemConnectTitle: 'Połącz',
+    sshItemEditTitle: 'Edytuj',
+    sshItemDeleteTitle: 'Usuń',
+    sshItemAuthKeyfile: '🔑',
+    sshItemAuthPassword: '🔒',
+    sshItemConnIcon: '🖥️',
+
+    // ── SSH Dialogs ──────────────────────────────────────────────────────────
+    sshDialogTitleNewConn: 'Nowe połączenie',
+    sshDialogTitleEditConn: 'Edytuj połączenie',
+    sshDialogTitleNewFolder: 'Nowy folder',
+    sshDialogTitleEditFolder: 'Edytuj folder',
+    sshDialogTitleNewUser: 'Nowy użytkownik',
+    sshDialogTitleEditUser: 'Edytuj użytkownika',
+    sshDialogSave: 'Zapisz',
+    sshDialogCancel: 'Anuluj',
+    sshFormName: 'Nazwa',
+    sshFormHost: 'Host',
+    sshFormPort: 'Port',
+    sshFormUser: 'Użytkownik',
+    sshFolderOptional: 'Folder (opcjonalnie)',
+    sshFormSelectUser: '-- Wybierz użytkownika --',
+    sshFormNone: '-- Brak --',
+    sshFormJumpHostOptional: 'Host pośredni (opcjonalnie)',
+    sshFormJumpType: 'Typ',
+    sshFormJumpNone: 'Brak (połączenie bezpośrednie)',
+    sshFormJumpManual: 'Wpisz ręcznie',
+    sshFormJumpReference: 'Wybierz zapisane połączenie',
+    sshFormJumpHost: 'Host pośredni',
+    sshFormJumpPort: 'Port pośredni',
+    sshFormJumpUsername: 'Użytkownik pośredni',
+    sshFormJumpViaConnection: 'Przeskocz przez połączenie',
+    sshFormSelectConnection: '-- Wybierz połączenie --',
+    sshFormAdvancedOptional: 'Opcje zaawansowane (opcjonalnie)',
+    sshFormHostKeyAlgorithms: 'Algorytmy klucza hosta',
+    sshFormKexAlgorithms: 'Algorytmy wymiany kluczy',
+    sshFormPubkeyAcceptedAlgorithms: 'Algorytmy klucza publicznego',
+    sshFormUsername: 'Nazwa użytkownika',
+    sshFormAuthType: 'Uwierzytelnianie',
+    sshFormAuthPassword: 'Hasło',
+    sshFormAuthKeyfile: 'Plik klucza',
+    sshFormPassword: 'Hasło',
+    sshFormPasswordUnchanged: '(bez zmian, jeśli puste)',
+    sshFormKeyFilePath: 'Ścieżka pliku klucza',
+    sshFormKeyPassphrase: 'Hasło klucza',
+    sshFormKeyPassphraseOptional: '(opcjonalnie)',
+    sshFolderName: 'Nazwa folderu',
+    sshFolderParent: 'Folder nadrzędny',
+    sshFolderParentNone: '(brak — poziom główny)',
+    sshPasswordUnlockTitle: 'Odblokuj połączenia SSH',
+    sshPasswordSetupTitle: 'Chroń połączenia SSH',
+    sshPasswordChangeTitle: 'Zmień hasło główne',
+    sshPasswordLabel: 'Hasło główne',
+    sshPasswordPlaceholderUnlock: 'Wpisz hasło główne',
+    sshPasswordPlaceholderNew: 'Wpisz nowe hasło główne',
+    sshPasswordConfirmLabel: 'Potwierdź hasło',
+    sshPasswordConfirmPlaceholder: 'Potwierdź hasło główne',
+    sshPasswordBtnUnlock: 'Odblokuj',
+    sshPasswordBtnSet: 'Ustaw hasło',
+    sshPasswordBtnChange: 'Zmień hasło',
+    sshPasswordBtnUseOs: 'Użyj szyfrowania systemowego',
+    sshPasswordEmpty: 'Hasło nie może być puste.',
+    sshPasswordMismatch: 'Hasła nie są zgodne.',
+    sshPasswordIncorrect: 'Nieprawidłowe hasło.',
+    sshPasswordDecryptFailed: 'Nie udało się odszyfrować danych. Plik może być uszkodzony.',
+    sshMasterPasswordRequired: 'Wymagane hasło główne. Dane są zaszyfrowane.',
+    sshPasswordLockedIcon: '🔒',
+    sshPasswordUnlockedIcon: '🔓',
+    sshPasswordBtnChangeTitle: 'Zmień hasło główne',
+    sshPasswordBtnSetTitle: 'Ustaw hasło główne',
+
+    // ── SSH Import ───────────────────────────────────────────────────────────
+    sshImportTitle: 'Importuj z ~/.ssh/config',
+    sshImportUpdateTitle: 'Zaktualizuj z ~/.ssh/config',
+    sshImportBtnImport: 'Importuj zaznaczone',
+    sshImportBtnUpdate: 'Zaktualizuj zaznaczone',
+    sshImportUpdateFieldsTitle: 'Zaktualizuj te pola:',
+    sshImportFieldHost: 'Nazwa hosta / Port',
+    sshImportFieldUser: 'Użytkownik',
+    sshImportFieldJump: 'Host pośredni',
+    sshImportFieldOptions: 'Opcje algorytmów',
+    sshImportAuthKeyfile: 'klucz: {file}',
+    sshImportAuthPassword: 'hasło',
+    sshImportJumpVia: '↪ przez {host}',
+    sshImportJumpNotInConfig: ' (brak w konfiguracji)',
+    sshImportNoNewHosts: 'Nie znaleziono nowych hostów. Wszystkie są już zaimportowane.',
+    sshImportNoExistingToUpdate: 'Nie znaleziono istniejących połączeń w konfiguracji SSH do zaktualizowania.',
+    sshImportNoHosts: 'Nie znaleziono hostów w konfiguracji SSH.',
+
+    // ── SSH Context Menu ─────────────────────────────────────────────────────
+    sshCtxConnect: 'Połącz',
+    sshCtxEdit: 'Edytuj',
+    sshCtxMoveToFolder: 'Przenieś do folderu',
+    sshCtxDelete: 'Usuń',
+    sshCtxOpenAll: 'Otwórz wszystkie połączenia',
+    sshCtxConnectAll: 'Połącz wszystkie ({count})',
+    sshCtxDeleteSelected: 'Usuń zaznaczone ({count})',
+    sshCtxOpenAllMulti: 'Otwórz wszystkie ({count})',
+    sshCtxDuplicate: 'Duplikuj',
+    sshCtxDuplicateSelected: 'Duplikuj zaznaczone ({count})',
+    sshCtxNoOtherFolders: 'Brak innych folderów',
+
+    // ── Settings / Options Panel ──────────────────────────────────────────────
+    optionsTitleAppearance: 'Wygląd',
+    optionsThemeDark: 'Ciemny',
+    optionsThemeLight: 'Jasny',
+    optionsUiFontSize: 'Rozmiar czcionki interfejsu',
+    optionsTermFontSize: 'Rozmiar czcionki terminala',
+    optionsTitleDefaultShell: 'Domyślna powłoka',
+    optionsTitleWarnings: 'Ostrzeżenia',
+    optionsTitleMouse: 'Mysz',
+    optionsTabCloseConfirm: 'Potwierdź przed zamknięciem karty',
+    optionsWindowCloseConfirm: 'Potwierdź przed zamknięciem okna',
+    optionsGroupCloseConfirm: 'Potwierdź przed usunięciem grupy',
+    optionsSshJumpWarn: 'Ostrzegaj o nieodznaczonych hostach pośrednich podczas importu SSH',
+    optionsPastePreview: 'Potwierdź przed wklejeniem zawartości wieloliniowej',
+    optionsRightClickPaste: 'Prawy przycisk do kopiowania / wklejania',
+
+    // ── Danger Zone ──────────────────────────────────────────────────────────
+    optionsTitleDanger: 'Strefa niebezpieczna',
+    optionsResetSettings: 'Resetuj wszystkie ustawienia',
+    optionsClearSshData: 'Wyczyść wszystkie połączenia SSH',
+    confirmResetSettings: 'Zresetować wszystkie ustawienia do domyślnych?\nTej operacji nie można cofnąć.',
+    confirmClearSshData: 'Usunąć wszystkie zapisane połączenia, użytkowników i foldery SSH?\nTej operacji nie można cofnąć.',
+    confirmReset: 'Resetuj',
+    toastSettingsReset: 'Wszystkie ustawienia zostały zresetowane.',
+    toastSshDataCleared: 'Wszystkie połączenia SSH zostały wyczyszczone.',
+    optionsClearAllData: 'Wyczyść wszystkie dane i uruchom ponownie',
+    confirmClearAllData: 'Wyczyścić wszystkie dane i uruchomić EchoTerm ponownie?\nWszystkie ustawienia i połączenia SSH zostaną trwale usunięte.',
+    optionsClearCache: 'Wyczyść całą pamięć podręczną',
+    confirmClearCache: 'Wyczyścić pamięć podręczną aplikacji?\nNie wpłynie to na Twoje ustawienia ani połączenia SSH.',
+    confirmClear: 'Wyczyść',
+    toastCacheCleared: 'Pamięć podręczna aplikacji została wyczyszczona.',
+
+    // ── Paste Preview ─────────────────────────────────────────────────────────
+    pastePreviewTitle: 'Podgląd wklejania',
+    pastePreviewLines: 'linii: {count}',
+    pastePreviewDontShow: 'Nie pokazuj więcej',
+    pastePreviewCancel: 'Anuluj',
+    pastePreviewPaste: 'Wklej',
+
+    // ── Error messages ───────────────────────────────────────────────────────
+    errorUnknownShell: 'Nieznana powłoka: {shell}',
+    errorConnectionNotFound: 'Nie znaleziono połączenia.',
+    errorGroupNotFound: 'Nie znaleziono grupy.',
+    errorConfigNotFound: 'Nie znaleziono pliku konfiguracyjnego: {path}',
+    errorNoMasterPassword: 'Nie ustawiono hasła głównego.',
+
+    // ── Language ─────────────────────────────────────────────────────────────
+    optionsTitleLanguage: 'Język',
+
+    // ── About ────────────────────────────────────────────────────────────────
+    optionsTitleAbout: 'O aplikacji',
+    aboutDescription: 'EchoTerm — aplikacja terminala z podziałem widoku i wejściem echo',
+    aboutVersion: 'Wersja',
+
+    // ── Dialog buttons ───────────────────────────────────────────────────────
+    genericSave: 'Zapisz',
+    genericCancel: 'Anuluj',
+
+    // ── SSH Header Dropdown ─────────────────────────────────────────────────
+    sshDropdownSshLabel: '.SSH',
+    sshDropdownCreate: 'Utwórz',
+    sshDropdownImportBtn: 'Importuj',
+    sshDropdownUpdateBtn: 'Zaktualizuj',
+    sshDropdownExportBtn: 'Eksportuj',
+    sshDropdownConnBtn: 'Połączenie',
+    sshDropdownFolderBtn: 'Folder',
+    sshDropdownUserBtn: 'Użytkownik',
+
+    // ── SSH Import Diff Labels ──────────────────────────────────────────────
+    sshImportDiffHost: 'Host',
+    sshImportDiffUser: 'Użytkownik',
+    sshImportDiffJump: 'Pośredni',
+    sshImportDiffOptions: 'Opcje',
+    sshImportDiffNone: '(brak)',
+    sshImportDefaultUserName: 'domyślny',
+
+    // ── SSH Delete Type Labels ──────────────────────────────────────────────
+    sshDeleteTypeFolder: 'folder',
+    sshDeleteTypeConnection: 'połączenie',
+    sshDeleteTypeUser: 'użytkownik',
+  });
+
+})();
+
+export {};

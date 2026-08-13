@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data:;" />
+  <title data-i18n="appTitle">EchoTerm</title>
+  <link rel="stylesheet" href="../node_modules/@xterm/xterm/css/xterm.css" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <!-- ═══ Toolbar  ═══-->
+  <header id="toolbar">
+    <button id="btnSidebarToggle" class="toolbar-btn" data-i18n-title="toolbarSidebarToggle" title="Sidebar (Ctrl+Shift+S)">
+      <svg width="15" height="15" viewBox="0 0 16 16" fill="none">
+        <rect x="1.5" y="2.5" width="13" height="11" rx="1.5" stroke="currentColor" stroke-width="1.2"/>
+        <path d="M6 2.5v11" stroke="currentColor" stroke-width="1.2"/>
+      </svg>
+    </button>
+    <div class="toolbar-left">
+      <span class="app-title" data-i18n="appTitle">EchoTerm</span>
+      <span id="gitBashStatus" class="status-badge hidden"></span>
+    </div>
+    <button id="btnSettings" class="toolbar-btn" data-i18n-title="toolbarSettings" title="Settings">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="3"/>
+        <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+      </svg>
+    </button>
+    <div class="window-controls">
+      <button id="btnWinMin" class="window-btn" data-i18n-title="winMinimizeTitle" title="Minimize">
+        <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+          <path d="M2 6h8" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>
+        </svg>
+      </button>
+      <button id="btnWinMax" class="window-btn" data-i18n-title="winMaximizeTitle" title="Maximize">
+        <svg class="icon-max" width="12" height="12" viewBox="0 0 12 12" fill="none">
+          <rect x="2" y="2" width="8" height="8" rx="1" stroke="currentColor" stroke-width="1.2"/>
+        </svg>
+        <svg class="icon-restore hidden" width="12" height="12" viewBox="0 0 12 12" fill="none">
+          <rect x="1.5" y="3.5" width="7" height="7" rx="1" stroke="currentColor" stroke-width="1.2"/>
+          <path d="M4 3.5V2.5a1 1 0 0 1 1-1h4.5a1 1 0 0 1 1 1V7a1 1 0 0 1-1 1H8.5" stroke="currentColor" stroke-width="1.2"/>
+        </svg>
+      </button>
+      <button id="btnWinClose" class="window-btn window-btn-close" data-i18n-title="tabCloseTitle" title="Close">
+        <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+          <path d="M2.5 2.5l7 7m0-7l-7 7" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>
+        </svg>
+      </button>
+    </div>
+  </header>
+
+  <!-- ═══ Main body (sidebar + content)  ═══-->
+  <div id="mainBody">
+    <!-- ═══SSH Sidebar  ═══-->
+    <aside id="sshSidebar" class="ssh-sidebar">
+      <div class="ssh-sidebar-header">
+        <span class="ssh-sidebar-title" data-i18n="sshSidebarTitle">SSH</span>
+        <div class="ssh-header-actions">
+          <button id="btnSshPassword" class="ssh-sidebar-btn ssh-password-btn" data-i18n-title="sshPasswordBtnTitle" title="Set/Change master password">🔒</button>
+          <div class="ssh-header-menu-wrapper">
+            <button id="btnSshMenuToggle" class="ssh-sidebar-btn ssh-menu-toggle" data-i18n-title="sshMenuTitle" title="Actions">⋯</button>
+            <div id="sshHeaderDropdown" class="ssh-header-dropdown hidden">
+              <div class="ssh-dropdown-header" data-i18n="sshDropdownSshLabel">.SSH</div>
+              <button id="btnSshImport" class="ssh-sidebar-dd-btn" data-i18n="sshDropdownImportBtn" data-i18n-title="sshImportBtnTitle" title="Import new from ~/.ssh/config">Import</button>
+              <button id="btnSshUpdate" class="ssh-sidebar-dd-btn" data-i18n="sshDropdownUpdateBtn" data-i18n-title="sshUpdateBtnTitle" title="Update existing from ~/.ssh/config">Update</button>
+              <button id="btnSshExport" class="ssh-sidebar-dd-btn" data-i18n="sshDropdownExportBtn" data-i18n-title="sshExportBtnTitle" title="Export connections to SSH config">Export</button>
+              <div class="context-separator"></div>
+              <div class="ssh-dropdown-header" data-i18n="sshDropdownCreate">Create</div>
+              <button id="btnAddSshConn" class="ssh-sidebar-dd-btn" data-i18n="sshDropdownConnBtn" data-i18n-title="sshNewConnBtnTitle" title="New Connection">Connection</button>
+              <button id="btnAddSshFolder" class="ssh-sidebar-dd-btn" data-i18n="sshDropdownFolderBtn" data-i18n-title="sshNewFolderBtnTitle" title="New Folder">Folder</button>
+              <button id="btnAddSshUser" class="ssh-sidebar-dd-btn" data-i18n="sshDropdownUserBtn" data-i18n-title="sshNewUserBtnTitle" title="New User">User</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="ssh-search-bar">
+        <input type="text" id="sshSearchInput" class="ssh-search-input" placeholder="Search..." data-i18n-placeholder="sshSearchPlaceholder" />
+      </div>
+      <div class="ssh-sidebar-scroll">
+        <!-- Connections Tree (groups as folders, connections as children) -->
+        <div class="ssh-section">
+          <div class="ssh-section-header" data-i18n="sshSectionConnections">Connections</div>
+          <div id="sshConnectionList" class="ssh-list"></div>
+        </div>
+        <!-- Users Section -->
+        <div class="ssh-section">
+          <div class="ssh-section-header" data-i18n="sshSectionUsers">Users</div>
+          <div id="sshUserList" class="ssh-list"></div>
+        </div>
+      </div>
+    </aside>
+    <div id="sshResizeHandle" class="ssh-resize-handle"></div>
+
+    <!-- ═══Main content area  ═══-->
+    <div id="mainContent">
+  <!-- ═══Group Bar  ═══-->
+  <div id="groupBar" class="group-bar">
+    <div id="groupList" class="group-list">
+      <!-- Groups are added dynamically by app.js -->
+    </div>
+    <button id="btnNewGroup" class="tab-action-btn" data-i18n-title="newGroupTitle" title="New Group">
+      <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
+        <path d="M8 3V13M3 8H13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+      </svg>
+    </button>
+  </div>
+
+  <!-- ═══Tab Bar  ═══-->
+  <div id="tabBar" class="tab-bar">
+    <div id="tabList" class="tab-list">
+      <!-- Tabs are added dynamically by app.js -->
+    </div>
+    <div class="tab-actions">
+      <button id="btnEchoAll" class="tab-action-btn hidden" data-i18n-title="echoEnableAllTitle" data-i18n="echoEnableAll" title="Enable echo on all terminals" style="width:auto;padding:0 8px;font-size:calc(var(--app-font-size) * 0.769);">Enable All</button>
+      <button id="btnEchoToggle" class="tab-action-btn hidden" data-i18n-title="echoToggleAllTitle" data-i18n="echoToggleAll" title="Toggle each terminal's echo state" style="width:auto;padding:0 8px;font-size:calc(var(--app-font-size) * 0.769);">Toggle All</button>
+      <button id="btnEchoPaste" class="tab-action-btn hidden" data-i18n-title="echoPasteAllTitle" data-i18n="echoPasteAll" title="Paste to all echo-enabled terminals" style="width:auto;padding:0 8px;font-size:calc(var(--app-font-size) * 0.769);">Paste All</button>
+      <button id="btnNewTerminal" class="tab-action-btn" data-i18n-title="newTerminalTitle" title="New Terminal (Ctrl+Shift+N)">
+        <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
+          <path d="M8 3V13M3 8H13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+        </svg>
+      </button>
+      <div class="new-term-dropdown">
+        <button id="btnNewTermDropdown" class="tab-action-btn dropdown-arrow" data-i18n-title="newTermDropdownTitle" title="Select terminal type">
+          <svg width="8" height="8" viewBox="0 0 10 10" fill="none">
+            <path d="M2 3L5 7L8 3" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </button>
+        <div id="newTermDropdown" class="shell-dropdown hidden">
+          <button data-shell="powershell"><span class="dd-icon"></span><span data-i18n="powershellLabel">PowerShell</span></button>
+          <button data-shell="cmd"><span class="dd-icon"></span><span data-i18n="cmdLabel">CMD</span></button>
+          <button data-shell="gitbash"><span class="dd-icon"></span><span data-i18n="gitBashLabel">Git Bash</span></button>
+        </div>
+      </div>
+      <button id="btnEchoMode" class="tab-action-btn echo-mode-off" data-i18n-title="echoModeTitleOff" title="Echo Mode">
+        <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
+          <rect x="0.5" y="0.5" width="6" height="5" rx="1" stroke="currentColor" stroke-width="1.2" fill="none"/>
+          <rect x="9.5" y="0.5" width="6" height="5" rx="1" stroke="currentColor" stroke-width="1.2" fill="none"/>
+          <rect x="0.5" y="9.5" width="6" height="6" rx="1" stroke="currentColor" stroke-width="1.2" fill="none"/>
+          <rect x="9.5" y="9.5" width="6" height="6" rx="1" stroke="currentColor" stroke-width="1.2" fill="none"/>
+        </svg>
+        <span id="echoLabel" data-i18n="echoLabel">Echo</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- ═══Terminal container (split.js manages children)  ═══-->
+  <main id="terminal-container">
+    <!-- Terminals are added dynamically by app.js -->
+  </main>
+    </div><!-- /#mainContent -->
+  </div><!-- /#mainBody -->
+
+  <!-- ═══Status bar  ═══-->
+  <footer id="statusbar">
+    <span id="statusTerminalCount"></span>
+    <span id="statusEcho" class="hidden"></span>
+    <span id="statusShell"></span>
+  </footer>
+
+  <!-- ═══SSH context menu  ═══-->
+  <div id="sshContextMenu" class="context-menu hidden" data-overlay>
+    <button data-action="ssh-connect" data-i18n="sshCtxConnect">Connect</button>
+    <button data-action="ssh-edit" data-i18n="sshCtxEdit">Edit</button>
+    <button data-action="ssh-duplicate" data-i18n="sshCtxDuplicate">Duplicate</button>
+    <div class="context-separator" id="sshCtxMoveSep"></div>
+    <div class="context-submenu-trigger" id="sshCtxMoveItem">
+      <span data-i18n="sshCtxMoveToFolder">Move to Group</span> <span class="submenu-arrow">▶</span>
+      <div class="context-submenu hidden" id="sshCtxFolderSubmenu"></div>
+    </div>
+    <div class="context-separator" id="sshCtxDelSep"></div>
+    <button data-action="ssh-delete" data-i18n="sshCtxDelete">Delete</button>
+    <div class="context-separator" id="sshCtxOpenSep"></div>
+    <button data-action="ssh-open-folder" id="sshCtxOpenFolder" data-i18n="sshCtxOpenAll">Open All Connections</button>
+  </div>
+
+  <!-- ═══ Context menu (hidden by default)  ═══-->
+  <div id="contextMenu" class="context-menu hidden" data-overlay>
+    <button data-action="copy" data-i18n="ctxCopy">Copy</button>
+    <button data-action="paste" data-i18n="ctxPaste">Paste</button>
+    <button data-action="paste-all" id="ctxPasteAll" data-i18n="ctxPasteAll">Paste All</button>
+    <div class="context-separator"></div>
+    <button data-action="echo" id="ctxEcho" data-i18n="ctxToggleEcho">Toggle Echo</button>
+    <div class="context-separator" id="ctxEchoSep"></div>
+    <button data-action="close" data-i18n="ctxClosePane">Close Pane</button>
+  </div>
+
+  <!-- ═══Tab context menu  ═══-->
+  <div id="tabContextMenu" class="context-menu hidden" data-overlay>
+    <button data-action="tab-rename" data-i18n="tabCtxRename">Rename Tab</button>
+    <div class="context-separator"></div>
+    <button data-action="tab-close" data-i18n="tabCtxClose">Close Tab</button>
+    <button data-action="tab-close-selected" id="btnCloseSelected" data-i18n="tabCtxCloseSelected">Close Selected</button>
+    <div class="context-separator"></div>
+    <button data-action="tab-close-others" data-i18n="tabCtxCloseOthers">Close Others</button>
+    <div class="context-separator" id="tabCtxMoveSep"></div>
+    <div class="context-submenu-trigger" id="tabCtxMoveItem">
+      <span data-i18n="tabCtxMoveToGroup">Move to Group</span> <span class="submenu-arrow">▶</span>
+      <div class="context-submenu hidden" id="tabCtxGroupSubmenu"></div>
+    </div>
+  </div>
+
+  <!-- ═══Group context menu  ═══-->
+  <div id="groupContextMenu" class="context-menu hidden" data-overlay>
+    <button data-action="group-rename" data-i18n="groupCtxRename">Rename Group</button>
+    <button data-action="group-delete" data-i18n="groupCtxDelete">Close Group</button>
+    <div class="context-separator"></div>
+    <button data-action="group-close-terminals" data-i18n="groupCtxCloseTerminals">Close All Terminals</button>
+  </div>
+
+  <!-- ═══Custom confirm dialog  ═══-->
+  <div id="confirmDialog" class="confirm-overlay hidden" data-overlay>
+    <div class="confirm-box">
+      <div class="confirm-icon">⚠</div>
+      <div class="confirm-message" id="confirmMessage"></div>
+      <label class="confirm-remember">
+        <input type="checkbox" id="confirmDontShowAgain" />
+          <span data-i18n="confirmDontShowAgain">Don't show this again</span>
+      </label>
+      <div class="confirm-buttons">
+        <button id="confirmCancel" class="confirm-btn confirm-btn-cancel" data-i18n="confirmCancel">Cancel</button>
+        <button id="confirmOk" class="confirm-btn confirm-btn-ok" data-i18n="confirmDelete">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══Options panel  ═══-->
+  <div id="optionsPanel" class="options-overlay hidden" data-overlay>
+    <div class="options-window">
+      <div class="options-window-header">
+        <span data-i18n="toolbarSettings">Settings</span>
+        <button id="btnOptionsClose" class="options-window-close" data-i18n-title="tabCloseTitle" title="Close">×</button>
+      </div>
+      <div class="options-window-main">
+        <nav class="options-sidemenu">
+          <button class="options-menu-item active" data-options-target="appearance">
+            <svg class="options-menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="13.5" cy="6.5" r=".5" fill="currentColor"/><circle cx="17.5" cy="10.5" r=".5" fill="currentColor"/><circle cx="8.5" cy="7.5" r=".5" fill="currentColor"/><circle cx="6.5" cy="12.5" r=".5" fill="currentColor"/><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125a1.64 1.64 0 0 1 1.668-1.668h1.996c3.051 0 5.555-2.503 5.555-5.554C21.965 6.012 17.461 2 12 2z"/></svg>
+            <span data-i18n="optionsTitleAppearance">Appearance</span>
+          </button>
+          <button class="options-menu-item" data-options-target="shell">
+            <svg class="options-menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 17 10 11 4 5"/><line x1="12" x2="20" y1="19" y2="19"/></svg>
+            <span data-i18n="optionsTitleDefaultShell">Default Shell</span>
+          </button>
+          <button class="options-menu-item" data-options-target="warnings">
+            <svg class="options-menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"/><line x1="12" x2="12" y1="9" y2="13"/><line x1="12" x2="12.01" y1="17" y2="17"/></svg>
+            <span data-i18n="optionsTitleWarnings">Warnings</span>
+          </button>
+          <button class="options-menu-item" data-options-target="mouse">
+            <svg class="options-menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="2" width="14" height="20" rx="7"/><path d="M12 6v4"/></svg>
+            <span data-i18n="optionsTitleMouse">Mouse</span>
+          </button>
+          <button class="options-menu-item" data-options-target="language">
+            <svg class="options-menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/></svg>
+            <span data-i18n="optionsTitleLanguage">Language</span>
+          </button>
+          <button class="options-menu-item" data-options-target="about">
+            <svg class="options-menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
+            <span data-i18n="optionsTitleAbout">About</span>
+          </button>
+          <button class="options-menu-item options-menu-item-danger" data-options-target="danger">
+            <svg class="options-menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M7.86 2h8.28L22 7.86v8.28L16.14 22H7.86L2 16.14V7.86L7.86 2z"/><line x1="12" x2="12" y1="8" y2="12"/><line x1="12" x2="12.01" y1="16" y2="16"/></svg>
+            <span data-i18n="optionsTitleDanger">Danger Zone</span>
+          </button>
+        </nav>
+      <div class="options-window-body">
+    <div class="options-section active" data-options-section="appearance">
+      <div class="options-section-title" data-i18n="optionsTitleAppearance">Appearance</div>
+      <div class="options-theme-grid">
+        <label class="options-shell-option">
+          <input type="radio" name="optTheme" value="dark" />
+          <span><span class="shell-icon">🌙</span> <span data-i18n="optionsThemeDark">Dark</span></span>
+        </label>
+        <label class="options-shell-option">
+          <input type="radio" name="optTheme" value="light" />
+          <span><span class="shell-icon">☀️</span> <span data-i18n="optionsThemeLight">Light</span></span>
+        </label>
+      </div>
+      <div class="options-card">
+        <div class="options-slider-row">
+          <span class="options-slider-label" data-i18n="optionsUiFontSize">UI font size</span>
+          <input type="range" id="optUiFontSize" min="8" max="24" step="1" />
+          <input type="number" class="options-font-num" id="optUiFontSizeNum" min="8" max="24" step="1" value="13" />
+        </div>
+        <div class="options-slider-row">
+          <span class="options-slider-label" data-i18n="optionsTermFontSize">Terminal font size</span>
+          <input type="range" id="optTermFontSize" min="8" max="24" step="1" />
+          <input type="number" class="options-font-num" id="optTermFontSizeNum" min="8" max="24" step="1" value="13" />
+        </div>
+      </div>
+    </div>
+    <div class="options-section" data-options-section="shell">
+      <div class="options-section-title" data-i18n="optionsTitleDefaultShell">Default Shell</div>
+      <div class="options-card">
+        <div class="options-shell-list" id="optionsShellList">
+          <label class="options-shell-option" data-shell="powershell">
+            <input type="radio" name="optShell" value="powershell" />
+            <span><span class="shell-icon"></span> <span data-i18n="shellPowerShell">PowerShell</span></span>
+          </label>
+          <label class="options-shell-option" data-shell="cmd">
+            <input type="radio" name="optShell" value="cmd" />
+            <span><span class="shell-icon"></span> <span data-i18n="shellCmd">CMD</span></span>
+          </label>
+          <label class="options-shell-option" data-shell="gitbash">
+            <input type="radio" name="optShell" value="gitbash" />
+            <span><span class="shell-icon"></span> <span data-i18n="shellGitBash">Git Bash</span></span>
+          </label>
+        </div>
+      </div>
+    </div>
+    <div class="options-section" data-options-section="warnings">
+      <div class="options-section-title" data-i18n="optionsTitleWarnings">Warnings</div>
+      <div class="options-card">
+        <label class="options-toggle">
+          <span class="options-toggle-label" data-i18n="optionsTabCloseConfirm">Confirm before closing a tab</span>
+          <input type="checkbox" id="optTabCloseConfirm" checked />
+          <span class="options-toggle-slider"></span>
+        </label>
+        <label class="options-toggle">
+          <span class="options-toggle-label" data-i18n="optionsWindowCloseConfirm">Confirm before closing window</span>
+          <input type="checkbox" id="optWindowCloseConfirm" checked />
+          <span class="options-toggle-slider"></span>
+        </label>
+        <label class="options-toggle">
+          <span class="options-toggle-label" data-i18n="optionsGroupCloseConfirm">Confirm before deleting a group</span>
+          <input type="checkbox" id="optGroupCloseConfirm" checked />
+          <span class="options-toggle-slider"></span>
+        </label>
+        <label class="options-toggle">
+          <span class="options-toggle-label" data-i18n="optionsSshJumpWarn">Warn about unselected jump hosts on SSH import</span>
+          <input type="checkbox" id="optSshJumpWarn" checked />
+          <span class="options-toggle-slider"></span>
+        </label>
+        <label class="options-toggle">
+          <span class="options-toggle-label" data-i18n="optionsPastePreview">Confirm before pasting multi-line content</span>
+          <input type="checkbox" id="optPastePreview" checked />
+          <span class="options-toggle-slider"></span>
+        </label>
+      </div>
+    </div>
+    <div class="options-section" data-options-section="mouse">
+      <div class="options-section-title" data-i18n="optionsTitleMouse">Mouse</div>
+      <div class="options-card">
+        <label class="options-toggle">
+          <span class="options-toggle-label" data-i18n="optionsRightClickPaste">Right click to copy / paste</span>
+          <input type="checkbox" id="optRightClickPaste" />
+          <span class="options-toggle-slider"></span>
+        </label>
+      </div>
+    </div>
+    <div class="options-section" data-options-section="language">
+      <div class="options-section-title" data-i18n="optionsTitleLanguage">Language</div>
+      <div class="lang-page">
+        <input type="text" class="lang-search-input" id="langSearchInput" data-i18n-placeholder="sshSearchPlaceholder" placeholder="Search..." autocomplete="off">
+        <div class="lang-grid" id="langOptionsList"></div>
+      </div>
+    </div>
+    <div class="options-section" data-options-section="about">
+      <div class="options-section-title" data-i18n="optionsTitleAbout">About</div>
+      <div class="about-page">
+        <div class="about-header">
+          <img class="about-app-icon" src="../build-assets/echoterm.ico" alt="EchoTerm" />
+          <div class="about-app-name" id="aboutAppName">EchoTerm</div>
+          <div class="about-app-desc" data-i18n="aboutDescription">EchoTerm — split-view terminal app with echo input</div>
+        </div>
+        <div class="about-info">
+          <div class="about-row"><span class="about-row-label" data-i18n="aboutVersion">Version</span><span class="about-row-value" id="aboutVersion">—</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="options-section" data-options-section="danger">
+      <div class="options-section-title" data-i18n="optionsTitleDanger">Danger Zone</div>
+      <div class="options-card options-card-danger">
+        <div class="options-danger-zone">
+          <button id="btnResetSettings" class="options-danger-btn">
+            <svg class="options-danger-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
+            <span data-i18n="optionsResetSettings">Reset all settings</span>
+          </button>
+          <button id="btnClearSshData" class="options-danger-btn">
+            <svg class="options-danger-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+            <span data-i18n="optionsClearSshData">Clear all SSH connections</span>
+          </button>
+          <button id="btnClearCache" class="options-danger-btn">
+            <svg class="options-danger-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M13.5 3 4 14.5a2 2 0 0 0 .4 2.9l2.2 1.8a2 2 0 0 0 2.9-.4L19 7.5"/><path d="M15.5 5.5 18 8"/><path d="M20 20h-9"/></svg>
+            <span data-i18n="optionsClearCache">Clear all cache</span>
+          </button>
+          <button id="btnClearAllData" class="options-danger-btn">
+            <svg class="options-danger-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v10"/><path d="M18.4 6.6a9 9 0 1 1-12.77.04"/></svg>
+            <span data-i18n="optionsClearAllData">Clear all data and restart</span>
+          </button>
+        </div>
+      </div>
+    </div>
+      </div><!-- /.options-window-body -->
+      </div><!-- /.options-window-main -->
+    </div><!-- /.options-window -->
+  </div>
+
+  <!-- ═══SSH Connection Dialog (add/edit connections, users, groups)  ═══-->
+  <div id="sshDialog" class="ssh-dialog-overlay hidden" data-overlay>
+    <div class="ssh-dialog-box">
+      <div class="ssh-dialog-header">
+        <span id="sshDialogTitle" data-i18n="sshDialogTitleNewConn">New Connection</span>
+      </div>
+      <div id="sshDialogBody" class="ssh-dialog-body">
+        <!-- Form injected by ssh-panel.js -->
+      </div>
+      <div class="ssh-dialog-buttons">
+        <button id="sshDialogCancel" class="ssh-dialog-btn ssh-dialog-btn-cancel" data-i18n="sshDialogCancel">Cancel</button>
+        <button id="sshDialogSave" class="ssh-dialog-btn ssh-dialog-btn-save" data-i18n="sshDialogSave">Save</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══SSH Password Dialog (master password setup / unlock)  ═══-->
+  <div id="sshPasswordDialog" class="ssh-dialog-overlay hidden" data-overlay>
+    <div class="ssh-dialog-box ssh-password-box">
+      <div class="ssh-dialog-header">
+        <span id="sshPasswordTitle" data-i18n="sshPasswordUnlockTitle">Unlock SSH Connections</span>
+      </div>
+      <div class="ssh-dialog-body">
+        <div id="sshPasswordError" class="ssh-password-error hidden"></div>
+        <label><span data-i18n="sshPasswordLabel">Master Password</span>
+          <input id="sshPasswordInput" type="password" data-i18n-placeholder="sshPasswordPlaceholderUnlock" placeholder="Enter master password" />
+        </label>
+        <label id="sshPasswordConfirmGroup" class="hidden"><span data-i18n="sshPasswordConfirmLabel">Confirm Password</span>
+          <input id="sshPasswordConfirm" type="password" data-i18n-placeholder="sshPasswordConfirmPlaceholder" placeholder="Confirm master password" />
+        </label>
+      </div>
+      <div class="ssh-dialog-buttons">
+        <button id="sshPasswordCancel" class="ssh-dialog-btn ssh-dialog-btn-cancel" data-i18n="sshDialogCancel">Cancel</button>
+        <button id="sshPasswordSkip" class="ssh-dialog-btn ssh-dialog-btn-cancel" data-i18n="sshPasswordBtnUseOs">Use OS Encryption</button>
+        <button id="sshPasswordBtn" class="ssh-dialog-btn ssh-dialog-btn-save" data-i18n="sshPasswordBtnUnlock">Unlock</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══SSH Import Dialog  ═══-->
+  <div id="sshImportDialog" class="ssh-dialog-overlay hidden" data-overlay>
+    <div class="ssh-dialog-box">
+      <div class="ssh-dialog-header ssh-dialog-header-buttons">
+        <span data-i18n="sshImportTitle">Import from ~/.ssh/config</span>
+        <div class="ssh-dialog-buttons">
+          <button id="sshImportCancel" class="ssh-dialog-btn ssh-dialog-btn-cancel" data-i18n="genericCancel">Cancel</button>
+          <button id="sshImportConfirm" class="ssh-dialog-btn ssh-dialog-btn-save" data-i18n="sshImportBtnImport">Import Selected</button>
+        </div>
+      </div>
+      <div id="sshImportBody" class="ssh-dialog-body"></div>
+    </div>
+  </div>
+
+  <!-- ═══Paste Preview Dialog  ═══-->
+  <div id="pastePreviewDialog" class="ssh-dialog-overlay hidden" data-overlay>
+    <div class="ssh-dialog-box" style="width:calc(520px * var(--ui-scale));">
+      <div class="ssh-dialog-header">
+        <span data-i18n="pastePreviewTitle">Paste Preview</span>
+        <span id="pasteLineCount" style="font-size:calc(var(--app-font-size) * 0.769);color:var(--text-muted);font-weight:400;"></span>
+      </div>
+      <div class="ssh-dialog-body" style="padding:calc(8px * var(--ui-scale)) calc(16px * var(--ui-scale));">
+        <textarea id="pastePreviewText" rows="10" style="width:100%;resize:vertical;font-family:'Cascadia Code','Fira Code',Consolas,monospace;font-size:12px;padding:8px;border:1px solid var(--border);border-radius:4px;background:var(--bg-primary);color:var(--text-primary);outline:none;"></textarea>
+        <label style="display:flex;flex-direction:row;align-items:center;gap:6px;font-size:calc(var(--app-font-size) * 0.846);color:var(--text-muted);margin-top:6px;cursor:pointer;">
+          <input type="checkbox" id="pastePreviewDontShow" />
+          <span data-i18n="pastePreviewDontShow">Don't show this again</span>
+        </label>
+      </div>
+      <div class="ssh-dialog-buttons">
+        <button id="pastePreviewCancel" class="ssh-dialog-btn ssh-dialog-btn-cancel" data-i18n="pastePreviewCancel">Cancel</button>
+        <button id="pastePreviewConfirm" class="ssh-dialog-btn ssh-dialog-btn-save" data-i18n="pastePreviewPaste">Paste</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══Scripts  ═══-->
+  <script src="../node_modules/@xterm/xterm/lib/xterm.js"></script>
+  <script src="../node_modules/@xterm/addon-fit/lib/addon-fit.js"></script>
+  <script src="../node_modules/split.js/dist/split.js"></script>
+  <!-- Compiled renderer bundle (built from renderer/*.ts via `npm run compile`) -->
+  <script src="../build/renderer.js"></script>
+</body>
+</html>

@@ -1,0 +1,324 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   EchoTerm — Chinese (Simplified) / 中文（简体） translations
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+(function () {
+  'use strict';
+
+  window.App.i18n.registerLocale('zh-CN', {
+
+    // ── Locale metadata ─────────────────────────────────────────────────────
+    _langName: '中文（简体）',
+
+    // ── App / Shells ─────────────────────────────────────────────────────────
+    appTitle: 'EchoTerm',
+    gitBashNotFound: '⚠ 未找到 Git Bash',
+    shellPowerShell: 'PowerShell',
+    shellCmd: 'CMD',
+    shellGitBash: 'Git Bash',
+    shellSsh: 'SSH',
+
+    // ── Toolbar ──────────────────────────────────────────────────────────────
+    toolbarSidebarToggle: '侧边栏 (Ctrl+Shift+S)',
+    toolbarSettings: '设置',
+    winMinimizeTitle: '最小化',
+    winMaximizeTitle: '最大化',
+    winRestoreTitle: '还原',
+
+    // ── New Terminal Dropdown ────────────────────────────────────────────────
+    newTerminalTitle: '新建终端 (Ctrl+Shift+N)',
+    newTermDropdownTitle: '选择终端类型',
+    powershellLabel: 'PowerShell',
+    cmdLabel: 'CMD',
+    gitBashLabel: 'Git Bash',
+
+    // ── Echo buttons ─────────────────────────────────────────────────────────
+    echoEnableAll: '全部启用',
+    echoDisableAll: '全部禁用',
+    echoToggleAll: '全部切换',
+    echoPasteAll: '全部粘贴',
+    echoLabel: '回显',
+    echoLabelOn: '回显 开',
+    echoModeTitleOff: '回显模式',
+    echoEnableAllTitle: '在所有终端上启用回显',
+    echoToggleAllTitle: '切换每个终端的回显状态',
+    echoPasteAllTitle: '粘贴到所有已启用回显的终端',
+
+    // ── Group bar ────────────────────────────────────────────────────────────
+    groupDefaultName: '组 {n}',
+    newGroupTitle: '新建组',
+    closeGroupTitle: '关闭组',
+
+    // ── Tab ──────────────────────────────────────────────────────────────────
+    tabCloseTitle: '关闭',
+
+    // ── Pane titlebar ────────────────────────────────────────────────────────
+    panePasteTitle: '粘贴',
+    paneEchoTitle: '向此终端回显输入',
+    paneEchoLabel: '回显',
+    paneCloseTitle: '关闭',
+    paneDismissTitle: '关闭',
+
+    // ── Status bar ───────────────────────────────────────────────────────────
+    statusTerminalCount: '{count} 个终端',
+    statusTerminalPlural: '',
+    statusEchoOff: '回显: 关',
+    statusEchoOn: '回显: 开',
+    statusEchoOnSelected: '回显: 开（已选 {count} 个）',
+    statusShell: 'Shell: {shell}',
+
+    // ── Toast messages ───────────────────────────────────────────────────────
+    toastDefaultShell: '默认: {shell}',
+    toastGitBashNotFound: '未找到 Git Bash。请定位 bash.exe 以打开 Git Bash 终端。',
+    toastTerminalExited: '终端已退出。正在生成新的...',
+    toastNeedTwoTerminals: '此组至少需要 2 个终端才能使用回显模式。',
+    toastCannotDeleteLastGroup: '无法删除最后一个组。',
+    toastError: '错误: {message}',
+    toastSshError: 'SSH 错误: {message}',
+    toastSshErrorNamed: 'SSH 错误 ({name}): {message}',
+    toastSkipped: '已跳过 {name}: {message}',
+    toastImported: '已导入 {list}。',
+    toastImportedNew: '{count} 个新增',
+    toastImportedUpdated: '{count} 个已更新',
+    toastSshExported: 'SSH 配置已导出到 {path}。',
+    toastAlreadyRunning: 'EchoTerm 已在运行。',
+
+    // ── Context menus ────────────────────────────────────────────────────────
+    ctxCopy: '复制',
+    ctxPaste: '粘贴',
+    ctxPasteAll: '全部粘贴',
+    ctxToggleEcho: '切换回显',
+    ctxClosePane: '关闭窗格',
+    tabCtxRename: '重命名标签',
+    tabCtxClose: '关闭标签',
+    tabCtxCloseSelected: '关闭选中',
+    tabCtxCloseOthers: '关闭其他',
+    tabCtxMoveToGroup: '移至组',
+    tabCtxSubmenuArrow: '▶',
+    groupCtxRename: '重命名组',
+    groupCtxDelete: '关闭组',
+    groupCtxCloseTerminals: '关闭所有终端',
+
+    // ── Confirm dialogs ──────────────────────────────────────────────────────
+    confirmCancel: '取消',
+    confirmClose: '关闭',
+    confirmDelete: '删除',
+    confirmDontShowAgain: '不再显示',
+    confirmCloseTerminal: '关闭此终端？\n会话将被终止。',
+    confirmCloseSelectedTerminals: '关闭 {count} 个选中的终端？\n所有会话将被终止。',
+    confirmCloseOtherTerminals: '关闭 {count} 个其他终端？\n所有会话将被终止。',
+    confirmCloseGroup: '关闭组 "{name}"？',
+    confirmCloseGroupWithTerminals: '关闭组 "{name}"？\n{count} 个终端将被关闭。',
+    confirmCloseApp: '关闭 EchoTerm？\n所有终端会话将被终止。',
+    confirmCloseAllGroupTerminals: '关闭组 "{name}" 中的 {count} 个终端？\n所有会话将被终止。',
+    confirmDeleteSshConnection: '删除 SSH 连接 "{name}"？',
+    confirmDeleteSshFolder: '删除 SSH 文件夹 "{name}"？\n其子文件夹也会一并删除。文件夹中的连接不会被删除。',
+    confirmDeleteSshUser: '删除 SSH 用户 "{name}"？\n使用此用户的连接需要重新分配。',
+    confirmDeleteMultiSsh: '删除 {count} 个 SSH {type}？',
+    confirmJumpHostsMissing: '以下跳板机未被选中：\n\n{names}\n\n仍然导入？',
+
+    // ── SSH Sidebar ──────────────────────────────────────────────────────────
+    sshSidebarTitle: 'SSH',
+    sshPasswordBtnTitle: '设置/更改主密码',
+    sshImportBtnTitle: '从 ~/.ssh/config 导入新的',
+    sshUpdateBtnTitle: '从 ~/.ssh/config 更新现有的',
+    sshExportBtnTitle: '导出连接到 SSH 配置文件',
+    sshNewConnBtnTitle: '新建连接',
+    sshNewFolderBtnTitle: '新建文件夹',
+    sshNewUserBtnTitle: '新建用户',
+    sshMenuTitle: '操作',
+    sshSearchPlaceholder: '搜索...',
+    sshSectionConnections: '连接',
+    sshSectionUsers: '用户',
+    sshNoConnections: '暂无连接。\n点击 + 添加。',
+    sshNoUsers: '暂无用户。\n点击 + 添加。',
+    sshFolderOpenAllTitle: '全部打开',
+    sshFolderEditTitle: '编辑',
+    sshFolderDeleteTitle: '删除',
+    sshItemConnectTitle: '连接',
+    sshItemEditTitle: '编辑',
+    sshItemDeleteTitle: '删除',
+    sshItemAuthKeyfile: '🔑',
+    sshItemAuthPassword: '🔒',
+    sshItemConnIcon: '🖥️',
+
+    // ── SSH Dialogs ──────────────────────────────────────────────────────────
+    sshDialogTitleNewConn: '新建连接',
+    sshDialogTitleEditConn: '编辑连接',
+    sshDialogTitleNewFolder: '新建文件夹',
+    sshDialogTitleEditFolder: '编辑文件夹',
+    sshDialogTitleNewUser: '新建用户',
+    sshDialogTitleEditUser: '编辑用户',
+    sshDialogSave: '保存',
+    sshDialogCancel: '取消',
+    sshFormName: '名称',
+    sshFormHost: '主机',
+    sshFormPort: '端口',
+    sshFormUser: '用户',
+    sshFolderOptional: '文件夹（可选）',
+    sshFormSelectUser: '-- 选择用户 --',
+    sshFormNone: '-- 无 --',
+    sshFormJumpHostOptional: '跳板机（可选）',
+    sshFormJumpType: '类型',
+    sshFormJumpNone: '无（直连）',
+    sshFormJumpManual: '手动输入',
+    sshFormJumpReference: '选择已保存的连接',
+    sshFormJumpHost: '跳板主机',
+    sshFormJumpPort: '跳板端口',
+    sshFormJumpUsername: '跳板用户名',
+    sshFormJumpViaConnection: '通过连接跳转',
+    sshFormSelectConnection: '-- 选择连接 --',
+    sshFormAdvancedOptional: '高级选项（可选）',
+    sshFormHostKeyAlgorithms: '主机密钥算法',
+    sshFormKexAlgorithms: '密钥交换算法',
+    sshFormPubkeyAcceptedAlgorithms: '公钥算法',
+    sshFormUsername: '用户名',
+    sshFormAuthType: '认证方式',
+    sshFormAuthPassword: '密码',
+    sshFormAuthKeyfile: '密钥文件',
+    sshFormPassword: '密码',
+    sshFormPasswordUnchanged: '（留空则不更改）',
+    sshFormKeyFilePath: '密钥文件路径',
+    sshFormKeyPassphrase: '密钥密码',
+    sshFormKeyPassphraseOptional: '（可选）',
+    sshFolderName: '文件夹名称',
+    sshFolderParent: '父文件夹',
+    sshFolderParentNone: '（无 — 根层级）',
+    sshPasswordUnlockTitle: '解锁 SSH 连接',
+    sshPasswordSetupTitle: '保护 SSH 连接',
+    sshPasswordChangeTitle: '更改主密码',
+    sshPasswordLabel: '主密码',
+    sshPasswordPlaceholderUnlock: '输入主密码',
+    sshPasswordPlaceholderNew: '输入新的主密码',
+    sshPasswordConfirmLabel: '确认密码',
+    sshPasswordConfirmPlaceholder: '确认主密码',
+    sshPasswordBtnUnlock: '解锁',
+    sshPasswordBtnSet: '设置密码',
+    sshPasswordBtnChange: '更改密码',
+    sshPasswordBtnUseOs: '使用操作系统加密',
+    sshPasswordEmpty: '密码不能为空。',
+    sshPasswordMismatch: '两次密码不匹配。',
+    sshPasswordIncorrect: '密码错误。',
+    sshPasswordDecryptFailed: '数据解密失败，文件可能已损坏。',
+    sshMasterPasswordRequired: '需要主密码。数据已加密。',
+    sshPasswordLockedIcon: '🔒',
+    sshPasswordUnlockedIcon: '🔓',
+    sshPasswordBtnChangeTitle: '更改主密码',
+    sshPasswordBtnSetTitle: '设置主密码',
+
+    // ── SSH Import ───────────────────────────────────────────────────────────
+    sshImportTitle: '从 ~/.ssh/config 导入',
+    sshImportUpdateTitle: '从 ~/.ssh/config 更新',
+    sshImportBtnImport: '导入选中',
+    sshImportBtnUpdate: '更新选中',
+    sshImportUpdateFieldsTitle: '更新以下字段：',
+    sshImportFieldHost: '主机名 / 端口',
+    sshImportFieldUser: '用户',
+    sshImportFieldJump: '跳板机',
+    sshImportFieldOptions: '算法选项',
+    sshImportAuthKeyfile: '密钥: {file}',
+    sshImportAuthPassword: '密码',
+    sshImportJumpVia: '↪ 经由 {host}',
+    sshImportJumpNotInConfig: '（不在配置中）',
+    sshImportNoNewHosts: '未发现新主机。所有主机已导入。',
+    sshImportNoExistingToUpdate: '在 SSH 配置中未找到可更新的现有连接。',
+    sshImportNoHosts: 'SSH 配置中未找到主机。',
+
+    // ── SSH Context Menu ─────────────────────────────────────────────────────
+    sshCtxConnect: '连接',
+    sshCtxEdit: '编辑',
+    sshCtxMoveToFolder: '移至文件夹',
+    sshCtxDelete: '删除',
+    sshCtxOpenAll: '打开所有连接',
+    sshCtxConnectAll: '连接全部 ({count})',
+    sshCtxDeleteSelected: '删除选中 ({count})',
+    sshCtxOpenAllMulti: '全部打开 ({count})',
+    sshCtxDuplicate: '复制',
+    sshCtxDuplicateSelected: '复制选中 ({count})',
+    sshCtxNoOtherFolders: '没有其他文件夹',
+
+    // ── Settings / Options Panel ─────────────────────────────────────────────
+    optionsTitleAppearance: '外观',
+    optionsThemeDark: '深色',
+    optionsThemeLight: '浅色',
+    optionsUiFontSize: '界面字体大小',
+    optionsTermFontSize: '终端字体大小',
+    optionsTitleDefaultShell: '默认 Shell',
+    optionsTitleWarnings: '警告',
+    optionsTitleMouse: '鼠标',
+    optionsTabCloseConfirm: '关闭标签前确认',
+    optionsWindowCloseConfirm: '关闭窗口前确认',
+    optionsGroupCloseConfirm: '删除组前确认',
+    optionsSshJumpWarn: 'SSH 导入时警告未选中的跳板机',
+    optionsPastePreview: '粘贴多行内容前确认',
+    optionsRightClickPaste: '右键复制 / 粘贴',
+
+    // ── Danger Zone ──────────────────────────────────────────────────────────
+    optionsTitleDanger: '危险区域',
+    optionsResetSettings: '重置所有设置',
+    optionsClearSshData: '清除所有 SSH 连接',
+    confirmResetSettings: '将所有设置恢复为默认值？\n此操作无法撤销。',
+    confirmClearSshData: '删除所有已保存的 SSH 连接、用户和文件夹？\n此操作无法撤销。',
+    confirmReset: '重置',
+    toastSettingsReset: '所有设置已重置。',
+    toastSshDataCleared: '所有 SSH 连接已清除。',
+    optionsClearAllData: '清除所有数据并重启',
+    confirmClearAllData: '清除所有数据并重启 EchoTerm？\n所有设置和 SSH 连接将被永久删除。',
+    optionsClearCache: '清除所有缓存',
+    confirmClearCache: '清除应用缓存？\n不会影响您的设置或 SSH 连接。',
+    confirmClear: '清除',
+    toastCacheCleared: '应用缓存已清除。',
+
+    // ── Paste Preview ─────────────────────────────────────────────────────────
+    pastePreviewTitle: '粘贴预览',
+    pastePreviewLines: '{count} 行',
+    pastePreviewDontShow: '不再显示',
+    pastePreviewCancel: '取消',
+    pastePreviewPaste: '粘贴',
+
+    // ── Language ─────────────────────────────────────────────────────────────
+    optionsTitleLanguage: '语言',
+
+    // ── About ────────────────────────────────────────────────────────────────
+    optionsTitleAbout: '关于',
+    aboutDescription: 'EchoTerm — 支持回声输入的分屏终端应用',
+    aboutVersion: '版本',
+
+    // ── Error messages ───────────────────────────────────────────────────────
+    errorUnknownShell: '未知 Shell: {shell}',
+    errorConnectionNotFound: '未找到连接。',
+    errorGroupNotFound: '未找到组。',
+    errorConfigNotFound: '未找到配置文件: {path}',
+    errorNoMasterPassword: '未设置主密码。',
+
+    // ── Dialog buttons ───────────────────────────────────────────────────────
+    genericSave: '保存',
+    genericCancel: '取消',
+
+    // ── SSH Header Dropdown ─────────────────────────────────────────────────
+    sshDropdownSshLabel: '.SSH',
+    sshDropdownCreate: '新建',
+    sshDropdownImportBtn: '导入',
+    sshDropdownUpdateBtn: '更新',
+    sshDropdownExportBtn: '导出',
+    sshDropdownConnBtn: '连接',
+    sshDropdownFolderBtn: '文件夹',
+    sshDropdownUserBtn: '用户',
+
+    // ── SSH Import Diff Labels ──────────────────────────────────────────────
+    sshImportDiffHost: '主机',
+    sshImportDiffUser: '用户',
+    sshImportDiffJump: '跳板',
+    sshImportDiffOptions: '选项',
+    sshImportDiffNone: '（无）',
+    sshImportDefaultUserName: '默认',
+
+    // ── SSH Delete Type Labels ──────────────────────────────────────────────
+    sshDeleteTypeFolder: '文件夹',
+    sshDeleteTypeConnection: '连接',
+    sshDeleteTypeUser: '用户',
+  });
+
+})();
+
+export {};

@@ -1,0 +1,324 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   EchoTerm — Spanish / Español translations
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+(function () {
+  'use strict';
+
+  window.App.i18n.registerLocale('es', {
+
+    // ── Locale metadata ─────────────────────────────────────────────────────
+    _langName: 'Español',
+
+    // ── App / Shells ─────────────────────────────────────────────────────────
+    appTitle: 'EchoTerm',
+    gitBashNotFound: '⚠ Git Bash no encontrado',
+    shellPowerShell: 'PowerShell',
+    shellCmd: 'CMD',
+    shellGitBash: 'Git Bash',
+    shellSsh: 'SSH',
+
+    // ── Toolbar ──────────────────────────────────────────────────────────────
+    toolbarSidebarToggle: 'Barra lateral (Ctrl+Shift+S)',
+    toolbarSettings: 'Ajustes',
+    winMinimizeTitle: 'Minimizar',
+    winMaximizeTitle: 'Maximizar',
+    winRestoreTitle: 'Restaurar',
+
+    // ── New Terminal Dropdown ────────────────────────────────────────────────
+    newTerminalTitle: 'Nueva terminal (Ctrl+Shift+N)',
+    newTermDropdownTitle: 'Seleccionar tipo de terminal',
+    powershellLabel: 'PowerShell',
+    cmdLabel: 'CMD',
+    gitBashLabel: 'Git Bash',
+
+    // ── Echo buttons ─────────────────────────────────────────────────────────
+    echoEnableAll: 'Habilitar todas',
+    echoDisableAll: 'Deshabilitar todas',
+    echoToggleAll: 'Alternar todas',
+    echoPasteAll: 'Pegar en todas',
+    echoLabel: 'Eco',
+    echoLabelOn: 'Eco activado',
+    echoModeTitleOff: 'Modo eco',
+    echoEnableAllTitle: 'Habilitar eco en todas las terminales',
+    echoToggleAllTitle: 'Alternar el estado de eco de cada terminal',
+    echoPasteAllTitle: 'Pegar en todas las terminales con eco habilitado',
+
+    // ── Group bar ────────────────────────────────────────────────────────────
+    groupDefaultName: 'Grupo {n}',
+    newGroupTitle: 'Nuevo grupo',
+    closeGroupTitle: 'Cerrar grupo',
+
+    // ── Tab ──────────────────────────────────────────────────────────────────
+    tabCloseTitle: 'Cerrar',
+
+    // ── Pane titlebar ────────────────────────────────────────────────────────
+    panePasteTitle: 'Pegar',
+    paneEchoTitle: 'Eco de entrada en esta terminal',
+    paneEchoLabel: 'Eco',
+    paneCloseTitle: 'Cerrar',
+    paneDismissTitle: 'Cerrar',
+
+    // ── Status bar ───────────────────────────────────────────────────────────
+    statusTerminalCount: 'Terminales: {count}',
+    statusTerminalPlural: '',
+    statusEchoOff: 'Eco: DESACTIVADO',
+    statusEchoOn: 'Eco: ACTIVADO',
+    statusEchoOnSelected: 'Eco: ACTIVADO ({count} seleccionadas)',
+    statusShell: 'Shell: {shell}',
+
+    // ── Toast messages ───────────────────────────────────────────────────────
+    toastDefaultShell: 'Predeterminada: {shell}',
+    toastGitBashNotFound: 'No se encontró Git Bash. Localiza bash.exe para abrir una terminal de Git Bash.',
+    toastTerminalExited: 'La terminal terminó. Abriendo una nueva...',
+    toastNeedTwoTerminals: 'Se necesitan al menos 2 terminales en este grupo para el modo eco.',
+    toastCannotDeleteLastGroup: 'No se puede eliminar el último grupo.',
+    toastError: 'Error: {message}',
+    toastSshError: 'Error de SSH: {message}',
+    toastSshErrorNamed: 'Error de SSH ({name}): {message}',
+    toastSkipped: 'Omitido {name}: {message}',
+    toastImported: 'Importado {list}.',
+    toastImportedNew: '{count} nuevos',
+    toastImportedUpdated: '{count} actualizados',
+    toastSshExported: 'Configuración SSH exportada a {path}.',
+    toastAlreadyRunning: 'EchoTerm ya está en ejecución.',
+
+    // ── Context menus ────────────────────────────────────────────────────────
+    ctxCopy: 'Copiar',
+    ctxPaste: 'Pegar',
+    ctxPasteAll: 'Pegar en todas',
+    ctxToggleEcho: 'Alternar eco',
+    ctxClosePane: 'Cerrar panel',
+    tabCtxRename: 'Renombrar pestaña',
+    tabCtxClose: 'Cerrar pestaña',
+    tabCtxCloseSelected: 'Cerrar seleccionadas',
+    tabCtxCloseOthers: 'Cerrar otras',
+    tabCtxMoveToGroup: 'Mover al grupo',
+    tabCtxSubmenuArrow: '▶',
+    groupCtxRename: 'Renombrar grupo',
+    groupCtxDelete: 'Cerrar grupo',
+    groupCtxCloseTerminals: 'Cerrar todas las terminales',
+
+    // ── Confirm dialogs ──────────────────────────────────────────────────────
+    confirmCancel: 'Cancelar',
+    confirmClose: 'Cerrar',
+    confirmDelete: 'Eliminar',
+    confirmDontShowAgain: 'No volver a mostrar',
+    confirmCloseTerminal: '¿Cerrar esta terminal?\nLa sesión terminará.',
+    confirmCloseSelectedTerminals: '¿Cerrar terminales seleccionadas ({count})?\nTodas las sesiones terminarán.',
+    confirmCloseOtherTerminals: '¿Cerrar otras terminales ({count})?\nTodas las sesiones terminarán.',
+    confirmCloseGroup: '¿Cerrar el grupo "{name}"?',
+    confirmCloseGroupWithTerminals: '¿Cerrar el grupo "{name}"?\nSe cerrarán terminales ({count}).',
+    confirmCloseApp: '¿Cerrar EchoTerm?\nTodas las sesiones de terminal terminarán.',
+    confirmCloseAllGroupTerminals: '¿Cerrar las terminales ({count}) del grupo "{name}"?\nTodas las sesiones terminarán.',
+    confirmDeleteSshConnection: '¿Eliminar la conexión SSH "{name}"?',
+    confirmDeleteSshFolder: '¿Eliminar la carpeta SSH "{name}"?\nLas subcarpetas también se eliminarán. Las conexiones no se eliminarán.',
+    confirmDeleteSshUser: '¿Eliminar el usuario SSH "{name}"?\nLas conexiones que usan este usuario deberán reasignarse.',
+    confirmDeleteMultiSsh: '¿Eliminar {count} elementos SSH?',
+    confirmJumpHostsMissing: 'Los siguientes hosts de salto no están seleccionados:\n\n{names}\n\n¿Importar de todos modos?',
+
+    // ── SSH Sidebar ──────────────────────────────────────────────────────────
+    sshSidebarTitle: 'SSH',
+    sshPasswordBtnTitle: 'Establecer/Cambiar contraseña maestra',
+    sshImportBtnTitle: 'Importar nuevos desde ~/.ssh/config',
+    sshUpdateBtnTitle: 'Actualizar existentes desde ~/.ssh/config',
+    sshExportBtnTitle: 'Exportar conexiones al archivo de configuración SSH',
+    sshNewConnBtnTitle: 'Nueva conexión',
+    sshNewFolderBtnTitle: 'Nueva carpeta',
+    sshNewUserBtnTitle: 'Nuevo usuario',
+    sshMenuTitle: 'Acciones',
+    sshSearchPlaceholder: 'Buscar...',
+    sshSectionConnections: 'Conexiones',
+    sshSectionUsers: 'Usuarios',
+    sshNoConnections: 'Aún no hay conexiones.\nHaz clic en + para añadir una.',
+    sshNoUsers: 'Aún no hay usuarios.\nHaz clic en + para añadir uno.',
+    sshFolderOpenAllTitle: 'Abrir todas',
+    sshFolderEditTitle: 'Editar',
+    sshFolderDeleteTitle: 'Eliminar',
+    sshItemConnectTitle: 'Conectar',
+    sshItemEditTitle: 'Editar',
+    sshItemDeleteTitle: 'Eliminar',
+    sshItemAuthKeyfile: '🔑',
+    sshItemAuthPassword: '🔒',
+    sshItemConnIcon: '🖥️',
+
+    // ── SSH Dialogs ──────────────────────────────────────────────────────────
+    sshDialogTitleNewConn: 'Nueva conexión',
+    sshDialogTitleEditConn: 'Editar conexión',
+    sshDialogTitleNewFolder: 'Nueva carpeta',
+    sshDialogTitleEditFolder: 'Editar carpeta',
+    sshDialogTitleNewUser: 'Nuevo usuario',
+    sshDialogTitleEditUser: 'Editar usuario',
+    sshDialogSave: 'Guardar',
+    sshDialogCancel: 'Cancelar',
+    sshFormName: 'Nombre',
+    sshFormHost: 'Host',
+    sshFormPort: 'Puerto',
+    sshFormUser: 'Usuario',
+    sshFolderOptional: 'Carpeta (opcional)',
+    sshFormSelectUser: '-- Seleccionar usuario --',
+    sshFormNone: '-- Ninguno --',
+    sshFormJumpHostOptional: 'Host de salto (opcional)',
+    sshFormJumpType: 'Tipo',
+    sshFormJumpNone: 'Ninguno (conexión directa)',
+    sshFormJumpManual: 'Introducir manualmente',
+    sshFormJumpReference: 'Seleccionar una conexión guardada',
+    sshFormJumpHost: 'Host de salto',
+    sshFormJumpPort: 'Puerto de salto',
+    sshFormJumpUsername: 'Usuario de salto',
+    sshFormJumpViaConnection: 'Saltar a través de conexión',
+    sshFormSelectConnection: '-- Seleccionar conexión --',
+    sshFormAdvancedOptional: 'Opciones avanzadas (opcional)',
+    sshFormHostKeyAlgorithms: 'Algoritmos de clave de host',
+    sshFormKexAlgorithms: 'Algoritmos de intercambio de claves',
+    sshFormPubkeyAcceptedAlgorithms: 'Algoritmos de clave pública',
+    sshFormUsername: 'Nombre de usuario',
+    sshFormAuthType: 'Autenticación',
+    sshFormAuthPassword: 'Contraseña',
+    sshFormAuthKeyfile: 'Archivo de clave',
+    sshFormPassword: 'Contraseña',
+    sshFormPasswordUnchanged: '(sin cambios si se deja en blanco)',
+    sshFormKeyFilePath: 'Ruta del archivo de clave',
+    sshFormKeyPassphrase: 'Frase de contraseña de la clave',
+    sshFormKeyPassphraseOptional: '(opcional)',
+    sshFolderName: 'Nombre de la carpeta',
+    sshFolderParent: 'Carpeta principal',
+    sshFolderParentNone: '(ninguna — nivel raíz)',
+    sshPasswordUnlockTitle: 'Desbloquear conexiones SSH',
+    sshPasswordSetupTitle: 'Proteger conexiones SSH',
+    sshPasswordChangeTitle: 'Cambiar contraseña maestra',
+    sshPasswordLabel: 'Contraseña maestra',
+    sshPasswordPlaceholderUnlock: 'Introduce la contraseña maestra',
+    sshPasswordPlaceholderNew: 'Introduce la nueva contraseña maestra',
+    sshPasswordConfirmLabel: 'Confirmar contraseña',
+    sshPasswordConfirmPlaceholder: 'Confirma la contraseña maestra',
+    sshPasswordBtnUnlock: 'Desbloquear',
+    sshPasswordBtnSet: 'Establecer contraseña',
+    sshPasswordBtnChange: 'Cambiar contraseña',
+    sshPasswordBtnUseOs: 'Usar cifrado del sistema',
+    sshPasswordEmpty: 'La contraseña no puede estar vacía.',
+    sshPasswordMismatch: 'Las contraseñas no coinciden.',
+    sshPasswordIncorrect: 'Contraseña incorrecta.',
+    sshPasswordDecryptFailed: 'No se pudo descifrar la información. El archivo puede estar dañado.',
+    sshMasterPasswordRequired: 'Se requiere la contraseña maestra. La información está cifrada.',
+    sshPasswordLockedIcon: '🔒',
+    sshPasswordUnlockedIcon: '🔓',
+    sshPasswordBtnChangeTitle: 'Cambiar contraseña maestra',
+    sshPasswordBtnSetTitle: 'Establecer contraseña maestra',
+
+    // ── SSH Import ───────────────────────────────────────────────────────────
+    sshImportTitle: 'Importar desde ~/.ssh/config',
+    sshImportUpdateTitle: 'Actualizar desde ~/.ssh/config',
+    sshImportBtnImport: 'Importar seleccionados',
+    sshImportBtnUpdate: 'Actualizar seleccionados',
+    sshImportUpdateFieldsTitle: 'Actualizar estos campos:',
+    sshImportFieldHost: 'Nombre de host / Puerto',
+    sshImportFieldUser: 'Usuario',
+    sshImportFieldJump: 'Host de salto',
+    sshImportFieldOptions: 'Opciones de algoritmo',
+    sshImportAuthKeyfile: 'clave: {file}',
+    sshImportAuthPassword: 'contraseña',
+    sshImportJumpVia: '↪ vía {host}',
+    sshImportJumpNotInConfig: ' (no está en la configuración)',
+    sshImportNoNewHosts: 'No se encontraron hosts nuevos. Todos ya están importados.',
+    sshImportNoExistingToUpdate: 'No se encontraron conexiones existentes en la configuración SSH para actualizar.',
+    sshImportNoHosts: 'No se encontraron hosts en la configuración SSH.',
+
+    // ── SSH Context Menu ─────────────────────────────────────────────────────
+    sshCtxConnect: 'Conectar',
+    sshCtxEdit: 'Editar',
+    sshCtxMoveToFolder: 'Mover a carpeta',
+    sshCtxDelete: 'Eliminar',
+    sshCtxOpenAll: 'Abrir todas las conexiones',
+    sshCtxConnectAll: 'Conectar todas ({count})',
+    sshCtxDeleteSelected: 'Eliminar seleccionados ({count})',
+    sshCtxOpenAllMulti: 'Abrir todas ({count})',
+    sshCtxDuplicate: 'Duplicar',
+    sshCtxDuplicateSelected: 'Duplicar seleccionados ({count})',
+    sshCtxNoOtherFolders: 'No hay otras carpetas',
+
+    // ── Settings / Options Panel ──────────────────────────────────────────────
+    optionsTitleAppearance: 'Apariencia',
+    optionsThemeDark: 'Oscuro',
+    optionsThemeLight: 'Claro',
+    optionsUiFontSize: 'Tamaño de fuente de la interfaz',
+    optionsTermFontSize: 'Tamaño de fuente del terminal',
+    optionsTitleDefaultShell: 'Shell predeterminado',
+    optionsTitleWarnings: 'Advertencias',
+    optionsTitleMouse: 'Ratón',
+    optionsTabCloseConfirm: 'Confirmar al cerrar una pestaña',
+    optionsWindowCloseConfirm: 'Confirmar al cerrar la ventana',
+    optionsGroupCloseConfirm: 'Confirmar al eliminar un grupo',
+    optionsSshJumpWarn: 'Advertir sobre hosts de salto no seleccionados al importar SSH',
+    optionsPastePreview: 'Confirmar antes de pegar contenido de varias líneas',
+    optionsRightClickPaste: 'Clic derecho para copiar / pegar',
+
+    // ── Danger Zone ──────────────────────────────────────────────────────────
+    optionsTitleDanger: 'Zona de peligro',
+    optionsResetSettings: 'Restablecer todos los ajustes',
+    optionsClearSshData: 'Borrar todas las conexiones SSH',
+    confirmResetSettings: '¿Restablecer todos los ajustes a sus valores predeterminados?\nEsta acción no se puede deshacer.',
+    confirmClearSshData: '¿Eliminar todas las conexiones, usuarios y carpetas SSH guardados?\nEsta acción no se puede deshacer.',
+    confirmReset: 'Restablecer',
+    toastSettingsReset: 'Todos los ajustes se han restablecido.',
+    toastSshDataCleared: 'Se han borrado todas las conexiones SSH.',
+    optionsClearAllData: 'Borrar todos los datos y reiniciar',
+    confirmClearAllData: '¿Borrar todos los datos y reiniciar EchoTerm?\nTodos los ajustes y conexiones SSH se eliminarán permanentemente.',
+    optionsClearCache: 'Borrar toda la caché',
+    confirmClearCache: '¿Borrar la caché de la aplicación?\nNo afectará a tus ajustes ni a tus conexiones SSH.',
+    confirmClear: 'Borrar',
+    toastCacheCleared: 'Se ha borrado la caché de la aplicación.',
+
+    // ── Paste Preview ─────────────────────────────────────────────────────────
+    pastePreviewTitle: 'Vista previa de pegado',
+    pastePreviewLines: '{count} líneas',
+    pastePreviewDontShow: 'No volver a mostrar',
+    pastePreviewCancel: 'Cancelar',
+    pastePreviewPaste: 'Pegar',
+
+    // ── Error messages ───────────────────────────────────────────────────────
+    errorUnknownShell: 'Shell desconocido: {shell}',
+    errorConnectionNotFound: 'Conexión no encontrada.',
+    errorGroupNotFound: 'Grupo no encontrado.',
+    errorConfigNotFound: 'Archivo de configuración no encontrado: {path}',
+    errorNoMasterPassword: 'No se ha establecido una contraseña maestra.',
+
+    // ── Language ─────────────────────────────────────────────────────────────
+    optionsTitleLanguage: 'Idioma',
+
+    // ── About ────────────────────────────────────────────────────────────────
+    optionsTitleAbout: 'Acerca de',
+    aboutDescription: 'EchoTerm — aplicación de terminal con vista dividida y entrada eco',
+    aboutVersion: 'Versión',
+
+    // ── Dialog buttons ───────────────────────────────────────────────────────
+    genericSave: 'Guardar',
+    genericCancel: 'Cancelar',
+
+    // ── SSH Header Dropdown ─────────────────────────────────────────────────
+    sshDropdownSshLabel: '.SSH',
+    sshDropdownCreate: 'Crear',
+    sshDropdownImportBtn: 'Importar',
+    sshDropdownUpdateBtn: 'Actualizar',
+    sshDropdownExportBtn: 'Exportar',
+    sshDropdownConnBtn: 'Conexión',
+    sshDropdownFolderBtn: 'Carpeta',
+    sshDropdownUserBtn: 'Usuario',
+
+    // ── SSH Import Diff Labels ──────────────────────────────────────────────
+    sshImportDiffHost: 'Host',
+    sshImportDiffUser: 'Usuario',
+    sshImportDiffJump: 'Salto',
+    sshImportDiffOptions: 'Opciones',
+    sshImportDiffNone: '(ninguno)',
+    sshImportDefaultUserName: 'predeterminado',
+
+    // ── SSH Delete Type Labels ──────────────────────────────────────────────
+    sshDeleteTypeFolder: 'carpeta',
+    sshDeleteTypeConnection: 'conexión',
+    sshDeleteTypeUser: 'usuario',
+  });
+
+})();
+
+export {};

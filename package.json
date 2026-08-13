@@ -1,0 +1,77 @@
+{
+  "name": "echoterm",
+  "version": "0.1.0",
+  "main": "build/main.js",
+  "scripts": {
+    "compile": "node scripts/build.mjs",
+    "watch": "node scripts/build.mjs --watch",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint . && npm run lint:arch",
+    "lint:fix": "eslint . --fix",
+    "lint:arch": "depcruise --config .dependency-cruiser.cjs src renderer main.ts preload.ts shared",
+    "start": "npm run compile && electron .",
+    "build": "npm run compile && electron-builder build --win",
+    "build-portable": "npm run compile && electron-builder build --win --config.win.target=portable",
+    "build-zip": "npm run compile && electron-builder build --win --config.win.target=zip",
+    "pack": "npm run compile && electron-builder build --win --dir",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "test:unit": "vitest run tests/unit/",
+    "test:integration": "vitest run tests/integration/",
+    "test:e2e": "npm run compile && playwright test"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "SEE LICENSE IN LICENSE",
+  "description": "EchoTerm — split-view terminal app with echo input",
+  "dependencies": {
+    "@xterm/addon-fit": "^0.11.0",
+    "@xterm/xterm": "^6.0.0",
+    "node-pty": "^1.1.0",
+    "split.js": "^1.6.5"
+  },
+  "build": {
+    "appId": "com.echoterm.app",
+    "productName": "EchoTerm",
+    "npmRebuild": false,
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "build/**/*",
+      "build-assets/**/*",
+      "renderer/index.html",
+      "renderer/styles.css",
+      "package.json"
+    ],
+    "win": {
+      "target": "nsis",
+      "icon": "build-assets/echoterm.ico"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": false,
+      "include": "build-assets/installer.nsh",
+      "license": "LICENSE"
+    }
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "@playwright/test": "^1.62.0",
+    "@types/node": "^26.1.2",
+    "@typescript/native": "npm:typescript@^7.0.2",
+    "@vitest/coverage-v8": "^4.1.10",
+    "dependency-cruiser": "^18.1.1",
+    "electron": "^43.2.0",
+    "electron-builder": "^26.15.3",
+    "esbuild": "^0.28.1",
+    "eslint": "^10.8.0",
+    "globals": "^17.9.0",
+    "jsdom": "^29.1.1",
+    "typescript": "npm:@typescript/typescript6@^6.0.2",
+    "typescript-eslint": "^8.66.0",
+    "vitest": "^4.1.10"
+  }
+}
