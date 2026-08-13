@@ -1,0 +1,79 @@
+name: Bug Report
+description: Report a bug to help improve EchoTerm
+title: "[Bug]: "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to report a bug. Please fill in as much detail as you can.
+
+        Before submitting, please check that the issue has not already been reported.
+  - type: textarea
+    id: description
+    attributes:
+      label: Describe the bug
+      description: A clear and concise description of what the bug is.
+      placeholder: What happened, and what did you expect to happen instead?
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Steps to reproduce
+      description: The exact steps to trigger the bug.
+      placeholder: |
+        1. Launch EchoTerm
+        2. Create an SSH connection to ...
+        3. Press ...
+        4. See the error
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+      description: What did you expect to happen?
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual behavior
+      description: What actually happened? Include any error messages shown in the terminal or in the UI.
+    validations:
+      required: true
+  - type: textarea
+    id: screenshots
+    attributes:
+      label: Screenshots / screen recordings
+      description: If applicable, add screenshots or a short recording to help explain the problem.
+      placeholder: Drag & drop images here.
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment
+      description: Please complete the following information.
+      value: |
+        - EchoTerm version: (Help → About, or version in package.json)
+        - OS: (e.g. Windows 11 23H2)
+        - Install method: (Installer / Portable zip)
+        - Session type: (Local shell / SSH)
+        - Shell / SSH client: (e.g. PowerShell 7, cmd, Git Bash, WSL, OpenSSH version)
+        - Language setting: (e.g. English, 简体中文, 繁體中文)
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs
+      description: Optional. Terminal output, crash messages, or anything relevant from the console.
+      render: shell
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Confirmation
+      options:
+        - label: I searched the existing issues and this bug has not been reported yet.
+          required: true
+        - label: I am using the latest release version of EchoTerm.

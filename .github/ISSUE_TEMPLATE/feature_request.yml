@@ -1,0 +1,53 @@
+name: Feature Request
+description: Suggest a new feature or an improvement for EchoTerm
+title: "[Feature]: "
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for sharing your idea. Please describe the feature you'd like to see in EchoTerm.
+
+        Before submitting, please check that a similar request has not already been filed.
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem / motivation
+      description: What problem does this feature solve, or what pain point are you hitting? Describe the scenario where this feature would help.
+      placeholder: "e.g. I frequently switch between the same groups of SSH connections and I want to..."
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed solution
+      description: Describe the feature you'd like. How should it work and where should it live in the UI (tabs, SSH panel, settings, menus...)?
+      placeholder: "e.g. Add a keyboard shortcut to... / Add a settings option to..."
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+      description: Any workarounds or alternative designs you've tried or thought of.
+      placeholder: "e.g. I currently do X manually, but it's tedious because..."
+  - type: textarea
+    id: scope
+    attributes:
+      label: Affected area
+      description: Which part of EchoTerm is this related to? This helps route the request.
+      placeholder: "e.g. Terminal, SSH connections, Groups, Vault / master password, i18n, UI/theme, general"
+    validations:
+      required: false
+  - type: textarea
+    id: examples
+    attributes:
+      label: Examples / references
+      description: Optional. Screenshots, mockups, or links to how other tools implement this (e.g. Windows Terminal, VS Code, tabby, Warp).
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Confirmation
+      options:
+        - label: I searched the existing issues and feature requests and this has not been requested yet.
+          required: true
