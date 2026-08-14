@@ -36,7 +36,7 @@ jobs:
         run: npm run compile
 
       - name: Build NSIS installer and portable zip
-        run: npx electron-builder --win nsis zip
+        run: npx electron-builder --win nsis zip --publish never
 
       - name: Upload artifacts to GitHub Release
         uses: softprops/action-gh-release@v2
