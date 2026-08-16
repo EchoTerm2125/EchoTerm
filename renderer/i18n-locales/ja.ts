@@ -26,7 +26,7 @@
     winRestoreTitle: '元のサイズに戻す',
 
     // ── New Terminal Dropdown ────────────────────────────────────────────────
-    newTerminalTitle: '新しいターミナル (Ctrl+Shift+N)',
+    newTerminalTitle: '新しいターミナル (Ctrl+N)',
     newTermDropdownTitle: 'ターミナルの種類を選択',
     powershellLabel: 'PowerShell',
     cmdLabel: 'CMD',
@@ -46,7 +46,7 @@
 
     // ── Group bar ────────────────────────────────────────────────────────────
     groupDefaultName: 'グループ {n}',
-    newGroupTitle: '新しいグループ',
+    newGroupTitle: '新しいグループ (Ctrl+Shift+N)',
     closeGroupTitle: 'グループを閉じる',
 
     // ── Tab ──────────────────────────────────────────────────────────────────

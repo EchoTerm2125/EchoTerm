@@ -26,7 +26,7 @@
     winRestoreTitle: '還原',
 
     // ── New Terminal Dropdown ────────────────────────────────────────────────
-    newTerminalTitle: '新增終端機 (Ctrl+Shift+N)',
+    newTerminalTitle: '新增終端機 (Ctrl+N)',
     newTermDropdownTitle: '選擇終端機類型',
     powershellLabel: 'PowerShell',
     cmdLabel: 'CMD',
@@ -46,7 +46,7 @@
 
     // ── Group bar ────────────────────────────────────────────────────────────
     groupDefaultName: '群組 {n}',
-    newGroupTitle: '新增群組',
+    newGroupTitle: '新增群組 (Ctrl+Shift+N)',
     closeGroupTitle: '關閉群組',
 
     // ── Tab ──────────────────────────────────────────────────────────────────

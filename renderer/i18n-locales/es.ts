@@ -26,7 +26,7 @@
     winRestoreTitle: 'Restaurar',
 
     // ── New Terminal Dropdown ────────────────────────────────────────────────
-    newTerminalTitle: 'Nueva terminal (Ctrl+Shift+N)',
+    newTerminalTitle: 'Nueva terminal (Ctrl+N)',
     newTermDropdownTitle: 'Seleccionar tipo de terminal',
     powershellLabel: 'PowerShell',
     cmdLabel: 'CMD',
@@ -46,7 +46,7 @@
 
     // ── Group bar ────────────────────────────────────────────────────────────
     groupDefaultName: 'Grupo {n}',
-    newGroupTitle: 'Nuevo grupo',
+    newGroupTitle: 'Nuevo grupo (Ctrl+Shift+N)',
     closeGroupTitle: 'Cerrar grupo',
 
     // ── Tab ──────────────────────────────────────────────────────────────────

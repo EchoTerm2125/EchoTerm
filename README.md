@@ -97,7 +97,8 @@ Grab the latest release:
 
 | Shortcut | Action |
 |---|---|
-| `Ctrl+Shift+N` | New terminal |
+| `Ctrl+N` | New tab |
+| `Ctrl+Shift+N` | New group |
 | `Ctrl+Shift+T` | Toggle echo mode |
 | `Ctrl+W` | Close active terminal |
 | `Ctrl+Tab` / `Ctrl+Shift+Tab` | Switch terminal |

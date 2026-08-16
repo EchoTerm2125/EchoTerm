@@ -96,7 +96,8 @@
 
 | 快捷鍵 | 功能 |
 |---|---|
-| `Ctrl+Shift+N` | 新增終端機 |
+| `Ctrl+N` | 新增分頁 |
+| `Ctrl+Shift+N` | 新增群組 |
 | `Ctrl+Shift+T` | 切換 echo 模式 |
 | `Ctrl+W` | 關閉目前終端機 |
 | `Ctrl+Tab` / `Ctrl+Shift+Tab` | 切換終端機 |

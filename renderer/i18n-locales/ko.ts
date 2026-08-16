@@ -26,7 +26,7 @@
     winRestoreTitle: '복원',
 
     // ── New Terminal Dropdown ────────────────────────────────────────────────
-    newTerminalTitle: '새 터미널 (Ctrl+Shift+N)',
+    newTerminalTitle: '새 터미널 (Ctrl+N)',
     newTermDropdownTitle: '터미널 유형 선택',
     powershellLabel: 'PowerShell',
     cmdLabel: 'CMD',
@@ -46,7 +46,7 @@
 
     // ── Group bar ────────────────────────────────────────────────────────────
     groupDefaultName: '그룹 {n}',
-    newGroupTitle: '새 그룹',
+    newGroupTitle: '새 그룹 (Ctrl+Shift+N)',
     closeGroupTitle: '그룹 닫기',
 
     // ── Tab ──────────────────────────────────────────────────────────────────

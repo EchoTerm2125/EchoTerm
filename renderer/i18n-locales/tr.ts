@@ -26,7 +26,7 @@
     winRestoreTitle: 'Geri Yükle',
 
     // ── New Terminal Dropdown ────────────────────────────────────────────────
-    newTerminalTitle: 'Yeni Terminal (Ctrl+Shift+N)',
+    newTerminalTitle: 'Yeni Terminal (Ctrl+N)',
     newTermDropdownTitle: 'Terminal türünü seç',
     powershellLabel: 'PowerShell',
     cmdLabel: 'CMD',
@@ -46,7 +46,7 @@
 
     // ── Group bar ────────────────────────────────────────────────────────────
     groupDefaultName: 'Grup {n}',
-    newGroupTitle: 'Yeni Grup',
+    newGroupTitle: 'Yeni Grup (Ctrl+Shift+N)',
     closeGroupTitle: 'Grubu Kapat',
 
     // ── Tab ──────────────────────────────────────────────────────────────────

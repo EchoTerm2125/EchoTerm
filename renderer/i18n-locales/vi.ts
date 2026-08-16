@@ -26,7 +26,7 @@
     winRestoreTitle: 'Khôi phục',
 
     // ── New Terminal Dropdown ────────────────────────────────────────────────
-    newTerminalTitle: 'Terminal mới (Ctrl+Shift+N)',
+    newTerminalTitle: 'Terminal mới (Ctrl+N)',
     newTermDropdownTitle: 'Chọn loại terminal',
     powershellLabel: 'PowerShell',
     cmdLabel: 'CMD',
@@ -46,7 +46,7 @@
 
     // ── Group bar ────────────────────────────────────────────────────────────
     groupDefaultName: 'Nhóm {n}',
-    newGroupTitle: 'Nhóm mới',
+    newGroupTitle: 'Nhóm mới (Ctrl+Shift+N)',
     closeGroupTitle: 'Đóng nhóm',
 
     // ── Tab ──────────────────────────────────────────────────────────────────
