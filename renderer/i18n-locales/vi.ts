@@ -26,7 +26,7 @@
     winRestoreTitle: 'Khôi phục',
 
     // ── New Terminal Dropdown ────────────────────────────────────────────────
-    newTerminalTitle: 'Terminal mới (Ctrl+Shift+N)',
+    newTerminalTitle: 'Terminal mới (Ctrl+N)',
     newTermDropdownTitle: 'Chọn loại terminal',
     powershellLabel: 'PowerShell',
     cmdLabel: 'CMD',
@@ -46,7 +46,7 @@
 
     // ── Group bar ────────────────────────────────────────────────────────────
     groupDefaultName: 'Nhóm {n}',
-    newGroupTitle: 'Nhóm mới',
+    newGroupTitle: 'Nhóm mới (Ctrl+Shift+N)',
     closeGroupTitle: 'Đóng nhóm',
 
     // ── Tab ──────────────────────────────────────────────────────────────────
@@ -225,6 +225,9 @@
     sshImportNoHosts: 'Không tìm thấy máy chủ nào trong cấu hình SSH.',
 
     // ── SSH Context Menu ─────────────────────────────────────────────────────
+    sshCtxAddConn: 'Thêm kết nối',
+    sshCtxAddSubFolder: 'Thêm thư mục con',
+    sshCtxAddParentFolder: 'Thêm thư mục cha',
     sshCtxConnect: 'Kết nối',
     sshCtxEdit: 'Sửa',
     sshCtxMoveToFolder: 'Chuyển tới thư mục',

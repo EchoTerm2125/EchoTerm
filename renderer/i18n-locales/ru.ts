@@ -26,7 +26,7 @@
     winRestoreTitle: 'Восстановить',
 
     // ── New Terminal Dropdown ────────────────────────────────────────────────
-    newTerminalTitle: 'Новый терминал (Ctrl+Shift+N)',
+    newTerminalTitle: 'Новый терминал (Ctrl+N)',
     newTermDropdownTitle: 'Выберите тип терминала',
     powershellLabel: 'PowerShell',
     cmdLabel: 'CMD',
@@ -46,7 +46,7 @@
 
     // ── Group bar ────────────────────────────────────────────────────────────
     groupDefaultName: 'Группа {n}',
-    newGroupTitle: 'Новая группа',
+    newGroupTitle: 'Новая группа (Ctrl+Shift+N)',
     closeGroupTitle: 'Закрыть группу',
 
     // ── Tab ──────────────────────────────────────────────────────────────────
@@ -225,6 +225,9 @@
     sshImportNoHosts: 'В конфигурации SSH не найдено хостов.',
 
     // ── SSH Context Menu ─────────────────────────────────────────────────────
+    sshCtxAddConn: 'Добавить подключение',
+    sshCtxAddSubFolder: 'Добавить подпапку',
+    sshCtxAddParentFolder: 'Добавить родительскую папку',
     sshCtxConnect: 'Подключиться',
     sshCtxEdit: 'Изменить',
     sshCtxMoveToFolder: 'Переместить в папку',

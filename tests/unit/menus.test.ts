@@ -121,4 +121,78 @@ describe('Menus (menus.js)', () => {
       expect(tabCtx.classList.contains('hidden')).toBe(true);
     });
   });
+
+  describe('positionSubmenu', () => {
+    function makeSubmenu() {
+      const trigger = document.createElement('div');
+      const submenu = document.createElement('div');
+      submenu.className = 'context-submenu';
+      trigger.appendChild(submenu);
+      document.body.appendChild(trigger);
+      return { trigger, submenu };
+    }
+
+    function mockRect(el, rect) {
+      vi.spyOn(el, 'getBoundingClientRect').mockReturnValue(rect as DOMRect);
+    }
+
+    afterEach(() => {
+      vi.restoreAllMocks();
+      vi.unstubAllGlobals();
+    });
+
+    it('opens the flyout to the left when it would overflow the right edge', () => {
+      const App = getApp();
+      const { trigger, submenu } = makeSubmenu();
+      vi.stubGlobal('innerWidth', 800);
+      vi.stubGlobal('innerHeight', 600);
+      mockRect(trigger, { left: 700, top: 100, right: 750, width: 50, height: 30, bottom: 130, x: 700, y: 100, toJSON: () => ({}) });
+      mockRect(submenu, { left: 752, top: 96, right: 952, width: 200, height: 100, bottom: 196, x: 752, y: 96, toJSON: () => ({}) });
+
+      App.Menus.positionSubmenu(submenu);
+
+      // right edge would be 952 > 792 (800 - 8) → flip left, clamped to 8px margin
+      expect(submenu.style.left).toBe('-202px');
+    });
+
+    it('keeps the flyout on the right when there is room', () => {
+      const App = getApp();
+      const { trigger, submenu } = makeSubmenu();
+      vi.stubGlobal('innerWidth', 800);
+      vi.stubGlobal('innerHeight', 600);
+      mockRect(trigger, { left: 100, top: 100, right: 150, width: 50, height: 30, bottom: 130, x: 100, y: 100, toJSON: () => ({}) });
+      mockRect(submenu, { left: 152, top: 96, right: 352, width: 200, height: 100, bottom: 196, x: 152, y: 96, toJSON: () => ({}) });
+
+      App.Menus.positionSubmenu(submenu);
+
+      expect(submenu.style.left).toBe('');
+      expect(submenu.style.top).toBe('');
+    });
+
+    it('shifts the flyout up when it would overflow the bottom edge', () => {
+      const App = getApp();
+      const { trigger, submenu } = makeSubmenu();
+      vi.stubGlobal('innerWidth', 800);
+      vi.stubGlobal('innerHeight', 600);
+      mockRect(trigger, { left: 100, top: 550, right: 150, width: 50, height: 30, bottom: 580, x: 100, y: 550, toJSON: () => ({}) });
+      mockRect(submenu, { left: 152, top: 546, right: 352, width: 200, height: 100, bottom: 646, x: 152, y: 546, toJSON: () => ({}) });
+
+      App.Menus.positionSubmenu(submenu);
+
+      // bottom would be 550 - 4 + 100 = 646 > 592 (600 - 8) → shift up by 54px
+      expect(submenu.style.top).toBe('-58px');
+      expect(submenu.style.left).toBe('');
+    });
+
+    it('does nothing when the flyout is hidden', () => {
+      const App = getApp();
+      const { submenu } = makeSubmenu();
+      submenu.classList.add('hidden');
+
+      App.Menus.positionSubmenu(submenu);
+
+      expect(submenu.style.left).toBe('');
+      expect(submenu.style.top).toBe('');
+    });
+  });
 });

@@ -25,6 +25,31 @@
     if (rect.top > maxTop) menu.style.top = `${Math.max(MENU_EDGE_MARGIN, maxTop)}px`;
   }
 
+  // Keep a submenu flyout inside the window: open it to the left when it would
+  // overflow the right edge, and shift it up when it would overflow the bottom.
+  function positionSubmenu(submenu) {
+    if (!submenu || submenu.classList.contains('hidden')) return;
+    const trigger = submenu.parentElement;
+    if (!trigger) return;
+    const triggerRect = trigger.getBoundingClientRect();
+    const rect = submenu.getBoundingClientRect();
+    const vw = window.innerWidth;
+    const vh = window.innerHeight;
+
+    // The default CSS opens the flyout to the right of the trigger (left: 100%)
+    if (triggerRect.right + rect.width + 2 > vw - MENU_EDGE_MARGIN) {
+      // Open to the left instead, clamped so the left edge stays in the viewport
+      const left = Math.max(MENU_EDGE_MARGIN, triggerRect.left - rect.width - 2) - triggerRect.left;
+      submenu.style.left = `${left}px`;
+    } else {
+      submenu.style.left = '';
+    }
+
+    // The default CSS places the flyout at top: -4px relative to the trigger
+    const overflowBottom = triggerRect.top - 4 + rect.height - (vh - MENU_EDGE_MARGIN);
+    submenu.style.top = overflowBottom > 0 ? `${-4 - overflowBottom}px` : '';
+  }
+
   function bindContextMenu(paneEl, id) {
     const echoBtn = $('#ctxEcho');
     const echoSep = $('#ctxEchoSep');
@@ -148,6 +173,7 @@
     trigger.addEventListener('mouseenter', () => {
       clearTimeout(hideTimer);
       submenu.classList.remove('hidden');
+      positionSubmenu(submenu);
     });
 
     trigger.addEventListener('mouseleave', () => {
@@ -381,7 +407,7 @@
 
   App.Menus = {
     bindContextMenu, showTabContextMenu, showGroupContextMenu, setupContextMenu,
-    bindCloseConfirmDialog, showConfirm, bindSubmenuHover, positionContextMenu,
+    bindCloseConfirmDialog, showConfirm, bindSubmenuHover, positionContextMenu, positionSubmenu,
   };
 })();
 

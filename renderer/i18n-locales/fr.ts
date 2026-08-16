@@ -26,7 +26,7 @@
     winRestoreTitle: 'Restaurer',
 
     // ── New Terminal Dropdown ────────────────────────────────────────────────
-    newTerminalTitle: 'Nouveau terminal (Ctrl+Shift+N)',
+    newTerminalTitle: 'Nouveau terminal (Ctrl+N)',
     newTermDropdownTitle: 'Sélectionner le type de terminal',
     powershellLabel: 'PowerShell',
     cmdLabel: 'CMD',
@@ -46,7 +46,7 @@
 
     // ── Group bar ────────────────────────────────────────────────────────────
     groupDefaultName: 'Groupe {n}',
-    newGroupTitle: 'Nouveau groupe',
+    newGroupTitle: 'Nouveau groupe (Ctrl+Shift+N)',
     closeGroupTitle: 'Fermer le groupe',
 
     // ── Tab ──────────────────────────────────────────────────────────────────
@@ -225,6 +225,9 @@
     sshImportNoHosts: 'Aucun hôte trouvé dans la configuration SSH.',
 
     // ── SSH Context Menu ─────────────────────────────────────────────────────
+    sshCtxAddConn: 'Ajouter une connexion',
+    sshCtxAddSubFolder: 'Ajouter un sous-dossier',
+    sshCtxAddParentFolder: 'Ajouter un dossier parent',
     sshCtxConnect: 'Se connecter',
     sshCtxEdit: 'Modifier',
     sshCtxMoveToFolder: 'Déplacer vers le dossier',

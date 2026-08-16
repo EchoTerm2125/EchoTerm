@@ -1,6 +1,6 @@
 {
   "name": "echoterm",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "main": "build/main.js",
   "scripts": {
     "compile": "node scripts/build.mjs",
@@ -50,6 +50,7 @@
       "icon": "build-assets/echoterm.ico"
     },
     "nsis": {
+      "artifactName": "${productName}-Setup-${version}.${ext}",
       "oneClick": false,
       "allowToChangeInstallationDirectory": true,
       "createDesktopShortcut": false,

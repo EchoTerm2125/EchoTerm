@@ -26,7 +26,7 @@
     winRestoreTitle: '还原',
 
     // ── New Terminal Dropdown ────────────────────────────────────────────────
-    newTerminalTitle: '新建终端 (Ctrl+Shift+N)',
+    newTerminalTitle: '新建终端 (Ctrl+N)',
     newTermDropdownTitle: '选择终端类型',
     powershellLabel: 'PowerShell',
     cmdLabel: 'CMD',
@@ -46,7 +46,7 @@
 
     // ── Group bar ────────────────────────────────────────────────────────────
     groupDefaultName: '组 {n}',
-    newGroupTitle: '新建组',
+    newGroupTitle: '新建组 (Ctrl+Shift+N)',
     closeGroupTitle: '关闭组',
 
     // ── Tab ──────────────────────────────────────────────────────────────────
@@ -225,6 +225,9 @@
     sshImportNoHosts: 'SSH 配置中未找到主机。',
 
     // ── SSH Context Menu ─────────────────────────────────────────────────────
+    sshCtxAddConn: '添加连接',
+    sshCtxAddSubFolder: '添加子文件夹',
+    sshCtxAddParentFolder: '添加父文件夹',
     sshCtxConnect: '连接',
     sshCtxEdit: '编辑',
     sshCtxMoveToFolder: '移至文件夹',

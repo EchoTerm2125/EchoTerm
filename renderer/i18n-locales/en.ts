@@ -27,7 +27,7 @@
     winRestoreTitle: 'Restore',
 
     // ── New Terminal Dropdown ────────────────────────────────────────────────
-    newTerminalTitle: 'New Terminal (Ctrl+Shift+N)',
+    newTerminalTitle: 'New Terminal (Ctrl+N)',
     newTermDropdownTitle: 'Select terminal type',
     powershellLabel: 'PowerShell',
     cmdLabel: 'CMD',
@@ -47,7 +47,7 @@
 
     // ── Group bar ────────────────────────────────────────────────────────────
     groupDefaultName: 'Group {n}',
-    newGroupTitle: 'New Group',
+    newGroupTitle: 'New Group (Ctrl+Shift+N)',
     closeGroupTitle: 'Close Group',
 
     // ── Tab ──────────────────────────────────────────────────────────────────
@@ -226,6 +226,9 @@
     sshImportNoHosts: 'No hosts found in SSH config.',
 
     // ── SSH Context Menu ─────────────────────────────────────────────────────
+    sshCtxAddConn: 'Add Connection',
+    sshCtxAddSubFolder: 'Add Sub Folder',
+    sshCtxAddParentFolder: 'Add Parent Folder',
     sshCtxConnect: 'Connect',
     sshCtxEdit: 'Edit',
     sshCtxMoveToFolder: 'Move to Folder',

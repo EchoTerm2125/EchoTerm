@@ -26,7 +26,7 @@
     winRestoreTitle: 'Geri Yükle',
 
     // ── New Terminal Dropdown ────────────────────────────────────────────────
-    newTerminalTitle: 'Yeni Terminal (Ctrl+Shift+N)',
+    newTerminalTitle: 'Yeni Terminal (Ctrl+N)',
     newTermDropdownTitle: 'Terminal türünü seç',
     powershellLabel: 'PowerShell',
     cmdLabel: 'CMD',
@@ -46,7 +46,7 @@
 
     // ── Group bar ────────────────────────────────────────────────────────────
     groupDefaultName: 'Grup {n}',
-    newGroupTitle: 'Yeni Grup',
+    newGroupTitle: 'Yeni Grup (Ctrl+Shift+N)',
     closeGroupTitle: 'Grubu Kapat',
 
     // ── Tab ──────────────────────────────────────────────────────────────────
@@ -225,6 +225,9 @@
     sshImportNoHosts: 'SSH yapılandırmasında sunucu bulunamadı.',
 
     // ── SSH Context Menu ─────────────────────────────────────────────────────
+    sshCtxAddConn: 'Bağlantı Ekle',
+    sshCtxAddSubFolder: 'Alt Klasör Ekle',
+    sshCtxAddParentFolder: 'Üst Klasör Ekle',
     sshCtxConnect: 'Bağlan',
     sshCtxEdit: 'Düzenle',
     sshCtxMoveToFolder: 'Klasöre Taşı',

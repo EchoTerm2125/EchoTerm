@@ -26,7 +26,7 @@
     winRestoreTitle: '복원',
 
     // ── New Terminal Dropdown ────────────────────────────────────────────────
-    newTerminalTitle: '새 터미널 (Ctrl+Shift+N)',
+    newTerminalTitle: '새 터미널 (Ctrl+N)',
     newTermDropdownTitle: '터미널 유형 선택',
     powershellLabel: 'PowerShell',
     cmdLabel: 'CMD',
@@ -46,7 +46,7 @@
 
     // ── Group bar ────────────────────────────────────────────────────────────
     groupDefaultName: '그룹 {n}',
-    newGroupTitle: '새 그룹',
+    newGroupTitle: '새 그룹 (Ctrl+Shift+N)',
     closeGroupTitle: '그룹 닫기',
 
     // ── Tab ──────────────────────────────────────────────────────────────────
@@ -225,6 +225,9 @@
     sshImportNoHosts: 'SSH 설정에서 호스트를 찾을 수 없습니다.',
 
     // ── SSH Context Menu ─────────────────────────────────────────────────────
+    sshCtxAddConn: '연결 추가',
+    sshCtxAddSubFolder: '하위 폴더 추가',
+    sshCtxAddParentFolder: '상위 폴더 추가',
     sshCtxConnect: '연결',
     sshCtxEdit: '편집',
     sshCtxMoveToFolder: '폴더로 이동',

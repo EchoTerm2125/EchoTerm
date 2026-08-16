@@ -26,7 +26,7 @@
     winRestoreTitle: '還原',
 
     // ── New Terminal Dropdown ────────────────────────────────────────────────
-    newTerminalTitle: '新增終端機 (Ctrl+Shift+N)',
+    newTerminalTitle: '新增終端機 (Ctrl+N)',
     newTermDropdownTitle: '選擇終端機類型',
     powershellLabel: 'PowerShell',
     cmdLabel: 'CMD',
@@ -46,7 +46,7 @@
 
     // ── Group bar ────────────────────────────────────────────────────────────
     groupDefaultName: '群組 {n}',
-    newGroupTitle: '新增群組',
+    newGroupTitle: '新增群組 (Ctrl+Shift+N)',
     closeGroupTitle: '關閉群組',
 
     // ── Tab ──────────────────────────────────────────────────────────────────
@@ -225,6 +225,9 @@
     sshImportNoHosts: 'SSH 設定中找不到主機。',
 
     // ── SSH Context Menu ─────────────────────────────────────────────────────
+    sshCtxAddConn: '新增連線',
+    sshCtxAddSubFolder: '新增子資料夾',
+    sshCtxAddParentFolder: '新增父資料夾',
     sshCtxConnect: '連線',
     sshCtxEdit: '編輯',
     sshCtxMoveToFolder: '移至資料夾',

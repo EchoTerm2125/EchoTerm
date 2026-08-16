@@ -23,9 +23,23 @@ describe('Integration: Keyboard Shortcuts', () => {
     App.UI.bindKeyboardShortcuts();
   });
 
-  describe('Ctrl+Shift+N → New Terminal', () => {
+  describe('Ctrl+N → New Tab', () => {
     it('triggers spawnTerminal', () => {
       const spy = vi.spyOn(App.Terminal, 'spawnTerminal');
+
+      document.dispatchEvent(new KeyboardEvent('keydown', {
+        key: 'n',
+        ctrlKey: true,
+        bubbles: true,
+      }));
+
+      expect(spy).toHaveBeenCalled();
+    });
+  });
+
+  describe('Ctrl+Shift+N → New Group', () => {
+    it('creates a new group', () => {
+      const spy = vi.spyOn(App.Groups, 'createGroup');
 
       document.dispatchEvent(new KeyboardEvent('keydown', {
         key: 'N',
