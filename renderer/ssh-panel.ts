@@ -26,6 +26,7 @@ import type { SshUser, SshConnection, SshFolder } from '../shared/ipc';
   const sshImportCancel = $('#sshImportCancel');
   const sshImportConfirm = $('#sshImportConfirm');
   const sshContextMenu = $('#sshContextMenu');
+  const sshCtxAddSep = $('#sshCtxAddSep');
   const sshCtxOpenSep = $('#sshCtxOpenSep');
   const sshCtxOpenFolder = $('#sshCtxOpenFolder');
   const sshCtxMoveSep = $('#sshCtxMoveSep');
@@ -1118,7 +1119,7 @@ import type { SshUser, SshConnection, SshFolder } from '../shared/ipc';
             showSshContextMenu(e, ['ssh-open-folder', 'ssh-move', 'ssh-delete']);
           } else {
             sshContextTarget = { type: 'group', id: folderId };
-            showSshContextMenu(e, ['ssh-open-folder', 'ssh-edit', 'ssh-move', 'ssh-delete']);
+            showSshContextMenu(e, ['ssh-add-conn', 'ssh-add-subfolder', 'ssh-open-folder', 'ssh-edit', 'ssh-move', 'ssh-delete']);
           }
         } else if (connItem) {
           const connId = connItem.dataset.connId;
@@ -1174,6 +1175,12 @@ import type { SshUser, SshConnection, SshFolder } from '../shared/ipc';
             } else {
               connectSsh(target.id);
             }
+            break;
+          case 'ssh-add-conn':
+            showConnectionDialog(undefined, target.id);
+            break;
+          case 'ssh-add-subfolder':
+            showFolderDialog(undefined, target.id);
             break;
           case 'ssh-edit':
             if (target.type === 'connection') showConnectionDialog(target.id);
@@ -1279,6 +1286,8 @@ import type { SshUser, SshConnection, SshFolder } from '../shared/ipc';
       if (btn) btn.classList.remove('hidden');
     }
     // Show/hide separators and submenu items
+    const showAdd = actions.includes('ssh-add-conn') || actions.includes('ssh-add-subfolder');
+    if (sshCtxAddSep) sshCtxAddSep.classList.toggle('hidden', !showAdd);
     const showMove = actions.includes('ssh-move');
     if (sshCtxMoveSep) sshCtxMoveSep.classList.toggle('hidden', !showMove);
     if (sshCtxMoveItem) sshCtxMoveItem.classList.toggle('hidden', !showMove);
@@ -1838,7 +1847,7 @@ import type { SshUser, SshConnection, SshFolder } from '../shared/ipc';
     focusFirstTextInput(el);
   }
 
-  async function showConnectionDialog(connId?) {
+  async function showConnectionDialog(connId?, initialFolderId?) {
     editingConnectionId = connId || null;
     sshDialogTitle.textContent = connId ? App.__('sshDialogTitleEditConn') : App.__('sshDialogTitleNewConn');
 
@@ -1853,10 +1862,11 @@ import type { SshUser, SshConnection, SshFolder } from '../shared/ipc';
       `<option value="${escHtml(u.id)}" ${conn && conn.userId === u.id ? 'selected' : ''}>${escHtml(u.name)} (${escHtml(u.username)})</option>`
     ).join('');
 
+    const selectedFolderId = (conn && conn.groupId) || (!connId ? initialFolderId : null);
     const groupOptions = [...groups]
       .sort((a, b) => (a.name || '').localeCompare(b.name || ''))
       .map(g =>
-      `<option value="${escHtml(g.id)}" ${conn && conn.groupId === g.id ? 'selected' : ''}>${escHtml(g.name)}</option>`
+      `<option value="${escHtml(g.id)}" ${g.id === selectedFolderId ? 'selected' : ''}>${escHtml(g.name)}</option>`
     ).join('');
 
     // Jump host options from existing connections (exclude self)
@@ -2000,7 +2010,7 @@ import type { SshUser, SshConnection, SshFolder } from '../shared/ipc';
     showPopup(sshDialog, 'user');
   }
 
-  async function showFolderDialog(groupId?) {
+  async function showFolderDialog(groupId?, initialParentId?) {
     editingFolderId = groupId || null;
     sshDialogTitle.textContent = groupId ? App.__('sshDialogTitleEditFolder') : App.__('sshDialogTitleNewFolder');
 
@@ -2023,10 +2033,11 @@ import type { SshUser, SshConnection, SshFolder } from '../shared/ipc';
       collectDescendants(groupId);
     }
 
+    const selectedParentId = (group && group.parentId) || (!groupId ? initialParentId : null);
     const parentOptions = [...groups]
       .filter(g => !excludedIds.has(g.id))
       .sort((a, b) => (a.name || '').localeCompare(b.name || ''))
-      .map(g => `<option value="${escHtml(g.id)}" ${group && group.parentId === g.id ? 'selected' : ''}>${escHtml(g.name)}</option>`)
+      .map(g => `<option value="${escHtml(g.id)}" ${g.id === selectedParentId ? 'selected' : ''}>${escHtml(g.name)}</option>`)
       .join('');
 
     sshDialogBody.innerHTML = `
@@ -2034,7 +2045,7 @@ import type { SshUser, SshConnection, SshFolder } from '../shared/ipc';
         <label>${App.__('sshFolderName')} <input name="groupName" value="${escHtml(group ? group.name : '')}" required /></label>
         <label>${App.__('sshFolderParent') || 'Parent folder'}
           <select name="groupParent">
-            <option value="" ${!group || !group.parentId ? 'selected' : ''}>${App.__('sshFolderParentNone') || '(none — root level)'}</option>
+            <option value="" ${!selectedParentId ? 'selected' : ''}>${App.__('sshFolderParentNone') || '(none — root level)'}</option>
             ${parentOptions}
           </select>
         </label>

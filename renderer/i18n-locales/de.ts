@@ -225,6 +225,8 @@
     sshImportNoHosts: 'Keine Hosts in der SSH-Konfiguration gefunden.',
 
     // ── SSH Context Menu ─────────────────────────────────────────────────────
+    sshCtxAddConn: 'Verbindung hinzufügen',
+    sshCtxAddSubFolder: 'Unterordner hinzufügen',
     sshCtxConnect: 'Verbinden',
     sshCtxEdit: 'Bearbeiten',
     sshCtxMoveToFolder: 'In Ordner verschieben',

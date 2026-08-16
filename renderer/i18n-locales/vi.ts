@@ -225,6 +225,8 @@
     sshImportNoHosts: 'Không tìm thấy máy chủ nào trong cấu hình SSH.',
 
     // ── SSH Context Menu ─────────────────────────────────────────────────────
+    sshCtxAddConn: 'Thêm kết nối',
+    sshCtxAddSubFolder: 'Thêm thư mục con',
     sshCtxConnect: 'Kết nối',
     sshCtxEdit: 'Sửa',
     sshCtxMoveToFolder: 'Chuyển tới thư mục',

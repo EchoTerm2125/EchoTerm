@@ -225,6 +225,8 @@
     sshImportNoHosts: 'SSH yapılandırmasında sunucu bulunamadı.',
 
     // ── SSH Context Menu ─────────────────────────────────────────────────────
+    sshCtxAddConn: 'Bağlantı Ekle',
+    sshCtxAddSubFolder: 'Alt Klasör Ekle',
     sshCtxConnect: 'Bağlan',
     sshCtxEdit: 'Düzenle',
     sshCtxMoveToFolder: 'Klasöre Taşı',

@@ -225,6 +225,8 @@
     sshImportNoHosts: 'В конфигурации SSH не найдено хостов.',
 
     // ── SSH Context Menu ─────────────────────────────────────────────────────
+    sshCtxAddConn: 'Добавить подключение',
+    sshCtxAddSubFolder: 'Добавить подпапку',
     sshCtxConnect: 'Подключиться',
     sshCtxEdit: 'Изменить',
     sshCtxMoveToFolder: 'Переместить в папку',

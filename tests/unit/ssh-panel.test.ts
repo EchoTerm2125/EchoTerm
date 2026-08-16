@@ -88,6 +88,24 @@ describe('SshPanel (ssh-panel.ts)', () => {
     });
   });
 
+  describe('dialog folder preselect from context menu', () => {
+    it('preselects the folder when adding a connection from a folder context menu', async () => {
+      await getApp().SshPanel.showConnectionDialog(undefined, 'f1');
+
+      const select = document.querySelector('#sshDialogBody select[name="connGroup"]');
+      expect(select).not.toBeNull();
+      expect(select.value).toBe('f1');
+    });
+
+    it('preselects the parent folder when adding a sub folder', async () => {
+      await getApp().SshPanel.showFolderDialog(undefined, 'f1');
+
+      const select = document.querySelector('#sshDialogBody select[name="groupParent"]');
+      expect(select).not.toBeNull();
+      expect(select.value).toBe('f1');
+    });
+  });
+
   describe('delete connection', () => {
     it('shows a Delete-labelled confirm and deletes on OK', async () => {
       const App = getApp();

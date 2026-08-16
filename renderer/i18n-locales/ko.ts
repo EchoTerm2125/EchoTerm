@@ -225,6 +225,8 @@
     sshImportNoHosts: 'SSH 설정에서 호스트를 찾을 수 없습니다.',
 
     // ── SSH Context Menu ─────────────────────────────────────────────────────
+    sshCtxAddConn: '연결 추가',
+    sshCtxAddSubFolder: '하위 폴더 추가',
     sshCtxConnect: '연결',
     sshCtxEdit: '편집',
     sshCtxMoveToFolder: '폴더로 이동',
