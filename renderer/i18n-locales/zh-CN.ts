@@ -227,6 +227,7 @@
     // ── SSH Context Menu ─────────────────────────────────────────────────────
     sshCtxAddConn: '添加连接',
     sshCtxAddSubFolder: '添加子文件夹',
+    sshCtxAddParentFolder: '添加父文件夹',
     sshCtxConnect: '连接',
     sshCtxEdit: '编辑',
     sshCtxMoveToFolder: '移至文件夹',

@@ -227,6 +227,7 @@
     // ── SSH Context Menu ─────────────────────────────────────────────────────
     sshCtxAddConn: 'Verbindung hinzufügen',
     sshCtxAddSubFolder: 'Unterordner hinzufügen',
+    sshCtxAddParentFolder: 'Übergeordneten Ordner hinzufügen',
     sshCtxConnect: 'Verbinden',
     sshCtxEdit: 'Bearbeiten',
     sshCtxMoveToFolder: 'In Ordner verschieben',

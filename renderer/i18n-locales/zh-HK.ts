@@ -227,6 +227,7 @@
     // ── SSH Context Menu ─────────────────────────────────────────────────────
     sshCtxAddConn: '新增連線',
     sshCtxAddSubFolder: '新增子資料夾',
+    sshCtxAddParentFolder: '新增父資料夾',
     sshCtxConnect: '連線',
     sshCtxEdit: '編輯',
     sshCtxMoveToFolder: '移至資料夾',
