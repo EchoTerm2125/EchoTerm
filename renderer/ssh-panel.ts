@@ -296,6 +296,12 @@ import type { SshUser, SshConnection, SshFolder } from '../shared/ipc';
       sshPasswordError.classList.add('hidden');
       const pw = sshPasswordInput.value;
 
+      const finish = async () => {
+        sshPasswordDialog.classList.add('hidden');
+        await updatePasswordIcon();
+        await refreshAll();
+      };
+
       if (passwordMode === 'setup') {
         if (!pw) {
           sshPasswordError.textContent = App.__('sshPasswordEmpty');
@@ -307,47 +313,62 @@ import type { SshUser, SshConnection, SshFolder } from '../shared/ipc';
           sshPasswordError.classList.remove('hidden');
           return;
         }
-        const result = await api.sshSetPassword(pw);
-        if (result.error) {
-          sshPasswordError.textContent = result.error;
-          sshPasswordError.classList.remove('hidden');
-          return;
-        }
-      } else {
-        // unlock
-        const result = await api.sshUnlock(pw);
-        if (result.error || !result.success) {
-          const msg = result.errorCode === 'NO_MASTER_PASSWORD'
-            ? App.__('errorNoMasterPassword')
-            : result.errorCode === 'INCORRECT_PASSWORD'
-            ? App.__('sshPasswordIncorrect')
-            : result.errorCode === 'DECRYPT_FAILED'
-            ? App.__('sshPasswordDecryptFailed')
-            : result.errorCode === 'MASTER_PASSWORD_REQUIRED'
-            ? App.__('sshMasterPasswordRequired')
-            : result.error || App.__('sshPasswordIncorrect');
-          sshPasswordError.textContent = msg;
-          sshPasswordError.classList.remove('hidden');
-          sshPasswordInput.value = '';
-          sshPasswordInput.focus();
-          return;
-        }
-      }
-
-      sshPasswordDialog.classList.add('hidden');
-      await updatePasswordIcon();
-      await refreshAll();
-    });
-
-    sshPasswordSkip.addEventListener('click', async () => {
-      sshPasswordDialog.classList.add('hidden');
-      const result = await api.sshUseSafeStorage();
-      if (result.error) {
-        App.UI.showToast(App.__('toastError', { message: result.error }));
+        App.Menus.showConfirm(
+          App.__('confirmSetMasterPassword'),
+          async () => {
+            const result = await api.sshSetPassword(pw);
+            if (result.error) {
+              sshPasswordError.textContent = result.error;
+              sshPasswordError.classList.remove('hidden');
+              return;
+            }
+            App.UI.showToast(App.__('toastPasswordSet'));
+            await finish();
+          },
+          'skipSetMasterPasswordConfirm',
+          'confirmSetMasterPasswordOk'
+        );
         return;
       }
-      await updatePasswordIcon();
-      await refreshAll();
+
+      // unlock
+      const result = await api.sshUnlock(pw);
+      if (result.error || !result.success) {
+        const msg = result.errorCode === 'NO_MASTER_PASSWORD'
+          ? App.__('errorNoMasterPassword')
+          : result.errorCode === 'INCORRECT_PASSWORD'
+          ? App.__('sshPasswordIncorrect')
+          : result.errorCode === 'DECRYPT_FAILED'
+          ? App.__('sshPasswordDecryptFailed')
+          : result.errorCode === 'MASTER_PASSWORD_REQUIRED'
+          ? App.__('sshMasterPasswordRequired')
+          : result.error || App.__('sshPasswordIncorrect');
+        sshPasswordError.textContent = msg;
+        sshPasswordError.classList.remove('hidden');
+        sshPasswordInput.value = '';
+        sshPasswordInput.focus();
+        return;
+      }
+      await finish();
+    });
+
+    sshPasswordSkip.addEventListener('click', () => {
+      App.Menus.showConfirm(
+        App.__('confirmUseDefaultEncryption'),
+        async () => {
+          sshPasswordDialog.classList.add('hidden');
+          const result = await api.sshUseSafeStorage();
+          if (result.error) {
+            App.UI.showToast(App.__('toastError', { message: result.error }));
+            return;
+          }
+          App.UI.showToast(App.__('toastUseDefaultEncryption'));
+          await updatePasswordIcon();
+          await refreshAll();
+        },
+        'skipDefaultEncryptionConfirm',
+        'confirmUseDefaultEncryptionOk'
+      );
     });
 
     if (sshPasswordCancel) {
