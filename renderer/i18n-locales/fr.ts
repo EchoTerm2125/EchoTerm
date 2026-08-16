@@ -195,7 +195,7 @@
     sshPasswordBtnUnlock: 'Déverrouiller',
     sshPasswordBtnSet: 'Définir le mot de passe',
     sshPasswordBtnChange: 'Changer le mot de passe',
-    sshPasswordBtnUseOs: 'Utiliser le chiffrement du système',
+    sshPasswordBtnUseOs: 'Chiffrement par défaut (sans mot de passe)',
     sshPasswordEmpty: 'Le mot de passe ne peut pas être vide.',
     sshPasswordMismatch: 'Les mots de passe ne correspondent pas.',
     sshPasswordIncorrect: 'Mot de passe incorrect.',

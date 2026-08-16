@@ -195,7 +195,7 @@
     sshPasswordBtnUnlock: 'Desbloquear',
     sshPasswordBtnSet: 'Definir senha',
     sshPasswordBtnChange: 'Alterar senha',
-    sshPasswordBtnUseOs: 'Usar criptografia do sistema',
+    sshPasswordBtnUseOs: 'Criptografia padrão (sem senha)',
     sshPasswordEmpty: 'A senha não pode estar vazia.',
     sshPasswordMismatch: 'As senhas não coincidem.',
     sshPasswordIncorrect: 'Senha incorreta.',

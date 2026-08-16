@@ -195,7 +195,7 @@
     sshPasswordBtnUnlock: 'Kilidi Aç',
     sshPasswordBtnSet: 'Parolayı Belirle',
     sshPasswordBtnChange: 'Parolayı Değiştir',
-    sshPasswordBtnUseOs: 'İşletim Sistemi Şifrelemesini Kullan',
+    sshPasswordBtnUseOs: 'Varsayılan şifreleme (parola yok)',
     sshPasswordEmpty: 'Parola boş olamaz.',
     sshPasswordMismatch: 'Parolalar eşleşmiyor.',
     sshPasswordIncorrect: 'Parola hatalı.',

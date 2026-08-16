@@ -196,7 +196,7 @@
     sshPasswordBtnUnlock: 'Unlock',
     sshPasswordBtnSet: 'Set Password',
     sshPasswordBtnChange: 'Change Password',
-    sshPasswordBtnUseOs: 'Use OS Encryption',
+    sshPasswordBtnUseOs: 'Default encryption (No password)',
     sshPasswordEmpty: 'Password cannot be empty.',
     sshPasswordMismatch: 'Passwords do not match.',
     sshPasswordIncorrect: 'Incorrect password.',

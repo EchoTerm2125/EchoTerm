@@ -195,7 +195,7 @@
     sshPasswordBtnUnlock: '解锁',
     sshPasswordBtnSet: '设置密码',
     sshPasswordBtnChange: '更改密码',
-    sshPasswordBtnUseOs: '使用操作系统加密',
+    sshPasswordBtnUseOs: '默认加密（无需密码）',
     sshPasswordEmpty: '密码不能为空。',
     sshPasswordMismatch: '两次密码不匹配。',
     sshPasswordIncorrect: '密码错误。',

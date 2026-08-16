@@ -195,7 +195,7 @@
     sshPasswordBtnUnlock: 'ロック解除',
     sshPasswordBtnSet: 'パスワードを設定',
     sshPasswordBtnChange: 'パスワードを変更',
-    sshPasswordBtnUseOs: 'OS の暗号化を使用',
+    sshPasswordBtnUseOs: '既定の暗号化（パスワードなし）',
     sshPasswordEmpty: 'パスワードは空にできません。',
     sshPasswordMismatch: 'パスワードが一致しません。',
     sshPasswordIncorrect: 'パスワードが正しくありません。',

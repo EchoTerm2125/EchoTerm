@@ -195,7 +195,7 @@
     sshPasswordBtnUnlock: 'Mở khóa',
     sshPasswordBtnSet: 'Đặt mật khẩu',
     sshPasswordBtnChange: 'Đổi mật khẩu',
-    sshPasswordBtnUseOs: 'Dùng mã hóa hệ điều hành',
+    sshPasswordBtnUseOs: 'Mã hóa mặc định (không cần mật khẩu)',
     sshPasswordEmpty: 'Mật khẩu không được để trống.',
     sshPasswordMismatch: 'Mật khẩu không khớp.',
     sshPasswordIncorrect: 'Sai mật khẩu.',

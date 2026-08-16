@@ -195,7 +195,7 @@
     sshPasswordBtnUnlock: 'Odblokuj',
     sshPasswordBtnSet: 'Ustaw hasło',
     sshPasswordBtnChange: 'Zmień hasło',
-    sshPasswordBtnUseOs: 'Użyj szyfrowania systemowego',
+    sshPasswordBtnUseOs: 'Domyślne szyfrowanie (bez hasła)',
     sshPasswordEmpty: 'Hasło nie może być puste.',
     sshPasswordMismatch: 'Hasła nie są zgodne.',
     sshPasswordIncorrect: 'Nieprawidłowe hasło.',

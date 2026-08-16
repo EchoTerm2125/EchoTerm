@@ -195,7 +195,7 @@
     sshPasswordBtnUnlock: '잠금 해제',
     sshPasswordBtnSet: '암호 설정',
     sshPasswordBtnChange: '암호 변경',
-    sshPasswordBtnUseOs: 'OS 암호화 사용',
+    sshPasswordBtnUseOs: '기본 암호화 (비밀번호 없음)',
     sshPasswordEmpty: '암호는 비워둘 수 없습니다.',
     sshPasswordMismatch: '암호가 일치하지 않습니다.',
     sshPasswordIncorrect: '암호가 올바르지 않습니다.',

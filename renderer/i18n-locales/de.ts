@@ -195,7 +195,7 @@
     sshPasswordBtnUnlock: 'Entsperren',
     sshPasswordBtnSet: 'Passwort festlegen',
     sshPasswordBtnChange: 'Passwort ändern',
-    sshPasswordBtnUseOs: 'Betriebssystem-Verschlüsselung verwenden',
+    sshPasswordBtnUseOs: 'Standardverschlüsselung (kein Passwort)',
     sshPasswordEmpty: 'Das Passwort darf nicht leer sein.',
     sshPasswordMismatch: 'Die Passwörter stimmen nicht überein.',
     sshPasswordIncorrect: 'Falsches Passwort.',

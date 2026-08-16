@@ -195,7 +195,7 @@
     sshPasswordBtnUnlock: '解鎖',
     sshPasswordBtnSet: '設定密碼',
     sshPasswordBtnChange: '變更密碼',
-    sshPasswordBtnUseOs: '使用作業系統加密',
+    sshPasswordBtnUseOs: '預設加密（無密碼）',
     sshPasswordEmpty: '密碼不能為空白。',
     sshPasswordMismatch: '兩次密碼不相符。',
     sshPasswordIncorrect: '密碼錯誤。',

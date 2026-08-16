@@ -195,7 +195,7 @@
     sshPasswordBtnUnlock: 'Разблокировать',
     sshPasswordBtnSet: 'Задать пароль',
     sshPasswordBtnChange: 'Изменить пароль',
-    sshPasswordBtnUseOs: 'Использовать шифрование ОС',
+    sshPasswordBtnUseOs: 'Шифрование по умолчанию (без пароля)',
     sshPasswordEmpty: 'Пароль не может быть пустым.',
     sshPasswordMismatch: 'Пароли не совпадают.',
     sshPasswordIncorrect: 'Неверный пароль.',
