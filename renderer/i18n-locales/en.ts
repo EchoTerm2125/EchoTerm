@@ -197,7 +197,7 @@
     sshPasswordBtnSet: 'Set Password',
     sshPasswordBtnChange: 'Change Password',
     sshPasswordBtnUseOs: 'Default encryption (No password)',
-    confirmUseDefaultEncryption: 'Default encryption has no password protection.\nAnyone with access to this app can view your stored connections.\nWe recommend using password protection instead.',
+    confirmUseDefaultEncryption: 'Default encryption relies on your OS user account.\nAny application running in your user session can potentially access your encrypted connections.\nWe recommend using password protection instead.',
     confirmUseDefaultEncryptionOk: 'Continue',
     confirmSetMasterPassword: 'Your password protects all stored connections.\nKeep it somewhere safe. If you forget it, there is no way to recover your stored data.',
     confirmSetMasterPasswordOk: 'Understood',

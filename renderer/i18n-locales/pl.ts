@@ -196,7 +196,7 @@
     sshPasswordBtnSet: 'Ustaw hasło',
     sshPasswordBtnChange: 'Zmień hasło',
     sshPasswordBtnUseOs: 'Domyślne szyfrowanie (bez hasła)',
-    confirmUseDefaultEncryption: 'Domyślne szyfrowanie nie zapewnia ochrony hasłem.\nKażdy, kto ma dostęp do tej aplikacji, będzie mógł zobaczyć zapisane połączenia.\nZalecamy użycie ochrony hasłem.',
+    confirmUseDefaultEncryption: 'Domyślne szyfrowanie opiera się na koncie użytkownika systemu.\nKażda aplikacja działająca w Twojej sesji użytkownika może potencjalnie uzyskać dostęp do zaszyfrowanych połączeń.\nZalecamy użycie ochrony hasłem.',
     confirmUseDefaultEncryptionOk: 'Kontynuuj',
     confirmSetMasterPassword: 'Twoje hasło chroni wszystkie zapisane połączenia.\nPrzechowuj je w bezpiecznym miejscu. Jeśli je zapomnisz, nie będzie można odzyskać zapisanych danych.',
     confirmSetMasterPasswordOk: 'Zrozumiałem',

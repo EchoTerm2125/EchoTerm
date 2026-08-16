@@ -196,7 +196,7 @@
     sshPasswordBtnSet: 'Parolayı Belirle',
     sshPasswordBtnChange: 'Parolayı Değiştir',
     sshPasswordBtnUseOs: 'Varsayılan şifreleme (parola yok)',
-    confirmUseDefaultEncryption: 'Varsayılan şifrelemenin parola koruması yoktur.\nBu uygulamaya erişebilen herkes kayıtlı bağlantıları görebilir.\nParola korumasını kullanmanızı öneririz.',
+    confirmUseDefaultEncryption: 'Varsayılan şifreleme, işletim sistemi kullanıcı hesabınıza dayanır.\nKullanıcı oturumunuzda çalışan herhangi bir uygulama, şifrelenmiş bağlantılarınıza erişebilir.\nParola korumasını kullanmanızı öneririz.',
     confirmUseDefaultEncryptionOk: 'Devam Et',
     confirmSetMasterPassword: 'Parolanız kayıtlı tüm bağlantıları korur.\nGüvenli bir yerde saklayın. Unutursanız, kayıtlı verilerinizi kurtarmanın bir yolu yoktur.',
     confirmSetMasterPasswordOk: 'Anladım',

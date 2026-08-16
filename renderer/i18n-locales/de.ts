@@ -196,7 +196,7 @@
     sshPasswordBtnSet: 'Passwort festlegen',
     sshPasswordBtnChange: 'Passwort ändern',
     sshPasswordBtnUseOs: 'Standardverschlüsselung (kein Passwort)',
-    confirmUseDefaultEncryption: 'Die Standardverschlüsselung bietet keinen Passwortschutz.\nJeder, der Zugriff auf diese App hat, kann die gespeicherten Verbindungen einsehen.\nWir empfehlen, den Passwortschutz zu verwenden.',
+    confirmUseDefaultEncryption: 'Die Standardverschlüsselung basiert auf Ihrem Betriebssystem-Benutzerkonto.\nJede Anwendung, die in Ihrer Benutzersitzung läuft, kann möglicherweise auf Ihre verschlüsselten Verbindungen zugreifen.\nWir empfehlen, den Passwortschutz zu verwenden.',
     confirmUseDefaultEncryptionOk: 'Weiter',
     confirmSetMasterPassword: 'Ihr Passwort schützt alle gespeicherten Verbindungen.\nBewahren Sie es sicher auf. Wenn Sie es vergessen, gibt es keine Möglichkeit, Ihre gespeicherten Daten wiederherzustellen.',
     confirmSetMasterPasswordOk: 'Verstanden',

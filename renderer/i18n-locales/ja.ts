@@ -196,7 +196,7 @@
     sshPasswordBtnSet: 'パスワードを設定',
     sshPasswordBtnChange: 'パスワードを変更',
     sshPasswordBtnUseOs: '既定の暗号化（パスワードなし）',
-    confirmUseDefaultEncryption: '既定の暗号化にはパスワード保護がありません。\nこのアプリにアクセスできる人は誰でも保存された接続を閲覧できます。\nパスワード保護の使用をお勧めします。',
+    confirmUseDefaultEncryption: '既定の暗号化はOSのユーザーアカウントに依存します。\nユーザーセッション内で実行されている任意のアプリケーションが、暗号化された接続情報を取得できる可能性があります。\nパスワード保護の使用をお勧めします。',
     confirmUseDefaultEncryptionOk: '続行',
     confirmSetMasterPassword: 'パスワードは保存されたすべての接続を保護します。\n大切に保管してください。パスワードを忘れると、保存されたデータを復元する方法はありません。',
     confirmSetMasterPasswordOk: '承知しました',

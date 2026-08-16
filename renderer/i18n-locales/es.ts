@@ -196,7 +196,7 @@
     sshPasswordBtnSet: 'Establecer contraseña',
     sshPasswordBtnChange: 'Cambiar contraseña',
     sshPasswordBtnUseOs: 'Cifrado predeterminado (sin contraseña)',
-    confirmUseDefaultEncryption: 'El cifrado predeterminado no tiene protección por contraseña.\nCualquiera que acceda a esta aplicación podrá ver tus conexiones guardadas.\nTe recomendamos usar la protección por contraseña.',
+    confirmUseDefaultEncryption: 'El cifrado predeterminado se basa en tu cuenta de usuario del sistema.\nCualquier aplicación que se ejecute en tu sesión de usuario puede acceder a tus conexiones cifradas.\nTe recomendamos usar la protección por contraseña.',
     confirmUseDefaultEncryptionOk: 'Continuar',
     confirmSetMasterPassword: 'Tu contraseña protege todas las conexiones guardadas.\nGuárdala en un lugar seguro. Si la olvidas, no hay forma de recuperar tus datos guardados.',
     confirmSetMasterPasswordOk: 'Entendido',

@@ -196,7 +196,7 @@
     sshPasswordBtnSet: '设置密码',
     sshPasswordBtnChange: '更改密码',
     sshPasswordBtnUseOs: '默认加密（无需密码）',
-    confirmUseDefaultEncryption: '默认加密没有密码保护。\n任何能访问此应用的人都可以查看你存储的连接。\n建议改用密码保护。',
+    confirmUseDefaultEncryption: '默认加密依赖于你的操作系统用户账户。\n在你的用户会话中运行的任何应用程序都可能获取你加密的连接。\n建议改用密码保护。',
     confirmUseDefaultEncryptionOk: '继续',
     confirmSetMasterPassword: '你的密码保护所有已存储的连接。\n请妥善保管。如果忘记密码，将无法恢复已存储的数据。',
     confirmSetMasterPasswordOk: '明白了',

@@ -196,7 +196,7 @@
     sshPasswordBtnSet: '암호 설정',
     sshPasswordBtnChange: '암호 변경',
     sshPasswordBtnUseOs: '기본 암호화 (비밀번호 없음)',
-    confirmUseDefaultEncryption: '기본 암호화에는 비밀번호 보호 기능이 없습니다.\n이 앱에 접근할 수 있는 사람은 누구나 저장된 연결을 볼 수 있습니다.\n비밀번호 보호 기능 사용을 권장합니다.',
+    confirmUseDefaultEncryption: '기본 암호화는 OS 사용자 계정에 의존합니다.\n사용자 세션에서 실행되는 모든 애플리케이션이 암호화된 연결 정보에 접근할 수 있습니다.\n비밀번호 보호 기능 사용을 권장합니다.',
     confirmUseDefaultEncryptionOk: '계속',
     confirmSetMasterPassword: '비밀번호는 저장된 모든 연결을 보호합니다.\n안전한 곳에 보관하세요. 비밀번호를 잊으면 저장된 데이터를 복구할 방법이 없습니다.',
     confirmSetMasterPasswordOk: '확인',

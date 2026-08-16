@@ -196,7 +196,7 @@
     sshPasswordBtnSet: 'Définir le mot de passe',
     sshPasswordBtnChange: 'Changer le mot de passe',
     sshPasswordBtnUseOs: 'Chiffrement par défaut (sans mot de passe)',
-    confirmUseDefaultEncryption: 'Le chiffrement par défaut n\'offre aucune protection par mot de passe.\nToute personne ayant accès à cette application peut consulter vos connexions enregistrées.\nNous recommandons d\'utiliser la protection par mot de passe.',
+    confirmUseDefaultEncryption: 'Le chiffrement par défaut repose sur votre compte utilisateur du système.\nToute application exécutée dans votre session utilisateur peut potentiellement accéder à vos connexions chiffrées.\nNous recommandons d\'utiliser la protection par mot de passe.',
     confirmUseDefaultEncryptionOk: 'Continuer',
     confirmSetMasterPassword: 'Votre mot de passe protège toutes les connexions enregistrées.\nConservez-le en lieu sûr. Si vous l\'oubliez, il n\'y a aucun moyen de récupérer vos données enregistrées.',
     confirmSetMasterPasswordOk: 'Compris',

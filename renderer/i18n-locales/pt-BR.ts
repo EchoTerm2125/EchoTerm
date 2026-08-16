@@ -196,7 +196,7 @@
     sshPasswordBtnSet: 'Definir senha',
     sshPasswordBtnChange: 'Alterar senha',
     sshPasswordBtnUseOs: 'Criptografia padrão (sem senha)',
-    confirmUseDefaultEncryption: 'A criptografia padrão não tem proteção por senha.\nQualquer pessoa com acesso a este aplicativo poderá ver suas conexões salvas.\nRecomendamos usar a proteção por senha.',
+    confirmUseDefaultEncryption: 'A criptografia padrão depende da sua conta de usuário do sistema.\nQualquer aplicativo em execução na sua sessão de usuário pode acessar suas conexões criptografadas.\nRecomendamos usar a proteção por senha.',
     confirmUseDefaultEncryptionOk: 'Continuar',
     confirmSetMasterPassword: 'Sua senha protege todas as conexões salvas.\nGuarde-a em um lugar seguro. Se você a esquecer, não há como recuperar seus dados salvos.',
     confirmSetMasterPasswordOk: 'Entendi',

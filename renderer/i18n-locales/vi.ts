@@ -196,7 +196,7 @@
     sshPasswordBtnSet: 'Đặt mật khẩu',
     sshPasswordBtnChange: 'Đổi mật khẩu',
     sshPasswordBtnUseOs: 'Mã hóa mặc định (không cần mật khẩu)',
-    confirmUseDefaultEncryption: 'Mã hóa mặc định không có bảo vệ bằng mật khẩu.\nBất kỳ ai có quyền truy cập vào ứng dụng này đều có thể xem các kết nối đã lưu.\nChúng tôi khuyên bạn nên dùng bảo vệ bằng mật khẩu.',
+    confirmUseDefaultEncryption: 'Mã hóa mặc định dựa trên tài khoản người dùng hệ điều hành của bạn.\nBất kỳ ứng dụng nào chạy trong phiên người dùng của bạn đều có thể truy cập các kết nối đã mã hóa.\nChúng tôi khuyên bạn nên dùng bảo vệ bằng mật khẩu.',
     confirmUseDefaultEncryptionOk: 'Tiếp tục',
     confirmSetMasterPassword: 'Mật khẩu của bạn bảo vệ tất cả các kết nối đã lưu.\nHãy giữ nó ở nơi an toàn. Nếu quên mật khẩu, sẽ không có cách nào khôi phục dữ liệu đã lưu.',
     confirmSetMasterPasswordOk: 'Đã hiểu',
