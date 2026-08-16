@@ -1288,6 +1288,7 @@ import type { SshUser, SshConnection, SshFolder } from '../shared/ipc';
       sshCtxMoveItem.addEventListener('mouseenter', () => {
         clearTimeout(hideTimer);
         sshCtxFolderSubmenu.classList.remove('hidden');
+        App.Menus.positionSubmenu(sshCtxFolderSubmenu);
       });
       sshCtxMoveItem.addEventListener('mouseleave', () => {
         hideTimer = setTimeout(() => sshCtxFolderSubmenu.classList.add('hidden'), 150);
