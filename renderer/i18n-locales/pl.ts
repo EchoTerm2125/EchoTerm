@@ -181,6 +181,8 @@
     sshFormKeyFilePath: 'Ścieżka pliku klucza',
     sshFormKeyPassphrase: 'Hasło klucza',
     sshFormKeyPassphraseOptional: '(opcjonalnie)',
+    sshFormClearPassword: 'Wyczyść zapisane hasło',
+    sshFormClearPasswordSet: 'Zapisane hasło zostanie wyczyszczone po zapisaniu',
     sshFolderName: 'Nazwa folderu',
     sshFolderParent: 'Folder nadrzędny',
     sshFolderParentNone: '(brak — poziom główny)',

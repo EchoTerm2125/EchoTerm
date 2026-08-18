@@ -181,6 +181,8 @@
     sshFormKeyFilePath: '키 파일 경로',
     sshFormKeyPassphrase: '키 암호 구문',
     sshFormKeyPassphraseOptional: '(선택 사항)',
+    sshFormClearPassword: '저장된 비밀번호 지우기',
+    sshFormClearPasswordSet: '저장을 누르면 저장된 비밀번호가 지워집니다',
     sshFolderName: '폴더 이름',
     sshFolderParent: '상위 폴더',
     sshFolderParentNone: '(없음 — 루트 수준)',

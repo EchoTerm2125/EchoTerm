@@ -2159,6 +2159,22 @@ html, body {
   box-shadow: var(--shadow-md);
 }
 
+.ssh-clear-password-row {
+  margin: calc(2px * var(--ui-scale)) 0 calc(10px * var(--ui-scale));
+}
+
+.ssh-clear-password-btn {
+  padding: calc(5px * var(--ui-scale)) calc(12px * var(--ui-scale));
+  border: 1px solid var(--border);
+  font-size: calc(var(--app-font-size) * 0.846);
+}
+
+.ssh-clear-password-btn.active {
+  color: var(--error);
+  border-color: var(--error);
+  background: rgba(243, 139, 168, 0.1);
+}
+
 .ssh-password-error {
   background: rgba(243, 139, 168, 0.1);
   color: var(--error);

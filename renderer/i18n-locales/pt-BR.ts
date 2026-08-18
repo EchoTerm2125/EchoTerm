@@ -181,6 +181,8 @@
     sshFormKeyFilePath: 'Caminho do arquivo de chave',
     sshFormKeyPassphrase: 'Frase secreta da chave',
     sshFormKeyPassphraseOptional: '(opcional)',
+    sshFormClearPassword: 'Limpar senha salva',
+    sshFormClearPasswordSet: 'A senha salva será limpa ao salvar',
     sshFolderName: 'Nome da pasta',
     sshFolderParent: 'Pasta principal',
     sshFolderParentNone: '(nenhuma — nível raiz)',

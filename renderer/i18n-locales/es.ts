@@ -181,6 +181,8 @@
     sshFormKeyFilePath: 'Ruta del archivo de clave',
     sshFormKeyPassphrase: 'Frase de contraseña de la clave',
     sshFormKeyPassphraseOptional: '(opcional)',
+    sshFormClearPassword: 'Borrar contraseña guardada',
+    sshFormClearPasswordSet: 'La contraseña guardada se borrará al guardar',
     sshFolderName: 'Nombre de la carpeta',
     sshFolderParent: 'Carpeta principal',
     sshFolderParentNone: '(ninguna — nivel raíz)',

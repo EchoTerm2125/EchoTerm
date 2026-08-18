@@ -1835,9 +1835,15 @@ import type { SshUser, SshConnection, SshFolder } from '../shared/ipc';
           authType: data.userAuthType || 'password',
           keyFilePath: data.userKeyFile || null,
         };
-        // Only include password if provided (editing with blank = keep existing)
-        if (data.userPassword) userData.password = data.userPassword;
-        if (data.userKeyPassword) userData.keyPassword = data.userKeyPassword;
+        if (data.userClearPassword === '1') {
+          // Explicitly clear stored secrets
+          userData.password = '';
+          userData.keyPassword = '';
+        } else {
+          // Only include password if provided (editing with blank = keep existing)
+          if (data.userPassword) userData.password = data.userPassword;
+          if (data.userKeyPassword) userData.keyPassword = data.userKeyPassword;
+        }
         const result = await api.sshUserSave(userData);
         if (result.error) { App.UI.showToast(App.__('toastError', { message: result.error })); return; }
       } else if (sshDialog.dataset.type === 'connection') { 
@@ -2064,6 +2070,12 @@ import type { SshUser, SshConnection, SshFolder } from '../shared/ipc';
         <label id="dialogKeyPasswordLabel" class="${user && user.authType === 'keyfile' ? '' : 'hidden'}">
           ${App.__('sshFormKeyPassphrase')} <input name="userKeyPassword" type="password" value="" placeholder="${userId ? App.__('sshFormPasswordUnchanged') : App.__('sshFormKeyPassphraseOptional')}" />
         </label>
+        ${userId ? `
+        <div class="ssh-clear-password-row">
+          <button type="button" id="dialogClearPassword" class="ssh-dialog-btn ssh-dialog-btn-cancel ssh-clear-password-btn">${App.__('sshFormClearPassword')}</button>
+          <input type="hidden" name="userClearPassword" value="0" />
+        </div>
+        ` : ''}
       </form>
     `;
 
@@ -2083,6 +2095,17 @@ import type { SshUser, SshConnection, SshFolder } from '../shared/ipc';
           if (kfLabel) kfLabel.classList.add('hidden');
           if (kpLabel) kpLabel.classList.add('hidden');
         }
+      });
+    }
+
+    const clearPasswordBtn = sshDialogBody.querySelector('#dialogClearPassword');
+    const clearPasswordFlag = sshDialogBody.querySelector('input[name="userClearPassword"]');
+    if (clearPasswordBtn && clearPasswordFlag) {
+      clearPasswordBtn.addEventListener('click', () => {
+        const willClear = clearPasswordFlag.value !== '1';
+        clearPasswordFlag.value = willClear ? '1' : '0';
+        clearPasswordBtn.classList.toggle('active', willClear);
+        clearPasswordBtn.textContent = willClear ? App.__('sshFormClearPasswordSet') : App.__('sshFormClearPassword');
       });
     }
 

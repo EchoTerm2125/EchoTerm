@@ -181,6 +181,8 @@
     sshFormKeyFilePath: '鍵ファイルのパス',
     sshFormKeyPassphrase: '鍵のパスフレーズ',
     sshFormKeyPassphraseOptional: '（省略可）',
+    sshFormClearPassword: '保存されたパスワードを消去',
+    sshFormClearPasswordSet: '保存時に保存されたパスワードは消去されます',
     sshFolderName: 'フォルダ名',
     sshFolderParent: '親フォルダ',
     sshFolderParentNone: '（なし — ルートレベル）',

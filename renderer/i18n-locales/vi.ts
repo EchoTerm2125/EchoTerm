@@ -181,6 +181,8 @@
     sshFormKeyFilePath: 'Đường dẫn tệp khóa',
     sshFormKeyPassphrase: 'Cụm mật khẩu khóa',
     sshFormKeyPassphraseOptional: '(tùy chọn)',
+    sshFormClearPassword: 'Xóa mật khẩu đã lưu',
+    sshFormClearPasswordSet: 'Mật khẩu đã lưu sẽ bị xóa khi nhấn Lưu',
     sshFolderName: 'Tên thư mục',
     sshFolderParent: 'Thư mục cha',
     sshFolderParentNone: '(không có — cấp gốc)',

@@ -181,6 +181,8 @@
     sshFormKeyFilePath: 'Pfad der Schlüsseldatei',
     sshFormKeyPassphrase: 'Passphrase der Schlüsseldatei',
     sshFormKeyPassphraseOptional: '(optional)',
+    sshFormClearPassword: 'Gespeichertes Passwort löschen',
+    sshFormClearPasswordSet: 'Gespeichertes Passwort wird beim Speichern gelöscht',
     sshFolderName: 'Ordnername',
     sshFolderParent: 'Übergeordneter Ordner',
     sshFolderParentNone: '(keine — Stammebene)',

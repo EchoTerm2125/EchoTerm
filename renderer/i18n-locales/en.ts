@@ -182,6 +182,8 @@
     sshFormKeyFilePath: 'Key File Path',
     sshFormKeyPassphrase: 'Key Passphrase',
     sshFormKeyPassphraseOptional: '(optional)',
+    sshFormClearPassword: 'Clear stored password',
+    sshFormClearPasswordSet: 'Stored password will be cleared when Save is clicked',
     sshFolderName: 'Folder Name',
     sshFolderParent: 'Parent folder',
     sshFolderParentNone: '(none — root level)',

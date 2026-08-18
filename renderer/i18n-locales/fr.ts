@@ -181,6 +181,8 @@
     sshFormKeyFilePath: 'Chemin du fichier de clé',
     sshFormKeyPassphrase: 'Phrase de passe de la clé',
     sshFormKeyPassphraseOptional: '(facultatif)',
+    sshFormClearPassword: 'Effacer le mot de passe enregistré',
+    sshFormClearPasswordSet: 'Le mot de passe enregistré sera effacé lors de l’enregistrement',
     sshFolderName: 'Nom du dossier',
     sshFolderParent: 'Dossier parent',
     sshFolderParentNone: '(aucun — niveau racine)',

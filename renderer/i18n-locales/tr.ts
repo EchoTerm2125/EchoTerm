@@ -181,6 +181,8 @@
     sshFormKeyFilePath: 'Anahtar Dosyası Yolu',
     sshFormKeyPassphrase: 'Anahtar Parolası',
     sshFormKeyPassphraseOptional: '(isteğe bağlı)',
+    sshFormClearPassword: 'Kayıtlı parolayı temizle',
+    sshFormClearPasswordSet: 'Kaydet düğmesine tıklanınca kayıtlı parola temizlenecek',
     sshFolderName: 'Klasör Adı',
     sshFolderParent: 'Üst klasör',
     sshFolderParentNone: '(yok — kök düzey)',

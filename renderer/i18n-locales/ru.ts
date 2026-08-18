@@ -181,6 +181,8 @@
     sshFormKeyFilePath: 'Путь к файлу ключа',
     sshFormKeyPassphrase: 'Парольная фраза ключа',
     sshFormKeyPassphraseOptional: '(необязательно)',
+    sshFormClearPassword: 'Удалить сохранённый пароль',
+    sshFormClearPasswordSet: 'Сохранённый пароль будет удалён при нажатии «Сохранить»',
     sshFolderName: 'Имя папки',
     sshFolderParent: 'Родительская папка',
     sshFolderParentNone: '(нет — корневой уровень)',

@@ -181,6 +181,8 @@
     sshFormKeyFilePath: '金鑰檔案路徑',
     sshFormKeyPassphrase: '金鑰密碼',
     sshFormKeyPassphraseOptional: '（可選）',
+    sshFormClearPassword: '清除已儲存的密碼',
+    sshFormClearPasswordSet: '點擊儲存後將清除已儲存的密碼',
     sshFolderName: '資料夾名稱',
     sshFolderParent: '父資料夾',
     sshFolderParentNone: '（無 — 根層級）',
