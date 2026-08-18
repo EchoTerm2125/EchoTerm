@@ -85,7 +85,7 @@ html, body {
   overflow: hidden;
   display: flex;
   flex-direction: column;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Microsoft YaHei', 'Microsoft JhengHei', Roboto, Oxygen, sans-serif;
   font-size: var(--app-font-size);
   background: var(--bg-primary);
   color: var(--text-primary);
@@ -1664,6 +1664,7 @@ html, body {
   border-radius: var(--radius-sm);
   background: transparent;
   color: var(--text-primary);
+  font-family: inherit;
   font-size: calc(var(--app-font-size) * 0.923);
   cursor: pointer;
   transition: background var(--transition), transform var(--transition);
@@ -2377,7 +2378,7 @@ html, body {
 .about-row-value {
   color: var(--text-primary);
   font-weight: 500;
-  font-family: 'Consolas', 'Cascadia Mono', monospace;
+  font-family: 'Consolas', 'Cascadia Mono', 'Microsoft YaHei', 'Microsoft JhengHei', monospace;
   word-break: break-all;
   text-align: right;
 }

@@ -67,7 +67,7 @@ import './icons';
       cursorBlink: true,
       cursorStyle: 'bar',
       fontSize: App.Theme.getTermFontSize(),
-      fontFamily: "'Cascadia Code', 'Fira Code', 'Consolas', 'Courier New', monospace",
+      fontFamily: "'Cascadia Code', 'Fira Code', 'Consolas', 'Courier New', 'Microsoft YaHei', 'Noto Sans Mono CJK SC', 'Noto Sans CJK SC', 'PingFang SC', 'WenQuanYi Micro Hei', monospace",
       bracketedPasteMode: true,
       theme: App.Theme.getXtermTheme(),
     } as any);
@@ -421,7 +421,7 @@ import './icons';
       cursorBlink: true,
       cursorStyle: 'bar',
       fontSize: App.Theme.getTermFontSize(),
-      fontFamily: "'Cascadia Code', 'Fira Code', 'Consolas', 'Courier New', monospace",
+      fontFamily: "'Cascadia Code', 'Fira Code', 'Consolas', 'Courier New', 'Microsoft YaHei', 'Noto Sans Mono CJK SC', 'Noto Sans CJK SC', 'PingFang SC', 'WenQuanYi Micro Hei', monospace",
       bracketedPasteMode: true,
       theme: App.Theme.getXtermTheme(),
     } as any);
