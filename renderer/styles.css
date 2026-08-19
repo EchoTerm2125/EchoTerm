@@ -5,6 +5,13 @@
   box-sizing: border-box;
 }
 
+/* Form controls don't inherit fonts by default; without this they fall back to
+   the OS UI font and lose the CJK fallbacks, so simplified-only Chinese
+   characters render in a different typeface. */
+button, input, select, textarea {
+  font-family: inherit;
+}
+
 .hidden {
   display: none !important;
 }
@@ -47,6 +54,14 @@
   --statusbar-height: calc(26px * var(--ui-scale));
   --transition: 150ms ease;
   --app-font-size: 13px;
+  /* Font stacks — CJK fallbacks (Microsoft YaHei covers both simplified and
+     traditional; Microsoft JhengHei is the traditional Windows default) keep
+     simplified-only characters in a consistent typeface on zh-HK systems. */
+  --font-ui: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Microsoft YaHei',
+             'Microsoft JhengHei', Roboto, Oxygen, sans-serif;
+  --font-mono: 'Cascadia Code', 'Fira Code', 'Consolas', 'Courier New',
+               'Microsoft YaHei', 'Noto Sans Mono CJK SC', 'Noto Sans CJK SC',
+               'PingFang SC', 'WenQuanYi Micro Hei', monospace;
 }
 
 [data-theme="light"] {
@@ -85,7 +100,7 @@ html, body {
   overflow: hidden;
   display: flex;
   flex-direction: column;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Microsoft YaHei', 'Microsoft JhengHei', Roboto, Oxygen, sans-serif;
+  font-family: var(--font-ui);
   font-size: var(--app-font-size);
   background: var(--bg-primary);
   color: var(--text-primary);
@@ -2378,7 +2393,7 @@ html, body {
 .about-row-value {
   color: var(--text-primary);
   font-weight: 500;
-  font-family: 'Consolas', 'Cascadia Mono', 'Microsoft YaHei', 'Microsoft JhengHei', monospace;
+  font-family: var(--font-mono);
   word-break: break-all;
   text-align: right;
 }
