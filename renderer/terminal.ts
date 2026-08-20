@@ -79,7 +79,7 @@ import './icons';
 
     // Intercept paste event for multi-line preview / echo paste-all
     xtermDiv.addEventListener('paste', (e) => {
-      const text = e.clipboardData ? e.clipboardData.getData('text') : '';
+      const text = normalizeNewlines(e.clipboardData ? e.clipboardData.getData('text') : '');
       if (!text) return;
       if (state.echoModeActive) {
         e.preventDefault();
@@ -89,10 +89,10 @@ import './icons';
         return;
       }
       if (text.includes('\n')) {
-        if (localStorage.getItem('skipPastePreview') === 'true') return;
         e.preventDefault();
         e.stopPropagation();
-        showPastePreview(id, text);
+        if (localStorage.getItem('skipPastePreview') === 'true') pasteToTerminal(id, text);
+        else showPastePreview(id, text);
       }
     }, true);
 
@@ -433,7 +433,7 @@ import './icons';
 
     // Intercept paste event for multi-line preview / echo paste-all
     xtermDiv.addEventListener('paste', (e) => {
-      const text = e.clipboardData ? e.clipboardData.getData('text') : '';
+      const text = normalizeNewlines(e.clipboardData ? e.clipboardData.getData('text') : '');
       if (!text) return;
       if (state.echoModeActive) {
         e.preventDefault();
@@ -443,10 +443,10 @@ import './icons';
         return;
       }
       if (text.includes('\n')) {
-        if (localStorage.getItem('skipPastePreview') === 'true') return;
         e.preventDefault();
         e.stopPropagation();
-        showPastePreview(id, text);
+        if (localStorage.getItem('skipPastePreview') === 'true') pasteToTerminal(id, text);
+        else showPastePreview(id, text);
       }
     }, true);
 
@@ -562,6 +562,13 @@ import './icons';
     return BRACKETED_PASTE_START + text + BRACKETED_PASTE_END;
   }
 
+  // ConPTY turns BOTH a carriage return and a line feed into an Enter keypress,
+  // so writing a clipboard's verbatim CRLF would deliver two Enters and insert
+  // a blank line after every pasted line. Normalize to bare LF before writing.
+  function normalizeNewlines(text) {
+    return text.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
+  }
+
   // Only wrap pastes when no password prompt is active and the remote
   // application has actually enabled bracketed paste mode.
   function bracketFor(id, text) {
@@ -574,6 +581,7 @@ import './icons';
   // ─── Shared paste helper (id=null means paste-all) ────────────────────────
   function pasteToTerminal(id, text?) {
     if (text !== undefined) {
+      text = normalizeNewlines(text);
       if (id === null) {
         for (const bid of state.echoSelection) api.write(bid, bracketFor(bid, text));
       } else {
@@ -586,8 +594,9 @@ import './icons';
       return;
     }
 
-    navigator.clipboard.readText().then(text => {
-      if (!text) return;
+    navigator.clipboard.readText().then(raw => {
+      if (!raw) return;
+      const text = normalizeNewlines(raw);
       if (text.includes('\n') && localStorage.getItem('skipPastePreview') !== 'true') {
         showPastePreview(id, text);
       } else if (id === null) {
