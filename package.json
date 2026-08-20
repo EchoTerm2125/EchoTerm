@@ -50,12 +50,18 @@
       "icon": "build-assets/echoterm.ico"
     },
     "nsis": {
-      "artifactName": "${productName}-Setup-${version}.${ext}",
+      "artifactName": "${productName}-Setup-${version}-${arch}-${os}.${ext}",
       "oneClick": false,
       "allowToChangeInstallationDirectory": true,
       "createDesktopShortcut": false,
       "include": "build-assets/installer.nsh",
       "license": "LICENSE"
+    },
+    "portable": {
+      "artifactName": "${productName}-Portable-${version}-${arch}-${os}.${ext}"
+    },
+    "zip": {
+      "artifactName": "${productName}-Portable-${version}-${arch}-${os}.${ext}"
     }
   },
   "devDependencies": {

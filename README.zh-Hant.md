@@ -87,8 +87,8 @@
 
 下載最新版本：
 
-- **安裝程式**（`EchoTerm-Setup-x.x.x.exe`）— 標準 Windows 安裝程式
-- **可攜版 ZIP**（`EchoTerm-x.x.x-win.zip`）— 解壓縮一次，直接執行 `EchoTerm.exe` 就能用
+- **安裝程式**（`EchoTerm-Setup-x.x.x-x64-win.exe`）— 標準 Windows 安裝程式
+- **可攜版 ZIP**（`EchoTerm-Portable-x.x.x-x64-win.zip`）— 解壓縮一次，直接執行 `EchoTerm.exe` 就能用
 
 ---
 
