@@ -235,6 +235,8 @@
 
     // ── SSH Context Menu ─────────────────────────────────────────────────────
     sshCtxAddConn: 'Add Connection',
+    sshCtxAddFolder: 'Add Folder',
+    sshCtxAddUser: 'Add User',
     sshCtxAddSubFolder: 'Add Sub Folder',
     sshCtxAddParentFolder: 'Add Parent Folder',
     sshCtxConnect: 'Connect',

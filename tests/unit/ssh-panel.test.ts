@@ -33,6 +33,8 @@ function buildSshContextMenu(menu) {
   };
 
   addBtn('ssh-add-conn', 'Add Connection');
+  addBtn('ssh-add-folder', 'Add Folder');
+  addBtn('ssh-add-user', 'Add User');
   addBtn('ssh-add-subfolder', 'Add Sub Folder');
   addBtn('ssh-add-parent-folder', 'Add Parent Folder');
   addSep('sshCtxAddSep');
@@ -58,11 +60,26 @@ function scaffoldSshDom() {
   for (const id of [...SSH_DIV_IDS, ...SSH_BUTTON_IDS, ...SSH_INPUT_IDS]) {
     document.getElementById(id)?.remove();
   }
+  // Clean up wrappers from a previous test run (they have no id)
+  document.querySelectorAll('.ssh-sidebar-scroll').forEach((el) => el.remove());
   for (const id of SSH_DIV_IDS) {
     const el = document.createElement('div');
     el.id = id;
     document.body.appendChild(el);
   }
+  // Wrap the connection/user lists in the same structure as renderer/index.html:
+  // .ssh-sidebar-scroll > .ssh-section > #sshConnectionList / #sshUserList
+  const scrollEl = document.createElement('div');
+  scrollEl.className = 'ssh-sidebar-scroll';
+  const connSection = document.createElement('div');
+  connSection.className = 'ssh-section';
+  connSection.appendChild(document.getElementById('sshConnectionList'));
+  scrollEl.appendChild(connSection);
+  const userSection = document.createElement('div');
+  userSection.className = 'ssh-section';
+  userSection.appendChild(document.getElementById('sshUserList'));
+  scrollEl.appendChild(userSection);
+  document.body.appendChild(scrollEl);
   for (const id of SSH_BUTTON_IDS) {
     const el = document.createElement('button');
     el.id = id;
@@ -361,6 +378,91 @@ describe('SshPanel (ssh-panel.ts)', () => {
 
       // Single folder menu keeps Edit between the add section and Move to Folder
       expect(document.getElementById('sshCtxMoveSep').classList.contains('hidden')).toBe(false);
+    });
+  });
+
+  describe('empty space context menu', () => {
+    const menuBtn = (action): HTMLElement => document.querySelector(`#sshContextMenu [data-action="${action}"]`) as HTMLElement;
+    const connSection = () => document.querySelector('.ssh-sidebar-scroll .ssh-section:first-child');
+    const userSection = () => document.querySelector('.ssh-sidebar-scroll .ssh-section:last-child');
+    const scrollEl = () => document.querySelector('.ssh-sidebar-scroll');
+
+    it('shows Add Connection and Add Folder when right-clicking Connections empty space', async () => {
+      connSection().dispatchEvent(new MouseEvent('contextmenu', { bubbles: true, clientX: 100, clientY: 100 }));
+      await flush();
+      expect(menuBtn('ssh-add-conn').classList.contains('hidden')).toBe(false);
+      expect(menuBtn('ssh-add-folder').classList.contains('hidden')).toBe(false);
+      expect(menuBtn('ssh-add-user').classList.contains('hidden')).toBe(true);
+    });
+
+    it('shows only Add User when right-clicking Users empty space', async () => {
+      userSection().dispatchEvent(new MouseEvent('contextmenu', { bubbles: true, clientX: 100, clientY: 100 }));
+      await flush();
+      expect(menuBtn('ssh-add-user').classList.contains('hidden')).toBe(false);
+      expect(menuBtn('ssh-add-conn').classList.contains('hidden')).toBe(true);
+      expect(menuBtn('ssh-add-folder').classList.contains('hidden')).toBe(true);
+    });
+
+    it('treats the scroll-area blank below the sections as the Users section', async () => {
+      scrollEl().dispatchEvent(new MouseEvent('contextmenu', { bubbles: true, clientX: 100, clientY: 100 }));
+      await flush();
+      expect(menuBtn('ssh-add-user').classList.contains('hidden')).toBe(false);
+      expect(menuBtn('ssh-add-conn').classList.contains('hidden')).toBe(true);
+    });
+
+    it('Add Connection opens the connection dialog with no folder preselected', async () => {
+      connSection().dispatchEvent(new MouseEvent('contextmenu', { bubbles: true, clientX: 100, clientY: 100 }));
+      await flush();
+      menuBtn('ssh-add-conn').click();
+      await flush();
+
+      const dialog = document.getElementById('sshDialog');
+      expect(dialog.classList.contains('hidden')).toBe(false);
+      expect(dialog.dataset.type).toBe('connection');
+      const groupSelect = document.querySelector('#sshDialogBody select[name="connGroup"]') as HTMLSelectElement;
+      expect(groupSelect.value).toBe('');
+    });
+
+    it('Add Folder opens the folder dialog with no parent preselected', async () => {
+      connSection().dispatchEvent(new MouseEvent('contextmenu', { bubbles: true, clientX: 100, clientY: 100 }));
+      await flush();
+      menuBtn('ssh-add-folder').click();
+      await flush();
+
+      const dialog = document.getElementById('sshDialog');
+      expect(dialog.classList.contains('hidden')).toBe(false);
+      expect(dialog.dataset.type).toBe('group');
+      const parentSelect = document.querySelector('#sshDialogBody select[name="groupParent"]') as HTMLSelectElement;
+      expect(parentSelect.value).toBe('');
+    });
+
+    it('Add User opens the user dialog', async () => {
+      userSection().dispatchEvent(new MouseEvent('contextmenu', { bubbles: true, clientX: 100, clientY: 100 }));
+      await flush();
+      menuBtn('ssh-add-user').click();
+      await flush();
+
+      const dialog = document.getElementById('sshDialog');
+      expect(dialog.classList.contains('hidden')).toBe(false);
+      expect(dialog.dataset.type).toBe('user');
+    });
+
+    it('does not open for item right-clicks (item menu still wins)', async () => {
+      const connEl = document.querySelector('.ssh-conn-item[data-conn-id="c1"]') as HTMLElement;
+      connEl.dispatchEvent(new MouseEvent('contextmenu', { bubbles: true, clientX: 100, clientY: 100 }));
+      await flush();
+      expect(menuBtn('ssh-connect').classList.contains('hidden')).toBe(false);
+      expect(menuBtn('ssh-add-user').classList.contains('hidden')).toBe(true);
+    });
+
+    it('clears the current selection on empty-space right-click', async () => {
+      const connEl = document.querySelector('.ssh-conn-item[data-conn-id="c1"]') as HTMLElement;
+      connEl.dispatchEvent(new MouseEvent('click', { bubbles: true, ctrlKey: true }));
+      expect(connEl.classList.contains('selected')).toBe(true);
+
+      connSection().dispatchEvent(new MouseEvent('contextmenu', { bubbles: true, clientX: 100, clientY: 100 }));
+      await flush();
+      expect(connEl.classList.contains('selected')).toBe(false);
     });
   });
 

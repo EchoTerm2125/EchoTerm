@@ -234,6 +234,8 @@
 
     // ── SSH Context Menu ─────────────────────────────────────────────────────
     sshCtxAddConn: 'Bağlantı Ekle',
+    sshCtxAddFolder: 'Klasör Ekle',
+    sshCtxAddUser: 'Kullanıcı Ekle',
     sshCtxAddSubFolder: 'Alt Klasör Ekle',
     sshCtxAddParentFolder: 'Üst Klasör Ekle',
     sshCtxConnect: 'Bağlan',

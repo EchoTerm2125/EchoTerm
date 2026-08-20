@@ -234,6 +234,8 @@
 
     // ── SSH Context Menu ─────────────────────────────────────────────────────
     sshCtxAddConn: '接続を追加',
+    sshCtxAddFolder: 'フォルダーを追加',
+    sshCtxAddUser: 'ユーザーを追加',
     sshCtxAddSubFolder: 'サブフォルダーを追加',
     sshCtxAddParentFolder: '親フォルダーを追加',
     sshCtxConnect: '接続',

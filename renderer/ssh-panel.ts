@@ -1192,6 +1192,28 @@ import type { SshUser, SshConnection, SshFolder } from '../shared/ipc';
       });
     }
 
+    // Right-click on empty space in the sidebar scroll area (not on any item,
+    // folder or action button): section-aware add menu.
+    // The sections stack top-to-bottom (Connections, then Users), so any blank
+    // area that is not inside a section lies below the Users section.
+    const sshScrollEl = document.querySelector('.ssh-sidebar-scroll');
+    if (sshScrollEl) {
+      sshScrollEl.addEventListener('contextmenu', (e) => {
+        // Item/folder right-clicks are handled (and stopped) by the list-level
+        // handlers above; keep this guard as a safety net.
+        if (e.target.closest('.ssh-folder, .ssh-conn-item, .ssh-user-item, .ssh-action-btn')) return;
+        e.preventDefault();
+        e.stopPropagation();
+        // A new right-click discards any pending "Add Parent Folder" flow and any selection
+        pendingAdoptTarget = null;
+        clearSshSelection();
+        const section = e.target.closest('.ssh-section');
+        const isUsers = section ? section.contains(sshUserList) : true;
+        sshContextTarget = { type: 'empty', id: null };
+        showSshContextMenu(e, isUsers ? ['ssh-add-user'] : ['ssh-add-conn', 'ssh-add-folder']);
+      });
+    }
+
     // Menu item click handlers
     sshContextMenu.querySelectorAll('button').forEach(btn => {
       btn.addEventListener('click', async () => {
@@ -1212,6 +1234,13 @@ import type { SshUser, SshConnection, SshFolder } from '../shared/ipc';
             break;
           case 'ssh-add-conn':
             showConnectionDialog(undefined, target.id);
+            break;
+          case 'ssh-add-folder':
+            // Root-level folder (no parent preselected)
+            showFolderDialog();
+            break;
+          case 'ssh-add-user':
+            showUserDialog();
             break;
           case 'ssh-add-subfolder':
             showFolderDialog(undefined, target.id);
