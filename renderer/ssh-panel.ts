@@ -296,6 +296,12 @@ import type { SshUser, SshConnection, SshFolder } from '../shared/ipc';
       sshPasswordError.classList.add('hidden');
       const pw = sshPasswordInput.value;
 
+      const finish = async () => {
+        sshPasswordDialog.classList.add('hidden');
+        await updatePasswordIcon();
+        await refreshAll();
+      };
+
       if (passwordMode === 'setup') {
         if (!pw) {
           sshPasswordError.textContent = App.__('sshPasswordEmpty');
@@ -307,47 +313,62 @@ import type { SshUser, SshConnection, SshFolder } from '../shared/ipc';
           sshPasswordError.classList.remove('hidden');
           return;
         }
-        const result = await api.sshSetPassword(pw);
-        if (result.error) {
-          sshPasswordError.textContent = result.error;
-          sshPasswordError.classList.remove('hidden');
-          return;
-        }
-      } else {
-        // unlock
-        const result = await api.sshUnlock(pw);
-        if (result.error || !result.success) {
-          const msg = result.errorCode === 'NO_MASTER_PASSWORD'
-            ? App.__('errorNoMasterPassword')
-            : result.errorCode === 'INCORRECT_PASSWORD'
-            ? App.__('sshPasswordIncorrect')
-            : result.errorCode === 'DECRYPT_FAILED'
-            ? App.__('sshPasswordDecryptFailed')
-            : result.errorCode === 'MASTER_PASSWORD_REQUIRED'
-            ? App.__('sshMasterPasswordRequired')
-            : result.error || App.__('sshPasswordIncorrect');
-          sshPasswordError.textContent = msg;
-          sshPasswordError.classList.remove('hidden');
-          sshPasswordInput.value = '';
-          sshPasswordInput.focus();
-          return;
-        }
-      }
-
-      sshPasswordDialog.classList.add('hidden');
-      await updatePasswordIcon();
-      await refreshAll();
-    });
-
-    sshPasswordSkip.addEventListener('click', async () => {
-      sshPasswordDialog.classList.add('hidden');
-      const result = await api.sshUseSafeStorage();
-      if (result.error) {
-        App.UI.showToast(App.__('toastError', { message: result.error }));
+        App.Menus.showConfirm(
+          App.__('confirmSetMasterPassword'),
+          async () => {
+            const result = await api.sshSetPassword(pw);
+            if (result.error) {
+              sshPasswordError.textContent = result.error;
+              sshPasswordError.classList.remove('hidden');
+              return;
+            }
+            App.UI.showToast(App.__('toastPasswordSet'));
+            await finish();
+          },
+          'skipSetMasterPasswordConfirm',
+          'confirmSetMasterPasswordOk'
+        );
         return;
       }
-      await updatePasswordIcon();
-      await refreshAll();
+
+      // unlock
+      const result = await api.sshUnlock(pw);
+      if (result.error || !result.success) {
+        const msg = result.errorCode === 'NO_MASTER_PASSWORD'
+          ? App.__('errorNoMasterPassword')
+          : result.errorCode === 'INCORRECT_PASSWORD'
+          ? App.__('sshPasswordIncorrect')
+          : result.errorCode === 'DECRYPT_FAILED'
+          ? App.__('sshPasswordDecryptFailed')
+          : result.errorCode === 'MASTER_PASSWORD_REQUIRED'
+          ? App.__('sshMasterPasswordRequired')
+          : result.error || App.__('sshPasswordIncorrect');
+        sshPasswordError.textContent = msg;
+        sshPasswordError.classList.remove('hidden');
+        sshPasswordInput.value = '';
+        sshPasswordInput.focus();
+        return;
+      }
+      await finish();
+    });
+
+    sshPasswordSkip.addEventListener('click', () => {
+      App.Menus.showConfirm(
+        App.__('confirmUseDefaultEncryption'),
+        async () => {
+          sshPasswordDialog.classList.add('hidden');
+          const result = await api.sshUseSafeStorage();
+          if (result.error) {
+            App.UI.showToast(App.__('toastError', { message: result.error }));
+            return;
+          }
+          App.UI.showToast(App.__('toastUseDefaultEncryption'));
+          await updatePasswordIcon();
+          await refreshAll();
+        },
+        'skipDefaultEncryptionConfirm',
+        'confirmUseDefaultEncryptionOk'
+      );
     });
 
     if (sshPasswordCancel) {
@@ -1171,6 +1192,28 @@ import type { SshUser, SshConnection, SshFolder } from '../shared/ipc';
       });
     }
 
+    // Right-click on empty space in the sidebar scroll area (not on any item,
+    // folder or action button): section-aware add menu.
+    // The sections stack top-to-bottom (Connections, then Users), so any blank
+    // area that is not inside a section lies below the Users section.
+    const sshScrollEl = document.querySelector('.ssh-sidebar-scroll');
+    if (sshScrollEl) {
+      sshScrollEl.addEventListener('contextmenu', (e) => {
+        // Item/folder right-clicks are handled (and stopped) by the list-level
+        // handlers above; keep this guard as a safety net.
+        if (e.target.closest('.ssh-folder, .ssh-conn-item, .ssh-user-item, .ssh-action-btn')) return;
+        e.preventDefault();
+        e.stopPropagation();
+        // A new right-click discards any pending "Add Parent Folder" flow and any selection
+        pendingAdoptTarget = null;
+        clearSshSelection();
+        const section = e.target.closest('.ssh-section');
+        const isUsers = section ? section.contains(sshUserList) : true;
+        sshContextTarget = { type: 'empty', id: null };
+        showSshContextMenu(e, isUsers ? ['ssh-add-user'] : ['ssh-add-conn', 'ssh-add-folder']);
+      });
+    }
+
     // Menu item click handlers
     sshContextMenu.querySelectorAll('button').forEach(btn => {
       btn.addEventListener('click', async () => {
@@ -1191,6 +1234,13 @@ import type { SshUser, SshConnection, SshFolder } from '../shared/ipc';
             break;
           case 'ssh-add-conn':
             showConnectionDialog(undefined, target.id);
+            break;
+          case 'ssh-add-folder':
+            // Root-level folder (no parent preselected)
+            showFolderDialog();
+            break;
+          case 'ssh-add-user':
+            showUserDialog();
             break;
           case 'ssh-add-subfolder':
             showFolderDialog(undefined, target.id);
@@ -1814,9 +1864,15 @@ import type { SshUser, SshConnection, SshFolder } from '../shared/ipc';
           authType: data.userAuthType || 'password',
           keyFilePath: data.userKeyFile || null,
         };
-        // Only include password if provided (editing with blank = keep existing)
-        if (data.userPassword) userData.password = data.userPassword;
-        if (data.userKeyPassword) userData.keyPassword = data.userKeyPassword;
+        if (data.userClearPassword === '1') {
+          // Explicitly clear stored secrets
+          userData.password = '';
+          userData.keyPassword = '';
+        } else {
+          // Only include password if provided (editing with blank = keep existing)
+          if (data.userPassword) userData.password = data.userPassword;
+          if (data.userKeyPassword) userData.keyPassword = data.userKeyPassword;
+        }
         const result = await api.sshUserSave(userData);
         if (result.error) { App.UI.showToast(App.__('toastError', { message: result.error })); return; }
       } else if (sshDialog.dataset.type === 'connection') { 
@@ -2043,6 +2099,12 @@ import type { SshUser, SshConnection, SshFolder } from '../shared/ipc';
         <label id="dialogKeyPasswordLabel" class="${user && user.authType === 'keyfile' ? '' : 'hidden'}">
           ${App.__('sshFormKeyPassphrase')} <input name="userKeyPassword" type="password" value="" placeholder="${userId ? App.__('sshFormPasswordUnchanged') : App.__('sshFormKeyPassphraseOptional')}" />
         </label>
+        ${userId ? `
+        <div class="ssh-clear-password-row">
+          <button type="button" id="dialogClearPassword" class="ssh-dialog-btn ssh-dialog-btn-cancel ssh-clear-password-btn">${App.__('sshFormClearPassword')}</button>
+          <input type="hidden" name="userClearPassword" value="0" />
+        </div>
+        ` : ''}
       </form>
     `;
 
@@ -2062,6 +2124,17 @@ import type { SshUser, SshConnection, SshFolder } from '../shared/ipc';
           if (kfLabel) kfLabel.classList.add('hidden');
           if (kpLabel) kpLabel.classList.add('hidden');
         }
+      });
+    }
+
+    const clearPasswordBtn = sshDialogBody.querySelector('#dialogClearPassword');
+    const clearPasswordFlag = sshDialogBody.querySelector('input[name="userClearPassword"]');
+    if (clearPasswordBtn && clearPasswordFlag) {
+      clearPasswordBtn.addEventListener('click', () => {
+        const willClear = clearPasswordFlag.value !== '1';
+        clearPasswordFlag.value = willClear ? '1' : '0';
+        clearPasswordBtn.classList.toggle('active', willClear);
+        clearPasswordBtn.textContent = willClear ? App.__('sshFormClearPasswordSet') : App.__('sshFormClearPassword');
       });
     }
 

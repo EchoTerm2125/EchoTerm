@@ -12,3 +12,7 @@ playwright-report/
 # OS junk
 .DS_Store
 Thumbs.db
+
+# Documentation
+CONTEXT.md
+/docs/adr/*

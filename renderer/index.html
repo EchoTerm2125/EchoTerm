@@ -161,6 +161,8 @@
   <!-- ═══SSH context menu  ═══-->
   <div id="sshContextMenu" class="context-menu hidden" data-overlay>
     <button data-action="ssh-add-conn" data-i18n="sshCtxAddConn">Add Connection</button>
+    <button data-action="ssh-add-folder" data-i18n="sshCtxAddFolder">Add Folder</button>
+    <button data-action="ssh-add-user" data-i18n="sshCtxAddUser">Add User</button>
     <button data-action="ssh-add-subfolder" data-i18n="sshCtxAddSubFolder">Add Sub Folder</button>
     <button data-action="ssh-add-parent-folder" data-i18n="sshCtxAddParentFolder">Add Parent Folder</button>
     <div class="context-separator" id="sshCtxAddSep"></div>
@@ -432,7 +434,7 @@
       </div>
       <div class="ssh-dialog-buttons">
         <button id="sshPasswordCancel" class="ssh-dialog-btn ssh-dialog-btn-cancel" data-i18n="sshDialogCancel">Cancel</button>
-        <button id="sshPasswordSkip" class="ssh-dialog-btn ssh-dialog-btn-cancel" data-i18n="sshPasswordBtnUseOs">Use OS Encryption</button>
+        <button id="sshPasswordSkip" class="ssh-dialog-btn ssh-dialog-btn-cancel" data-i18n="sshPasswordBtnUseOs">Default encryption (No password)</button>
         <button id="sshPasswordBtn" class="ssh-dialog-btn ssh-dialog-btn-save" data-i18n="sshPasswordBtnUnlock">Unlock</button>
       </div>
     </div>
@@ -460,7 +462,7 @@
         <span id="pasteLineCount" style="font-size:calc(var(--app-font-size) * 0.769);color:var(--text-muted);font-weight:400;"></span>
       </div>
       <div class="ssh-dialog-body" style="padding:calc(8px * var(--ui-scale)) calc(16px * var(--ui-scale));">
-        <textarea id="pastePreviewText" rows="10" style="width:100%;resize:vertical;font-family:'Cascadia Code','Fira Code',Consolas,monospace;font-size:12px;padding:8px;border:1px solid var(--border);border-radius:4px;background:var(--bg-primary);color:var(--text-primary);outline:none;"></textarea>
+        <textarea id="pastePreviewText" rows="10" style="width:100%;resize:vertical;font-family:var(--font-mono);font-size:12px;padding:8px;border:1px solid var(--border);border-radius:4px;background:var(--bg-primary);color:var(--text-primary);outline:none;"></textarea>
         <label style="display:flex;flex-direction:row;align-items:center;gap:6px;font-size:calc(var(--app-font-size) * 0.846);color:var(--text-muted);margin-top:6px;cursor:pointer;">
           <input type="checkbox" id="pastePreviewDontShow" />
           <span data-i18n="pastePreviewDontShow">Don't show this again</span>
