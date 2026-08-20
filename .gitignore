@@ -13,4 +13,6 @@ playwright-report/
 .DS_Store
 Thumbs.db
 
+# Documentation
 CONTEXT.md
+/docs/adr/*
