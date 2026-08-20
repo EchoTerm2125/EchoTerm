@@ -186,4 +186,25 @@ describe('Paste event with the multi-line confirm disabled', () => {
     expect(App.api.write).toHaveBeenCalledTimes(1);
     expect(App.api.write).toHaveBeenCalledWith(id, 'a\nb\nc');
   });
+
+  it('normalizes CRLF in echo-mode paste on an SSH terminal before writing', async () => {
+    localStorage.setItem('skipPastePreview', 'true');
+
+    // spawnSshTerminal attaches its own paste listener with the same echo
+    // branch; it must normalize too (its text never passes through pasteToTerminal).
+    const id = await App.Terminal.spawnSshTerminal({ id: 99, label: 'myhost', host: 'myhost' });
+    const entry = App.state.terminals.get(id);
+    const xtermDiv = entry.paneEl.querySelector('.xterm-container');
+
+    App.state.echoModeActive = true;
+    App.state.echoSelection.add(id);
+
+    const ev = new Event('paste', { bubbles: true, cancelable: true });
+    Object.defineProperty(ev, 'clipboardData', { value: { getData: () => 'a\r\nb\r\nc' } });
+    xtermDiv.dispatchEvent(ev);
+
+    expect(ev.defaultPrevented).toBe(true);
+    expect(App.api.write).toHaveBeenCalledTimes(1);
+    expect(App.api.write).toHaveBeenCalledWith(id, 'a\nb\nc');
+  });
 });

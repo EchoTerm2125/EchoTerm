@@ -79,6 +79,9 @@ import './icons';
 
     // Intercept paste event for multi-line preview / echo paste-all
     xtermDiv.addEventListener('paste', (e) => {
+      // Normalize here, not just in pasteToTerminal(): the echo-mode branch below
+      // writes this text straight to the pty and never passes through
+      // pasteToTerminal(), so this is its only CRLF guard.
       const text = normalizeNewlines(e.clipboardData ? e.clipboardData.getData('text') : '');
       if (!text) return;
       if (state.echoModeActive) {
@@ -433,6 +436,9 @@ import './icons';
 
     // Intercept paste event for multi-line preview / echo paste-all
     xtermDiv.addEventListener('paste', (e) => {
+      // Normalize here, not just in pasteToTerminal(): the echo-mode branch below
+      // writes this text straight to the pty and never passes through
+      // pasteToTerminal(), so this is its only CRLF guard.
       const text = normalizeNewlines(e.clipboardData ? e.clipboardData.getData('text') : '');
       if (!text) return;
       if (state.echoModeActive) {
