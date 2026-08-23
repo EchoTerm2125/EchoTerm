@@ -45,8 +45,6 @@ const api: WindowApi = {
   updateCheck: () => ipcRenderer.invoke('update:check'),
   updateGetSettings: () => ipcRenderer.invoke('update:get-settings'),
   updateSetSettings: (patch) => ipcRenderer.invoke('update:set-settings', patch),
-  updateSkipVersion: (version) => ipcRenderer.invoke('update:skip-version', version),
-  updateRemindLater: () => ipcRenderer.invoke('update:remind-later'),
   updateInstall: () => ipcRenderer.invoke('update:install'),
   onUpdateAvailable: (callback) => {
     const listener = (_event: unknown, info: unknown) => callback(info as never);

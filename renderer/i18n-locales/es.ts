@@ -305,7 +305,6 @@
     aboutVersion: 'Versión',
 
     // ── Updates ──────────────────────────────────────────────────────────────
-    optionsTitleUpdates: 'Actualizaciones',
     updCheckAutomatically: 'Buscar actualizaciones automáticamente',
     updIncludePrerelease: 'Incluir versiones preliminares (beta)',
     updCheckNow: 'Buscar actualizaciones ahora',
@@ -315,20 +314,13 @@
     updStatusDownloading: 'Descargando…',
     updStatusReady: 'Listo para instalar',
     updStatusIdle: 'Aún no comprobado',
-    updChecking: 'Buscando actualizaciones…',
-    updUpToDate: 'Ya tienes la última versión',
-    updAvailableBody: 'La versión {version} está disponible',
-    updDownloading: 'Descargando…',
-    updReadyBody: 'La versión {version} está lista para instalar',
     updInstallNow: 'Reiniciar e instalar',
-    updSkipVersion: 'Omitir esta versión',
-    updRemindLater: 'Recordármelo en 30 días',
-    updSkippedVersion: 'Versión omitida: {version}',
-    updUndoSkip: 'Deshacer omisión',
     updCheckFailed: 'Error al buscar actualizaciones: {message}',
     updCheckFailedGeneric: 'Error al buscar actualizaciones. Inténtalo de nuevo más tarde.',
     updSmartScreenHint: 'Si Windows SmartScreen bloquea la actualización, es normal en compilaciones sin firma: haz clic en "Más información" y luego en "Ejecutar de todos modos".',
     updPortableManual: 'La versión portable no admite actualizaciones automáticas. Abriendo la página de descarga de GitHub…',
+    updInstallUpdate: 'Instalar actualización',
+    updInstallConfirmBody: 'Hay una actualización lista. Cerrar EchoTerm finalizará todas las sesiones de terminal. ¿Instalar ahora?',
 
     // ── Dialog buttons ───────────────────────────────────────────────────────
     genericSave: 'Guardar',

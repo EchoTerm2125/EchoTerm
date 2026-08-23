@@ -305,7 +305,6 @@
     aboutVersion: 'Версия',
 
     // ── Updates ──────────────────────────────────────────────────────────────
-    optionsTitleUpdates: 'Обновления',
     updCheckAutomatically: 'Проверять обновления автоматически',
     updIncludePrerelease: 'Включать предварительные (бета) версии',
     updCheckNow: 'Проверить обновления сейчас',
@@ -315,20 +314,13 @@
     updStatusDownloading: 'Загрузка…',
     updStatusReady: 'Готово к установке',
     updStatusIdle: 'Ещё не проверено',
-    updChecking: 'Проверка обновлений…',
-    updUpToDate: 'У вас последняя версия',
-    updAvailableBody: 'Доступна версия {version}',
-    updDownloading: 'Загрузка…',
-    updReadyBody: 'Версия {version} готова к установке',
     updInstallNow: 'Перезапустить и установить',
-    updSkipVersion: 'Пропустить эту версию',
-    updRemindLater: 'Напомнить через 30 дней',
-    updSkippedVersion: 'Пропущенная версия: {version}',
-    updUndoSkip: 'Отменить пропуск',
     updCheckFailed: 'Не удалось проверить обновления: {message}',
     updCheckFailedGeneric: 'Не удалось проверить обновления. Повторите попытку позже.',
     updSmartScreenHint: 'Если Windows SmartScreen блокирует обновление, это ожидаемо для неподписанных сборок — нажмите «Подробнее», затем «Выполнить в любом случае».',
     updPortableManual: 'Портативная версия не поддерживает автоматическое обновление. Открываю страницу загрузки GitHub…',
+    updInstallUpdate: 'Установить обновление',
+    updInstallConfirmBody: 'Обновление готово. Закрытие EchoTerm завершит все сеансы терминала. Установить сейчас?',
 
     // ── Dialog buttons ───────────────────────────────────────────────────────
     genericSave: 'Сохранить',

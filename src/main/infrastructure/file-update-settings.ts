@@ -12,8 +12,6 @@ import type { UpdateSettings, UpdateSettingsStore } from '../../domain/ports/upd
 const DEFAULTS: UpdateSettings = {
   includePrerelease: false,
   checkForUpdatesAutomatically: true,
-  skippedVersion: null,
-  nextCheckAt: null,
 };
 
 export class FileUpdateSettingsStore implements UpdateSettingsStore {

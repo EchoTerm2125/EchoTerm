@@ -166,6 +166,33 @@ html, body {
   transform: scale(0.92);
 }
 
+/* Title-bar update-install button — appears only once the installer is downloaded */
+.toolbar-update-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: calc(5px * var(--ui-scale));
+  height: calc(26px * var(--ui-scale));
+  padding: 0 calc(10px * var(--ui-scale));
+  border: 1px solid color-mix(in srgb, var(--accent) 45%, transparent);
+  border-radius: var(--radius-sm);
+  background: var(--accent-wash);
+  color: var(--accent);
+  font-size: calc(var(--app-font-size) * 0.846);
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  flex-shrink: 0;
+  transition: background var(--transition), color var(--transition);
+  -webkit-app-region: no-drag;
+}
+.toolbar-update-btn:hover {
+  background: var(--accent);
+  color: var(--bg-primary);
+}
+.toolbar-update-btn:active {
+  transform: scale(0.96);
+}
+
 /* Window caption buttons (custom titlebar) */
 .window-controls {
   display: flex;
@@ -1050,19 +1077,6 @@ html, body {
   border-color: #e06c7f;
 }
 
-.confirm-btn-primary {
-  background: var(--accent);
-  color: white;
-  border-color: var(--accent);
-}
-.confirm-btn-primary:hover {
-  filter: brightness(1.08);
-}
-.confirm-btn-primary:disabled {
-  opacity: 0.55;
-  cursor: default;
-}
-
 .options-card-actions {
   display: flex;
   flex-direction: column;
@@ -1195,39 +1209,6 @@ html, body {
   border-radius: 2px;
   background: var(--accent-gradient);
   transition: width 0.2s ease;
-}
-
-/* Skipped-version footer — rare, low-priority info below the actions */
-.options-card.options-card-updates .options-card-actions {
-  border-bottom: none;
-}
-
-.options-updates-footer {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: calc(10px * var(--ui-scale));
-  padding: calc(9px * var(--ui-scale)) calc(12px * var(--ui-scale));
-  border-top: 1px solid var(--border);
-}
-
-.options-updates-skipped {
-  font-size: calc(var(--app-font-size) * 0.846);
-  color: var(--text-muted);
-}
-
-/* Subtle text-style button (e.g. "Undo skip") */
-.options-link-btn {
-  background: none;
-  border: none;
-  padding: 0;
-  color: var(--accent);
-  font-size: calc(var(--app-font-size) * 0.846);
-  cursor: pointer;
-  flex-shrink: 0;
-}
-.options-link-btn:hover {
-  text-decoration: underline;
 }
 
 .confirm-remember {

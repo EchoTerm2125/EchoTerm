@@ -305,7 +305,6 @@
     aboutVersion: 'Version',
 
     // ── Updates ──────────────────────────────────────────────────────────────
-    optionsTitleUpdates: 'Mises à jour',
     updCheckAutomatically: 'Vérifier les mises à jour automatiquement',
     updIncludePrerelease: 'Inclure les versions préliminaires (bêta)',
     updCheckNow: 'Vérifier les mises à jour maintenant',
@@ -315,20 +314,13 @@
     updStatusDownloading: 'Téléchargement…',
     updStatusReady: 'Prête à être installée',
     updStatusIdle: 'Pas encore vérifié',
-    updChecking: 'Vérification des mises à jour…',
-    updUpToDate: 'Vous êtes à jour',
-    updAvailableBody: 'La version {version} est disponible',
-    updDownloading: 'Téléchargement…',
-    updReadyBody: 'La version {version} est prête à être installée',
     updInstallNow: 'Redémarrer et installer',
-    updSkipVersion: 'Ignorer cette version',
-    updRemindLater: 'Me le rappeler dans 30 jours',
-    updSkippedVersion: 'Version ignorée : {version}',
-    updUndoSkip: 'Annuler l’ignorance',
     updCheckFailed: 'Échec de la vérification des mises à jour : {message}',
     updCheckFailedGeneric: 'Échec de la vérification des mises à jour. Réessayez plus tard.',
     updSmartScreenHint: 'Si Windows SmartScreen bloque la mise à jour, c’est normal pour les versions non signées — cliquez sur « Plus d’infos », puis « Exécuter quand même ».',
     updPortableManual: 'La version portable ne prend pas en charge les mises à jour automatiques. Ouverture de la page de téléchargement GitHub…',
+    updInstallUpdate: 'Installer la mise à jour',
+    updInstallConfirmBody: 'Une mise à jour est prête. Fermer EchoTerm mettra fin à toutes les sessions de terminal. Installer maintenant ?',
 
     // ── Dialog buttons ───────────────────────────────────────────────────────
     genericSave: 'Enregistrer',

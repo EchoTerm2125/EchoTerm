@@ -305,7 +305,6 @@
     aboutVersion: 'Sürüm',
 
     // ── Updates ──────────────────────────────────────────────────────────────
-    optionsTitleUpdates: 'Güncellemeler',
     updCheckAutomatically: 'Güncellemeleri otomatik kontrol et',
     updIncludePrerelease: 'Ön sürüm (beta) yapılarını dahil et',
     updCheckNow: 'Şimdi güncellemeleri kontrol et',
@@ -315,20 +314,13 @@
     updStatusDownloading: 'İndiriliyor…',
     updStatusReady: 'Kuruluma hazır',
     updStatusIdle: 'Henüz denetlenmedi',
-    updChecking: 'Güncellemeler kontrol ediliyor…',
-    updUpToDate: 'En son sürümdesiniz',
-    updAvailableBody: '{version} sürümü kullanılabilir',
-    updDownloading: 'İndiriliyor…',
-    updReadyBody: '{version} sürümü kuruluma hazır',
     updInstallNow: 'Yeniden başlat ve kur',
-    updSkipVersion: 'Bu sürümü atla',
-    updRemindLater: '30 gün sonra hatırlat',
-    updSkippedVersion: 'Atlanan sürüm: {version}',
-    updUndoSkip: 'Atlamayı geri al',
     updCheckFailed: 'Güncelleme kontrolü başarısız: {message}',
     updCheckFailedGeneric: 'Güncelleme kontrolü başarısız oldu. Lütfen daha sonra tekrar deneyin.',
     updSmartScreenHint: 'Windows SmartScreen güncellemeyi engellerse, imzasız derlemelerde bu beklenen bir durumdur — "Diğer bilgiler" ve ardından "Yine de çalıştır" seçeneğine tıklayın.',
     updPortableManual: 'Taşınabilir sürüm otomatik güncellemeyi desteklemez. GitHub indirme sayfası açılıyor…',
+    updInstallUpdate: 'Güncellemeyi kur',
+    updInstallConfirmBody: 'Bir güncelleme hazır. EchoTerm kapatıldığında tüm terminal oturumları sona erecek. Şimdi kurulsun mu?',
 
     // ── Dialog buttons ───────────────────────────────────────────────────────
     genericSave: 'Kaydet',

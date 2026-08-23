@@ -298,7 +298,6 @@
     aboutVersion: '版本',
 
     // ── Updates ──────────────────────────────────────────────────────────────
-    optionsTitleUpdates: '更新',
     updCheckAutomatically: '自动检查更新',
     updIncludePrerelease: '包含预发布（测试版）版本',
     updCheckNow: '立即检查更新',
@@ -308,20 +307,13 @@
     updStatusDownloading: '正在下载…',
     updStatusReady: '已准备好安装',
     updStatusIdle: '尚未检查',
-    updChecking: '正在检查更新…',
-    updUpToDate: '你已是最新版本',
-    updAvailableBody: '新版本 {version} 可用',
-    updDownloading: '正在下载…',
-    updReadyBody: '版本 {version} 已准备好安装',
     updInstallNow: '重启并安装',
-    updSkipVersion: '跳过此版本',
-    updRemindLater: '30 天后提醒我',
-    updSkippedVersion: '已跳过的版本：{version}',
-    updUndoSkip: '取消跳过',
     updCheckFailed: '更新检查失败：{message}',
     updCheckFailedGeneric: '检查更新失败，请稍后重试。',
     updSmartScreenHint: '如果 Windows SmartScreen 阻止了更新，未签名版本出现此情况是正常的——请点击“更多信息”，然后选择“仍要运行”。',
     updPortableManual: 'Portable 版不支持自动更新，已打开 GitHub 下载页面。',
+    updInstallUpdate: '安装更新',
+    updInstallConfirmBody: '更新已准备就绪。关闭 EchoTerm 将结束所有终端会话。现在安装吗？',
 
     // ── Error messages ───────────────────────────────────────────────────────
     errorUnknownShell: '未知 Shell: {shell}',

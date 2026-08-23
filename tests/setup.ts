@@ -89,18 +89,12 @@ window.api = {
   updateGetSettings: vi.fn(() => Promise.resolve({
     includePrerelease: false,
     checkForUpdatesAutomatically: true,
-    skippedVersion: null,
-    nextCheckAt: null,
   })),
   updateSetSettings: vi.fn((patch) => Promise.resolve({
     includePrerelease: false,
     checkForUpdatesAutomatically: true,
-    skippedVersion: null,
-    nextCheckAt: null,
     ...patch,
   })),
-  updateSkipVersion: vi.fn(() => Promise.resolve({ success: true })),
-  updateRemindLater: vi.fn(() => Promise.resolve({ success: true })),
   updateInstall: vi.fn(() => Promise.resolve({ success: true })),
   onUpdateAvailable: vi.fn(() => vi.fn()),
   onUpdateNotAvailable: vi.fn(() => vi.fn()),
@@ -177,10 +171,9 @@ const DOM_IDS = [
   'pastePreviewText', 'pastePreviewDontShow', 'pastePreviewCancel',
   'pastePreviewConfirm',
   // Auto-update
-  'updateDialog', 'updateMessage', 'updateInstall', 'updateSkip', 'updateRemind',
   'optCheckUpdates', 'optIncludePrerelease', 'btnCheckUpdates',
   'updStatusBanner', 'updStatusLine', 'updProgressTrack', 'updProgressBar',
-  'updSkippedFooter', 'updSkippedInfo', 'btnUndoSkip',
+  'btnInstallUpdate',
   // Language dropdown
   'langSelect', 'langSelectTrigger', 'langSelectLabel',
   'langSelectDropdown', 'langSearchInput', 'langOptionsList',
@@ -194,8 +187,7 @@ function scaffoldDom() {
 
   for (const id of DOM_IDS) {
     let el;
-    if (id.startsWith('btn') || id === 'confirmOk' || id === 'confirmCancel' ||
-        id === 'updateInstall' || id === 'updateSkip' || id === 'updateRemind') {
+    if (id.startsWith('btn') || id === 'confirmOk' || id === 'confirmCancel') {
       el = document.createElement('button');
     } else if (id === 'pastePreviewCancel' || id === 'pastePreviewConfirm') {
       el = document.createElement('button');

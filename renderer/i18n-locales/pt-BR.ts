@@ -305,7 +305,6 @@
     aboutVersion: 'Versão',
 
     // ── Updates ──────────────────────────────────────────────────────────────
-    optionsTitleUpdates: 'Atualizações',
     updCheckAutomatically: 'Verificar atualizações automaticamente',
     updIncludePrerelease: 'Incluir versões pré-lançamento (beta)',
     updCheckNow: 'Verificar atualizações agora',
@@ -315,20 +314,13 @@
     updStatusDownloading: 'Baixando…',
     updStatusReady: 'Pronto para instalar',
     updStatusIdle: 'Ainda não verificado',
-    updChecking: 'Verificando atualizações…',
-    updUpToDate: 'Você está atualizado',
-    updAvailableBody: 'A versão {version} está disponível',
-    updDownloading: 'Baixando…',
-    updReadyBody: 'A versão {version} está pronta para instalar',
     updInstallNow: 'Reiniciar e instalar',
-    updSkipVersion: 'Pular esta versão',
-    updRemindLater: 'Lembrar-me em 30 dias',
-    updSkippedVersion: 'Versão ignorada: {version}',
-    updUndoSkip: 'Desfazer ignorar',
     updCheckFailed: 'Falha ao verificar atualizações: {message}',
     updCheckFailedGeneric: 'Falha ao verificar atualizações. Tente novamente mais tarde.',
     updSmartScreenHint: 'Se o Windows SmartScreen bloquear a atualização, isso é esperado em builds não assinadas — clique em "Mais informações" e depois em "Executar mesmo assim".',
     updPortableManual: 'A versão portátil não suporta atualização automática. Abrindo a página de download do GitHub…',
+    updInstallUpdate: 'Instalar atualização',
+    updInstallConfirmBody: 'Uma atualização está pronta. Fechar o EchoTerm encerrará todas as sessões de terminal. Instalar agora?',
 
     // ── Dialog buttons ───────────────────────────────────────────────────────
     genericSave: 'Salvar',

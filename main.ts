@@ -46,6 +46,10 @@ const sessionRegistry = new SessionRegistry();
 
 let mainWindow = null;
 
+// Set when the user confirmed the update install: the window close interceptor
+// must let quitAndInstall() close the window without asking the renderer again.
+let installingUpdate = false;
+
 // ─── Single instance: only one EchoTerm window may be open ──────────────────
 const gotTheLock = app.requestSingleInstanceLock();
 
@@ -136,6 +140,9 @@ function createWindow() {
   }
 
   mainWindow.on('close', (e) => {
+    // Installing an update: the user already confirmed in the install warning,
+    // so let the window close and the installer run.
+    if (installingUpdate) return;
     // Prevent immediate close — ask renderer to confirm first
     e.preventDefault();
     mainWindow.webContents.send('app:confirm-close');
@@ -267,8 +274,12 @@ ipcMain.handle('ssh:export-config', () => sshController.exportConfig());
 ipcMain.handle('update:check', () => updateController.checkForUpdates(true));
 ipcMain.handle('update:get-settings', () => updateController.getSettings());
 ipcMain.handle('update:set-settings', (event, patch) => updateController.setSettings(patch));
-ipcMain.handle('update:skip-version', (event, version) => updateController.skipVersion(version));
-ipcMain.handle('update:remind-later', () => updateController.remindLater());
-ipcMain.handle('update:install', () => updateController.installUpdate());
+ipcMain.handle('update:install', () => {
+  // The renderer already warned the user and got confirmation — bypass the
+  // window close interceptor so quitAndInstall can close the app and run the
+  // (assisted) installer.
+  installingUpdate = true;
+  updateController.installUpdate();
+});
 
 export {};

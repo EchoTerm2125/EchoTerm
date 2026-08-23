@@ -1,8 +1,9 @@
 /* ═══════════════════════════════════════════════════════════════════════════
    EchoTerm — Auto-update UI
-   Update prompt dialog (available / downloading / ready to install) plus the
-   "Updates" section of the options panel. All persistence lives in the main
-   process (settings.json); this module only reflects it over IPC.
+   Status banner (the "Updates" section of the options panel) plus the title-bar
+   install button that appears once the update installer is downloaded.
+   All persistence lives in the main process (settings.json); this module only
+   reflects it over IPC.
    ═══════════════════════════════════════════════════════════════════════════ */
 
 import type { UpdateSettings } from '../shared/ipc';
@@ -13,32 +14,16 @@ import type { UpdateSettings } from '../shared/ipc';
 
   // ── State ──
   let settings: UpdateSettings | null = null; // cached copy from the main process
-  let offeredVersion: string | null = null;   // version currently shown in the prompt
-  let installReady = false;                   // download finished, install button enabled
-
-  const DEFAULT_SETTINGS: UpdateSettings = {
-    includePrerelease: false,
-    checkForUpdatesAutomatically: true,
-    skippedVersion: null,
-    nextCheckAt: null,
-  };
 
   // ── DOM refs ──
-  let updateDialog: HTMLElement | null;
-  let updateMessage: HTMLElement | null;
-  let updateInstall: HTMLButtonElement | null;
-  let updateSkip: HTMLButtonElement | null;
-  let updateRemind: HTMLButtonElement | null;
   let optCheckUpdates: HTMLInputElement | null;
   let optIncludePrerelease: HTMLInputElement | null;
   let btnCheckUpdates: HTMLButtonElement | null;
+  let btnInstallUpdate: HTMLButtonElement | null;
   let updStatusBanner: HTMLElement | null;
   let updStatusLine: HTMLElement | null;
   let updProgressTrack: HTMLElement | null;
   let updProgressBar: HTMLElement | null;
-  let updSkippedFooter: HTMLElement | null;
-  let updSkippedInfo: HTMLElement | null;
-  let btnUndoSkip: HTMLButtonElement | null;
 
   function init() {
     cacheDom();
@@ -49,26 +34,18 @@ import type { UpdateSettings } from '../shared/ipc';
     // Keep the card's JS-set text in sync when the user switches language.
     App.i18n.onLocaleChange(() => {
       renderStatus();
-      renderSkippedInfo();
     });
   }
 
   function cacheDom() {
-    updateDialog = document.getElementById('updateDialog');
-    updateMessage = document.getElementById('updateMessage');
-    updateInstall = document.getElementById('updateInstall') as HTMLButtonElement | null;
-    updateSkip = document.getElementById('updateSkip') as HTMLButtonElement | null;
-    updateRemind = document.getElementById('updateRemind') as HTMLButtonElement | null;
     optCheckUpdates = document.getElementById('optCheckUpdates') as HTMLInputElement | null;
     optIncludePrerelease = document.getElementById('optIncludePrerelease') as HTMLInputElement | null;
     btnCheckUpdates = document.getElementById('btnCheckUpdates') as HTMLButtonElement | null;
+    btnInstallUpdate = document.getElementById('btnInstallUpdate') as HTMLButtonElement | null;
     updStatusBanner = document.getElementById('updStatusBanner');
     updStatusLine = document.getElementById('updStatusLine');
     updProgressTrack = document.getElementById('updProgressTrack');
     updProgressBar = document.getElementById('updProgressBar');
-    updSkippedFooter = document.getElementById('updSkippedFooter');
-    updSkippedInfo = document.getElementById('updSkippedInfo');
-    btnUndoSkip = document.getElementById('btnUndoSkip') as HTMLButtonElement | null;
   }
 
   async function loadSettings() {
@@ -84,17 +61,6 @@ import type { UpdateSettings } from '../shared/ipc';
     if (!settings) return;
     if (optCheckUpdates) optCheckUpdates.checked = settings.checkForUpdatesAutomatically;
     if (optIncludePrerelease) optIncludePrerelease.checked = settings.includePrerelease;
-    renderSkippedInfo();
-  }
-
-  function renderSkippedInfo() {
-    if (!updSkippedInfo || !updSkippedFooter) return;
-    if (settings && settings.skippedVersion) {
-      updSkippedInfo.textContent = App.__('updSkippedVersion', { version: settings.skippedVersion });
-      updSkippedFooter.classList.remove('hidden');
-    } else {
-      updSkippedFooter.classList.add('hidden');
-    }
   }
 
   type UpdateStatusState = 'idle' | 'checking' | 'uptodate' | 'available' | 'downloading' | 'ready' | 'error' | 'portable';
@@ -138,6 +104,10 @@ import type { UpdateSettings } from '../shared/ipc';
         updProgressBar.style.width = '0';
       }
     }
+    // The title-bar install button appears only once the installer is downloaded.
+    if (btnInstallUpdate) {
+      btnInstallUpdate.classList.toggle('hidden', statusState !== 'ready');
+    }
   }
 
   // The banner is always visible; idle is the initial state.
@@ -149,51 +119,7 @@ import type { UpdateSettings } from '../shared/ipc';
     renderStatus();
   }
 
-  function showUpdatePrompt(version: string) {
-    if (!updateDialog || !updateMessage || !updateInstall) return;
-    offeredVersion = version;
-    installReady = false;
-    updateMessage.textContent = App.__('updAvailableBody', { version });
-    updateInstall.textContent = App.__('updDownloading');
-    updateInstall.disabled = true;
-    updateDialog.classList.remove('hidden');
-  }
-
-  function closeUpdatePrompt() {
-    if (updateDialog) updateDialog.classList.add('hidden');
-    offeredVersion = null;
-  }
-
   function bindEvents() {
-    if (updateInstall) {
-      updateInstall.addEventListener('click', () => api.updateInstall());
-    }
-    if (updateSkip) {
-      updateSkip.addEventListener('click', async () => {
-        if (offeredVersion) {
-          try {
-            await api.updateSkipVersion(offeredVersion);
-            settings = { ...(settings ?? DEFAULT_SETTINGS), skippedVersion: offeredVersion };
-            renderSkippedInfo();
-          } catch (err) {
-            console.error('Failed to skip version:', err);
-          }
-        }
-        setStatus('idle');
-        closeUpdatePrompt();
-      });
-    }
-    if (updateRemind) {
-      updateRemind.addEventListener('click', async () => {
-        try {
-          await api.updateRemindLater();
-        } catch (err) {
-          console.error('Failed to save reminder:', err);
-        }
-        setStatus('idle');
-        closeUpdatePrompt();
-      });
-    }
     if (optCheckUpdates) {
       optCheckUpdates.addEventListener('change', async () => {
         try {
@@ -220,14 +146,13 @@ import type { UpdateSettings } from '../shared/ipc';
         api.updateCheck();
       });
     }
-    if (btnUndoSkip) {
-      btnUndoSkip.addEventListener('click', async () => {
-        try {
-          settings = await api.updateSetSettings({ skippedVersion: null });
-          renderSkippedInfo();
-        } catch (err) {
-          console.error('Failed to clear skipped version:', err);
-        }
+    if (btnInstallUpdate) {
+      btnInstallUpdate.addEventListener('click', () => {
+        // Always warn before closing the app — installing ends every terminal
+        // session, so this is never silently skipped.
+        App.Menus.showConfirm(App.__('updInstallConfirmBody'), () => {
+          api.updateInstall();
+        }, undefined, 'updInstallNow');
       });
     }
   }
@@ -235,7 +160,6 @@ import type { UpdateSettings } from '../shared/ipc';
   function subscribeEvents() {
     api.onUpdateAvailable((info) => {
       setStatus('available', info.version);
-      showUpdatePrompt(info.version);
     });
 
     api.onUpdateNotAvailable(() => {
@@ -244,21 +168,10 @@ import type { UpdateSettings } from '../shared/ipc';
 
     api.onUpdateProgress((info) => {
       setStatus('downloading', null, info.percent);
-      if (updateInstall && offeredVersion && !installReady) {
-        updateInstall.textContent = `${App.__('updDownloading')} ${info.percent}%`;
-      }
     });
 
-    api.onUpdateDownloaded((info) => {
-      installReady = true;
+    api.onUpdateDownloaded(() => {
       setStatus('ready');
-      if (updateMessage && offeredVersion === info.version) {
-        updateMessage.textContent = App.__('updReadyBody', { version: info.version });
-      }
-      if (updateInstall) {
-        updateInstall.textContent = App.__('updInstallNow');
-        updateInstall.disabled = false;
-      }
     });
 
     api.onUpdateError((info) => {

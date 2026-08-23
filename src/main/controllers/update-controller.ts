@@ -8,11 +8,7 @@ import { shell } from 'electron';
 import { autoUpdater } from 'electron-updater';
 
 import type { UpdateSettings, UpdateSettingsStore } from '../../domain/ports/update-settings';
-import {
-  applyRemindLater,
-  isVersionSkipped,
-  shouldCheckForUpdate,
-} from '../../domain/services/update-policy';
+import { shouldCheckForUpdate } from '../../domain/services/update-policy';
 import type { SendToRenderer } from './session-registry';
 
 /** GitHub releases page — the manual download destination for portable builds. */
@@ -32,23 +28,17 @@ export class UpdateController {
 
   /** Wire electron-updater events and push them to the renderer. Call once at startup. */
   init(): void {
-    // We control download and install explicitly so that "Skip this version"
-    // can suppress both (a skipped download is never offered and never installed).
+    // We control download and install explicitly: the update is downloaded in
+    // the background as soon as it is available, and installed only when the
+    // user clicks the title-bar install button (never automatically on quit).
     autoUpdater.autoDownload = false;
     autoUpdater.autoInstallOnAppQuit = false;
 
     autoUpdater.on('update-available', (info) => {
-      const settings = this.settingsStore.load();
-      if (isVersionSkipped(settings, info.version)) {
-        // The only offered version is skipped — the check has nothing to offer.
-        this.send('update:not-available', {});
-        return;
-      }
-
       this.currentVersion = info.version;
       this.send('update:available', { version: info.version });
 
-      // Q11(b): auto-download in the background — the user is never asked to start it.
+      // Auto-download in the background — the user is never asked to start it.
       if (this.currentVersion === info.version) {
         autoUpdater.downloadUpdate().catch(() => {
           // electron-updater already emitted 'error' (handled in init()).
@@ -65,11 +55,8 @@ export class UpdateController {
     });
 
     autoUpdater.on('update-downloaded', (info) => {
-      // A version skipped mid-download must never install (including on quit).
-      const settings = this.settingsStore.load();
-      if (isVersionSkipped(settings, info.version)) return;
-
-      autoUpdater.autoInstallOnAppQuit = true;
+      // Installing is an explicit user action (the title-bar button) — never
+      // auto-install on quit. The renderer shows the button on this event.
       this.send('update:downloaded', { version: info.version });
     });
 
@@ -79,8 +66,8 @@ export class UpdateController {
   }
 
   /**
-   * Run an update check. Automatic checks honor the master toggle and the
-   * 30-day reminder window; manual checks always run.
+   * Run an update check. Automatic checks honor the master toggle; manual
+   * checks always run.
    */
   checkForUpdates(manual: boolean): { started: boolean } {
     // Portable builds have no installer and ship no app-update.yml, so
@@ -95,7 +82,7 @@ export class UpdateController {
     }
 
     const settings = this.settingsStore.load();
-    if (!shouldCheckForUpdate({ settings, now: Date.now(), manual })) {
+    if (!shouldCheckForUpdate({ settings, manual })) {
       return { started: false };
     }
 
@@ -113,21 +100,11 @@ export class UpdateController {
     return { started: true };
   }
 
-  /** "Skip this version" — suppresses that exact version string for good. */
-  skipVersion(version: string): void {
-    const settings = this.settingsStore.load();
-    this.settingsStore.save({ ...settings, skippedVersion: version });
-  }
-
-  /** "Remind me in 30 days" — suppress automatic checks until the window passes. */
-  remindLater(): void {
-    const settings = this.settingsStore.load();
-    this.settingsStore.save(applyRemindLater(settings, Date.now()));
-  }
-
-  /** Quit and run the (oneClick, hence silent) installer, relaunching on finish. */
+  /** Quit the app and run the installer (assisted wizard), relaunching on finish. */
   installUpdate(): void {
-    autoUpdater.quitAndInstall(true, true);
+    // isSilent=false shows the NSIS wizard; the main process must bypass the
+    // window close interceptor before calling this (see main.ts).
+    autoUpdater.quitAndInstall(false, true);
   }
 
   getSettings(): UpdateSettings {

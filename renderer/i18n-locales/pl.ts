@@ -305,7 +305,6 @@
     aboutVersion: 'Wersja',
 
     // ── Updates ──────────────────────────────────────────────────────────────
-    optionsTitleUpdates: 'Aktualizacje',
     updCheckAutomatically: 'Sprawdzaj aktualizacje automatycznie',
     updIncludePrerelease: 'Uwzględniaj wersje przedpremierowe (beta)',
     updCheckNow: 'Sprawdź aktualizacje teraz',
@@ -315,20 +314,13 @@
     updStatusDownloading: 'Pobieranie…',
     updStatusReady: 'Gotowe do instalacji',
     updStatusIdle: 'Nie sprawdzono jeszcze',
-    updChecking: 'Sprawdzanie aktualizacji…',
-    updUpToDate: 'Masz najnowszą wersję',
-    updAvailableBody: 'Dostępna jest wersja {version}',
-    updDownloading: 'Pobieranie…',
-    updReadyBody: 'Wersja {version} jest gotowa do instalacji',
     updInstallNow: 'Uruchom ponownie i zainstaluj',
-    updSkipVersion: 'Pomiń tę wersję',
-    updRemindLater: 'Przypomnij za 30 dni',
-    updSkippedVersion: 'Pominięta wersja: {version}',
-    updUndoSkip: 'Cofnij pominięcie',
     updCheckFailed: 'Nie udało się sprawdzić aktualizacji: {message}',
     updCheckFailedGeneric: 'Nie udało się sprawdzić aktualizacji. Spróbuj ponownie później.',
     updSmartScreenHint: 'Jeśli Windows SmartScreen zablokuje aktualizację, jest to normalne w przypadku niepodpisanych wersji — kliknij „Więcej informacji”, a następnie „Uruchom mimo to”.',
     updPortableManual: 'Wersja przenośna nie obsługuje automatycznych aktualizacji. Otwieram stronę pobierania GitHub…',
+    updInstallUpdate: 'Zainstaluj aktualizację',
+    updInstallConfirmBody: 'Aktualizacja jest gotowa. Zamknięcie EchoTerm zakończy wszystkie sesje terminala. Zainstalować teraz?',
 
     // ── Dialog buttons ───────────────────────────────────────────────────────
     genericSave: 'Zapisz',

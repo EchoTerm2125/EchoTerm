@@ -20,6 +20,12 @@
     <div class="toolbar-left">
       <span class="app-title" data-i18n="appTitle">EchoTerm</span>
       <span id="gitBashStatus" class="status-badge hidden"></span>
+      <button id="btnInstallUpdate" class="toolbar-update-btn hidden" data-i18n-title="updInstallUpdate" title="Install update">
+        <svg width="12" height="12" viewBox="0 0 16 16" fill="none">
+          <path d="M8 2v8m0 0l-3-3m3 3l3-3M3 13h10" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <span data-i18n="updInstallUpdate">Install update</span>
+      </button>
     </div>
     <button id="btnSettings" class="toolbar-btn" data-i18n-title="toolbarSettings" title="Settings">
       <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
@@ -230,19 +236,6 @@
     </div>
   </div>
 
-  <!-- ═══Update Dialog (available / downloading / ready to install)  ═══-->
-  <div id="updateDialog" class="confirm-overlay hidden" data-overlay>
-    <div class="confirm-box">
-      <div class="confirm-icon">⬇</div>
-      <div class="confirm-message" id="updateMessage"></div>
-      <div class="confirm-buttons">
-        <button id="updateRemind" class="confirm-btn confirm-btn-cancel" data-i18n="updRemindLater">Remind me in 30 days</button>
-        <button id="updateSkip" class="confirm-btn confirm-btn-cancel" data-i18n="updSkipVersion">Skip this version</button>
-        <button id="updateInstall" class="confirm-btn confirm-btn-primary" data-i18n="updDownloading">Downloading…</button>
-      </div>
-    </div>
-  </div>
-
   <!-- ═══Options panel  ═══-->
   <div id="optionsPanel" class="options-overlay hidden" data-overlay>
     <div class="options-window">
@@ -407,10 +400,6 @@
         </label>
         <div class="options-card-actions">
           <button id="btnCheckUpdates" class="options-action-btn options-action-btn-primary" data-i18n="updCheckNow">Check for updates now</button>
-        </div>
-        <div id="updSkippedFooter" class="options-updates-footer hidden">
-          <span id="updSkippedInfo" class="options-updates-skipped"></span>
-          <button id="btnUndoSkip" class="options-link-btn" data-i18n="updUndoSkip">Undo skip</button>
         </div>
       </div>
     </div>

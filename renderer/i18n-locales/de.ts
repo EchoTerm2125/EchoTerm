@@ -305,7 +305,6 @@
     aboutVersion: 'Version',
 
     // ── Updates ──────────────────────────────────────────────────────────────
-    optionsTitleUpdates: 'Updates',
     updCheckAutomatically: 'Automatisch nach Updates suchen',
     updIncludePrerelease: 'Vorabversionen (Beta) einschließen',
     updCheckNow: 'Jetzt nach Updates suchen',
@@ -315,20 +314,13 @@
     updStatusDownloading: 'Wird heruntergeladen…',
     updStatusReady: 'Bereit zur Installation',
     updStatusIdle: 'Noch nicht geprüft',
-    updChecking: 'Suche nach Updates…',
-    updUpToDate: 'Du bist auf dem neuesten Stand',
-    updAvailableBody: 'Version {version} ist verfügbar',
-    updDownloading: 'Wird heruntergeladen…',
-    updReadyBody: 'Version {version} ist zur Installation bereit',
     updInstallNow: 'Neu starten und installieren',
-    updSkipVersion: 'Diese Version überspringen',
-    updRemindLater: 'In 30 Tagen erinnern',
-    updSkippedVersion: 'Übersprungene Version: {version}',
-    updUndoSkip: 'Überspringen rückgängig machen',
     updCheckFailed: 'Update-Suche fehlgeschlagen: {message}',
     updCheckFailedGeneric: 'Update-Prüfung fehlgeschlagen. Bitte versuchen Sie es später erneut.',
     updSmartScreenHint: 'Wenn Windows SmartScreen das Update blockiert, ist das bei unsignierten Builds zu erwarten — klicken Sie auf „Weitere Informationen“ und dann auf „Trotzdem ausführen“.',
     updPortableManual: 'Die Portable-Version unterstützt keine automatischen Updates. Die GitHub-Downloadseite wird geöffnet…',
+    updInstallUpdate: 'Update installieren',
+    updInstallConfirmBody: 'Ein Update ist bereit. Das Schließen von EchoTerm beendet alle Terminalsitzungen. Jetzt installieren?',
 
     // ── Dialog buttons ───────────────────────────────────────────────────────
     genericSave: 'Speichern',

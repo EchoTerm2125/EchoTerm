@@ -306,7 +306,6 @@
     aboutVersion: 'Version',
 
     // ── Updates ──────────────────────────────────────────────────────────────
-    optionsTitleUpdates: 'Updates',
     updCheckAutomatically: 'Check for updates automatically',
     updIncludePrerelease: 'Include pre-release (beta) builds',
     updCheckNow: 'Check for updates now',
@@ -316,20 +315,13 @@
     updStatusDownloading: 'Downloading…',
     updStatusReady: 'Ready to install',
     updStatusIdle: 'Not checked yet',
-    updChecking: 'Checking for updates…',
-    updUpToDate: 'You are up to date',
-    updAvailableBody: 'Version {version} is available',
-    updDownloading: 'Downloading…',
-    updReadyBody: 'Version {version} is ready to install',
     updInstallNow: 'Restart & Install',
-    updSkipVersion: 'Skip this version',
-    updRemindLater: 'Remind me in 30 days',
-    updSkippedVersion: 'Skipped version: {version}',
-    updUndoSkip: 'Undo skip',
     updCheckFailed: 'Update check failed: {message}',
     updCheckFailedGeneric: 'Update check failed. Please try again later.',
     updSmartScreenHint: 'If Windows SmartScreen blocks the update, it is expected for unsigned builds — click "More info", then "Run anyway".',
     updPortableManual: 'Portable build does not support auto-update. Opening the GitHub download page…',
+    updInstallUpdate: 'Install update',
+    updInstallConfirmBody: 'An update is ready. Closing EchoTerm will end all terminal sessions. Install now?',
 
     // ── Dialog buttons ───────────────────────────────────────────────────────
     genericSave: 'Save',

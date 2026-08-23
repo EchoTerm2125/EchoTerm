@@ -305,7 +305,6 @@
     aboutVersion: 'バージョン',
 
     // ── Updates ──────────────────────────────────────────────────────────────
-    optionsTitleUpdates: '更新',
     updCheckAutomatically: '更新を自動的に確認する',
     updIncludePrerelease: 'プレリリース（ベータ）版を含める',
     updCheckNow: '今すぐ更新を確認',
@@ -315,20 +314,13 @@
     updStatusDownloading: 'ダウンロード中…',
     updStatusReady: 'インストール準備完了',
     updStatusIdle: 'まだ確認していません',
-    updChecking: '更新を確認しています…',
-    updUpToDate: '最新バージョンです',
-    updAvailableBody: 'バージョン {version} が利用可能です',
-    updDownloading: 'ダウンロード中…',
-    updReadyBody: 'バージョン {version} のインストール準備ができました',
     updInstallNow: '再起動してインストール',
-    updSkipVersion: 'このバージョンをスキップ',
-    updRemindLater: '30日後に通知',
-    updSkippedVersion: 'スキップしたバージョン: {version}',
-    updUndoSkip: 'スキップを解除',
     updCheckFailed: '更新の確認に失敗しました: {message}',
     updCheckFailedGeneric: '更新の確認に失敗しました。後でもう一度お試しください。',
     updSmartScreenHint: 'Windows SmartScreen が更新をブロックした場合、未署名ビルドでは想定どおりです。「詳細情報」→「実行」を選択してください。',
     updPortableManual: 'ポータブル版は自動更新に対応していません。GitHub のダウンロードページを開きます…',
+    updInstallUpdate: '更新をインストール',
+    updInstallConfirmBody: '更新の準備ができました。EchoTerm を閉じるとすべてのターミナルセッションが終了します。今すぐインストールしますか？',
 
     // ── Dialog buttons ───────────────────────────────────────────────────────
     genericSave: '保存',

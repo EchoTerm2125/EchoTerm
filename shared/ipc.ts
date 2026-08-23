@@ -176,12 +176,8 @@ export interface AppInfo {
 export interface UpdateSettings {
   /** Offer prerelease (beta) builds when checking for updates. */
   includePrerelease: boolean;
-  /** Run the automatic startup check (and honor the 30-day reminder window). */
+  /** Run the automatic startup check. */
   checkForUpdatesAutomatically: boolean;
-  /** Version string the user dismissed with "Skip this version". */
-  skippedVersion: string | null;
-  /** Epoch ms before which automatic checks are suppressed. */
-  nextCheckAt: number | null;
 }
 
 export interface UpdateVersionInfo {
@@ -224,8 +220,6 @@ export interface WindowApi {
   updateCheck(): Promise<{ started: boolean }>;
   updateGetSettings(): Promise<UpdateSettings>;
   updateSetSettings(patch: Partial<UpdateSettings>): Promise<UpdateSettings>;
-  updateSkipVersion(version: string): Promise<IpcOutcome>;
-  updateRemindLater(): Promise<IpcOutcome>;
   updateInstall(): Promise<IpcOutcome>;
   onUpdateAvailable(callback: (info: UpdateVersionInfo) => void): () => void;
   onUpdateNotAvailable(callback: () => void): () => void;
