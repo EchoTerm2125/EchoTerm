@@ -113,8 +113,12 @@
     confirmCloseAllGroupTerminals: 'Đóng tất cả {count} terminal trong nhóm "{name}"?\nTất cả phiên sẽ bị chấm dứt.',
     confirmDeleteSshConnection: 'Xóa kết nối SSH "{name}"?',
     confirmDeleteSshFolder: 'Xóa thư mục SSH "{name}"?\nCác thư mục con cũng sẽ bị xóa. Các kết nối sẽ không bị xóa.',
-    confirmDeleteSshUser: 'Xóa người dùng SSH "{name}"?\nCác kết nối dùng người dùng này sẽ cần được gán lại.',
+    confirmDeleteSshUser: 'Xóa người dùng SSH "{name}"?',
+    confirmDeleteSshUserConnections: '{count} kết nối dùng người dùng này: {names}.\nChúng sẽ cần được gán lại.',
+    confirmDeleteSshUserMore: 'và {count} nữa',
     confirmDeleteMultiSsh: 'Xóa {count} mục SSH?',
+    confirmDeleteMultiSshUserConnections: 'Các kết nối dùng những người dùng đã chọn sẽ cần được gán lại:\n{users}',
+    confirmDeleteMultiSshUserLine: '{user} → {connections}',
     confirmJumpHostsMissing: 'Các máy chủ trung gian sau chưa được chọn:\n\n{names}\n\nVẫn nhập?',
 
     // ── SSH Sidebar ──────────────────────────────────────────────────────────

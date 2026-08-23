@@ -113,8 +113,12 @@
     confirmCloseAllGroupTerminals: '¿Cerrar las terminales ({count}) del grupo "{name}"?\nTodas las sesiones terminarán.',
     confirmDeleteSshConnection: '¿Eliminar la conexión SSH "{name}"?',
     confirmDeleteSshFolder: '¿Eliminar la carpeta SSH "{name}"?\nLas subcarpetas también se eliminarán. Las conexiones no se eliminarán.',
-    confirmDeleteSshUser: '¿Eliminar el usuario SSH "{name}"?\nLas conexiones que usan este usuario deberán reasignarse.',
+    confirmDeleteSshUser: '¿Eliminar el usuario SSH "{name}"?',
+    confirmDeleteSshUserConnections: '{count} conexión usa este usuario: {names}.\nDeberán reasignarse.',
+    confirmDeleteSshUserMore: 'y {count} más',
     confirmDeleteMultiSsh: '¿Eliminar {count} elementos SSH?',
+    confirmDeleteMultiSshUserConnections: 'Las conexiones que usan los usuarios seleccionados deberán reasignarse:\n{users}',
+    confirmDeleteMultiSshUserLine: '{user} → {connections}',
     confirmJumpHostsMissing: 'Los siguientes hosts de salto no están seleccionados:\n\n{names}\n\n¿Importar de todos modos?',
 
     // ── SSH Sidebar ──────────────────────────────────────────────────────────

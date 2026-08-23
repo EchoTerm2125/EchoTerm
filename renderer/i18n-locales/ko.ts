@@ -113,8 +113,12 @@
     confirmCloseAllGroupTerminals: '그룹 "{name}"의 터미널 {count}개를 모두 닫을까요?\n모든 세션이 종료됩니다.',
     confirmDeleteSshConnection: 'SSH 연결 "{name}"을(를) 삭제할까요?',
     confirmDeleteSshFolder: 'SSH 폴더 "{name}"을(를) 삭제할까요?\n하위 폴더도 삭제됩니다. 연결은 삭제되지 않습니다.',
-    confirmDeleteSshUser: 'SSH 사용자 "{name}"을(를) 삭제할까요?\n이 사용자를 사용하는 연결은 다시 지정해야 합니다.',
+    confirmDeleteSshUser: 'SSH 사용자 "{name}"을(를) 삭제할까요?',
+    confirmDeleteSshUserConnections: '{count}개 연결이 이 사용자를 사용합니다: {names}.\n다시 지정해야 합니다.',
+    confirmDeleteSshUserMore: '외 {count}개',
     confirmDeleteMultiSsh: 'SSH {type} {count}개를 삭제할까요?',
+    confirmDeleteMultiSshUserConnections: '선택한 사용자를 사용하는 연결은 다시 지정해야 합니다:\n{users}',
+    confirmDeleteMultiSshUserLine: '{user} → {connections}',
     confirmJumpHostsMissing: '다음 점프 호스트가 선택되지 않았습니다:\n\n{names}\n\n그래도 가져올까요?',
 
     // ── SSH Sidebar ──────────────────────────────────────────────────────────

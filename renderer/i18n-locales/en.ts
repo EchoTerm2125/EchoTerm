@@ -114,8 +114,12 @@
     confirmCloseAllGroupTerminals: 'Close all {count} terminal{plural} in group "{name}"?\nAll sessions will be terminated.',
     confirmDeleteSshConnection: 'Delete SSH connection "{name}"?',
     confirmDeleteSshFolder: 'Delete SSH folder "{name}"?\nSubfolders will also be deleted. Connections will not be deleted.',
-    confirmDeleteSshUser: 'Delete SSH user "{name}"?\nConnections using this user will need to be reassigned.',
+    confirmDeleteSshUser: 'Delete SSH user "{name}"?',
+    confirmDeleteSshUserConnections: 'Used by {count} connection{plural}: {names}.\nThey will need to be reassigned.',
+    confirmDeleteSshUserMore: 'and {count} more',
     confirmDeleteMultiSsh: 'Delete {count} SSH {type}{plural}?',
+    confirmDeleteMultiSshUserConnections: 'Connections using the selected users will need to be reassigned:\n{users}',
+    confirmDeleteMultiSshUserLine: '{user} → {connections}',
     confirmJumpHostsMissing: 'The following jump hosts are not selected:\n\n{names}\n\nImport anyway?',
 
     // ── SSH Sidebar ──────────────────────────────────────────────────────────

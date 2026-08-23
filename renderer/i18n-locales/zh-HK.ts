@@ -113,8 +113,12 @@
     confirmCloseAllGroupTerminals: '關閉群組「{name}」中的 {count} 個終端機？\n所有工作階段將被終止。',
     confirmDeleteSshConnection: '刪除 SSH 連線「{name}」？',
     confirmDeleteSshFolder: '刪除 SSH 資料夾「{name}」？\n其子資料夾也會一併刪除。資料夾中的連線不會被刪除。',
-    confirmDeleteSshUser: '刪除 SSH 使用者「{name}」？\n使用此使用者的連線需要重新指派。',
+    confirmDeleteSshUser: '刪除 SSH 使用者「{name}」？',
+    confirmDeleteSshUserConnections: '{count} 個連線使用了此使用者：{names}。\n它們需要重新指派。',
+    confirmDeleteSshUserMore: '另有 {count} 個',
     confirmDeleteMultiSsh: '刪除 {count} 個 SSH {type}？',
+    confirmDeleteMultiSshUserConnections: '使用所選使用者的連線需要重新指派：\n{users}',
+    confirmDeleteMultiSshUserLine: '{user} → {connections}',
     confirmJumpHostsMissing: '以下跳板機未被選取：\n\n{names}\n\n仍然匯入？',
 
     // ── SSH Sidebar ──────────────────────────────────────────────────────────

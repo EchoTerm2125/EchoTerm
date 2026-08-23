@@ -1280,8 +1280,15 @@ import type { SshUser, SshConnection, SshFolder } from '../shared/ipc';
             if (target.multi) {
               const count = target.ids.length;
               const typeLabel = target.type === 'group' ? App.__('sshDeleteTypeFolder') : target.type === 'connection' ? App.__('sshDeleteTypeConnection') : App.__('sshDeleteTypeUser');
+              let message = App._n('confirmDeleteMultiSsh', count, 'statusTerminalPlural').replace('{type}', typeLabel);
+              if (target.type === 'user') {
+                const affectedLines = await buildUserDeleteWarning(target.ids);
+                if (affectedLines.length > 0) {
+                  message += `\n${App.__('confirmDeleteMultiSshUserConnections', { users: affectedLines.join('\n') })}`;
+                }
+              }
               App.Menus.showConfirm(
-                App._n('confirmDeleteMultiSsh', count, 'statusTerminalPlural').replace('{type}', typeLabel),
+                message,
                 async () => {
                   for (const id of target.ids) {
                     if (target.type === 'connection') await api.sshConnectionDelete(id);
@@ -1533,11 +1540,36 @@ import type { SshUser, SshConnection, SshFolder } from '../shared/ipc';
     );
   }
 
+  // Build the per-user "connections reference this user" lines for a multi-user
+  // delete. Returns one line per affected user, in selection order.
+  async function buildUserDeleteWarning(userIds) {
+    const [connections, users] = await Promise.all([api.sshConnectionList(), api.sshUserList()]);
+    const lines = [];
+    for (const userId of userIds) {
+      const conns = connections.filter(c => c.userId === userId);
+      if (conns.length === 0) continue;
+      const user = users.find(u => u.id === userId);
+      const names = conns.map(c => c.name).join(', ');
+      lines.push(App.__('confirmDeleteMultiSshUserLine', { user: user?.name || userId, connections: names }));
+    }
+    return lines;
+  }
+
   async function deleteUser(userId) {
     const users = await api.sshUserList();
     const user = users.find(u => u.id === userId);
+    const connections = await api.sshConnectionList();
+    const affected = connections.filter(c => c.userId === userId);
+    let message = App.__('confirmDeleteSshUser', { name: user?.name || userId });
+    if (affected.length > 0) {
+      const names = affected.slice(0, 3).map(c => c.name).join(', ');
+      const namesText = affected.length > 3
+        ? `${names}, ${App.__('confirmDeleteSshUserMore', { count: affected.length - 3 })}`
+        : names;
+      message += `\n${App._p('confirmDeleteSshUserConnections', affected.length).replace('{names}', namesText)}`;
+    }
     App.Menus.showConfirm(
-      App.__('confirmDeleteSshUser', { name: user?.name || userId }),
+      message,
       async () => {
         await api.sshUserDelete(userId);
         await refreshAll();

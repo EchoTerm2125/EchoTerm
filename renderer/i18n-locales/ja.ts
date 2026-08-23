@@ -113,8 +113,12 @@
     confirmCloseAllGroupTerminals: 'グループ「{name}」の {count} 台すべてのターミナルを閉じますか？\nすべてのセッションが終了します。',
     confirmDeleteSshConnection: 'SSH 接続「{name}」を削除しますか？',
     confirmDeleteSshFolder: 'SSH フォルダ「{name}」を削除しますか？\nサブフォルダも削除されます。接続は削除されません。',
-    confirmDeleteSshUser: 'SSH ユーザー「{name}」を削除しますか？\nこのユーザーを使用している接続は再割り当てが必要になります。',
+    confirmDeleteSshUser: 'SSH ユーザー「{name}」を削除しますか？',
+    confirmDeleteSshUserConnections: '{count} 件の接続がこのユーザーを使用しています: {names}。\n再割り当てが必要になります。',
+    confirmDeleteSshUserMore: 'ほか {count} 件',
     confirmDeleteMultiSsh: 'SSH {type} を {count} 件削除しますか？',
+    confirmDeleteMultiSshUserConnections: '選択したユーザーを使用している接続は再割り当てが必要になります:\n{users}',
+    confirmDeleteMultiSshUserLine: '{user} → {connections}',
     confirmJumpHostsMissing: '次のジャンプホストが選択されていません：\n\n{names}\n\nそれでもインポートしますか？',
 
     // ── SSH Sidebar ──────────────────────────────────────────────────────────

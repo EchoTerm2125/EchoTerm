@@ -113,8 +113,12 @@
     confirmCloseAllGroupTerminals: '"{name}" grubundaki {count} terminalin tamamı kapatılsın mı?\nTüm oturumlar sonlandırılacak.',
     confirmDeleteSshConnection: 'SSH bağlantısı "{name}" silinsin mi?',
     confirmDeleteSshFolder: 'SSH klasörü "{name}" silinsin mi?\nAlt klasörler de silinecek. Bağlantılar silinmeyecek.',
-    confirmDeleteSshUser: 'SSH kullanıcısı "{name}" silinsin mi?\nBu kullanıcıyı kullanan bağlantıların yeniden atanması gerekecek.',
+    confirmDeleteSshUser: 'SSH kullanıcısı "{name}" silinsin mi?',
+    confirmDeleteSshUserConnections: '{count} bağlantı bu kullanıcıyı kullanıyor: {names}.\nYeniden atanması gerekecek.',
+    confirmDeleteSshUserMore: 've {count} daha',
     confirmDeleteMultiSsh: '{count} SSH öğesi silinsin mi?',
+    confirmDeleteMultiSshUserConnections: 'Seçili kullanıcıları kullanan bağlantıların yeniden atanması gerekecek:\n{users}',
+    confirmDeleteMultiSshUserLine: '{user} → {connections}',
     confirmJumpHostsMissing: 'Aşağıdaki atlama sunucuları seçili değil:\n\n{names}\n\nYine de içe aktarılsın mı?',
 
     // ── SSH Sidebar ──────────────────────────────────────────────────────────

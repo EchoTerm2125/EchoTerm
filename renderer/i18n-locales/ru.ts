@@ -113,8 +113,12 @@
     confirmCloseAllGroupTerminals: 'Закрыть все терминалы ({count}) в группе «{name}»?\nВсе сеансы будут завершены.',
     confirmDeleteSshConnection: 'Удалить SSH-подключение «{name}»?',
     confirmDeleteSshFolder: 'Удалить SSH-папку «{name}»?\nВложенные папки также будут удалены. Подключения не будут удалены.',
-    confirmDeleteSshUser: 'Удалить SSH-пользователя «{name}»?\nПодключения, использующие этого пользователя, потребуется переназначить.',
+    confirmDeleteSshUser: 'Удалить SSH-пользователя «{name}»?',
+    confirmDeleteSshUserConnections: '{count} подключение использует этого пользователя: {names}.\nИх потребуется переназначить.',
+    confirmDeleteSshUserMore: 'и ещё {count}',
     confirmDeleteMultiSsh: 'Удалить SSH-элементы ({count})?',
+    confirmDeleteMultiSshUserConnections: 'Подключения, использующие выбранных пользователей, потребуется переназначить:\n{users}',
+    confirmDeleteMultiSshUserLine: '{user} → {connections}',
     confirmJumpHostsMissing: 'Следующие хосты перехода не выбраны:\n\n{names}\n\nВсё равно импортировать?',
 
     // ── SSH Sidebar ──────────────────────────────────────────────────────────
