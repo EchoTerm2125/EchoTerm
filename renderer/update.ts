@@ -1,7 +1,9 @@
 /* ═══════════════════════════════════════════════════════════════════════════
    EchoTerm — Auto-update UI
    Status banner (the "Updates" section of the options panel) plus the title-bar
-   install button that appears once the update installer is downloaded.
+   install button. Installed builds download in the background and the button
+   installs; portable/zip builds never download and the button opens the GitHub
+   releases page instead.
    All persistence lives in the main process (settings.json); this module only
    reflects it over IPC.
    ═══════════════════════════════════════════════════════════════════════════ */
@@ -14,12 +16,14 @@ import type { UpdateSettings } from '../shared/ipc';
 
   // ── State ──
   let settings: UpdateSettings | null = null; // cached copy from the main process
+  let isPortable = false;                     // portable/zip build (no installer)
 
   // ── DOM refs ──
   let optCheckUpdates: HTMLInputElement | null;
   let optIncludePrerelease: HTMLInputElement | null;
   let btnCheckUpdates: HTMLButtonElement | null;
   let btnInstallUpdate: HTMLButtonElement | null;
+  let btnInstallUpdateLabel: HTMLElement | null;
   let updStatusBanner: HTMLElement | null;
   let updStatusLine: HTMLElement | null;
   let updProgressTrack: HTMLElement | null;
@@ -42,6 +46,7 @@ import type { UpdateSettings } from '../shared/ipc';
     optIncludePrerelease = document.getElementById('optIncludePrerelease') as HTMLInputElement | null;
     btnCheckUpdates = document.getElementById('btnCheckUpdates') as HTMLButtonElement | null;
     btnInstallUpdate = document.getElementById('btnInstallUpdate') as HTMLButtonElement | null;
+    btnInstallUpdateLabel = document.getElementById('btnInstallUpdateLabel');
     updStatusBanner = document.getElementById('updStatusBanner');
     updStatusLine = document.getElementById('updStatusLine');
     updProgressTrack = document.getElementById('updProgressTrack');
@@ -52,6 +57,9 @@ import type { UpdateSettings } from '../shared/ipc';
     try {
       settings = await api.updateGetSettings();
       applySettingsToUI();
+      const buildType = await api.updateGetBuildType();
+      isPortable = buildType.portable;
+      renderStatus();
     } catch (err) {
       console.error('Failed to load update settings:', err);
     }
@@ -63,7 +71,7 @@ import type { UpdateSettings } from '../shared/ipc';
     if (optIncludePrerelease) optIncludePrerelease.checked = settings.includePrerelease;
   }
 
-  type UpdateStatusState = 'idle' | 'checking' | 'uptodate' | 'available' | 'downloading' | 'ready' | 'error' | 'portable';
+  type UpdateStatusState = 'idle' | 'checking' | 'uptodate' | 'available' | 'downloading' | 'ready' | 'error';
 
   let statusState: UpdateStatusState = 'idle';
   let statusVersion: string | null = null;
@@ -86,8 +94,6 @@ import type { UpdateSettings } from '../shared/ipc';
         return App.__('updStatusReady');
       case 'error':
         return statusError ?? App.__('updCheckFailedGeneric');
-      case 'portable':
-        return App.__('updPortableManual');
     }
   }
 
@@ -104,9 +110,17 @@ import type { UpdateSettings } from '../shared/ipc';
         updProgressBar.style.width = '0';
       }
     }
-    // The title-bar install button appears only once the installer is downloaded.
+    // Title-bar button: portable/zip builds show it as soon as an update is
+    // available (clicking opens the GitHub page); installed builds only after
+    // the installer is downloaded (clicking installs).
     if (btnInstallUpdate) {
-      btnInstallUpdate.classList.toggle('hidden', statusState !== 'ready');
+      const show = isPortable ? statusState === 'available' : statusState === 'ready';
+      btnInstallUpdate.classList.toggle('hidden', !show);
+      if (show) {
+        const label = isPortable ? App.__('updGetUpdate') : App.__('updInstallUpdate');
+        if (btnInstallUpdateLabel) btnInstallUpdateLabel.textContent = label;
+        btnInstallUpdate.title = label;
+      }
     }
   }
 
@@ -148,6 +162,11 @@ import type { UpdateSettings } from '../shared/ipc';
     }
     if (btnInstallUpdate) {
       btnInstallUpdate.addEventListener('click', () => {
+        if (isPortable) {
+          // Portable/zip: no install, just point at the download page.
+          api.updateInstall();
+          return;
+        }
         // Always warn before closing the app — installing ends every terminal
         // session, so this is never silently skipped.
         App.Menus.showConfirm(App.__('updInstallConfirmBody'), () => {
@@ -183,12 +202,6 @@ import type { UpdateSettings } from '../shared/ipc';
         ? `${App.__('updCheckFailed', { message: info.message })} ${App.__('updSmartScreenHint')}`
         : App.__('updCheckFailedGeneric');
       setStatus('error', null, null, message);
-    });
-
-    // Portable builds: no auto-update — the main process already opened the
-    // GitHub releases page; the banner explains it so the click doesn't look dead.
-    api.onUpdatePortable(() => {
-      setStatus('portable');
     });
   }
 

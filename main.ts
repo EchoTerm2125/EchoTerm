@@ -274,11 +274,15 @@ ipcMain.handle('ssh:export-config', () => sshController.exportConfig());
 ipcMain.handle('update:check', () => updateController.checkForUpdates(true));
 ipcMain.handle('update:get-settings', () => updateController.getSettings());
 ipcMain.handle('update:set-settings', (event, patch) => updateController.setSettings(patch));
+ipcMain.handle('update:get-build-type', () => ({ portable: updateController.isPortableBuild() }));
 ipcMain.handle('update:install', () => {
-  // The renderer already warned the user and got confirmation — bypass the
-  // window close interceptor so quitAndInstall can close the app and run the
-  // (assisted) installer.
-  installingUpdate = true;
+  // Portable/zip builds open the GitHub releases page instead — no app close,
+  // so no need to bypass the close interceptor. Installed builds: the renderer
+  // already warned the user and got confirmation, so let quitAndInstall close
+  // the window and run the (assisted) installer.
+  if (!updateController.isPortableBuild()) {
+    installingUpdate = true;
+  }
   updateController.installUpdate();
 });
 

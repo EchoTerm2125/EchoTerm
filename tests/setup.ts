@@ -96,12 +96,12 @@ window.api = {
     ...patch,
   })),
   updateInstall: vi.fn(() => Promise.resolve({ success: true })),
+  updateGetBuildType: vi.fn(() => Promise.resolve({ portable: false })),
   onUpdateAvailable: vi.fn(() => vi.fn()),
   onUpdateNotAvailable: vi.fn(() => vi.fn()),
   onUpdateProgress: vi.fn(() => vi.fn()),
   onUpdateDownloaded: vi.fn(() => vi.fn()),
   onUpdateError: vi.fn(() => vi.fn()),
-  onUpdatePortable: vi.fn(() => vi.fn()),
   // Window controls (custom titlebar)
   minimizeWindow: vi.fn(),
   toggleMaximizeWindow: vi.fn(),

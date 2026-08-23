@@ -4,6 +4,8 @@
    settings store, and pushes update events to the renderer.
    ═══════════════════════════════════════════════════════════════════════════ */
 
+import fs from 'fs';
+import path from 'path';
 import { shell } from 'electron';
 import { autoUpdater } from 'electron-updater';
 
@@ -14,8 +16,18 @@ import type { SendToRenderer } from './session-registry';
 /** GitHub releases page — the manual download destination for portable builds. */
 const RELEASES_PAGE_URL = 'https://github.com/EchoTerm2125/EchoTerm/releases';
 
-/** electron-builder's portable target sets this env var at runtime. */
-const isPortableBuild = (): boolean => process.env.PORTABLE_EXECUTABLE_DIR != null;
+/** Marker written into portable/zip builds by scripts/after-pack.cjs. */
+const PORTABLE_MARKER = 'echoterm-portable';
+
+/**
+ * Whether this copy is a portable/zip artifact rather than the NSIS install.
+ * The electron-builder portable target sets PORTABLE_EXECUTABLE_DIR at runtime;
+ * the portable zip cannot rely on that env var, so our afterPack hook also
+ * drops a marker file into resources (deleted by the installer on install).
+ */
+const detectPortableBuild = (): boolean =>
+  process.env.PORTABLE_EXECUTABLE_DIR != null ||
+  fs.existsSync(path.join(process.resourcesPath, PORTABLE_MARKER));
 
 export class UpdateController {
   /** Version currently being offered/downloaded (used to suppress re-entry). */
@@ -26,11 +38,17 @@ export class UpdateController {
     private readonly send: SendToRenderer,
   ) {}
 
+  /** Whether this copy is a portable/zip artifact (rendered/installed builds are not). */
+  isPortableBuild(): boolean {
+    return detectPortableBuild();
+  }
+
   /** Wire electron-updater events and push them to the renderer. Call once at startup. */
   init(): void {
     // We control download and install explicitly: the update is downloaded in
     // the background as soon as it is available, and installed only when the
     // user clicks the title-bar install button (never automatically on quit).
+    // Portable/zip builds check for updates but never download or install.
     autoUpdater.autoDownload = false;
     autoUpdater.autoInstallOnAppQuit = false;
 
@@ -39,7 +57,9 @@ export class UpdateController {
       this.send('update:available', { version: info.version });
 
       // Auto-download in the background — the user is never asked to start it.
-      if (this.currentVersion === info.version) {
+      // Portable/zip builds have no installer, so they just show the
+      // "Get update" button that opens the GitHub releases page instead.
+      if (!detectPortableBuild() && this.currentVersion === info.version) {
         autoUpdater.downloadUpdate().catch(() => {
           // electron-updater already emitted 'error' (handled in init()).
         });
@@ -70,17 +90,6 @@ export class UpdateController {
    * checks always run.
    */
   checkForUpdates(manual: boolean): { started: boolean } {
-    // Portable builds have no installer and ship no app-update.yml, so
-    // auto-update is impossible: never run an automatic check, and point a
-    // manual check at the GitHub releases page instead.
-    if (isPortableBuild()) {
-      if (manual) {
-        shell.openExternal(RELEASES_PAGE_URL).catch(() => {});
-        this.send('update:portable', {});
-      }
-      return { started: false };
-    }
-
     const settings = this.settingsStore.load();
     if (!shouldCheckForUpdate({ settings, manual })) {
       return { started: false };
@@ -88,9 +97,8 @@ export class UpdateController {
 
     autoUpdater.allowPrerelease = settings.includePrerelease;
     autoUpdater.checkForUpdates().then((result) => {
-      // Inactive updater (dev run or missing app-update.yml) resolves to null
-      // and emits no events — resolve the check so the UI never hangs on
-      // "Checking for updates…".
+      // Inactive updater (dev run) resolves to null and emits no events —
+      // resolve the check so the UI never hangs on "Checking for updates…".
       if (!result) {
         this.send('update:not-available', {});
       }
@@ -100,8 +108,14 @@ export class UpdateController {
     return { started: true };
   }
 
-  /** Quit the app and run the installer (assisted wizard), relaunching on finish. */
+  /** Install (installed builds) or open the GitHub releases page (portable/zip). */
   installUpdate(): void {
+    // Portable/zip copies cannot install themselves — the "Get update" button
+    // points the user at the GitHub releases page for a manual download.
+    if (detectPortableBuild()) {
+      shell.openExternal(RELEASES_PAGE_URL).catch(() => {});
+      return;
+    }
     // isSilent=false shows the NSIS wizard; the main process must bypass the
     // window close interceptor before calling this (see main.ts).
     autoUpdater.quitAndInstall(false, true);

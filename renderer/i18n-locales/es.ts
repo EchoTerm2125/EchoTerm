@@ -318,7 +318,7 @@
     updCheckFailed: 'Error al buscar actualizaciones: {message}',
     updCheckFailedGeneric: 'Error al buscar actualizaciones. Inténtalo de nuevo más tarde.',
     updSmartScreenHint: 'Si Windows SmartScreen bloquea la actualización, es normal en compilaciones sin firma: haz clic en "Más información" y luego en "Ejecutar de todos modos".',
-    updPortableManual: 'La versión portable no admite actualizaciones automáticas. Abriendo la página de descarga de GitHub…',
+    updGetUpdate: 'Obtener actualización',
     updInstallUpdate: 'Instalar actualización',
     updInstallConfirmBody: 'Hay una actualización lista. Cerrar EchoTerm finalizará todas las sesiones de terminal. ¿Instalar ahora?',
 

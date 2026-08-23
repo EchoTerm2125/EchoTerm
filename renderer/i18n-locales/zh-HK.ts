@@ -311,7 +311,7 @@
     updCheckFailed: '更新檢查失敗：{message}',
     updCheckFailedGeneric: '檢查更新失敗，請稍後再試。',
     updSmartScreenHint: '如果 Windows SmartScreen 封鎖了更新，未簽署版本出現此情況屬正常——請按「詳細資訊」，然後選擇「仍要執行」。',
-    updPortableManual: 'Portable 版不支援自動更新，已開啟 GitHub 下載頁。',
+    updGetUpdate: '取得更新',
     updInstallUpdate: '安裝更新',
     updInstallConfirmBody: '更新已準備就緒。關閉 EchoTerm 會結束所有終端工作階段。現在安裝嗎？',
 

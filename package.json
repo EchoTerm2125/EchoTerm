@@ -46,6 +46,7 @@
       "renderer/styles.css",
       "package.json"
     ],
+    "afterPack": "scripts/after-pack.cjs",
     "win": {
       "target": "nsis",
       "icon": "build-assets/echoterm.ico",

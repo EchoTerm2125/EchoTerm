@@ -318,7 +318,7 @@
     updCheckFailed: 'Update-Suche fehlgeschlagen: {message}',
     updCheckFailedGeneric: 'Update-Prüfung fehlgeschlagen. Bitte versuchen Sie es später erneut.',
     updSmartScreenHint: 'Wenn Windows SmartScreen das Update blockiert, ist das bei unsignierten Builds zu erwarten — klicken Sie auf „Weitere Informationen“ und dann auf „Trotzdem ausführen“.',
-    updPortableManual: 'Die Portable-Version unterstützt keine automatischen Updates. Die GitHub-Downloadseite wird geöffnet…',
+    updGetUpdate: 'Update abrufen',
     updInstallUpdate: 'Update installieren',
     updInstallConfirmBody: 'Ein Update ist bereit. Das Schließen von EchoTerm beendet alle Terminalsitzungen. Jetzt installieren?',
 

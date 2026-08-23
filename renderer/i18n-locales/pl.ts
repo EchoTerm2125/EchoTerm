@@ -318,7 +318,7 @@
     updCheckFailed: 'Nie udało się sprawdzić aktualizacji: {message}',
     updCheckFailedGeneric: 'Nie udało się sprawdzić aktualizacji. Spróbuj ponownie później.',
     updSmartScreenHint: 'Jeśli Windows SmartScreen zablokuje aktualizację, jest to normalne w przypadku niepodpisanych wersji — kliknij „Więcej informacji”, a następnie „Uruchom mimo to”.',
-    updPortableManual: 'Wersja przenośna nie obsługuje automatycznych aktualizacji. Otwieram stronę pobierania GitHub…',
+    updGetUpdate: 'Pobierz aktualizację',
     updInstallUpdate: 'Zainstaluj aktualizację',
     updInstallConfirmBody: 'Aktualizacja jest gotowa. Zamknięcie EchoTerm zakończy wszystkie sesje terminala. Zainstalować teraz?',
 

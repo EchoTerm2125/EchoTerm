@@ -319,7 +319,7 @@
     updCheckFailed: 'Update check failed: {message}',
     updCheckFailedGeneric: 'Update check failed. Please try again later.',
     updSmartScreenHint: 'If Windows SmartScreen blocks the update, it is expected for unsigned builds — click "More info", then "Run anyway".',
-    updPortableManual: 'Portable build does not support auto-update. Opening the GitHub download page…',
+    updGetUpdate: 'Get update',
     updInstallUpdate: 'Install update',
     updInstallConfirmBody: 'An update is ready. Closing EchoTerm will end all terminal sessions. Install now?',
 

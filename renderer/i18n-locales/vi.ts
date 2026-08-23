@@ -318,7 +318,7 @@
     updCheckFailed: 'Kiểm tra cập nhật thất bại: {message}',
     updCheckFailedGeneric: 'Kiểm tra cập nhật thất bại. Vui lòng thử lại sau.',
     updSmartScreenHint: 'Nếu Windows SmartScreen chặn bản cập nhật, điều này là bình thường với bản không ký — bấm "Thông tin khác", rồi "Vẫn chạy".',
-    updPortableManual: 'Phiên bản portable không hỗ trợ tự động cập nhật. Đang mở trang tải xuống GitHub…',
+    updGetUpdate: 'Nhận bản cập nhật',
     updInstallUpdate: 'Cài đặt bản cập nhật',
     updInstallConfirmBody: 'Có bản cập nhật sẵn sàng. Đóng EchoTerm sẽ kết thúc mọi phiên thiết bị đầu cuối. Cài đặt ngay?',
 

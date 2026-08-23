@@ -318,7 +318,7 @@
     updCheckFailed: 'Falha ao verificar atualizações: {message}',
     updCheckFailedGeneric: 'Falha ao verificar atualizações. Tente novamente mais tarde.',
     updSmartScreenHint: 'Se o Windows SmartScreen bloquear a atualização, isso é esperado em builds não assinadas — clique em "Mais informações" e depois em "Executar mesmo assim".',
-    updPortableManual: 'A versão portátil não suporta atualização automática. Abrindo a página de download do GitHub…',
+    updGetUpdate: 'Obter atualização',
     updInstallUpdate: 'Instalar atualização',
     updInstallConfirmBody: 'Uma atualização está pronta. Fechar o EchoTerm encerrará todas as sessões de terminal. Instalar agora?',
 

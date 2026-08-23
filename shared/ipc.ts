@@ -220,14 +220,14 @@ export interface WindowApi {
   updateCheck(): Promise<{ started: boolean }>;
   updateGetSettings(): Promise<UpdateSettings>;
   updateSetSettings(patch: Partial<UpdateSettings>): Promise<UpdateSettings>;
+  /** Whether this copy is a portable/zip artifact (vs the NSIS install). */
+  updateGetBuildType(): Promise<{ portable: boolean }>;
   updateInstall(): Promise<IpcOutcome>;
   onUpdateAvailable(callback: (info: UpdateVersionInfo) => void): () => void;
   onUpdateNotAvailable(callback: () => void): () => void;
   onUpdateProgress(callback: (info: UpdateProgressInfo) => void): () => void;
   onUpdateDownloaded(callback: (info: UpdateVersionInfo) => void): () => void;
   onUpdateError(callback: (info: UpdateErrorInfo) => void): () => void;
-  /** Fired when a manual check runs on a portable build (no auto-update support). */
-  onUpdatePortable(callback: () => void): () => void;
 
   // Cache
   clearCache(): Promise<IpcOutcome>;

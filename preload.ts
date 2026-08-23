@@ -45,6 +45,7 @@ const api: WindowApi = {
   updateCheck: () => ipcRenderer.invoke('update:check'),
   updateGetSettings: () => ipcRenderer.invoke('update:get-settings'),
   updateSetSettings: (patch) => ipcRenderer.invoke('update:set-settings', patch),
+  updateGetBuildType: () => ipcRenderer.invoke('update:get-build-type'),
   updateInstall: () => ipcRenderer.invoke('update:install'),
   onUpdateAvailable: (callback) => {
     const listener = (_event: unknown, info: unknown) => callback(info as never);
@@ -70,11 +71,6 @@ const api: WindowApi = {
     const listener = (_event: unknown, info: unknown) => callback(info as never);
     ipcRenderer.on('update:error', listener);
     return () => ipcRenderer.removeListener('update:error', listener);
-  },
-  onUpdatePortable: (callback) => {
-    const listener = () => callback();
-    ipcRenderer.on('update:portable', listener);
-    return () => ipcRenderer.removeListener('update:portable', listener);
   },
 
   // ─── Cache ───────────────────────────────────────────────────────────────
