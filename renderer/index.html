@@ -230,6 +230,19 @@
     </div>
   </div>
 
+  <!-- ═══Update Dialog (available / downloading / ready to install)  ═══-->
+  <div id="updateDialog" class="confirm-overlay hidden" data-overlay>
+    <div class="confirm-box">
+      <div class="confirm-icon">⬇</div>
+      <div class="confirm-message" id="updateMessage"></div>
+      <div class="confirm-buttons">
+        <button id="updateRemind" class="confirm-btn confirm-btn-cancel" data-i18n="updRemindLater">Remind me in 30 days</button>
+        <button id="updateSkip" class="confirm-btn confirm-btn-cancel" data-i18n="updSkipVersion">Skip this version</button>
+        <button id="updateInstall" class="confirm-btn confirm-btn-primary" data-i18n="updDownloading">Downloading…</button>
+      </div>
+    </div>
+  </div>
+
   <!-- ═══Options panel  ═══-->
   <div id="optionsPanel" class="options-overlay hidden" data-overlay>
     <div class="options-window">
@@ -370,6 +383,34 @@
         </div>
         <div class="about-info">
           <div class="about-row"><span class="about-row-label" data-i18n="aboutVersion">Version</span><span class="about-row-value" id="aboutVersion">—</span></div>
+        </div>
+      </div>
+      <div class="options-card options-card-updates">
+        <div id="updStatusBanner" class="options-update-banner" data-state="idle">
+          <span class="options-update-dot"></span>
+          <div class="options-update-banner-body">
+            <span id="updStatusLine" class="options-update-status"></span>
+            <div id="updProgressTrack" class="options-update-progress hidden">
+              <div id="updProgressBar" class="options-update-progress-bar"></div>
+            </div>
+          </div>
+        </div>
+        <label class="options-toggle">
+          <span class="options-toggle-label" data-i18n="updCheckAutomatically">Check for updates automatically</span>
+          <input type="checkbox" id="optCheckUpdates" checked />
+          <span class="options-toggle-slider"></span>
+        </label>
+        <label class="options-toggle">
+          <span class="options-toggle-label" data-i18n="updIncludePrerelease">Include pre-release (beta) builds</span>
+          <input type="checkbox" id="optIncludePrerelease" />
+          <span class="options-toggle-slider"></span>
+        </label>
+        <div class="options-card-actions">
+          <button id="btnCheckUpdates" class="options-action-btn options-action-btn-primary" data-i18n="updCheckNow">Check for updates now</button>
+        </div>
+        <div id="updSkippedFooter" class="options-updates-footer hidden">
+          <span id="updSkippedInfo" class="options-updates-skipped"></span>
+          <button id="btnUndoSkip" class="options-link-btn" data-i18n="updUndoSkip">Undo skip</button>
         </div>
       </div>
     </div>

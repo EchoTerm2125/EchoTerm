@@ -41,6 +41,44 @@ const api: WindowApi = {
   // ─── App info (About page) ───────────────────────────────────────────────
   getAppInfo: () => ipcRenderer.invoke('app:info'),
 
+  // ─── Auto-update ─────────────────────────────────────────────────────────
+  updateCheck: () => ipcRenderer.invoke('update:check'),
+  updateGetSettings: () => ipcRenderer.invoke('update:get-settings'),
+  updateSetSettings: (patch) => ipcRenderer.invoke('update:set-settings', patch),
+  updateSkipVersion: (version) => ipcRenderer.invoke('update:skip-version', version),
+  updateRemindLater: () => ipcRenderer.invoke('update:remind-later'),
+  updateInstall: () => ipcRenderer.invoke('update:install'),
+  onUpdateAvailable: (callback) => {
+    const listener = (_event: unknown, info: unknown) => callback(info as never);
+    ipcRenderer.on('update:available', listener);
+    return () => ipcRenderer.removeListener('update:available', listener);
+  },
+  onUpdateNotAvailable: (callback) => {
+    const listener = () => callback();
+    ipcRenderer.on('update:not-available', listener);
+    return () => ipcRenderer.removeListener('update:not-available', listener);
+  },
+  onUpdateProgress: (callback) => {
+    const listener = (_event: unknown, info: unknown) => callback(info as never);
+    ipcRenderer.on('update:progress', listener);
+    return () => ipcRenderer.removeListener('update:progress', listener);
+  },
+  onUpdateDownloaded: (callback) => {
+    const listener = (_event: unknown, info: unknown) => callback(info as never);
+    ipcRenderer.on('update:downloaded', listener);
+    return () => ipcRenderer.removeListener('update:downloaded', listener);
+  },
+  onUpdateError: (callback) => {
+    const listener = (_event: unknown, info: unknown) => callback(info as never);
+    ipcRenderer.on('update:error', listener);
+    return () => ipcRenderer.removeListener('update:error', listener);
+  },
+  onUpdatePortable: (callback) => {
+    const listener = () => callback();
+    ipcRenderer.on('update:portable', listener);
+    return () => ipcRenderer.removeListener('update:portable', listener);
+  },
+
   // ─── Cache ───────────────────────────────────────────────────────────────
   clearCache: () => ipcRenderer.invoke('cache:clear'),
 

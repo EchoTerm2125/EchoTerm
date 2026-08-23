@@ -30,4 +30,5 @@ import './menus';
 import './ssh-panel';
 import './tabs';
 import './terminal';
+import './update';
 import './app';

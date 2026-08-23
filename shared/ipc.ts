@@ -172,6 +172,30 @@ export interface AppInfo {
   version: string;
 }
 
+// ─── Auto-update ─────────────────────────────────────────────────────────────
+export interface UpdateSettings {
+  /** Offer prerelease (beta) builds when checking for updates. */
+  includePrerelease: boolean;
+  /** Run the automatic startup check (and honor the 30-day reminder window). */
+  checkForUpdatesAutomatically: boolean;
+  /** Version string the user dismissed with "Skip this version". */
+  skippedVersion: string | null;
+  /** Epoch ms before which automatic checks are suppressed. */
+  nextCheckAt: number | null;
+}
+
+export interface UpdateVersionInfo {
+  version: string;
+}
+
+export interface UpdateProgressInfo {
+  percent: number;
+}
+
+export interface UpdateErrorInfo {
+  message: string;
+}
+
 // ─── The typed bridge exposed by preload.ts as window.api ───────────────────
 export interface WindowApi {
   // Shell
@@ -195,6 +219,21 @@ export interface WindowApi {
 
   // App info (About page)
   getAppInfo(): Promise<AppInfo>;
+
+  // Auto-update
+  updateCheck(): Promise<{ started: boolean }>;
+  updateGetSettings(): Promise<UpdateSettings>;
+  updateSetSettings(patch: Partial<UpdateSettings>): Promise<UpdateSettings>;
+  updateSkipVersion(version: string): Promise<IpcOutcome>;
+  updateRemindLater(): Promise<IpcOutcome>;
+  updateInstall(): Promise<IpcOutcome>;
+  onUpdateAvailable(callback: (info: UpdateVersionInfo) => void): () => void;
+  onUpdateNotAvailable(callback: () => void): () => void;
+  onUpdateProgress(callback: (info: UpdateProgressInfo) => void): () => void;
+  onUpdateDownloaded(callback: (info: UpdateVersionInfo) => void): () => void;
+  onUpdateError(callback: (info: UpdateErrorInfo) => void): () => void;
+  /** Fired when a manual check runs on a portable build (no auto-update support). */
+  onUpdatePortable(callback: () => void): () => void;
 
   // Cache
   clearCache(): Promise<IpcOutcome>;

@@ -7,6 +7,7 @@ import { ElectronDialogService } from './src/main/infrastructure/electron-dialog
 import { FileConnectionRepository } from './src/main/infrastructure/file-connection-repository';
 import { FileFolderRepository } from './src/main/infrastructure/file-folder-repository';
 import { FileUserRepository } from './src/main/infrastructure/file-user-repository';
+import { FileUpdateSettingsStore } from './src/main/infrastructure/file-update-settings';
 import { NodePtyGateway } from './src/main/infrastructure/node-pty-gateway';
 import { WindowsShellDetector } from './src/main/infrastructure/windows-shell-detector';
 
@@ -24,6 +25,7 @@ import {
 import { SessionRegistry } from './src/main/controllers/session-registry';
 import { SshController } from './src/main/controllers/ssh-controller';
 import { TerminalController } from './src/main/controllers/terminal-controller';
+import { UpdateController } from './src/main/controllers/update-controller';
 
 // ─── Global error handlers ──────────────────────────────────────────────────
 process.on('uncaughtException', (err) => {
@@ -68,6 +70,11 @@ const sendToRenderer = (channel: string, ...args: unknown[]) => {
   }
 };
 const dialogs = new ElectronDialogService(() => mainWindow);
+
+const updateController = new UpdateController(
+  new FileUpdateSettingsStore(path.join(app.getPath('userData'), 'settings.json')),
+  sendToRenderer,
+);
 
 const terminalController = new TerminalController(
   new SpawnShellSession(shellDetector, ptyGateway),
@@ -208,6 +215,13 @@ if (gotTheLock) {
 
     createWindow();
 
+    // Auto-update: packaged builds check for updates shortly after launch
+    // so the check never competes with terminal spawn at startup.
+    updateController.init();
+    if (app.isPackaged) {
+      setTimeout(() => updateController.checkForUpdates(false), 5000);
+    }
+
     app.on('activate', () => {
       if (BrowserWindow.getAllWindows().length === 0) createWindow();
     });
@@ -248,5 +262,13 @@ ipcMain.handle('ssh:open-folder', (event, folderId) => sshController.openFolder(
 ipcMain.handle('ssh:import-config', (event, customPath) => sshController.importConfig(customPath));
 ipcMain.handle('ssh:import-apply', (event, request) => sshController.importApply(request));
 ipcMain.handle('ssh:export-config', () => sshController.exportConfig());
+
+// ─── Auto-update IPC handlers ───────────────────────────────────────────────
+ipcMain.handle('update:check', () => updateController.checkForUpdates(true));
+ipcMain.handle('update:get-settings', () => updateController.getSettings());
+ipcMain.handle('update:set-settings', (event, patch) => updateController.setSettings(patch));
+ipcMain.handle('update:skip-version', (event, version) => updateController.skipVersion(version));
+ipcMain.handle('update:remind-later', () => updateController.remindLater());
+ipcMain.handle('update:install', () => updateController.installUpdate());
 
 export {};
