@@ -6,7 +6,7 @@
 
 import fs from 'fs';
 import path from 'path';
-import { shell } from 'electron';
+import { app, shell } from 'electron';
 import { autoUpdater } from 'electron-updater';
 
 import type { UpdateSettings, UpdateSettingsStore } from '../../domain/ports/update-settings';
@@ -51,6 +51,13 @@ export class UpdateController {
     // Portable/zip builds check for updates but never download or install.
     autoUpdater.autoDownload = false;
     autoUpdater.autoInstallOnAppQuit = false;
+
+    // Dev runs (`npm start`) are not packaged, so the updater is inactive by
+    // default. Let it consult dev-app-update.yml so the real check can be
+    // exercised from the About section's "Check for updates now" button.
+    if (!app.isPackaged) {
+      autoUpdater.forceDevUpdateConfig = true;
+    }
 
     autoUpdater.on('update-available', (info) => {
       this.currentVersion = info.version;

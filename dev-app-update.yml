@@ -1,0 +1,8 @@
+# Dev-only auto-update config (read by electron-updater when running unpackaged,
+# e.g. `npm start`, via autoUpdater.forceDevUpdateConfig).
+# Lets you exercise the real update check against the GitHub feed without a
+# packaged build. Not shipped inside any artifact.
+provider: github
+owner: EchoTerm2125
+repo: EchoTerm
+updaterCacheDirName: echoterm-updater
