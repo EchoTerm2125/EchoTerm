@@ -48,6 +48,9 @@
 !macroend
 
 !macro customInstall
+  ; Remove the portable/zip marker baked into the build (see scripts/after-pack.cjs)
+  ; so an installed copy is never mistaken for the portable artifact at runtime.
+  Delete "$INSTDIR\resources\echoterm-portable"
   ${ifNot} ${isNoDesktopShortcut}
     ${if} $DesktopShortcutOpt == "1"
       CreateShortCut "$newDesktopLink" "$appExe" "" "$appExe" 0 "" "" "${APP_DESCRIPTION}"

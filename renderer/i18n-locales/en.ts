@@ -305,6 +305,24 @@
     aboutDescription: 'EchoTerm — split-view terminal app with echo input',
     aboutVersion: 'Version',
 
+    // ── Updates ──────────────────────────────────────────────────────────────
+    updCheckAutomatically: 'Check for updates automatically',
+    updIncludePrerelease: 'Include pre-release (beta) builds',
+    updCheckNow: 'Check for updates now',
+    updStatusChecking: 'Checking for updates…',
+    updStatusUpToDate: 'You are up to date',
+    updStatusAvailable: 'Update available: {version}',
+    updStatusDownloading: 'Downloading…',
+    updStatusReady: 'Ready to install',
+    updStatusIdle: 'Not checked yet',
+    updInstallNow: 'Restart & Install',
+    updCheckFailed: 'Update check failed: {message}',
+    updCheckFailedGeneric: 'Update check failed. Please try again later.',
+    updSmartScreenHint: 'If Windows SmartScreen blocks the update, it is expected for unsigned builds — click "More info", then "Run anyway".',
+    updGetUpdate: 'Get update',
+    updInstallUpdate: 'Install update',
+    updInstallConfirmBody: 'An update is ready. Closing EchoTerm will end all terminal sessions. Install now?',
+
     // ── Dialog buttons ───────────────────────────────────────────────────────
     genericSave: 'Save',
     genericCancel: 'Cancel',

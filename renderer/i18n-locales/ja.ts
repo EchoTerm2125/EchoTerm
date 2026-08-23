@@ -304,6 +304,24 @@
     aboutDescription: 'EchoTerm — エコー入力対応の分割ビュー・ターミナルアプリ',
     aboutVersion: 'バージョン',
 
+    // ── Updates ──────────────────────────────────────────────────────────────
+    updCheckAutomatically: '更新を自動的に確認する',
+    updIncludePrerelease: 'プレリリース（ベータ）版を含める',
+    updCheckNow: '今すぐ更新を確認',
+    updStatusChecking: '更新を確認しています…',
+    updStatusUpToDate: '最新バージョンです',
+    updStatusAvailable: '更新が利用可能です: {version}',
+    updStatusDownloading: 'ダウンロード中…',
+    updStatusReady: 'インストール準備完了',
+    updStatusIdle: 'まだ確認していません',
+    updInstallNow: '再起動してインストール',
+    updCheckFailed: '更新の確認に失敗しました: {message}',
+    updCheckFailedGeneric: '更新の確認に失敗しました。後でもう一度お試しください。',
+    updSmartScreenHint: 'Windows SmartScreen が更新をブロックした場合、未署名ビルドでは想定どおりです。「詳細情報」→「実行」を選択してください。',
+    updGetUpdate: '更新を取得',
+    updInstallUpdate: '更新をインストール',
+    updInstallConfirmBody: '更新の準備ができました。EchoTerm を閉じるとすべてのターミナルセッションが終了します。今すぐインストールしますか？',
+
     // ── Dialog buttons ───────────────────────────────────────────────────────
     genericSave: '保存',
     genericCancel: 'キャンセル',

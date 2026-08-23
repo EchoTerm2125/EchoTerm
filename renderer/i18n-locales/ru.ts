@@ -304,6 +304,24 @@
     aboutDescription: 'EchoTerm — терминальное приложение с разделённым видом и эхо-вводом',
     aboutVersion: 'Версия',
 
+    // ── Updates ──────────────────────────────────────────────────────────────
+    updCheckAutomatically: 'Проверять обновления автоматически',
+    updIncludePrerelease: 'Включать предварительные (бета) версии',
+    updCheckNow: 'Проверить обновления сейчас',
+    updStatusChecking: 'Проверка обновлений…',
+    updStatusUpToDate: 'У вас последняя версия',
+    updStatusAvailable: 'Доступно обновление: {version}',
+    updStatusDownloading: 'Загрузка…',
+    updStatusReady: 'Готово к установке',
+    updStatusIdle: 'Ещё не проверено',
+    updInstallNow: 'Перезапустить и установить',
+    updCheckFailed: 'Не удалось проверить обновления: {message}',
+    updCheckFailedGeneric: 'Не удалось проверить обновления. Повторите попытку позже.',
+    updSmartScreenHint: 'Если Windows SmartScreen блокирует обновление, это ожидаемо для неподписанных сборок — нажмите «Подробнее», затем «Выполнить в любом случае».',
+    updGetUpdate: 'Получить обновление',
+    updInstallUpdate: 'Установить обновление',
+    updInstallConfirmBody: 'Обновление готово. Закрытие EchoTerm завершит все сеансы терминала. Установить сейчас?',
+
     // ── Dialog buttons ───────────────────────────────────────────────────────
     genericSave: 'Сохранить',
     genericCancel: 'Отмена',

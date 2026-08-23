@@ -297,6 +297,24 @@
     aboutDescription: 'EchoTerm — 支持回声输入的分屏终端应用',
     aboutVersion: '版本',
 
+    // ── Updates ──────────────────────────────────────────────────────────────
+    updCheckAutomatically: '自动检查更新',
+    updIncludePrerelease: '包含预发布（测试版）版本',
+    updCheckNow: '立即检查更新',
+    updStatusChecking: '正在检查更新…',
+    updStatusUpToDate: '你已是最新版本',
+    updStatusAvailable: '有新版本可用：{version}',
+    updStatusDownloading: '正在下载…',
+    updStatusReady: '已准备好安装',
+    updStatusIdle: '尚未检查',
+    updInstallNow: '重启并安装',
+    updCheckFailed: '更新检查失败：{message}',
+    updCheckFailedGeneric: '检查更新失败，请稍后重试。',
+    updSmartScreenHint: '如果 Windows SmartScreen 阻止了更新，未签名版本出现此情况是正常的——请点击“更多信息”，然后选择“仍要运行”。',
+    updGetUpdate: '获取更新',
+    updInstallUpdate: '安装更新',
+    updInstallConfirmBody: '更新已准备就绪。关闭 EchoTerm 将结束所有终端会话。现在安装吗？',
+
     // ── Error messages ───────────────────────────────────────────────────────
     errorUnknownShell: '未知 Shell: {shell}',
     errorConnectionNotFound: '未找到连接。',

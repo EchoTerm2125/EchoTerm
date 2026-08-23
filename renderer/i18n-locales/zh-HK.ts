@@ -297,6 +297,24 @@
     aboutDescription: 'EchoTerm — 支援迴聲輸入的分屏終端應用',
     aboutVersion: '版本',
 
+    // ── Updates ──────────────────────────────────────────────────────────────
+    updCheckAutomatically: '自動檢查更新',
+    updIncludePrerelease: '包含預發佈（測試版）版本',
+    updCheckNow: '立即檢查更新',
+    updStatusChecking: '正在檢查更新…',
+    updStatusUpToDate: '你已是最新版本',
+    updStatusAvailable: '有新版本可用：{version}',
+    updStatusDownloading: '正在下載…',
+    updStatusReady: '已準備好安裝',
+    updStatusIdle: '尚未檢查',
+    updInstallNow: '重新啟動並安裝',
+    updCheckFailed: '更新檢查失敗：{message}',
+    updCheckFailedGeneric: '檢查更新失敗，請稍後再試。',
+    updSmartScreenHint: '如果 Windows SmartScreen 封鎖了更新，未簽署版本出現此情況屬正常——請按「詳細資訊」，然後選擇「仍要執行」。',
+    updGetUpdate: '取得更新',
+    updInstallUpdate: '安裝更新',
+    updInstallConfirmBody: '更新已準備就緒。關閉 EchoTerm 會結束所有終端工作階段。現在安裝嗎？',
+
     // ── Error messages ───────────────────────────────────────────────────────
     errorUnknownShell: '未知 Shell: {shell}',
     errorConnectionNotFound: '找不到連線。',

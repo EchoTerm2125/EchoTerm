@@ -304,6 +304,24 @@
     aboutDescription: 'EchoTerm — aplicativo de terminal com visualização dividida e entrada eco',
     aboutVersion: 'Versão',
 
+    // ── Updates ──────────────────────────────────────────────────────────────
+    updCheckAutomatically: 'Verificar atualizações automaticamente',
+    updIncludePrerelease: 'Incluir versões pré-lançamento (beta)',
+    updCheckNow: 'Verificar atualizações agora',
+    updStatusChecking: 'Verificando atualizações…',
+    updStatusUpToDate: 'Você está atualizado',
+    updStatusAvailable: 'Atualização disponível: {version}',
+    updStatusDownloading: 'Baixando…',
+    updStatusReady: 'Pronto para instalar',
+    updStatusIdle: 'Ainda não verificado',
+    updInstallNow: 'Reiniciar e instalar',
+    updCheckFailed: 'Falha ao verificar atualizações: {message}',
+    updCheckFailedGeneric: 'Falha ao verificar atualizações. Tente novamente mais tarde.',
+    updSmartScreenHint: 'Se o Windows SmartScreen bloquear a atualização, isso é esperado em builds não assinadas — clique em "Mais informações" e depois em "Executar mesmo assim".',
+    updGetUpdate: 'Obter atualização',
+    updInstallUpdate: 'Instalar atualização',
+    updInstallConfirmBody: 'Uma atualização está pronta. Fechar o EchoTerm encerrará todas as sessões de terminal. Instalar agora?',
+
     // ── Dialog buttons ───────────────────────────────────────────────────────
     genericSave: 'Salvar',
     genericCancel: 'Cancelar',

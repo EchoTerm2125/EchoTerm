@@ -1,6 +1,6 @@
 {
   "name": "echoterm",
-  "version": "0.1.2",
+  "version": "0.2.0-beta.1",
   "main": "build/main.js",
   "scripts": {
     "compile": "node scripts/build.mjs",
@@ -28,6 +28,7 @@
   "dependencies": {
     "@xterm/addon-fit": "^0.11.0",
     "@xterm/xterm": "^6.0.0",
+    "electron-updater": "^6.8.9",
     "node-pty": "^1.1.0",
     "split.js": "^1.6.5"
   },
@@ -45,18 +46,30 @@
       "renderer/styles.css",
       "package.json"
     ],
+    "afterPack": "scripts/after-pack.cjs",
     "win": {
       "target": "nsis",
-      "icon": "build-assets/echoterm.ico"
+      "icon": "build-assets/echoterm.ico",
+      "artifactName": "${productName}-Portable-${version}-${arch}-${os}.${ext}"
     },
     "nsis": {
-      "artifactName": "${productName}-Setup-${version}.${ext}",
+      "artifactName": "${productName}-Setup-${version}-${arch}-${os}.${ext}",
       "oneClick": false,
       "allowToChangeInstallationDirectory": true,
       "createDesktopShortcut": false,
       "include": "build-assets/installer.nsh",
       "license": "LICENSE"
-    }
+    },
+    "portable": {
+      "artifactName": "${productName}-Portable-${version}-${arch}-${os}.${ext}"
+    },
+    "publish": [
+      {
+        "provider": "github",
+        "owner": "EchoTerm2125",
+        "repo": "EchoTerm"
+      }
+    ]
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",

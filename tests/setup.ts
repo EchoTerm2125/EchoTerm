@@ -84,6 +84,24 @@ window.api = {
     name: 'EchoTerm',
     version: '1.0.0',
   })),
+  // Auto-update
+  updateCheck: vi.fn(() => Promise.resolve({ started: true })),
+  updateGetSettings: vi.fn(() => Promise.resolve({
+    includePrerelease: false,
+    checkForUpdatesAutomatically: true,
+  })),
+  updateSetSettings: vi.fn((patch) => Promise.resolve({
+    includePrerelease: false,
+    checkForUpdatesAutomatically: true,
+    ...patch,
+  })),
+  updateInstall: vi.fn(() => Promise.resolve({ success: true })),
+  updateGetBuildType: vi.fn(() => Promise.resolve({ portable: false })),
+  onUpdateAvailable: vi.fn(() => vi.fn()),
+  onUpdateNotAvailable: vi.fn(() => vi.fn()),
+  onUpdateProgress: vi.fn(() => vi.fn()),
+  onUpdateDownloaded: vi.fn(() => vi.fn()),
+  onUpdateError: vi.fn(() => vi.fn()),
   // Window controls (custom titlebar)
   minimizeWindow: vi.fn(),
   toggleMaximizeWindow: vi.fn(),
@@ -152,6 +170,10 @@ const DOM_IDS = [
   'confirmDontShowAgain', 'pastePreviewDialog', 'pasteLineCount',
   'pastePreviewText', 'pastePreviewDontShow', 'pastePreviewCancel',
   'pastePreviewConfirm',
+  // Auto-update
+  'optCheckUpdates', 'optIncludePrerelease', 'btnCheckUpdates',
+  'updStatusBanner', 'updStatusLine', 'updProgressTrack', 'updProgressBar',
+  'btnInstallUpdate',
   // Language dropdown
   'langSelect', 'langSelectTrigger', 'langSelectLabel',
   'langSelectDropdown', 'langSearchInput', 'langOptionsList',
@@ -172,7 +194,8 @@ function scaffoldDom() {
     } else if (id === 'confirmDontShowAgain' || id === 'optTabCloseConfirm' ||
                id === 'optWindowCloseConfirm' || id === 'optGroupCloseConfirm' ||
                id === 'optSshJumpWarn' || id === 'optPastePreview' ||
-               id === 'optRightClickPaste' || id === 'pastePreviewDontShow') {
+               id === 'optRightClickPaste' || id === 'pastePreviewDontShow' ||
+               id === 'optCheckUpdates' || id === 'optIncludePrerelease') {
       el = document.createElement('input');
       el.type = 'checkbox';
     } else if (id === 'pastePreviewText') {

@@ -92,15 +92,15 @@
       currentLocale = localeCode;
       localStorage.setItem('i18nLocale', localeCode);
       localizeDom();
-      if (_onLocaleChange) _onLocaleChange(localeCode);
+      for (const fn of _localeChangeListeners) fn(localeCode);
     } else {
       console.warn(`i18n: locale "${localeCode}" is not registered. Load its file first.`);
     }
   }
 
-  let _onLocaleChange = null;
+  const _localeChangeListeners: Array<(localeCode: string) => void> = [];
   function onLocaleChange(fn) {
-    _onLocaleChange = fn;
+    _localeChangeListeners.push(fn);
   }
 
   function getLocale() {

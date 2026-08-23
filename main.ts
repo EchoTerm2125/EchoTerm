@@ -7,6 +7,7 @@ import { ElectronDialogService } from './src/main/infrastructure/electron-dialog
 import { FileConnectionRepository } from './src/main/infrastructure/file-connection-repository';
 import { FileFolderRepository } from './src/main/infrastructure/file-folder-repository';
 import { FileUserRepository } from './src/main/infrastructure/file-user-repository';
+import { FileUpdateSettingsStore } from './src/main/infrastructure/file-update-settings';
 import { NodePtyGateway } from './src/main/infrastructure/node-pty-gateway';
 import { WindowsShellDetector } from './src/main/infrastructure/windows-shell-detector';
 
@@ -24,6 +25,7 @@ import {
 import { SessionRegistry } from './src/main/controllers/session-registry';
 import { SshController } from './src/main/controllers/ssh-controller';
 import { TerminalController } from './src/main/controllers/terminal-controller';
+import { UpdateController } from './src/main/controllers/update-controller';
 
 // ─── Global error handlers ──────────────────────────────────────────────────
 process.on('uncaughtException', (err) => {
@@ -43,6 +45,10 @@ const shellDetector = new WindowsShellDetector();
 const sessionRegistry = new SessionRegistry();
 
 let mainWindow = null;
+
+// Set when the user confirmed the update install: the window close interceptor
+// must let quitAndInstall() close the window without asking the renderer again.
+let installingUpdate = false;
 
 // ─── Single instance: only one EchoTerm window may be open ──────────────────
 const gotTheLock = app.requestSingleInstanceLock();
@@ -68,6 +74,11 @@ const sendToRenderer = (channel: string, ...args: unknown[]) => {
   }
 };
 const dialogs = new ElectronDialogService(() => mainWindow);
+
+const updateController = new UpdateController(
+  new FileUpdateSettingsStore(path.join(app.getPath('userData'), 'settings.json')),
+  sendToRenderer,
+);
 
 const terminalController = new TerminalController(
   new SpawnShellSession(shellDetector, ptyGateway),
@@ -129,6 +140,9 @@ function createWindow() {
   }
 
   mainWindow.on('close', (e) => {
+    // Installing an update: the user already confirmed in the install warning,
+    // so let the window close and the installer run.
+    if (installingUpdate) return;
     // Prevent immediate close — ask renderer to confirm first
     e.preventDefault();
     mainWindow.webContents.send('app:confirm-close');
@@ -208,6 +222,13 @@ if (gotTheLock) {
 
     createWindow();
 
+    // Auto-update: packaged builds check for updates shortly after launch
+    // so the check never competes with terminal spawn at startup.
+    updateController.init();
+    if (app.isPackaged) {
+      setTimeout(() => updateController.checkForUpdates(false), 5000);
+    }
+
     app.on('activate', () => {
       if (BrowserWindow.getAllWindows().length === 0) createWindow();
     });
@@ -248,5 +269,31 @@ ipcMain.handle('ssh:open-folder', (event, folderId) => sshController.openFolder(
 ipcMain.handle('ssh:import-config', (event, customPath) => sshController.importConfig(customPath));
 ipcMain.handle('ssh:import-apply', (event, request) => sshController.importApply(request));
 ipcMain.handle('ssh:export-config', () => sshController.exportConfig());
+
+// ─── Auto-update IPC handlers ───────────────────────────────────────────────
+ipcMain.handle('update:check', () => updateController.checkForUpdates(true));
+ipcMain.handle('update:get-settings', () => updateController.getSettings());
+ipcMain.handle('update:set-settings', (event, patch) => updateController.setSettings(patch));
+ipcMain.handle('update:get-build-type', () => ({ portable: updateController.isPortableBuild() }));
+ipcMain.handle('update:install', () => {
+  // Portable/zip builds open the GitHub releases page instead — no app close,
+  // so no need to bypass the close interceptor. Installed builds: the renderer
+  // already warned the user and got confirmation, so let quitAndInstall close
+  // the window and run the (assisted) installer. The flag is only set for
+  // packaged, non-portable runs — that is the only path where quitAndInstall
+  // actually quits; dev runs no-op (electron-updater dispatches an async
+  // 'error' and returns without quitting), so the flag must not linger there.
+  if (!updateController.isPortableBuild() && app.isPackaged) {
+    installingUpdate = true;
+  }
+  try {
+    updateController.installUpdate();
+  } catch (err) {
+    // The quit-and-install did not proceed — restore the close interceptor so
+    // future window closes still ask the renderer for confirmation.
+    installingUpdate = false;
+    console.error('Update install failed:', err);
+  }
+});
 
 export {};

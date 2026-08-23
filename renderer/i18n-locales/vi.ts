@@ -304,6 +304,24 @@
     aboutDescription: 'EchoTerm — ứng dụng terminal chia màn hình với nhập echo',
     aboutVersion: 'Phiên bản',
 
+    // ── Updates ──────────────────────────────────────────────────────────────
+    updCheckAutomatically: 'Tự động kiểm tra cập nhật',
+    updIncludePrerelease: 'Bao gồm bản phát hành thử (beta)',
+    updCheckNow: 'Kiểm tra cập nhật ngay',
+    updStatusChecking: 'Đang kiểm tra cập nhật…',
+    updStatusUpToDate: 'Bạn đang dùng phiên bản mới nhất',
+    updStatusAvailable: 'Có bản cập nhật: {version}',
+    updStatusDownloading: 'Đang tải xuống…',
+    updStatusReady: 'Sẵn sàng cài đặt',
+    updStatusIdle: 'Chưa kiểm tra',
+    updInstallNow: 'Khởi động lại và cài đặt',
+    updCheckFailed: 'Kiểm tra cập nhật thất bại: {message}',
+    updCheckFailedGeneric: 'Kiểm tra cập nhật thất bại. Vui lòng thử lại sau.',
+    updSmartScreenHint: 'Nếu Windows SmartScreen chặn bản cập nhật, điều này là bình thường với bản không ký — bấm "Thông tin khác", rồi "Vẫn chạy".',
+    updGetUpdate: 'Nhận bản cập nhật',
+    updInstallUpdate: 'Cài đặt bản cập nhật',
+    updInstallConfirmBody: 'Có bản cập nhật sẵn sàng. Đóng EchoTerm sẽ kết thúc mọi phiên thiết bị đầu cuối. Cài đặt ngay?',
+
     // ── Dialog buttons ───────────────────────────────────────────────────────
     genericSave: 'Lưu',
     genericCancel: 'Hủy',

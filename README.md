@@ -88,8 +88,8 @@ There are more features waiting for your exploration — poke around and see wha
 
 Grab the latest release:
 
-- **Installer** (`EchoTerm-Setup-x.x.x.exe`) — the standard Windows installer
-- **Portable ZIP** (`EchoTerm-x.x.x-win.zip`) — unzip it once, then just run `EchoTerm.exe`
+- **Installer** (`EchoTerm-Setup-x.x.x-x64-win.exe`) — the standard Windows installer
+- **Portable ZIP** (`EchoTerm-Portable-x.x.x-x64-win.zip`) — unzip it once, then just run `EchoTerm.exe`
 
 ---
 

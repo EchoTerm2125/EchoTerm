@@ -78,9 +78,13 @@ export default defineConfig(
 
   // ─── Build scripts & JS configs (Node) ────────────────────────────────────
   {
-    files: ['scripts/**/*.mjs', 'vitest.config.js', 'eslint.config.mjs', '.dependency-cruiser.cjs'],
+    files: ['scripts/**/*.mjs', 'scripts/**/*.cjs', 'vitest.config.js', 'eslint.config.mjs', '.dependency-cruiser.cjs'],
     languageOptions: {
       globals: { ...globals.node },
+    },
+    rules: {
+      // CJS build hooks (e.g. scripts/after-pack.cjs) use require()/module
+      '@typescript-eslint/no-require-imports': 'off',
     },
   },
 

@@ -304,6 +304,24 @@
     aboutDescription: 'EchoTerm — bölünmüş görünüm ve yankı girişli terminal uygulaması',
     aboutVersion: 'Sürüm',
 
+    // ── Updates ──────────────────────────────────────────────────────────────
+    updCheckAutomatically: 'Güncellemeleri otomatik kontrol et',
+    updIncludePrerelease: 'Ön sürüm (beta) yapılarını dahil et',
+    updCheckNow: 'Şimdi güncellemeleri kontrol et',
+    updStatusChecking: 'Güncellemeler kontrol ediliyor…',
+    updStatusUpToDate: 'En son sürümdesiniz',
+    updStatusAvailable: 'Güncelleme mevcut: {version}',
+    updStatusDownloading: 'İndiriliyor…',
+    updStatusReady: 'Kuruluma hazır',
+    updStatusIdle: 'Henüz denetlenmedi',
+    updInstallNow: 'Yeniden başlat ve kur',
+    updCheckFailed: 'Güncelleme kontrolü başarısız: {message}',
+    updCheckFailedGeneric: 'Güncelleme kontrolü başarısız oldu. Lütfen daha sonra tekrar deneyin.',
+    updSmartScreenHint: 'Windows SmartScreen güncellemeyi engellerse, imzasız derlemelerde bu beklenen bir durumdur — "Diğer bilgiler" ve ardından "Yine de çalıştır" seçeneğine tıklayın.',
+    updGetUpdate: 'Güncellemeyi al',
+    updInstallUpdate: 'Güncellemeyi kur',
+    updInstallConfirmBody: 'Bir güncelleme hazır. EchoTerm kapatıldığında tüm terminal oturumları sona erecek. Şimdi kurulsun mu?',
+
     // ── Dialog buttons ───────────────────────────────────────────────────────
     genericSave: 'Kaydet',
     genericCancel: 'İptal',

@@ -388,7 +388,13 @@
     _confirmOk.textContent = App.__(okLabelKey || 'confirmClose');
     _confirmCallback = callback;
     _confirmStorageKey = storageKey || null;
-    if (_confirmDontShow) _confirmDontShow.checked = false;
+    if (_confirmDontShow) {
+      _confirmDontShow.checked = false;
+      // Without a storage key the dialog always warns — hide the now-pointless
+      // "Don't show this again" checkbox (e.g. the update-install warning).
+      const rememberLabel = _confirmDontShow.closest('.confirm-remember') as HTMLElement | null;
+      if (rememberLabel) rememberLabel.classList.toggle('hidden', !storageKey);
+    }
     _confirmDialog.classList.remove('hidden');
   }
 
