@@ -1,9 +1,9 @@
 /* ═══════════════════════════════════════════════════════════════════════════
    EchoTerm — Auto-update UI
-   Status banner (the "Updates" section of the options panel) plus the title-bar
-   install button. Installed builds download in the background and the button
-   installs; portable/zip builds never download and the button opens the GitHub
-   releases page instead.
+   Status banner (the "Updates" section of the options panel) plus the install
+   buttons in the title bar and the Updates banner. Installed builds download
+   in the background and the buttons install; portable/zip builds never
+   download and the buttons open the GitHub releases page instead.
    All persistence lives in the main process (settings.json); this module only
    reflects it over IPC.
    ═══════════════════════════════════════════════════════════════════════════ */
@@ -24,6 +24,8 @@ import type { UpdateSettings } from '../shared/ipc';
   let btnCheckUpdates: HTMLButtonElement | null;
   let btnInstallUpdate: HTMLButtonElement | null;
   let btnInstallUpdateLabel: HTMLElement | null;
+  let btnInstallBanner: HTMLButtonElement | null;
+  let btnInstallBannerLabel: HTMLElement | null;
   let updStatusBanner: HTMLElement | null;
   let updStatusLine: HTMLElement | null;
   let updProgressTrack: HTMLElement | null;
@@ -47,6 +49,8 @@ import type { UpdateSettings } from '../shared/ipc';
     btnCheckUpdates = document.getElementById('btnCheckUpdates') as HTMLButtonElement | null;
     btnInstallUpdate = document.getElementById('btnInstallUpdate') as HTMLButtonElement | null;
     btnInstallUpdateLabel = document.getElementById('btnInstallUpdateLabel');
+    btnInstallBanner = document.getElementById('btnInstallBanner') as HTMLButtonElement | null;
+    btnInstallBannerLabel = document.getElementById('btnInstallBannerLabel');
     updStatusBanner = document.getElementById('updStatusBanner');
     updStatusLine = document.getElementById('updStatusLine');
     updProgressTrack = document.getElementById('updProgressTrack');
@@ -97,7 +101,39 @@ import type { UpdateSettings } from '../shared/ipc';
     }
   }
 
+  // The manual check button and the update toggles are disabled while an
+  // update operation is in flight (checking/downloading) or a downloaded
+  // update is pending install; every other state — including 'error' —
+  // re-enables them so the user can retry.
+  function updateControlsDisabled() {
+    const busy =
+      statusState === 'checking' ||
+      statusState === 'downloading' ||
+      statusState === 'ready';
+    for (const el of [btnCheckUpdates, optCheckUpdates, optIncludePrerelease]) {
+      if (el) el.disabled = busy;
+    }
+  }
+
+  // Title-bar and Updates-banner install buttons share one visibility rule:
+  // portable/zip builds show them as soon as an update is available (clicking
+  // opens the GitHub page); installed builds only after the installer is
+  // downloaded (clicking installs). Hidden at all other times.
+  function updateInstallButtons() {
+    const show = isPortable ? statusState === 'available' : statusState === 'ready';
+    const label = isPortable ? App.__('updGetUpdate') : App.__('updInstallUpdate');
+    for (const btn of [btnInstallUpdate, btnInstallBanner]) {
+      if (!btn) continue;
+      btn.classList.toggle('hidden', !show);
+      if (show) btn.title = label;
+    }
+    if (show && btnInstallUpdateLabel) btnInstallUpdateLabel.textContent = label;
+    if (show && btnInstallBannerLabel) btnInstallBannerLabel.textContent = label;
+  }
+
   function renderStatus() {
+    updateControlsDisabled();
+    updateInstallButtons();
     if (!updStatusLine || !updStatusBanner) return;
     updStatusLine.textContent = statusMessage(statusState);
     updStatusBanner.dataset.state = statusState;
@@ -110,18 +146,6 @@ import type { UpdateSettings } from '../shared/ipc';
         updProgressBar.style.width = '0';
       }
     }
-    // Title-bar button: portable/zip builds show it as soon as an update is
-    // available (clicking opens the GitHub page); installed builds only after
-    // the installer is downloaded (clicking installs).
-    if (btnInstallUpdate) {
-      const show = isPortable ? statusState === 'available' : statusState === 'ready';
-      btnInstallUpdate.classList.toggle('hidden', !show);
-      if (show) {
-        const label = isPortable ? App.__('updGetUpdate') : App.__('updInstallUpdate');
-        if (btnInstallUpdateLabel) btnInstallUpdateLabel.textContent = label;
-        btnInstallUpdate.title = label;
-      }
-    }
   }
 
   // The banner is always visible; idle is the initial state.
@@ -131,6 +155,20 @@ import type { UpdateSettings } from '../shared/ipc';
     statusPercent = percent;
     statusError = state === 'error' ? errorMessage : null;
     renderStatus();
+  }
+
+  // The shared install action for the title-bar and Updates-banner buttons.
+  // Portable/zip builds have nothing to install — the action opens the GitHub
+  // releases page. Installed builds always warn first, since installing ends
+  // every terminal session and is never silently skipped.
+  function installUpdateAction() {
+    if (isPortable) {
+      api.updateInstall();
+      return;
+    }
+    App.Menus.showConfirm(App.__('updInstallConfirmBody'), () => {
+      api.updateInstall();
+    }, undefined, 'updInstallNow');
   }
 
   function bindEvents() {
@@ -160,19 +198,8 @@ import type { UpdateSettings } from '../shared/ipc';
         api.updateCheck();
       });
     }
-    if (btnInstallUpdate) {
-      btnInstallUpdate.addEventListener('click', () => {
-        if (isPortable) {
-          // Portable/zip: no install, just point at the download page.
-          api.updateInstall();
-          return;
-        }
-        // Always warn before closing the app — installing ends every terminal
-        // session, so this is never silently skipped.
-        App.Menus.showConfirm(App.__('updInstallConfirmBody'), () => {
-          api.updateInstall();
-        }, undefined, 'updInstallNow');
-      });
+    for (const btn of [btnInstallUpdate, btnInstallBanner]) {
+      if (btn) btn.addEventListener('click', installUpdateAction);
     }
   }
 

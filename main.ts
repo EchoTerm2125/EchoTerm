@@ -222,12 +222,12 @@ if (gotTheLock) {
 
     createWindow();
 
-    // Auto-update: packaged builds check for updates shortly after launch
-    // so the check never competes with terminal spawn at startup.
+    // Auto-update: check for updates shortly after launch so the check never
+    // competes with terminal spawn at startup. Runs for both packaged and dev
+    // runs (dev consults dev-app-update.yml, see UpdateController.init()); the
+    // user's "check automatically" setting still governs via update policy.
     updateController.init();
-    if (app.isPackaged) {
-      setTimeout(() => updateController.checkForUpdates(false), 5000);
-    }
+    setTimeout(() => updateController.checkForUpdates(false), 5000);
 
     app.on('activate', () => {
       if (BrowserWindow.getAllWindows().length === 0) createWindow();

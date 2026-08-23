@@ -173,7 +173,7 @@ const DOM_IDS = [
   // Auto-update
   'optCheckUpdates', 'optIncludePrerelease', 'btnCheckUpdates',
   'updStatusBanner', 'updStatusLine', 'updProgressTrack', 'updProgressBar',
-  'btnInstallUpdate',
+  'btnInstallUpdate', 'btnInstallBanner', 'btnInstallBannerLabel',
   // Language dropdown
   'langSelect', 'langSelectTrigger', 'langSelectLabel',
   'langSelectDropdown', 'langSearchInput', 'langOptionsList',

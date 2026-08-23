@@ -1095,8 +1095,12 @@ html, body {
   cursor: pointer;
   transition: background var(--transition), border-color var(--transition);
 }
-.options-action-btn:hover {
+.options-action-btn:hover:not(:disabled) {
   background: var(--bg-hover);
+}
+.options-action-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 /* Primary variant — one accent action per card (e.g. "Check for updates now") */
@@ -1108,7 +1112,7 @@ html, body {
   box-shadow: var(--shadow-sm);
   transition: filter var(--transition), box-shadow var(--transition);
 }
-.options-action-btn-primary:hover {
+.options-action-btn-primary:hover:not(:disabled) {
   background: var(--accent-gradient);
   filter: brightness(1.1);
   box-shadow: var(--shadow-md);
@@ -1121,6 +1125,18 @@ html, body {
   gap: calc(10px * var(--ui-scale));
   padding: calc(12px * var(--ui-scale));
   transition: background var(--transition);
+}
+
+/* Install/Get-update button inside the Updates banner — compact variant of
+   the primary action button, pinned to the banner's right edge */
+.options-update-banner-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: calc(6px * var(--ui-scale));
+  margin-left: auto;
+  padding: calc(5px * var(--ui-scale)) calc(12px * var(--ui-scale));
+  font-size: calc(var(--app-font-size) * 0.923);
+  flex-shrink: 0;
 }
 
 .options-update-banner[data-state="checking"],
@@ -1682,6 +1698,18 @@ html, body {
 .options-toggle input:checked + .options-toggle-slider::after {
   transform: translateX(calc(16px * var(--ui-scale)));
   background: white;
+}
+
+/* Disabled toggle — the input is hidden, so state is read off the label row */
+.options-toggle:has(input:disabled) {
+  cursor: not-allowed;
+}
+.options-toggle:has(input:disabled):hover {
+  background: transparent;
+}
+.options-toggle:has(input:disabled) .options-toggle-label,
+.options-toggle:has(input:disabled) .options-toggle-slider {
+  opacity: 0.5;
 }
 
 /* ═══ Main Body Layout (sidebar + content) ═══ */
