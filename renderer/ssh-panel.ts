@@ -1919,11 +1919,19 @@ import type { SshUser, SshConnection, SshFolder } from '../shared/ipc';
           const parentFolderId = result.folder.id;
           if (pendingAdoptTarget.type === 'connection') {
             for (const id of pendingAdoptTarget.ids) {
-              await api.sshConnectionSave({ id, folderId: parentFolderId });
+              const moveResult = await api.sshConnectionSave({ id, folderId: parentFolderId });
+              if (moveResult.error) {
+                App.UI.showToast(App.__('toastError', { message: moveResult.error }));
+                break;
+              }
             }
           } else {
             for (const id of pendingAdoptTarget.ids) {
-              await api.sshFolderSave({ id, parentId: parentFolderId });
+              const moveResult = await api.sshFolderSave({ id, parentId: parentFolderId });
+              if (moveResult.error) {
+                App.UI.showToast(App.__('toastError', { message: moveResult.error }));
+                break;
+              }
             }
           }
         }

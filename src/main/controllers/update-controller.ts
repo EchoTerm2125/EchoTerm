@@ -30,9 +30,6 @@ const detectPortableBuild = (): boolean =>
   fs.existsSync(path.join(process.resourcesPath, PORTABLE_MARKER));
 
 export class UpdateController {
-  /** Version currently being offered/downloaded (used to suppress re-entry). */
-  private currentVersion: string | null = null;
-
   constructor(
     private readonly settingsStore: UpdateSettingsStore,
     private readonly send: SendToRenderer,
@@ -60,13 +57,14 @@ export class UpdateController {
     }
 
     autoUpdater.on('update-available', (info) => {
-      this.currentVersion = info.version;
       this.send('update:available', { version: info.version });
 
       // Auto-download in the background — the user is never asked to start it.
       // Portable/zip builds have no installer, so they just show the
       // "Get update" button that opens the GitHub releases page instead.
-      if (!detectPortableBuild() && this.currentVersion === info.version) {
+      // electron-updater dedupes re-downloads itself (in-flight promise +
+      // sha512-validated disk cache), so no version guard is needed here.
+      if (!detectPortableBuild()) {
         autoUpdater.downloadUpdate().catch(() => {
           // electron-updater already emitted 'error' (handled in init()).
         });
