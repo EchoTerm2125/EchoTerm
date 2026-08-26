@@ -1549,8 +1549,11 @@ import type { SshUser, SshConnection, SshFolder } from '../shared/ipc';
       const conns = connections.filter(c => c.userId === userId);
       if (conns.length === 0) continue;
       const user = users.find(u => u.id === userId);
-      const names = conns.map(c => c.name).join(', ');
-      lines.push(App.__('confirmDeleteMultiSshUserLine', { user: user?.name || userId, connections: names }));
+      const names = conns.slice(0, 3).map(c => c.name).join(', ');
+      const namesText = conns.length > 3
+        ? `${names}, ${App.__('confirmDeleteSshUserMore', { count: conns.length - 3 })}`
+        : names;
+      lines.push(App.__('confirmDeleteMultiSshUserLine', { user: user?.name || userId, connections: namesText }));
     }
     return lines;
   }

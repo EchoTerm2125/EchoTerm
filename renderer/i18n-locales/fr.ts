@@ -114,7 +114,7 @@
     confirmDeleteSshConnection: 'Supprimer la connexion SSH « {name} » ?',
     confirmDeleteSshFolder: 'Supprimer le dossier SSH « {name} » ?\nLes sous-dossiers seront également supprimés. Les connexions ne seront pas supprimées.',
     confirmDeleteSshUser: 'Supprimer l’utilisateur SSH « {name} » ?',
-    confirmDeleteSshUserConnections: '{count} connexion utilise cet utilisateur : {names}.\nElles devront être réassignées.',
+    confirmDeleteSshUserConnections: 'Connexions utilisant cet utilisateur : {names} ({count}).\nElles devront être réassignées.',
     confirmDeleteSshUserMore: 'et {count} de plus',
     confirmDeleteMultiSsh: 'Supprimer {count} éléments SSH ?',
     confirmDeleteMultiSshUserConnections: 'Les connexions utilisant les utilisateurs sélectionnés devront être réassignées :\n{users}',

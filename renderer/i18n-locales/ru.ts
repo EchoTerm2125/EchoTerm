@@ -114,7 +114,7 @@
     confirmDeleteSshConnection: 'Удалить SSH-подключение «{name}»?',
     confirmDeleteSshFolder: 'Удалить SSH-папку «{name}»?\nВложенные папки также будут удалены. Подключения не будут удалены.',
     confirmDeleteSshUser: 'Удалить SSH-пользователя «{name}»?',
-    confirmDeleteSshUserConnections: '{count} подключение использует этого пользователя: {names}.\nИх потребуется переназначить.',
+    confirmDeleteSshUserConnections: 'Подключения, использующие этого пользователя: {names} ({count}).\nИх потребуется переназначить.',
     confirmDeleteSshUserMore: 'и ещё {count}',
     confirmDeleteMultiSsh: 'Удалить SSH-элементы ({count})?',
     confirmDeleteMultiSshUserConnections: 'Подключения, использующие выбранных пользователей, потребуется переназначить:\n{users}',

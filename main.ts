@@ -284,7 +284,11 @@ ipcMain.handle('update:install', () => {
     installingUpdate = true;
   }
   try {
-    return updateController.installUpdate();
+    const outcome = updateController.installUpdate();
+    // quitAndInstall can silently fail to start; only keep the close
+    // interceptor bypassed when the install actually proceeded.
+    if (!outcome.success) installingUpdate = false;
+    return outcome;
   } catch (err) {
     // The quit-and-install did not proceed — restore the close interceptor so
     // future window closes still ask the renderer for confirmation.

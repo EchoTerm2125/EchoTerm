@@ -147,7 +147,14 @@ export class UpdateController {
     this.updateDownloaded = false;
     // isSilent=false shows the NSIS wizard; the main process must bypass the
     // window close interceptor before calling this (see main.ts).
-    autoUpdater.quitAndInstall(false, true);
+    // quitAndInstall is typed as void but can return false at runtime when the
+    // install cannot start (e.g. another installer is already running); report
+    // that so main.ts re-arms the close interceptor instead of leaving it
+    // bypassed for the rest of the session.
+    const started = autoUpdater.quitAndInstall(false, true) as unknown as boolean | undefined;
+    if (started === false) {
+      return { success: false, error: 'Update install could not start.' };
+    }
     return { success: true };
   }
 
