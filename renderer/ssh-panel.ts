@@ -2268,7 +2268,7 @@ import type { SshUser, SshConnection, SshFolder } from '../shared/ipc';
   // --- Keyboard Shortcut
   function bindKeyboardShortcut() {
     document.addEventListener('keydown', (e) => {
-      if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key === 'S') {
+      if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.code === 'KeyS') {
         e.preventDefault();
         if (sshSidebar) {
           if (sshSidebar.classList.contains('collapsed')) {
