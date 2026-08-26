@@ -113,8 +113,12 @@
     confirmCloseAllGroupTerminals: 'Zamknąć wszystkie terminale ({count}) w grupie „{name}”?\nWszystkie sesje zostaną zakończone.',
     confirmDeleteSshConnection: 'Usunąć połączenie SSH „{name}”?',
     confirmDeleteSshFolder: 'Usunąć folder SSH „{name}”?\nPodfoldery również zostaną usunięte. Połączenia nie zostaną usunięte.',
-    confirmDeleteSshUser: 'Usunąć użytkownika SSH „{name}”?\nPołączenia korzystające z tego użytkownika będą wymagały ponownego przypisania.',
+    confirmDeleteSshUser: 'Usunąć użytkownika SSH „{name}”?',
+    confirmDeleteSshUserConnections: 'Połączenia korzystające z tego użytkownika: {names} ({count}).\nBędą wymagały ponownego przypisania.',
+    confirmDeleteSshUserMore: 'i {count} więcej',
     confirmDeleteMultiSsh: 'Usunąć {count} elementów SSH?',
+    confirmDeleteMultiSshUserConnections: 'Połączenia korzystające z wybranych użytkowników będą wymagały ponownego przypisania:\n{users}',
+    confirmDeleteMultiSshUserLine: '{user} → {connections}',
     confirmJumpHostsMissing: 'Następujące hosty pośrednie nie są wybrane:\n\n{names}\n\nZaimportować mimo to?',
 
     // ── SSH Sidebar ──────────────────────────────────────────────────────────
@@ -204,6 +208,8 @@
     confirmSetMasterPasswordOk: 'Zrozumiałem',
     toastPasswordSet: 'Hasło ustawione. Przechowuj je w bezpiecznym miejscu — w razie zapomnienia nie można go odzyskać.',
     toastUseDefaultEncryption: 'Włączono domyślne szyfrowanie. Zapisywane połączenia nie są już chronione hasłem.',
+    toastAdoptRolledBack: 'Nie można było przenieść {failed} z {total} elementów. Wszystkie zmiany zostały cofnięte.',
+    toastAdoptRollbackFailed: 'Nie można było przenieść {failed} z {total} elementów, a zmian nie udało się w pełni cofnąć: {message}',
     sshPasswordEmpty: 'Hasło nie może być puste.',
     sshPasswordMismatch: 'Hasła nie są zgodne.',
     sshPasswordIncorrect: 'Nieprawidłowe hasło.',

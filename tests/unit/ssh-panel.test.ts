@@ -217,6 +217,59 @@ describe('SshPanel (ssh-panel.ts)', () => {
 
       expect(api.sshConnectionSave).toHaveBeenCalledWith({ id: 'c1', folderId: 'newF' });
     });
+
+    it('rolls back the new folder and restores moved items when one move fails', async () => {
+      const App = getApp();
+      const api = window.api;
+      vi.mocked(api.sshConnectionList).mockResolvedValue([
+        { id: 'c1', name: 'A', host: 'a.com', port: 22, userId: null, folderId: 'f1' },
+        { id: 'c2', name: 'B', host: 'b.com', port: 22, userId: null, folderId: 'f1' },
+      ]);
+      await App.SshPanel.refreshAll();
+      await flush();
+      vi.mocked(api.sshFolderSave).mockResolvedValue({
+        success: true,
+        folder: { id: 'newF', name: 'New Parent', parentId: 'f1' },
+      });
+
+      // c1 moves into the new folder; c2 fails; the rollback restore of c1 succeeds.
+      let newFolderMoves = 0;
+      vi.mocked(api.sshConnectionSave).mockImplementation(async (data: any) => {
+        if (data.folderId === 'newF') {
+          newFolderMoves++;
+          return newFolderMoves === 1 ? { success: true } : { error: 'boom' };
+        }
+        return { success: true };
+      });
+      const toastSpy = vi.spyOn(App.UI, 'showToast');
+
+      const c1 = document.querySelector('.ssh-conn-item[data-conn-id="c1"]') as HTMLElement;
+      const c2 = document.querySelector('.ssh-conn-item[data-conn-id="c2"]') as HTMLElement;
+      c1.dispatchEvent(new MouseEvent('click', { bubbles: true, ctrlKey: true }));
+      c2.dispatchEvent(new MouseEvent('click', { bubbles: true, ctrlKey: true }));
+      c1.dispatchEvent(new MouseEvent('contextmenu', { bubbles: true, clientX: 100, clientY: 100 }));
+      await flush();
+
+      const menuBtn = document.querySelector('#sshContextMenu [data-action="ssh-add-parent-folder"]') as HTMLElement;
+      menuBtn.click();
+      await flush();
+
+      const nameInput = document.querySelector('#sshDialogBody input[name="groupName"]') as HTMLInputElement;
+      nameInput.value = 'New Parent';
+      (document.getElementById('sshDialogSave') as HTMLElement).click();
+      await flush();
+      await flush();
+
+      // c1 moved into newF, c2 failed → rollback restores c1 to f1 and deletes newF.
+      expect(api.sshConnectionSave).toHaveBeenNthCalledWith(1, { id: 'c1', folderId: 'newF' });
+      expect(api.sshConnectionSave).toHaveBeenNthCalledWith(2, { id: 'c2', folderId: 'newF' });
+      expect(api.sshConnectionSave).toHaveBeenNthCalledWith(3, { id: 'c1', folderId: 'f1' });
+      expect(api.sshFolderDelete).toHaveBeenCalledWith('newF');
+      expect(toastSpy).toHaveBeenCalledWith(
+        App.__('toastAdoptRolledBack', { failed: 1, total: 2 })
+      );
+      expect(document.getElementById('sshDialog').classList.contains('hidden')).toBe(true);
+    });
   });
 
   describe('add parent folder multi-select visibility', () => {
@@ -539,6 +592,116 @@ describe('SshPanel (ssh-panel.ts)', () => {
       ok.click();
       await flush();
       expect(window.api.sshUserDelete).toHaveBeenCalledWith('u1');
+    });
+
+    it('lists referencing connections in the confirm when the user is in use', async () => {
+      const App = getApp();
+      const api = window.api;
+      vi.mocked(api.sshConnectionList).mockResolvedValue([
+        { id: 'c1', name: 'prod-db', host: 'example.com', port: 22, userId: 'u1', folderId: null },
+        { id: 'c2', name: 'staging', host: 'example.com', port: 22, userId: null, folderId: null },
+      ]);
+      (document.querySelector('#sshUserList [data-action="delete-user"]') as HTMLElement).click();
+      await flush();
+
+      const { message } = getConfirmElements();
+      expect(message.textContent).toBe(
+        App.__('confirmDeleteSshUser', { name: 'Admin' }) + '\n' +
+        App._p('confirmDeleteSshUserConnections', 1).replace('{names}', 'prod-db')
+      );
+    });
+
+    it('caps the listed names and appends the "N more" suffix', async () => {
+      const App = getApp();
+      const api = window.api;
+      vi.mocked(api.sshConnectionList).mockResolvedValue([
+        { id: 'c1', name: 'A', host: 'a.com', port: 22, userId: 'u1', folderId: null },
+        { id: 'c2', name: 'B', host: 'b.com', port: 22, userId: 'u1', folderId: null },
+        { id: 'c3', name: 'C', host: 'c.com', port: 22, userId: 'u1', folderId: null },
+        { id: 'c4', name: 'D', host: 'd.com', port: 22, userId: 'u1', folderId: null },
+      ]);
+      (document.querySelector('#sshUserList [data-action="delete-user"]') as HTMLElement).click();
+      await flush();
+
+      const { message } = getConfirmElements();
+      const namesText = `A, B, C, ${App.__('confirmDeleteSshUserMore', { count: 1 })}`;
+      expect(message.textContent).toBe(
+        App.__('confirmDeleteSshUser', { name: 'Admin' }) + '\n' +
+        App._p('confirmDeleteSshUserConnections', 4).replace('{names}', namesText)
+      );
+    });
+
+    it('keeps only the plain question when no connection uses the user', async () => {
+      const App = getApp();
+      // beforeEach mock: c1 has userId null
+      (document.querySelector('#sshUserList [data-action="delete-user"]') as HTMLElement).click();
+      await flush();
+
+      const { message } = getConfirmElements();
+      expect(message.textContent).toBe(App.__('confirmDeleteSshUser', { name: 'Admin' }));
+      expect(message.textContent).not.toContain('reassigned');
+    });
+  });
+
+  describe('delete users (multi-select)', () => {
+    it('shows one referencing-connection line per affected user', async () => {
+      const App = getApp();
+      const api = window.api;
+      vi.mocked(api.sshUserList).mockResolvedValue([
+        { id: 'u1', name: 'Admin', username: 'admin', authType: 'password' },
+        { id: 'u2', name: 'Ops', username: 'ops', authType: 'password' },
+      ]);
+      vi.mocked(api.sshConnectionList).mockResolvedValue([
+        { id: 'c1', name: 'prod-db', host: 'example.com', port: 22, userId: 'u1', folderId: null },
+        { id: 'c2', name: 'staging', host: 'example.com', port: 22, userId: 'u2', folderId: null },
+        { id: 'c3', name: 'unused', host: 'example.com', port: 22, userId: null, folderId: null },
+      ]);
+      await getApp().SshPanel.refreshAll();
+      await flush();
+
+      const u1 = document.querySelector('.ssh-user-item[data-user-id="u1"]') as HTMLElement;
+      const u2 = document.querySelector('.ssh-user-item[data-user-id="u2"]') as HTMLElement;
+      u1.dispatchEvent(new MouseEvent('click', { bubbles: true, ctrlKey: true }));
+      u2.dispatchEvent(new MouseEvent('click', { bubbles: true, ctrlKey: true }));
+      u1.dispatchEvent(new MouseEvent('contextmenu', { bubbles: true, clientX: 100, clientY: 100 }));
+      await flush();
+
+      (document.querySelector('#sshContextMenu [data-action="ssh-delete"]') as HTMLElement).click();
+      await flush();
+      await flush();
+
+      const { message } = getConfirmElements();
+      const base = App._n('confirmDeleteMultiSsh', 2, 'statusTerminalPlural').replace('{type}', App.__('sshDeleteTypeUser'));
+      const lines = [
+        App.__('confirmDeleteMultiSshUserLine', { user: 'Admin', connections: 'prod-db' }),
+        App.__('confirmDeleteMultiSshUserLine', { user: 'Ops', connections: 'staging' }),
+      ];
+      expect(message.textContent).toBe(`${base}\n${App.__('confirmDeleteMultiSshUserConnections', { users: lines.join('\n') })}`);
+    });
+
+    it('shows only the base message when no selected user is referenced', async () => {
+      const App = getApp();
+      const api = window.api;
+      vi.mocked(api.sshUserList).mockResolvedValue([
+        { id: 'u1', name: 'Admin', username: 'admin', authType: 'password' },
+        { id: 'u2', name: 'Ops', username: 'ops', authType: 'password' },
+      ]);
+      await getApp().SshPanel.refreshAll();
+      await flush();
+
+      const u1 = document.querySelector('.ssh-user-item[data-user-id="u1"]') as HTMLElement;
+      const u2 = document.querySelector('.ssh-user-item[data-user-id="u2"]') as HTMLElement;
+      u1.dispatchEvent(new MouseEvent('click', { bubbles: true, ctrlKey: true }));
+      u2.dispatchEvent(new MouseEvent('click', { bubbles: true, ctrlKey: true }));
+      u1.dispatchEvent(new MouseEvent('contextmenu', { bubbles: true, clientX: 100, clientY: 100 }));
+      await flush();
+
+      (document.querySelector('#sshContextMenu [data-action="ssh-delete"]') as HTMLElement).click();
+      await flush();
+      await flush();
+
+      const { message } = getConfirmElements();
+      expect(message.textContent).toBe(App._n('confirmDeleteMultiSsh', 2, 'statusTerminalPlural').replace('{type}', App.__('sshDeleteTypeUser')));
     });
   });
 

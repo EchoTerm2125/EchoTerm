@@ -113,8 +113,12 @@
     confirmCloseAllGroupTerminals: '關閉群組「{name}」中的 {count} 個終端機？\n所有工作階段將被終止。',
     confirmDeleteSshConnection: '刪除 SSH 連線「{name}」？',
     confirmDeleteSshFolder: '刪除 SSH 資料夾「{name}」？\n其子資料夾也會一併刪除。資料夾中的連線不會被刪除。',
-    confirmDeleteSshUser: '刪除 SSH 使用者「{name}」？\n使用此使用者的連線需要重新指派。',
+    confirmDeleteSshUser: '刪除 SSH 使用者「{name}」？',
+    confirmDeleteSshUserConnections: '{count} 個連線使用了此使用者：{names}。\n它們需要重新指派。',
+    confirmDeleteSshUserMore: '另有 {count} 個',
     confirmDeleteMultiSsh: '刪除 {count} 個 SSH {type}？',
+    confirmDeleteMultiSshUserConnections: '使用所選使用者的連線需要重新指派：\n{users}',
+    confirmDeleteMultiSshUserLine: '{user} → {connections}',
     confirmJumpHostsMissing: '以下跳板機未被選取：\n\n{names}\n\n仍然匯入？',
 
     // ── SSH Sidebar ──────────────────────────────────────────────────────────
@@ -204,6 +208,8 @@
     confirmSetMasterPasswordOk: '明白了',
     toastPasswordSet: '密碼已設定。請妥善保管——忘記後將無法復原。',
     toastUseDefaultEncryption: '已切換為預設加密。你儲存的連線不再受密碼保護。',
+    toastAdoptRolledBack: '無法移動 {total} 項中的 {failed} 項。所有更改已還原。',
+    toastAdoptRollbackFailed: '無法移動 {total} 項中的 {failed} 項，且更改未能完全還原：{message}',
     sshPasswordEmpty: '密碼不能為空白。',
     sshPasswordMismatch: '兩次密碼不相符。',
     sshPasswordIncorrect: '密碼錯誤。',

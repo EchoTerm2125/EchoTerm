@@ -113,8 +113,12 @@
     confirmCloseAllGroupTerminals: 'Alle {count} Terminals in Gruppe „{name}“ schließen?\nAlle Sitzungen werden beendet.',
     confirmDeleteSshConnection: 'SSH-Verbindung „{name}“ löschen?',
     confirmDeleteSshFolder: 'SSH-Ordner „{name}“ löschen?\nUnterordner werden ebenfalls gelöscht. Verbindungen werden nicht gelöscht.',
-    confirmDeleteSshUser: 'SSH-Benutzer „{name}“ löschen?\nVerbindungen, die diesen Benutzer verwenden, müssen neu zugewiesen werden.',
+    confirmDeleteSshUser: 'SSH-Benutzer „{name}“ löschen?',
+    confirmDeleteSshUserConnections: 'Verbindungen, die diesen Benutzer verwenden: {names} ({count}).\nSie müssen neu zugewiesen werden.',
+    confirmDeleteSshUserMore: 'und {count} weitere',
     confirmDeleteMultiSsh: '{count} SSH-Elemente löschen?',
+    confirmDeleteMultiSshUserConnections: 'Verbindungen, die die ausgewählten Benutzer verwenden, müssen neu zugewiesen werden:\n{users}',
+    confirmDeleteMultiSshUserLine: '{user} → {connections}',
     confirmJumpHostsMissing: 'Die folgenden Sprunghosts sind nicht ausgewählt:\n\n{names}\n\nTrotzdem importieren?',
 
     // ── SSH Sidebar ──────────────────────────────────────────────────────────
@@ -204,6 +208,8 @@
     confirmSetMasterPasswordOk: 'Verstanden',
     toastPasswordSet: 'Passwort festgelegt. Bewahren Sie es sicher auf — es kann bei Verlust nicht wiederhergestellt werden.',
     toastUseDefaultEncryption: 'Auf Standardverschlüsselung umgestellt. Ihre gespeicherten Verbindungen sind nicht mehr passwortgeschützt.',
+    toastAdoptRolledBack: 'Konnten {failed} von {total} Element(en) nicht verschieben. Alle Änderungen wurden rückgängig gemacht.',
+    toastAdoptRollbackFailed: 'Konnten {failed} von {total} Element(en) nicht verschieben und die Änderungen konnten nicht vollständig rückgängig gemacht werden: {message}',
     sshPasswordEmpty: 'Das Passwort darf nicht leer sein.',
     sshPasswordMismatch: 'Die Passwörter stimmen nicht überein.',
     sshPasswordIncorrect: 'Falsches Passwort.',

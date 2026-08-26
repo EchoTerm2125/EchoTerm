@@ -222,12 +222,12 @@ if (gotTheLock) {
 
     createWindow();
 
-    // Auto-update: packaged builds check for updates shortly after launch
-    // so the check never competes with terminal spawn at startup.
+    // Auto-update: check for updates shortly after launch so the check never
+    // competes with terminal spawn at startup. Runs for both packaged and dev
+    // runs (dev consults dev-app-update.yml, see UpdateController.init()); the
+    // user's "check automatically" setting still governs via update policy.
     updateController.init();
-    if (app.isPackaged) {
-      setTimeout(() => updateController.checkForUpdates(false), 5000);
-    }
+    setTimeout(() => updateController.checkForUpdates(false), 5000);
 
     app.on('activate', () => {
       if (BrowserWindow.getAllWindows().length === 0) createWindow();
@@ -276,23 +276,25 @@ ipcMain.handle('update:get-settings', () => updateController.getSettings());
 ipcMain.handle('update:set-settings', (event, patch) => updateController.setSettings(patch));
 ipcMain.handle('update:get-build-type', () => ({ portable: updateController.isPortableBuild() }));
 ipcMain.handle('update:install', () => {
-  // Portable/zip builds open the GitHub releases page instead — no app close,
-  // so no need to bypass the close interceptor. Installed builds: the renderer
-  // already warned the user and got confirmation, so let quitAndInstall close
-  // the window and run the (assisted) installer. The flag is only set for
-  // packaged, non-portable runs — that is the only path where quitAndInstall
-  // actually quits; dev runs no-op (electron-updater dispatches an async
-  // 'error' and returns without quitting), so the flag must not linger there.
-  if (!updateController.isPortableBuild() && app.isPackaged) {
+  // Only bypass the close interceptor when the install will actually quit the
+  // app: portable/zip builds open the GitHub page (no app close), and an
+  // installed build with nothing downloaded must not silently disable the
+  // close-confirm for the rest of the session.
+  if (!updateController.isPortableBuild() && app.isPackaged && updateController.isUpdateDownloaded()) {
     installingUpdate = true;
   }
   try {
-    updateController.installUpdate();
+    const outcome = updateController.installUpdate();
+    // quitAndInstall can silently fail to start; only keep the close
+    // interceptor bypassed when the install actually proceeded.
+    if (!outcome.success) installingUpdate = false;
+    return outcome;
   } catch (err) {
     // The quit-and-install did not proceed — restore the close interceptor so
     // future window closes still ask the renderer for confirmation.
     installingUpdate = false;
     console.error('Update install failed:', err);
+    return { success: false, error: err instanceof Error ? err.message : String(err) };
   }
 });
 

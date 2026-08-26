@@ -113,8 +113,12 @@
     confirmCloseAllGroupTerminals: 'Закрыть все терминалы ({count}) в группе «{name}»?\nВсе сеансы будут завершены.',
     confirmDeleteSshConnection: 'Удалить SSH-подключение «{name}»?',
     confirmDeleteSshFolder: 'Удалить SSH-папку «{name}»?\nВложенные папки также будут удалены. Подключения не будут удалены.',
-    confirmDeleteSshUser: 'Удалить SSH-пользователя «{name}»?\nПодключения, использующие этого пользователя, потребуется переназначить.',
+    confirmDeleteSshUser: 'Удалить SSH-пользователя «{name}»?',
+    confirmDeleteSshUserConnections: 'Подключения, использующие этого пользователя: {names} ({count}).\nИх потребуется переназначить.',
+    confirmDeleteSshUserMore: 'и ещё {count}',
     confirmDeleteMultiSsh: 'Удалить SSH-элементы ({count})?',
+    confirmDeleteMultiSshUserConnections: 'Подключения, использующие выбранных пользователей, потребуется переназначить:\n{users}',
+    confirmDeleteMultiSshUserLine: '{user} → {connections}',
     confirmJumpHostsMissing: 'Следующие хосты перехода не выбраны:\n\n{names}\n\nВсё равно импортировать?',
 
     // ── SSH Sidebar ──────────────────────────────────────────────────────────
@@ -204,6 +208,8 @@
     confirmSetMasterPasswordOk: 'Понятно',
     toastPasswordSet: 'Пароль задан. Храните его в надёжном месте — при утере восстановить его невозможно.',
     toastUseDefaultEncryption: 'Включено шифрование по умолчанию. Ваши сохранённые подключения больше не защищены паролем.',
+    toastAdoptRolledBack: 'Не удалось переместить {failed} из {total} элементов. Все изменения отменены.',
+    toastAdoptRollbackFailed: 'Не удалось переместить {failed} из {total} элементов, и изменения не удалось полностью отменить: {message}',
     sshPasswordEmpty: 'Пароль не может быть пустым.',
     sshPasswordMismatch: 'Пароли не совпадают.',
     sshPasswordIncorrect: 'Неверный пароль.',

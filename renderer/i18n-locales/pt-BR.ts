@@ -113,8 +113,12 @@
     confirmCloseAllGroupTerminals: 'Fechar todas as {count} terminais do grupo "{name}"?\nTodas as sessões serão encerradas.',
     confirmDeleteSshConnection: 'Excluir a conexão SSH "{name}"?',
     confirmDeleteSshFolder: 'Excluir a pasta SSH "{name}"?\nAs subpastas também serão excluídas. As conexões não serão excluídas.',
-    confirmDeleteSshUser: 'Excluir o usuário SSH "{name}"?\nAs conexões que usam este usuário precisarão ser reatribuídas.',
+    confirmDeleteSshUser: 'Excluir o usuário SSH "{name}"?',
+    confirmDeleteSshUserConnections: 'Conexões que usam este usuário: {names} ({count}).\nElas precisarão ser reatribuídas.',
+    confirmDeleteSshUserMore: 'e mais {count}',
     confirmDeleteMultiSsh: 'Excluir {count} itens SSH?',
+    confirmDeleteMultiSshUserConnections: 'As conexões que usam os usuários selecionados precisarão ser reatribuídas:\n{users}',
+    confirmDeleteMultiSshUserLine: '{user} → {connections}',
     confirmJumpHostsMissing: 'Os seguintes hosts de salto não estão selecionados:\n\n{names}\n\nImportar mesmo assim?',
 
     // ── SSH Sidebar ──────────────────────────────────────────────────────────
@@ -204,6 +208,8 @@
     confirmSetMasterPasswordOk: 'Entendi',
     toastPasswordSet: 'Senha definida. Guarde-a em um lugar seguro — ela não pode ser recuperada se for esquecida.',
     toastUseDefaultEncryption: 'Criptografia padrão ativada. Suas conexões salvas não estão mais protegidas por senha.',
+    toastAdoptRolledBack: 'Não foi possível mover {failed} de {total} itens. Todas as alterações foram revertidas.',
+    toastAdoptRollbackFailed: 'Não foi possível mover {failed} de {total} itens e as alterações não puderam ser totalmente revertidas: {message}',
     sshPasswordEmpty: 'A senha não pode estar vazia.',
     sshPasswordMismatch: 'As senhas não coincidem.',
     sshPasswordIncorrect: 'Senha incorreta.',

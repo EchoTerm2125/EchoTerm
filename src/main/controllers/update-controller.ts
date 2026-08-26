@@ -9,6 +9,7 @@ import path from 'path';
 import { app, shell } from 'electron';
 import { autoUpdater } from 'electron-updater';
 
+import type { IpcOutcome } from '../../../shared/ipc';
 import type { UpdateSettings, UpdateSettingsStore } from '../../domain/ports/update-settings';
 import { shouldCheckForUpdate } from '../../domain/services/update-policy';
 import type { SendToRenderer } from './session-registry';
@@ -30,6 +31,9 @@ const detectPortableBuild = (): boolean =>
   fs.existsSync(path.join(process.resourcesPath, PORTABLE_MARKER));
 
 export class UpdateController {
+  /** True once an installer is fully downloaded and ready for quitAndInstall. */
+  private updateDownloaded = false;
+
   constructor(
     private readonly settingsStore: UpdateSettingsStore,
     private readonly send: SendToRenderer,
@@ -38,6 +42,11 @@ export class UpdateController {
   /** Whether this copy is a portable/zip artifact (rendered/installed builds are not). */
   isPortableBuild(): boolean {
     return detectPortableBuild();
+  }
+
+  /** Whether a full installer has been downloaded and is ready for quitAndInstall. */
+  isUpdateDownloaded(): boolean {
+    return this.updateDownloaded;
   }
 
   /** Wire electron-updater events and push them to the renderer. Call once at startup. */
@@ -58,6 +67,8 @@ export class UpdateController {
 
     autoUpdater.on('update-available', (info) => {
       this.send('update:available', { version: info.version });
+      // A fresh check supersedes any previously downloaded installer.
+      this.updateDownloaded = false;
 
       // Auto-download in the background — the user is never asked to start it.
       // Portable/zip builds have no installer, so they just show the
@@ -72,6 +83,8 @@ export class UpdateController {
     });
 
     autoUpdater.on('update-not-available', () => {
+      // No newer version exists; any earlier downloaded installer is stale.
+      this.updateDownloaded = false;
       this.send('update:not-available', {});
     });
 
@@ -82,10 +95,14 @@ export class UpdateController {
     autoUpdater.on('update-downloaded', (info) => {
       // Installing is an explicit user action (the title-bar button) — never
       // auto-install on quit. The renderer shows the button on this event.
+      this.updateDownloaded = true;
       this.send('update:downloaded', { version: info.version });
     });
 
     autoUpdater.on('error', (err) => {
+      // A failed check/download leaves the feed state unknown; refuse to install
+      // a possibly-stale or incomplete download until the next successful check.
+      this.updateDownloaded = false;
       this.send('update:error', { message: err?.message ?? String(err) });
     });
   }
@@ -114,16 +131,31 @@ export class UpdateController {
   }
 
   /** Install (installed builds) or open the GitHub releases page (portable/zip). */
-  installUpdate(): void {
+  installUpdate(): IpcOutcome {
     // Portable/zip copies cannot install themselves — the "Get update" button
     // points the user at the GitHub releases page for a manual download.
     if (detectPortableBuild()) {
       shell.openExternal(RELEASES_PAGE_URL).catch(() => {});
-      return;
+      return { success: true };
     }
+    // Guard against installing when nothing is downloaded: quitAndInstall()
+    // returns false without throwing (no 'error' event), and the main process
+    // only bypasses the window close interceptor when we report success here.
+    if (!this.updateDownloaded) {
+      return { success: false, error: 'No downloaded update to install.' };
+    }
+    this.updateDownloaded = false;
     // isSilent=false shows the NSIS wizard; the main process must bypass the
     // window close interceptor before calling this (see main.ts).
-    autoUpdater.quitAndInstall(false, true);
+    // quitAndInstall is typed as void but can return false at runtime when the
+    // install cannot start (e.g. another installer is already running); report
+    // that so main.ts re-arms the close interceptor instead of leaving it
+    // bypassed for the rest of the session.
+    const started = autoUpdater.quitAndInstall(false, true) as unknown as boolean | undefined;
+    if (started === false) {
+      return { success: false, error: 'Update install could not start.' };
+    }
+    return { success: true };
   }
 
   getSettings(): UpdateSettings {
