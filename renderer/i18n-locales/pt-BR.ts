@@ -208,6 +208,8 @@
     confirmSetMasterPasswordOk: 'Entendi',
     toastPasswordSet: 'Senha definida. Guarde-a em um lugar seguro — ela não pode ser recuperada se for esquecida.',
     toastUseDefaultEncryption: 'Criptografia padrão ativada. Suas conexões salvas não estão mais protegidas por senha.',
+    toastAdoptRolledBack: 'Não foi possível mover {failed} de {total} itens. Todas as alterações foram revertidas.',
+    toastAdoptRollbackFailed: 'Não foi possível mover {failed} de {total} itens e as alterações não puderam ser totalmente revertidas: {message}',
     sshPasswordEmpty: 'A senha não pode estar vazia.',
     sshPasswordMismatch: 'As senhas não coincidem.',
     sshPasswordIncorrect: 'Senha incorreta.',

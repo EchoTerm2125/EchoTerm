@@ -217,6 +217,59 @@ describe('SshPanel (ssh-panel.ts)', () => {
 
       expect(api.sshConnectionSave).toHaveBeenCalledWith({ id: 'c1', folderId: 'newF' });
     });
+
+    it('rolls back the new folder and restores moved items when one move fails', async () => {
+      const App = getApp();
+      const api = window.api;
+      vi.mocked(api.sshConnectionList).mockResolvedValue([
+        { id: 'c1', name: 'A', host: 'a.com', port: 22, userId: null, folderId: 'f1' },
+        { id: 'c2', name: 'B', host: 'b.com', port: 22, userId: null, folderId: 'f1' },
+      ]);
+      await App.SshPanel.refreshAll();
+      await flush();
+      vi.mocked(api.sshFolderSave).mockResolvedValue({
+        success: true,
+        folder: { id: 'newF', name: 'New Parent', parentId: 'f1' },
+      });
+
+      // c1 moves into the new folder; c2 fails; the rollback restore of c1 succeeds.
+      let newFolderMoves = 0;
+      vi.mocked(api.sshConnectionSave).mockImplementation(async (data: any) => {
+        if (data.folderId === 'newF') {
+          newFolderMoves++;
+          return newFolderMoves === 1 ? { success: true } : { error: 'boom' };
+        }
+        return { success: true };
+      });
+      const toastSpy = vi.spyOn(App.UI, 'showToast');
+
+      const c1 = document.querySelector('.ssh-conn-item[data-conn-id="c1"]') as HTMLElement;
+      const c2 = document.querySelector('.ssh-conn-item[data-conn-id="c2"]') as HTMLElement;
+      c1.dispatchEvent(new MouseEvent('click', { bubbles: true, ctrlKey: true }));
+      c2.dispatchEvent(new MouseEvent('click', { bubbles: true, ctrlKey: true }));
+      c1.dispatchEvent(new MouseEvent('contextmenu', { bubbles: true, clientX: 100, clientY: 100 }));
+      await flush();
+
+      const menuBtn = document.querySelector('#sshContextMenu [data-action="ssh-add-parent-folder"]') as HTMLElement;
+      menuBtn.click();
+      await flush();
+
+      const nameInput = document.querySelector('#sshDialogBody input[name="groupName"]') as HTMLInputElement;
+      nameInput.value = 'New Parent';
+      (document.getElementById('sshDialogSave') as HTMLElement).click();
+      await flush();
+      await flush();
+
+      // c1 moved into newF, c2 failed → rollback restores c1 to f1 and deletes newF.
+      expect(api.sshConnectionSave).toHaveBeenNthCalledWith(1, { id: 'c1', folderId: 'newF' });
+      expect(api.sshConnectionSave).toHaveBeenNthCalledWith(2, { id: 'c2', folderId: 'newF' });
+      expect(api.sshConnectionSave).toHaveBeenNthCalledWith(3, { id: 'c1', folderId: 'f1' });
+      expect(api.sshFolderDelete).toHaveBeenCalledWith('newF');
+      expect(toastSpy).toHaveBeenCalledWith(
+        App.__('toastAdoptRolledBack', { failed: 1, total: 2 })
+      );
+      expect(document.getElementById('sshDialog').classList.contains('hidden')).toBe(true);
+    });
   });
 
   describe('add parent folder multi-select visibility', () => {

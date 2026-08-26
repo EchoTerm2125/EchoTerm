@@ -208,6 +208,8 @@
     confirmSetMasterPasswordOk: 'Đã hiểu',
     toastPasswordSet: 'Đã đặt mật khẩu. Hãy giữ nó ở nơi an toàn — nếu quên sẽ không thể khôi phục.',
     toastUseDefaultEncryption: 'Đã chuyển sang mã hóa mặc định. Các kết nối đã lưu của bạn không còn được bảo vệ bằng mật khẩu.',
+    toastAdoptRolledBack: 'Không thể di chuyển {failed} trong số {total} mục. Mọi thay đổi đã được hoàn tác.',
+    toastAdoptRollbackFailed: 'Không thể di chuyển {failed} trong số {total} mục và không thể hoàn tác hoàn toàn các thay đổi: {message}',
     sshPasswordEmpty: 'Mật khẩu không được để trống.',
     sshPasswordMismatch: 'Mật khẩu không khớp.',
     sshPasswordIncorrect: 'Sai mật khẩu.',

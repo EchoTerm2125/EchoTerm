@@ -208,6 +208,8 @@
     confirmSetMasterPasswordOk: 'Compris',
     toastPasswordSet: 'Mot de passe défini. Conservez-le en lieu sûr — il ne pourra pas être récupéré s\'il est oublié.',
     toastUseDefaultEncryption: 'Chiffrement par défaut activé. Vos connexions enregistrées ne sont plus protégées par mot de passe.',
+    toastAdoptRolledBack: 'Impossible de déplacer {failed} sur {total} éléments. Toutes les modifications ont été annulées.',
+    toastAdoptRollbackFailed: 'Impossible de déplacer {failed} sur {total} éléments et les modifications n\'ont pas pu être entièrement annulées : {message}',
     sshPasswordEmpty: 'Le mot de passe ne peut pas être vide.',
     sshPasswordMismatch: 'Les mots de passe ne correspondent pas.',
     sshPasswordIncorrect: 'Mot de passe incorrect.',

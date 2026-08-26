@@ -208,6 +208,8 @@
     confirmSetMasterPasswordOk: 'Zrozumiałem',
     toastPasswordSet: 'Hasło ustawione. Przechowuj je w bezpiecznym miejscu — w razie zapomnienia nie można go odzyskać.',
     toastUseDefaultEncryption: 'Włączono domyślne szyfrowanie. Zapisywane połączenia nie są już chronione hasłem.',
+    toastAdoptRolledBack: 'Nie można było przenieść {failed} z {total} elementów. Wszystkie zmiany zostały cofnięte.',
+    toastAdoptRollbackFailed: 'Nie można było przenieść {failed} z {total} elementów, a zmian nie udało się w pełni cofnąć: {message}',
     sshPasswordEmpty: 'Hasło nie może być puste.',
     sshPasswordMismatch: 'Hasła nie są zgodne.',
     sshPasswordIncorrect: 'Nieprawidłowe hasło.',

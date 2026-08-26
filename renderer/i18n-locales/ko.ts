@@ -208,6 +208,8 @@
     confirmSetMasterPasswordOk: '확인',
     toastPasswordSet: '비밀번호가 설정되었습니다. 안전하게 보관하세요 — 잊으면 복구할 수 없습니다.',
     toastUseDefaultEncryption: '기본 암호화로 전환되었습니다. 저장된 연결은 더 이상 비밀번호로 보호되지 않습니다.',
+    toastAdoptRolledBack: '{total}개 중 {failed}개를 이동하지 못했습니다. 모든 변경 사항이 되돌려졌습니다.',
+    toastAdoptRollbackFailed: '{total}개 중 {failed}개를 이동하지 못했고 변경 사항을 완전히 되돌릴 수 없었습니다: {message}',
     sshPasswordEmpty: '암호는 비워둘 수 없습니다.',
     sshPasswordMismatch: '암호가 일치하지 않습니다.',
     sshPasswordIncorrect: '암호가 올바르지 않습니다.',

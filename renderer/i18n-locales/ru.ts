@@ -208,6 +208,8 @@
     confirmSetMasterPasswordOk: 'Понятно',
     toastPasswordSet: 'Пароль задан. Храните его в надёжном месте — при утере восстановить его невозможно.',
     toastUseDefaultEncryption: 'Включено шифрование по умолчанию. Ваши сохранённые подключения больше не защищены паролем.',
+    toastAdoptRolledBack: 'Не удалось переместить {failed} из {total} элементов. Все изменения отменены.',
+    toastAdoptRollbackFailed: 'Не удалось переместить {failed} из {total} элементов, и изменения не удалось полностью отменить: {message}',
     sshPasswordEmpty: 'Пароль не может быть пустым.',
     sshPasswordMismatch: 'Пароли не совпадают.',
     sshPasswordIncorrect: 'Неверный пароль.',

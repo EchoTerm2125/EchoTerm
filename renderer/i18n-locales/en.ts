@@ -209,6 +209,8 @@
     confirmSetMasterPasswordOk: 'Understood',
     toastPasswordSet: 'Password set. Keep it safe — it cannot be recovered if forgotten.',
     toastUseDefaultEncryption: 'Switched to default encryption. Your stored connections are no longer password protected.',
+    toastAdoptRolledBack: 'Could not move {failed} of {total} items. All changes were reverted.',
+    toastAdoptRollbackFailed: 'Could not move {failed} of {total} items, and the changes could not be fully reverted: {message}',
     sshPasswordEmpty: 'Password cannot be empty.',
     sshPasswordMismatch: 'Passwords do not match.',
     sshPasswordIncorrect: 'Incorrect password.',

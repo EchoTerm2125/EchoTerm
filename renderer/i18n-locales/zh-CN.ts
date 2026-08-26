@@ -208,6 +208,8 @@
     confirmSetMasterPasswordOk: '明白了',
     toastPasswordSet: '密码已设置。请妥善保管——忘记后将无法恢复。',
     toastUseDefaultEncryption: '已切换为默认加密。你存储的连接不再受密码保护。',
+    toastAdoptRolledBack: '无法移动 {total} 项中的 {failed} 项。所有更改已还原。',
+    toastAdoptRollbackFailed: '无法移动 {total} 项中的 {failed} 项，且更改未能完全还原：{message}',
     sshPasswordEmpty: '密码不能为空。',
     sshPasswordMismatch: '两次密码不匹配。',
     sshPasswordIncorrect: '密码错误。',

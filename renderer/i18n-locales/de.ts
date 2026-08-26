@@ -208,6 +208,8 @@
     confirmSetMasterPasswordOk: 'Verstanden',
     toastPasswordSet: 'Passwort festgelegt. Bewahren Sie es sicher auf — es kann bei Verlust nicht wiederhergestellt werden.',
     toastUseDefaultEncryption: 'Auf Standardverschlüsselung umgestellt. Ihre gespeicherten Verbindungen sind nicht mehr passwortgeschützt.',
+    toastAdoptRolledBack: 'Konnten {failed} von {total} Element(en) nicht verschieben. Alle Änderungen wurden rückgängig gemacht.',
+    toastAdoptRollbackFailed: 'Konnten {failed} von {total} Element(en) nicht verschieben und die Änderungen konnten nicht vollständig rückgängig gemacht werden: {message}',
     sshPasswordEmpty: 'Das Passwort darf nicht leer sein.',
     sshPasswordMismatch: 'Die Passwörter stimmen nicht überein.',
     sshPasswordIncorrect: 'Falsches Passwort.',

@@ -208,6 +208,8 @@
     confirmSetMasterPasswordOk: '承知しました',
     toastPasswordSet: 'パスワードを設定しました。大切に保管してください——忘れると復元できません。',
     toastUseDefaultEncryption: '既定の暗号化に切り替えました。保存された接続はパスワードで保護されなくなりました。',
+    toastAdoptRolledBack: '{total} 個中 {failed} 個を移動できませんでした。すべての変更は元に戻されました。',
+    toastAdoptRollbackFailed: '{total} 個中 {failed} 個を移動できず、変更を完全に元に戻せませんでした: {message}',
     sshPasswordEmpty: 'パスワードは空にできません。',
     sshPasswordMismatch: 'パスワードが一致しません。',
     sshPasswordIncorrect: 'パスワードが正しくありません。',
