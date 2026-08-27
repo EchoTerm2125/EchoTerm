@@ -29,6 +29,7 @@ describe('Integration: Keyboard Shortcuts', () => {
 
       document.dispatchEvent(new KeyboardEvent('keydown', {
         key: 'n',
+        code: 'KeyN',
         ctrlKey: true,
         bubbles: true,
       }));
@@ -43,6 +44,7 @@ describe('Integration: Keyboard Shortcuts', () => {
 
       document.dispatchEvent(new KeyboardEvent('keydown', {
         key: 'N',
+        code: 'KeyN',
         ctrlKey: true,
         shiftKey: true,
         bubbles: true,
@@ -58,6 +60,7 @@ describe('Integration: Keyboard Shortcuts', () => {
 
       document.dispatchEvent(new KeyboardEvent('keydown', {
         key: 'T',
+        code: 'KeyT',
         ctrlKey: true,
         shiftKey: true,
         bubbles: true,
@@ -100,6 +103,7 @@ describe('Integration: Keyboard Shortcuts', () => {
 
       document.dispatchEvent(new KeyboardEvent('keydown', {
         key: 'w',
+        code: 'KeyW',
         ctrlKey: true,
         bubbles: true,
       }));

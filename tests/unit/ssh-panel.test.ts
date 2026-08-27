@@ -34,6 +34,7 @@ function buildSshContextMenu(menu) {
 
   addBtn('ssh-add-conn', 'Add Connection');
   addBtn('ssh-add-folder', 'Add Folder');
+  addBtn('ssh-add-user-folder', 'Add User Folder');
   addBtn('ssh-add-user', 'Add User');
   addBtn('ssh-add-subfolder', 'Add Sub Folder');
   addBtn('ssh-add-parent-folder', 'Add Parent Folder');
@@ -119,9 +120,10 @@ describe('SshPanel (ssh-panel.ts)', () => {
     vi.mocked(api.sshConnectionList).mockResolvedValue([
       { id: 'c1', name: 'My Server', host: 'example.com', port: 22, userId: null, folderId: null },
     ]);
-    vi.mocked(api.sshFolderList).mockResolvedValue([
+    vi.mocked(api.sshConnectionFolderList).mockResolvedValue([
       { id: 'f1', name: 'Work', parentId: null },
     ]);
+    vi.mocked(api.sshUserFolderList).mockResolvedValue([]);
     vi.mocked(api.sshUserList).mockResolvedValue([
       { id: 'u1', name: 'Admin', username: 'admin', authType: 'password' },
     ]);
@@ -153,7 +155,7 @@ describe('SshPanel (ssh-panel.ts)', () => {
     });
 
     it('preselects the parent folder when adding a sub folder', async () => {
-      await getApp().SshPanel.showFolderDialog(undefined, 'f1');
+      await getApp().SshPanel.showConnectionFolderDialog(undefined, 'f1');
 
       const select = document.querySelector('#sshDialogBody select[name="groupParent"]');
       expect(select).not.toBeNull();
@@ -165,7 +167,7 @@ describe('SshPanel (ssh-panel.ts)', () => {
     it('creates a folder and moves the right-clicked folder under it', async () => {
       const api = window.api;
       // The main process generates an id for the new folder
-      vi.mocked(api.sshFolderSave).mockResolvedValue({
+      vi.mocked(api.sshConnectionFolderSave).mockResolvedValue({
         success: true,
         folder: { id: 'newF', name: 'New Parent', parentId: null },
       });
@@ -189,13 +191,13 @@ describe('SshPanel (ssh-panel.ts)', () => {
       await flush();
 
       // First call creates the new folder; second call moves f1 under it
-      expect(api.sshFolderSave).toHaveBeenNthCalledWith(1, expect.objectContaining({ name: 'New Parent' }));
-      expect(api.sshFolderSave).toHaveBeenNthCalledWith(2, { id: 'f1', parentId: 'newF' });
+      expect(api.sshConnectionFolderSave).toHaveBeenNthCalledWith(1, expect.objectContaining({ name: 'New Parent' }));
+      expect(api.sshConnectionFolderSave).toHaveBeenNthCalledWith(2, { id: 'f1', parentId: 'newF' });
     });
 
     it('creates a folder and moves the right-clicked connection under it', async () => {
       const api = window.api;
-      vi.mocked(api.sshFolderSave).mockResolvedValue({
+      vi.mocked(api.sshConnectionFolderSave).mockResolvedValue({
         success: true,
         folder: { id: 'newF', name: 'New Parent', parentId: null },
       });
@@ -227,7 +229,7 @@ describe('SshPanel (ssh-panel.ts)', () => {
       ]);
       await App.SshPanel.refreshAll();
       await flush();
-      vi.mocked(api.sshFolderSave).mockResolvedValue({
+      vi.mocked(api.sshConnectionFolderSave).mockResolvedValue({
         success: true,
         folder: { id: 'newF', name: 'New Parent', parentId: 'f1' },
       });
@@ -264,7 +266,7 @@ describe('SshPanel (ssh-panel.ts)', () => {
       expect(api.sshConnectionSave).toHaveBeenNthCalledWith(1, { id: 'c1', folderId: 'newF' });
       expect(api.sshConnectionSave).toHaveBeenNthCalledWith(2, { id: 'c2', folderId: 'newF' });
       expect(api.sshConnectionSave).toHaveBeenNthCalledWith(3, { id: 'c1', folderId: 'f1' });
-      expect(api.sshFolderDelete).toHaveBeenCalledWith('newF');
+      expect(api.sshConnectionFolderDelete).toHaveBeenCalledWith('newF');
       expect(toastSpy).toHaveBeenCalledWith(
         App.__('toastAdoptRolledBack', { failed: 1, total: 2 })
       );
@@ -277,7 +279,7 @@ describe('SshPanel (ssh-panel.ts)', () => {
 
     it('shows the option when all selected folders share the same parent', async () => {
       const api = window.api;
-      vi.mocked(api.sshFolderList).mockResolvedValue([
+      vi.mocked(api.sshConnectionFolderList).mockResolvedValue([
         { id: 'f1', name: 'Work', parentId: null },
         { id: 'f2', name: 'Personal', parentId: null },
       ]);
@@ -296,7 +298,7 @@ describe('SshPanel (ssh-panel.ts)', () => {
 
     it('hides the option when the selected folders are at different levels', async () => {
       const api = window.api;
-      vi.mocked(api.sshFolderList).mockResolvedValue([
+      vi.mocked(api.sshConnectionFolderList).mockResolvedValue([
         { id: 'f1', name: 'Work', parentId: null },
         { id: 'f2', name: 'Sub', parentId: 'f1' },
       ]);
@@ -353,7 +355,7 @@ describe('SshPanel (ssh-panel.ts)', () => {
 
     it('preselects the shared parent when adding a parent folder for multiple folders', async () => {
       const api = window.api;
-      vi.mocked(api.sshFolderList).mockResolvedValue([
+      vi.mocked(api.sshConnectionFolderList).mockResolvedValue([
         { id: 'p1', name: 'Parent', parentId: null },
         { id: 'f1', name: 'Work', parentId: 'p1' },
         { id: 'f2', name: 'Personal', parentId: 'p1' },
@@ -402,7 +404,7 @@ describe('SshPanel (ssh-panel.ts)', () => {
   describe('context menu separator visibility', () => {
     it('hides the Move separator when no option sits between it and the add section', async () => {
       const api = window.api;
-      vi.mocked(api.sshFolderList).mockResolvedValue([
+      vi.mocked(api.sshConnectionFolderList).mockResolvedValue([
         { id: 'f1', name: 'Work', parentId: null },
         { id: 'f2', name: 'Personal', parentId: null },
       ]);
@@ -484,7 +486,7 @@ describe('SshPanel (ssh-panel.ts)', () => {
 
       const dialog = document.getElementById('sshDialog');
       expect(dialog.classList.contains('hidden')).toBe(false);
-      expect(dialog.dataset.type).toBe('group');
+      expect(dialog.dataset.type).toBe('connectionFolder');
       const parentSelect = document.querySelector('#sshDialogBody select[name="groupParent"]') as HTMLSelectElement;
       expect(parentSelect.value).toBe('');
     });
@@ -569,12 +571,12 @@ describe('SshPanel (ssh-panel.ts)', () => {
 
       const { dialog, message, ok } = getConfirmElements();
       expect(dialog.classList.contains('hidden')).toBe(false);
-      expect(message.textContent).toBe(App.__('confirmDeleteSshFolder', { name: 'Work' }));
+      expect(message.textContent).toBe(App.__('confirmDeleteSshConnectionFolder', { name: 'Work', connections: 0, subfolders: 0 }));
       expect(ok.textContent).toBe(App.__('confirmDelete'));
 
       ok.click();
       await flush();
-      expect(window.api.sshFolderDelete).toHaveBeenCalledWith('f1');
+      expect(window.api.sshConnectionFolderDelete).toHaveBeenCalledWith('f1');
     });
   });
 
@@ -702,6 +704,239 @@ describe('SshPanel (ssh-panel.ts)', () => {
 
       const { message } = getConfirmElements();
       expect(message.textContent).toBe(App._n('confirmDeleteMultiSsh', 2, 'statusTerminalPlural').replace('{type}', App.__('sshDeleteTypeUser')));
+    });
+  });
+
+  describe('user folders', () => {
+    it('renders user folders with users inside them and ungrouped users at root', async () => {
+      const App = getApp();
+      const api = window.api;
+      vi.mocked(api.sshUserList).mockResolvedValue([
+        { id: 'u1', name: 'Admin', username: 'admin', authType: 'password', folderId: 'uf1' },
+        { id: 'u2', name: 'Ops', username: 'ops', authType: 'password', folderId: null },
+      ]);
+      vi.mocked(api.sshUserFolderList).mockResolvedValue([
+        { id: 'uf1', name: 'Team A', parentId: null },
+      ]);
+      await App.SshPanel.refreshAll();
+      await flush();
+
+      const userList = document.getElementById('sshUserList');
+      const folderEl = userList.querySelector('.ssh-user-folder[data-user-folder-id="uf1"]');
+      expect(folderEl).not.toBeNull();
+      expect(folderEl.querySelector('.ssh-folder-name').textContent).toBe('Team A');
+      expect(userList.querySelector('.ssh-user-item[data-user-id="u1"]')).not.toBeNull();
+      expect(userList.querySelector('.ssh-user-item[data-user-id="u2"]')).not.toBeNull();
+    });
+
+    it('groups the connection dialog user dropdown by user folder', async () => {
+      const App = getApp();
+      const api = window.api;
+      vi.mocked(api.sshUserList).mockResolvedValue([
+        { id: 'u1', name: 'Admin', username: 'admin', authType: 'password', folderId: 'uf1' },
+        { id: 'u2', name: 'Ops', username: 'ops', authType: 'password', folderId: null },
+      ]);
+      vi.mocked(api.sshUserFolderList).mockResolvedValue([
+        { id: 'uf1', name: 'Team A', parentId: null },
+      ]);
+      await App.SshPanel.showConnectionDialog();
+
+      const select = document.querySelector('#sshDialogBody select[name="connUser"]');
+      const groups = select.querySelectorAll('optgroup');
+      expect(groups.length).toBe(2);
+      expect(groups[0].label).toBe('└─ Team A');
+      expect(groups[0].querySelector('[value="u1"]')).not.toBeNull();
+      expect(groups[1].label).toBe(App.__('sshFormUserUngrouped'));
+      expect(groups[1].querySelector('[value="u2"]')).not.toBeNull();
+    });
+
+    it('shows the full user folder tree (indented by depth) in the connection dialog', async () => {
+      const App = getApp();
+      const api = window.api;
+      vi.mocked(api.sshUserList).mockResolvedValue([
+        { id: 'u1', name: 'Admin', username: 'admin', authType: 'password', folderId: 'uf1' },
+        { id: 'u2', name: 'Root', username: 'root', authType: 'password', folderId: 'uf2' },
+        { id: 'u3', name: 'Deep', username: 'deep', authType: 'password', folderId: null },
+      ]);
+      vi.mocked(api.sshUserFolderList).mockResolvedValue([
+        { id: 'uf1', name: 'Team A', parentId: null },
+        { id: 'uf2', name: 'Sub', parentId: 'uf1' },
+      ]);
+      await App.SshPanel.showConnectionDialog();
+
+      const select = document.querySelector('#sshDialogBody select[name="connUser"]');
+      const labels = [...select.querySelectorAll('optgroup')].map(g => g.label);
+      expect(labels[0]).toBe('└─ Team A');
+      expect(labels[1]).toBe('\u00A0\u00A0\u00A0└─ Sub');
+      expect(labels[2]).toBe(App.__('sshFormUserUngrouped'));
+      expect(select.querySelector('[value="u2"]')).not.toBeNull();
+      expect(select.querySelector('[value="u3"]')).not.toBeNull();
+      // User names are indented to line up with their folder name column
+      expect(select.querySelector('[value="u1"]').textContent).toBe('\u00A0\u00A0\u00A0Admin (admin)');
+      expect(select.querySelector('[value="u2"]').textContent).toBe('\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0Root (root)');
+    });
+
+    it('keeps the parent folder name visible even when it has no direct members', async () => {
+      const App = getApp();
+      const api = window.api;
+      // All users live in "Sub" — "Team A" itself is empty but must still appear
+      vi.mocked(api.sshUserList).mockResolvedValue([
+        { id: 'u1', name: 'Root', username: 'root', authType: 'password', folderId: 'uf2' },
+        { id: 'u2', name: 'Deep', username: 'deep', authType: 'password', folderId: null },
+      ]);
+      vi.mocked(api.sshUserFolderList).mockResolvedValue([
+        { id: 'uf1', name: 'Team A', parentId: null },
+        { id: 'uf2', name: 'Sub', parentId: 'uf1' },
+      ]);
+      await App.SshPanel.showConnectionDialog();
+
+      const select = document.querySelector('#sshDialogBody select[name="connUser"]');
+      const labels = [...select.querySelectorAll('optgroup')].map(g => g.label);
+      expect(labels[0]).toBe('└─ Team A');
+      expect(labels[1]).toBe('\u00A0\u00A0\u00A0└─ Sub');
+      expect(select.querySelector('[value="u1"]')).not.toBeNull();
+    });
+
+    it('preselects the right-clicked user folder as parent when adding a sub user folder', async () => {
+      const App = getApp();
+      const api = window.api;
+      vi.mocked(api.sshUserFolderList).mockResolvedValue([
+        { id: 'uf1', name: 'Team A', parentId: null },
+      ]);
+      await App.SshPanel.refreshAll();
+      await flush();
+
+      const folderEl = document.querySelector('.ssh-user-folder[data-user-folder-id="uf1"]') as HTMLElement;
+      folderEl.dispatchEvent(new MouseEvent('contextmenu', { bubbles: true, clientX: 100, clientY: 100 }));
+      await flush();
+
+      const menuBtn = (document.querySelector('#sshContextMenu [data-action="ssh-add-user-folder"]') as HTMLElement);
+      menuBtn.click();
+      await flush();
+
+      const select = document.querySelector('#sshDialogBody select[name="userFolderParent"]') as HTMLSelectElement;
+      expect(select).not.toBeNull();
+      expect(select.value).toBe('uf1');
+    });
+
+    it('shows the connection folder tree (all selectable) in the connection dialog', async () => {
+      const App = getApp();
+      const api = window.api;
+      vi.mocked(api.sshConnectionFolderList).mockResolvedValue([
+        { id: 'g1', name: 'Prod', parentId: null },
+        { id: 'g2', name: 'EU', parentId: 'g1' },
+        { id: 'g4', name: 'US', parentId: 'g1' },
+        { id: 'g3', name: 'Dev', parentId: null },
+      ]);
+      await App.SshPanel.showConnectionDialog();
+
+      const select = document.querySelector('#sshDialogBody select[name="connGroup"]') as HTMLSelectElement;
+      const opts = [...select.options].filter(o => o.value !== '');
+      expect(opts.map(o => o.textContent)).toEqual([
+        '├─ Dev',
+        '└─ Prod',
+        '\u00A0\u00A0\u00A0├─ EU',
+        '\u00A0\u00A0\u00A0└─ US',
+      ]);
+      for (const o of opts) expect(o.disabled).toBe(false);
+    });
+
+    it('shows the user folder tree (all selectable) in the user dialog', async () => {
+      const App = getApp();
+      const api = window.api;
+      vi.mocked(api.sshUserFolderList).mockResolvedValue([
+        { id: 'uf1', name: 'Team A', parentId: null },
+        { id: 'uf2', name: 'Sub', parentId: 'uf1' },
+      ]);
+      await App.SshPanel.showUserDialog();
+
+      const select = document.querySelector('#sshDialogBody select[name="userFolder"]') as HTMLSelectElement;
+      const opts = [...select.options].filter(o => o.value !== '');
+      expect(opts.map(o => o.textContent)).toEqual(['└─ Team A', '\u00A0\u00A0\u00A0└─ Sub']);
+      for (const o of opts) expect(o.disabled).toBe(false);
+    });
+
+    it('disables self and descendants in the connection folder parent select', async () => {
+      const App = getApp();
+      const api = window.api;
+      vi.mocked(api.sshConnectionFolderList).mockResolvedValue([
+        { id: 'g1', name: 'Root', parentId: null },
+        { id: 'g2', name: 'Child', parentId: 'g1' },
+        { id: 'g3', name: 'Sibling', parentId: null },
+      ]);
+      await App.SshPanel.showConnectionFolderDialog('g1');
+
+      const select = document.querySelector('#sshDialogBody select[name="groupParent"]') as HTMLSelectElement;
+      const opt = (id) => [...select.options].find(o => o.value === id);
+      expect(opt('g1').disabled).toBe(true);
+      expect(opt('g2').disabled).toBe(true);
+      expect(opt('g3').disabled).toBe(false);
+    });
+
+    it('disables self and descendants in the user folder parent select', async () => {
+      const App = getApp();
+      const api = window.api;
+      vi.mocked(api.sshUserFolderList).mockResolvedValue([
+        { id: 'uf1', name: 'Root', parentId: null },
+        { id: 'uf2', name: 'Child', parentId: 'uf1' },
+        { id: 'uf3', name: 'Sibling', parentId: null },
+      ]);
+      await App.SshPanel.showUserFolderDialog('uf1');
+
+      const select = document.querySelector('#sshDialogBody select[name="userFolderParent"]') as HTMLSelectElement;
+      const opt = (id) => [...select.options].find(o => o.value === id);
+      expect(opt('uf1').disabled).toBe(true);
+      expect(opt('uf2').disabled).toBe(true);
+      expect(opt('uf3').disabled).toBe(false);
+    });
+
+    it('shows the user folder context menu actions', async () => {
+      const App = getApp();
+      const api = window.api;
+      vi.mocked(api.sshUserFolderList).mockResolvedValue([
+        { id: 'uf1', name: 'Team A', parentId: null },
+      ]);
+      vi.mocked(api.sshUserList).mockResolvedValue([
+        { id: 'u1', name: 'Admin', username: 'admin', authType: 'password', folderId: 'uf1' },
+      ]);
+      await App.SshPanel.refreshAll();
+      await flush();
+
+      const folderEl = document.querySelector('.ssh-user-folder[data-user-folder-id="uf1"]') as HTMLElement;
+      folderEl.dispatchEvent(new MouseEvent('contextmenu', { bubbles: true, clientX: 100, clientY: 100 }));
+      await flush();
+
+      const menuBtn = (action): HTMLElement => document.querySelector(`#sshContextMenu [data-action="${action}"]`) as HTMLElement;
+      expect(menuBtn('ssh-add-user-folder').classList.contains('hidden')).toBe(false);
+      expect(menuBtn('ssh-add-user').classList.contains('hidden')).toBe(false);
+      expect(menuBtn('ssh-edit').classList.contains('hidden')).toBe(false);
+      expect(menuBtn('ssh-delete').classList.contains('hidden')).toBe(false);
+      expect(document.getElementById('sshCtxMoveItem').classList.contains('hidden')).toBe(false);
+    });
+
+    it('deletes a user folder with a cascade confirm showing the user count', async () => {
+      const App = getApp();
+      const api = window.api;
+      vi.mocked(api.sshUserFolderList).mockResolvedValue([
+        { id: 'uf1', name: 'Team A', parentId: null },
+      ]);
+      vi.mocked(api.sshUserList).mockResolvedValue([
+        { id: 'u1', name: 'Admin', username: 'admin', authType: 'password', folderId: 'uf1' },
+        { id: 'u2', name: 'Ops', username: 'ops', authType: 'password', folderId: 'uf1' },
+      ]);
+      await App.SshPanel.refreshAll();
+      await flush();
+
+      (document.querySelector('#sshUserList [data-action="delete-user-folder"]') as HTMLElement).click();
+      await flush();
+
+      const { dialog, message, ok } = getConfirmElements();
+      expect(dialog.classList.contains('hidden')).toBe(false);
+      expect(message.textContent).toBe(App.__('confirmDeleteSshUserFolder', { name: 'Team A', users: 2, subfolders: 0 }));
+
+      ok.click();
+      await flush();
+      expect(window.api.sshUserFolderDelete).toHaveBeenCalledWith('uf1');
     });
   });
 

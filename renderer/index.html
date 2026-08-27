@@ -74,8 +74,9 @@
               <div class="context-separator"></div>
               <div class="ssh-dropdown-header" data-i18n="sshDropdownCreate">Create</div>
               <button id="btnAddSshConn" class="ssh-sidebar-dd-btn" data-i18n="sshDropdownConnBtn" data-i18n-title="sshNewConnBtnTitle" title="New Connection">Connection</button>
-              <button id="btnAddSshFolder" class="ssh-sidebar-dd-btn" data-i18n="sshDropdownFolderBtn" data-i18n-title="sshNewFolderBtnTitle" title="New Folder">Folder</button>
+              <button id="btnAddSshFolder" class="ssh-sidebar-dd-btn" data-i18n="sshDropdownFolderBtn" data-i18n-title="sshNewFolderBtnTitle" title="New Connection Folder">Connection Folder</button>
               <button id="btnAddSshUser" class="ssh-sidebar-dd-btn" data-i18n="sshDropdownUserBtn" data-i18n-title="sshNewUserBtnTitle" title="New User">User</button>
+              <button id="btnAddUserFolder" class="ssh-sidebar-dd-btn" data-i18n="sshDropdownUserFolderBtn" data-i18n-title="sshNewUserFolderBtnTitle" title="New User Folder">User Folder</button>
             </div>
           </div>
         </div>
@@ -167,7 +168,8 @@
   <!-- ═══SSH context menu  ═══-->
   <div id="sshContextMenu" class="context-menu hidden" data-overlay>
     <button data-action="ssh-add-conn" data-i18n="sshCtxAddConn">Add Connection</button>
-    <button data-action="ssh-add-folder" data-i18n="sshCtxAddFolder">Add Folder</button>
+    <button data-action="ssh-add-folder" data-i18n="sshCtxAddFolder">Add Connection Folder</button>
+    <button data-action="ssh-add-user-folder" data-i18n="sshCtxAddUserFolder">Add User Folder</button>
     <button data-action="ssh-add-user" data-i18n="sshCtxAddUser">Add User</button>
     <button data-action="ssh-add-subfolder" data-i18n="sshCtxAddSubFolder">Add Sub Folder</button>
     <button data-action="ssh-add-parent-folder" data-i18n="sshCtxAddParentFolder">Add Parent Folder</button>
@@ -177,7 +179,7 @@
     <button data-action="ssh-duplicate" data-i18n="sshCtxDuplicate">Duplicate</button>
     <div class="context-separator" id="sshCtxMoveSep"></div>
     <div class="context-submenu-trigger" id="sshCtxMoveItem">
-      <span data-i18n="sshCtxMoveToFolder">Move to Group</span> <span class="submenu-arrow">▶</span>
+      <span data-i18n="sshCtxMoveToFolder">Move to Folder</span> <span class="submenu-arrow">▶</span>
       <div class="context-submenu hidden" id="sshCtxFolderSubmenu"></div>
     </div>
     <div class="context-separator" id="sshCtxDelSep"></div>

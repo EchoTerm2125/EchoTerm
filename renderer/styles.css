@@ -2125,6 +2125,12 @@ html, body {
   padding-left: calc(6px * var(--ui-scale));
 }
 
+.ssh-folder-children .ssh-user-item {
+  border-left: 1px solid var(--border);
+  margin-left: calc(4px * var(--ui-scale));
+  padding-left: calc(6px * var(--ui-scale));
+}
+
 /* Sub-folders inside a folder children area */
 .ssh-folder-children .ssh-folder {
   font-weight: 500;

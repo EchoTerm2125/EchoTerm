@@ -1,15 +1,21 @@
 /* ═══════════════════════════════════════════════════════════════════════════
    EchoTerm — Domain service: folder tree traversal & cycle guards
    Pure logic — no Node/Electron imports allowed (see .dependency-cruiser.cjs).
+   Generic over any `{id, parentId}` node — used by both connection folders
+   and user folders.
    ═══════════════════════════════════════════════════════════════════════════ */
 
-import type { Folder } from '../entities/ssh';
+/** Minimal structural shape needed by the tree helpers. */
+interface FolderNode {
+  id: string;
+  parentId: string | null;
+}
 
 /**
  * Collect the id of a folder and all of its transitive descendants.
  * Used when deleting a folder subtree.
  */
-export function collectFolderAndDescendantIds(folders: Folder[], rootId: string): Set<string> {
+export function collectFolderAndDescendantIds(folders: FolderNode[], rootId: string): Set<string> {
   const ids = new Set([rootId]);
   let foundNew = true;
   while (foundNew) {
@@ -30,7 +36,7 @@ export function collectFolderAndDescendantIds(folders: Folder[], rootId: string)
  * or the folder is made its own parent).
  */
 export function wouldCreateFolderCycle(
-  folders: Folder[],
+  folders: FolderNode[],
   folderId: string | undefined,
   parentId: string | null | undefined,
 ): boolean {

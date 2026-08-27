@@ -25,12 +25,13 @@ export type SshAuthType = 'password' | 'keyfile';
 
 export interface SshUser {
   id?: string;
-  name: string;
-  username: string;
-  authType: SshAuthType;
+  name?: string;
+  username?: string;
+  authType?: SshAuthType;
   password?: string | null;
   keyFilePath?: string | null;
   keyPassword?: string | null;
+  folderId?: string | null;
 }
 
 export interface SshJumpHostManual {
@@ -76,11 +77,24 @@ export interface SshConnection {
   resolvedJumpHost?: SshJumpHostManual | null;
 }
 
-export interface SshFolder {
+export interface SshConnectionFolder {
   id?: string;
   name?: string;
   parentId?: string | null;
   connectionIds?: string[];
+  connectionCount?: number;
+  childFolderIds?: string[];
+  childCount?: number;
+}
+
+export interface SshUserFolder {
+  id?: string;
+  name?: string;
+  parentId?: string | null;
+  userIds?: string[];
+  userCount?: number;
+  childFolderIds?: string[];
+  childCount?: number;
 }
 
 // ─── IPC result shapes ───────────────────────────────────────────────────────
@@ -103,7 +117,7 @@ export interface UnlockResult {
   errorCode?: string;
 }
 
-export interface SshFolderOpen {
+export interface SshConnectionFolderOpen {
   name: string;
   connections: Array<{ id: string; name: string; host: string; username: string | null }>;
 }
@@ -257,19 +271,24 @@ export interface WindowApi {
   sshUserSave(userData: SshUser): Promise<IpcOutcome & { user?: SshUser }>;
   sshUserDelete(userId: string): Promise<IpcOutcome>;
 
+  // SSH user folders
+  sshUserFolderList(): Promise<SshUserFolder[]>;
+  sshUserFolderSave(folderData: SshUserFolder): Promise<IpcOutcome & { folder?: SshUserFolder }>;
+  sshUserFolderDelete(folderId: string): Promise<IpcOutcome>;
+
   // SSH connections
   sshConnectionList(): Promise<SshConnection[]>;
   sshConnectionSave(connData: SshConnection): Promise<IpcOutcome & { connection?: SshConnection }>;
   sshConnectionDelete(connId: string): Promise<IpcOutcome>;
 
-  // SSH folders
-  sshFolderList(): Promise<SshFolder[]>;
-  sshFolderSave(folderData: SshFolder): Promise<IpcOutcome & { folder?: SshFolder }>;
-  sshFolderDelete(folderId: string): Promise<IpcOutcome>;
+  // SSH connection folders
+  sshConnectionFolderList(): Promise<SshConnectionFolder[]>;
+  sshConnectionFolderSave(folderData: SshConnectionFolder): Promise<IpcOutcome & { folder?: SshConnectionFolder }>;
+  sshConnectionFolderDelete(folderId: string): Promise<IpcOutcome>;
 
   // SSH actions
   sshConnect(connectionId: string): Promise<SpawnResult>;
-  sshOpenFolder(folderId: string): Promise<SshFolderOpen & { error?: string; errorCode?: string }>;
+  sshOpenConnectionFolder(folderId: string): Promise<SshConnectionFolderOpen & { error?: string; errorCode?: string }>;
   sshImportConfig(filePath?: string): Promise<ImportConfigResult>;
   sshImportApply(request: SshImportApplyRequest): Promise<SshImportApplyResult>;
   sshExportConfig(): Promise<ExportConfigResult>;

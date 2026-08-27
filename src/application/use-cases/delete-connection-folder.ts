@@ -1,14 +1,14 @@
 /* ═══════════════════════════════════════════════════════════════════════════
-   EchoTerm — Use case: list folders
+   EchoTerm — Use case: cascade-delete a connection folder subtree
    ═══════════════════════════════════════════════════════════════════════════ */
 
-import type { Folder } from '../../domain/entities/ssh';
-import type { FolderRepository } from '../../domain/ports/folder-repository';
+import type { ConnectionFolderRepository } from '../../domain/ports/connection-folder-repository';
 
-export class ListFolders {
-  constructor(private readonly folders: FolderRepository) {}
+export class DeleteConnectionFolder {
+  constructor(private readonly folders: ConnectionFolderRepository) {}
 
-  execute(): Folder[] {
-    return this.folders.list();
+  /** Throws when the folder does not exist. */
+  execute(id: string): void {
+    this.folders.delete(id);
   }
 }

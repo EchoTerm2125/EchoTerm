@@ -125,11 +125,14 @@ window.api = {
   sshConnectionList: vi.fn(() => Promise.resolve([])),
   sshConnectionSave: vi.fn((connData) => Promise.resolve({ success: true, connection: connData })),
   sshConnectionDelete: vi.fn(() => Promise.resolve({ success: true })),
-  sshFolderList: vi.fn(() => Promise.resolve([])),
-  sshFolderSave: vi.fn((folderData) => Promise.resolve({ success: true, folder: folderData })),
-  sshFolderDelete: vi.fn(() => Promise.resolve({ success: true })),
+  sshConnectionFolderList: vi.fn(() => Promise.resolve([])),
+  sshConnectionFolderSave: vi.fn((folderData) => Promise.resolve({ success: true, folder: folderData })),
+  sshConnectionFolderDelete: vi.fn(() => Promise.resolve({ success: true })),
+  sshUserFolderList: vi.fn(() => Promise.resolve([])),
+  sshUserFolderSave: vi.fn((folderData) => Promise.resolve({ success: true, folder: folderData })),
+  sshUserFolderDelete: vi.fn(() => Promise.resolve({ success: true })),
   sshConnect: vi.fn((connectionId) => Promise.resolve({ id: _nextApiId++, shell: 'ssh', label: connectionId })),
-  sshOpenFolder: vi.fn(() => Promise.resolve({ name: '', connections: [] })),
+  sshOpenConnectionFolder: vi.fn(() => Promise.resolve({ name: '', connections: [] })),
   sshImportConfig: vi.fn(() => Promise.resolve({ canceled: true })),
   sshImportApply: vi.fn(() => Promise.resolve({ success: true, imported: 0, updated: 0, skipped: [] })),
   sshExportConfig: vi.fn(() => Promise.resolve({ canceled: true })),
@@ -177,6 +180,8 @@ const DOM_IDS = [
   // Language dropdown
   'langSelect', 'langSelectTrigger', 'langSelectLabel',
   'langSelectDropdown', 'langSearchInput', 'langOptionsList',
+  // Tab bar wrapper (children are nested into it below)
+  'tabBar',
 ];
 
 function scaffoldDom() {
@@ -211,6 +216,26 @@ function scaffoldDom() {
       el.classList.add('hidden');
     }
     document.body.appendChild(el);
+  }
+
+  // Recreate the real tab-bar hierarchy — #tabList inside .tab-list, the
+  // action buttons inside .tab-actions — so ui.ts's delegated #tabBar click
+  // listener (which matches closest('.tab-actions')) is exercised in tests.
+  const tabBar = document.getElementById('tabBar');
+  if (tabBar) {
+    const tabListWrap = document.createElement('div');
+    tabListWrap.className = 'tab-list';
+    const tabListEl = document.getElementById('tabList');
+    if (tabListEl) tabListWrap.appendChild(tabListEl);
+    const tabActions = document.createElement('div');
+    tabActions.className = 'tab-actions';
+    for (const id of ['btnNewTerminal', 'btnNewTermDropdown', 'btnEchoMode',
+                      'btnEchoAll', 'btnEchoToggle', 'btnEchoPaste', 'newTermDropdown']) {
+      const el = document.getElementById(id);
+      if (el) tabActions.appendChild(el);
+    }
+    tabBar.appendChild(tabListWrap);
+    tabBar.appendChild(tabActions);
   }
 
   let style = document.getElementById('test-styles');

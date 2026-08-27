@@ -96,6 +96,23 @@
         api.toggleMaximizeWindow();
       });
     }
+
+    // ── Tab-bar action clicks hand keyboard focus back to a terminal ──
+    // The tab bar is a mouse-only surface: clicking any action button blurs
+    // the xterm textarea, and the per-button handlers do not reliably refocus
+    // (paste-all never does; echo all/toggle bail when the active terminal
+    // stays echoed). One delegated listener keeps the rule uniform for every
+    // present and future action button. Shell-dropdown item clicks are
+    // excluded because spawnTerminal focuses the freshly spawned pane itself.
+    const tabBar = document.getElementById('tabBar');
+    if (tabBar) {
+      tabBar.addEventListener('click', (e) => {
+        const target = e.target as HTMLElement;
+        if (!target.closest('.tab-actions')) return;
+        if (target.closest('#newTermDropdown')) return;
+        App.Terminal.refocus();
+      });
+    }
   }
 
   function refreshOptionsPanel() {
@@ -497,10 +514,10 @@
     // (which map to control characters) from the focused terminal textarea.
     document.addEventListener('keydown', (e) => {
       const ctrl = e.ctrlKey || e.metaKey;
-      if (ctrl && !e.shiftKey && e.key === 'n') { e.preventDefault(); e.stopPropagation(); App.Terminal.spawnTerminal(state.selectedShell); return; }
-      if (ctrl && e.shiftKey && e.key === 'N') { e.preventDefault(); e.stopPropagation(); const count = state.groups.size + 1; const group = App.Groups.createGroup(App.__('groupDefaultName', { n: count })); App.Groups.switchGroup(group.id); App.Terminal.spawnTerminal(state.selectedShell); return; }
-      if (ctrl && e.shiftKey && e.key === 'T') { e.preventDefault(); e.stopPropagation(); App.Echo.toggleEchoMode(); return; }
-      if (ctrl && e.key === 'w') { e.preventDefault(); e.stopPropagation(); if (state.activeTerminalId) App.Menus.showConfirm(App.__('confirmCloseTerminal'), () => App.Terminal.closeTerminal(state.activeTerminalId), 'skipTabCloseConfirm'); return; }
+      if (ctrl && !e.shiftKey && e.code === 'KeyN') { e.preventDefault(); e.stopPropagation(); App.Terminal.spawnTerminal(state.selectedShell); return; }
+      if (ctrl && e.shiftKey && e.code === 'KeyN') { e.preventDefault(); e.stopPropagation(); const count = state.groups.size + 1; const group = App.Groups.createGroup(App.__('groupDefaultName', { n: count })); App.Groups.switchGroup(group.id); App.Terminal.spawnTerminal(state.selectedShell); return; }
+      if (ctrl && e.shiftKey && e.code === 'KeyT') { e.preventDefault(); e.stopPropagation(); App.Echo.toggleEchoMode(); return; }
+      if (ctrl && e.code === 'KeyW') { e.preventDefault(); e.stopPropagation(); if (state.activeTerminalId) App.Menus.showConfirm(App.__('confirmCloseTerminal'), () => App.Terminal.closeTerminal(state.activeTerminalId), 'skipTabCloseConfirm'); return; }
       if (ctrl && e.key === 'Tab') { e.preventDefault(); e.stopPropagation(); App.Terminal.cycleTerminal(e.shiftKey ? -1 : 1); return; }
     }, true);
   }
