@@ -632,7 +632,11 @@ import './icons';
     if (ts.term.options) ts.term.options.ignoreBracketedPasteMode = ts.pwPrompt;
   }
 
-  function restoreTerminalFocus(targetId) {
+  // Decide which terminal should own keyboard focus and hand it over. Used
+  // after dialogs close and (via App.Terminal.refocus) after any tab-bar
+  // action click: in echo mode prefer a terminal still in the echo selection,
+  // otherwise fall back to the active terminal of the current group.
+  function refocus(targetId) {
     const groupIds = App.Groups.getGroupTerminalIds(state.activeGroupId);
     if (state.echoModeActive) {
       const focusId = state.echoSelection.has(state.activeTerminalId)
@@ -672,7 +676,7 @@ import './icons';
       if (edited) pasteToTerminal(id, edited);
       document.removeEventListener('keydown', escHandler);
       _pasteEscHandler = null;
-      restoreTerminalFocus(id);
+      refocus(id);
     };
 
     document.getElementById('pastePreviewConfirm').onclick = confirmOnce;
@@ -680,7 +684,7 @@ import './icons';
       dialog.classList.add('hidden');
       document.removeEventListener('keydown', escHandler);
       _pasteEscHandler = null;
-      restoreTerminalFocus(id);
+      refocus(id);
     };
 
     function escHandler(e) {
@@ -688,7 +692,7 @@ import './icons';
         dialog.classList.add('hidden');
         document.removeEventListener('keydown', escHandler);
         _pasteEscHandler = null;
-        restoreTerminalFocus(id);
+        refocus(id);
       }
       if (e.ctrlKey && e.key === 'Enter') confirmOnce();
     }
@@ -701,6 +705,7 @@ import './icons';
     spawnTerminal, spawnSshTerminal, focusTerminal, closeTerminal, handleTerminalExit,
     setSinglePane, showOnlyPane, showAllPanes,
     setEchoCheckboxesVisible, cycleTerminal, pasteToTerminal, showPastePreview, noteOutput,
+    refocus,
   };
 })();
 

@@ -96,6 +96,23 @@
         api.toggleMaximizeWindow();
       });
     }
+
+    // ── Tab-bar action clicks hand keyboard focus back to a terminal ──
+    // The tab bar is a mouse-only surface: clicking any action button blurs
+    // the xterm textarea, and the per-button handlers do not reliably refocus
+    // (paste-all never does; echo all/toggle bail when the active terminal
+    // stays echoed). One delegated listener keeps the rule uniform for every
+    // present and future action button. Shell-dropdown item clicks are
+    // excluded because spawnTerminal focuses the freshly spawned pane itself.
+    const tabBar = document.getElementById('tabBar');
+    if (tabBar) {
+      tabBar.addEventListener('click', (e) => {
+        const target = e.target as HTMLElement;
+        if (!target.closest('.tab-actions')) return;
+        if (target.closest('#newTermDropdown')) return;
+        App.Terminal.refocus();
+      });
+    }
   }
 
   function refreshOptionsPanel() {

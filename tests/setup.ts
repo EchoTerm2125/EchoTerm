@@ -180,6 +180,8 @@ const DOM_IDS = [
   // Language dropdown
   'langSelect', 'langSelectTrigger', 'langSelectLabel',
   'langSelectDropdown', 'langSearchInput', 'langOptionsList',
+  // Tab bar wrapper (children are nested into it below)
+  'tabBar',
 ];
 
 function scaffoldDom() {
@@ -214,6 +216,26 @@ function scaffoldDom() {
       el.classList.add('hidden');
     }
     document.body.appendChild(el);
+  }
+
+  // Recreate the real tab-bar hierarchy — #tabList inside .tab-list, the
+  // action buttons inside .tab-actions — so ui.ts's delegated #tabBar click
+  // listener (which matches closest('.tab-actions')) is exercised in tests.
+  const tabBar = document.getElementById('tabBar');
+  if (tabBar) {
+    const tabListWrap = document.createElement('div');
+    tabListWrap.className = 'tab-list';
+    const tabListEl = document.getElementById('tabList');
+    if (tabListEl) tabListWrap.appendChild(tabListEl);
+    const tabActions = document.createElement('div');
+    tabActions.className = 'tab-actions';
+    for (const id of ['btnNewTerminal', 'btnNewTermDropdown', 'btnEchoMode',
+                      'btnEchoAll', 'btnEchoToggle', 'btnEchoPaste', 'newTermDropdown']) {
+      const el = document.getElementById(id);
+      if (el) tabActions.appendChild(el);
+    }
+    tabBar.appendChild(tabListWrap);
+    tabBar.appendChild(tabActions);
   }
 
   let style = document.getElementById('test-styles');
