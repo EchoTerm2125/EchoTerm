@@ -15,6 +15,8 @@ export interface User {
   password: string | null;
   keyFilePath: string | null;
   keyPassword: string | null;
+  /** User folder this user is grouped under, or null for root level. */
+  folderId: string | null;
 }
 
 /** Jump host entered inline on a connection. */
@@ -42,7 +44,7 @@ export interface Connection {
   host: string;
   port: number;
   userId: string | null;
-  folderId: string | null;
+  folderId: string | null; // references a ConnectionFolder, or null for root level
   jumpHost: JumpHost | null;
   /** Optional ssh_config-style algorithm overrides (for legacy servers). */
   hostKeyAlgorithms: string | null;
@@ -50,8 +52,15 @@ export interface Connection {
   pubkeyAcceptedAlgorithms: string | null;
 }
 
-/** Folder grouping connections and sub-folders (tree via parentId). */
-export interface Folder {
+/** Connection folder grouping connections and sub-folders (tree via parentId). */
+export interface ConnectionFolder {
+  id: string;
+  name: string;
+  parentId: string | null;
+}
+
+/** User folder grouping SSH users and sub-folders (tree via parentId). */
+export interface UserFolder {
   id: string;
   name: string;
   parentId: string | null;

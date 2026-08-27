@@ -1,18 +1,18 @@
 /* ═══════════════════════════════════════════════════════════════════════════
-   EchoTerm — Domain port: folder persistence
+   EchoTerm — Domain port: connection folder persistence
    Implemented by an infrastructure adapter (Phase 3).
    ═══════════════════════════════════════════════════════════════════════════ */
 
-import type { Folder } from '../entities/ssh';
+import type { ConnectionFolder } from '../entities/ssh';
 
-export interface FolderRepository {
-  list(): Folder[];
-  findById(id: string): Folder | null;
+export interface ConnectionFolderRepository {
+  list(): ConnectionFolder[];
+  findById(id: string): ConnectionFolder | null;
   /**
    * Creates or updates. Throws when saving would create a circular
    * folder reference.
    */
-  save(folder: Folder): Folder;
-  /** Removes the folder subtree; contained connections move to the deleted folder's parent. */
+  save(folder: ConnectionFolder): ConnectionFolder;
+  /** Cascade-deletes the folder subtree: all sub-folders and every contained connection. */
   delete(id: string): void;
 }

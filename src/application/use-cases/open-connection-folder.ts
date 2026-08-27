@@ -1,24 +1,25 @@
 /* ═══════════════════════════════════════════════════════════════════════════
-   EchoTerm — Use case: open a folder (all connections in it and sub-folders)
+   EchoTerm — Use case: open a connection folder
+   (all connections in it and sub-folders)
    ═══════════════════════════════════════════════════════════════════════════ */
 
 import type { ResolvedConnection } from '../../domain/entities/ssh';
 import type { ConnectionRepository } from '../../domain/ports/connection-repository';
-import type { FolderRepository } from '../../domain/ports/folder-repository';
+import type { ConnectionFolderRepository } from '../../domain/ports/connection-folder-repository';
 
-export interface OpenFolderResult {
+export interface OpenConnectionFolderResult {
   name: string;
   connections: ResolvedConnection[];
 }
 
-export class OpenFolder {
+export class OpenConnectionFolder {
   constructor(
     private readonly connections: ConnectionRepository,
-    private readonly folders: FolderRepository,
+    private readonly folders: ConnectionFolderRepository,
   ) {}
 
   /** Returns null when the folder does not exist. */
-  execute(folderId: string): OpenFolderResult | null {
+  execute(folderId: string): OpenConnectionFolderResult | null {
     const folder = this.folders.findById(folderId);
     if (!folder) return null;
 

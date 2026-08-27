@@ -4,8 +4,9 @@ const path = require('path');
 // Infrastructure adapters
 import { CryptoVault } from './src/main/infrastructure/crypto-vault';
 import { ElectronDialogService } from './src/main/infrastructure/electron-dialog-service';
+import { FileConnectionFolderRepository } from './src/main/infrastructure/file-connection-folder-repository';
 import { FileConnectionRepository } from './src/main/infrastructure/file-connection-repository';
-import { FileFolderRepository } from './src/main/infrastructure/file-folder-repository';
+import { FileUserFolderRepository } from './src/main/infrastructure/file-user-folder-repository';
 import { FileUserRepository } from './src/main/infrastructure/file-user-repository';
 import { FileUpdateSettingsStore } from './src/main/infrastructure/file-update-settings';
 import { NodePtyGateway } from './src/main/infrastructure/node-pty-gateway';
@@ -13,10 +14,10 @@ import { WindowsShellDetector } from './src/main/infrastructure/windows-shell-de
 
 // Application use cases
 import {
-  ClearSshData, DeleteConnection, DeleteFolder, DeleteUser, ExportSshConfig,
-  GetVaultStatus, ListConnections, ListFolders, ListUsers,
-  OpenFolder, SaveConnection, SaveFolder, SaveUser,
-  SetMasterPassword, SpawnShellSession, SpawnSshSession,
+  ClearSshData, DeleteConnection, DeleteConnectionFolder, DeleteUser, DeleteUserFolder,
+  ExportSshConfig, GetVaultStatus, ListConnectionFolders, ListConnections,
+  ListUserFolders, ListUsers, OpenConnectionFolder, SaveConnection, SaveConnectionFolder,
+  SaveUser, SaveUserFolder, SetMasterPassword, SpawnShellSession, SpawnSshSession,
   UnlockWithOsCredentials, UnlockWithPassword, UseOsEncryption,
   ApplySshImport,
 } from './src/application/use-cases';
@@ -39,7 +40,8 @@ process.on('unhandledRejection', (reason) => {
 const vault = new CryptoVault(path.join(app.getPath('userData'), 'ssh'), safeStorage);
 const userRepo = new FileUserRepository(vault);
 const connectionRepo = new FileConnectionRepository(vault);
-const folderRepo = new FileFolderRepository(vault);
+const userFolderRepo = new FileUserFolderRepository(vault);
+const connectionFolderRepo = new FileConnectionFolderRepository(vault);
 const ptyGateway = new NodePtyGateway();
 const shellDetector = new WindowsShellDetector();
 const sessionRegistry = new SessionRegistry();
@@ -98,13 +100,16 @@ const sshController = new SshController(
   new ListUsers(userRepo),
   new SaveUser(userRepo),
   new DeleteUser(userRepo),
+  new ListUserFolders(userFolderRepo),
+  new SaveUserFolder(userFolderRepo),
+  new DeleteUserFolder(userFolderRepo),
   new ListConnections(connectionRepo),
   new SaveConnection(connectionRepo),
   new DeleteConnection(connectionRepo),
-  new ListFolders(folderRepo),
-  new SaveFolder(folderRepo),
-  new DeleteFolder(folderRepo),
-  new OpenFolder(connectionRepo, folderRepo),
+  new ListConnectionFolders(connectionFolderRepo),
+  new SaveConnectionFolder(connectionFolderRepo),
+  new DeleteConnectionFolder(connectionFolderRepo),
+  new OpenConnectionFolder(connectionRepo, connectionFolderRepo),
   new ExportSshConfig(connectionRepo, userRepo),
   new SpawnSshSession(connectionRepo, ptyGateway),
   new ApplySshImport(vault, userRepo, connectionRepo),
@@ -258,14 +263,17 @@ ipcMain.handle('ssh:clear-all', () => sshController.clearAll());
 ipcMain.handle('ssh:user-list', () => sshController.listUsers());
 ipcMain.handle('ssh:user-save', (event, userData) => sshController.saveUser(userData));
 ipcMain.handle('ssh:user-delete', (event, userId) => sshController.deleteUser(userId));
+ipcMain.handle('ssh:user-folder-list', () => sshController.listUserFolders());
+ipcMain.handle('ssh:user-folder-save', (event, folderData) => sshController.saveUserFolder(folderData));
+ipcMain.handle('ssh:user-folder-delete', (event, folderId) => sshController.deleteUserFolder(folderId));
 ipcMain.handle('ssh:connection-list', () => sshController.listConnections());
 ipcMain.handle('ssh:connection-save', (event, connData) => sshController.saveConnection(connData));
 ipcMain.handle('ssh:connection-delete', (event, connId) => sshController.deleteConnection(connId));
-ipcMain.handle('ssh:folder-list', () => sshController.listFolders());
-ipcMain.handle('ssh:folder-save', (event, folderData) => sshController.saveFolder(folderData));
-ipcMain.handle('ssh:folder-delete', (event, folderId) => sshController.deleteFolder(folderId));
+ipcMain.handle('ssh:connection-folder-list', () => sshController.listConnectionFolders());
+ipcMain.handle('ssh:connection-folder-save', (event, folderData) => sshController.saveConnectionFolder(folderData));
+ipcMain.handle('ssh:connection-folder-delete', (event, folderId) => sshController.deleteConnectionFolder(folderId));
 ipcMain.handle('ssh:connect', (event, connectionId) => sshController.connect(connectionId));
-ipcMain.handle('ssh:open-folder', (event, folderId) => sshController.openFolder(folderId));
+ipcMain.handle('ssh:open-connection-folder', (event, folderId) => sshController.openConnectionFolder(folderId));
 ipcMain.handle('ssh:import-config', (event, customPath) => sshController.importConfig(customPath));
 ipcMain.handle('ssh:import-apply', (event, request) => sshController.importApply(request));
 ipcMain.handle('ssh:export-config', () => sshController.exportConfig());

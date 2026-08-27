@@ -1,11 +1,11 @@
 /* ═══════════════════════════════════════════════════════════════════════════
-   EchoTerm — Use case: delete a folder subtree
+   EchoTerm — Use case: cascade-delete a user folder subtree
    ═══════════════════════════════════════════════════════════════════════════ */
 
-import type { FolderRepository } from '../../domain/ports/folder-repository';
+import type { UserFolderRepository } from '../../domain/ports/user-folder-repository';
 
-export class DeleteFolder {
-  constructor(private readonly folders: FolderRepository) {}
+export class DeleteUserFolder {
+  constructor(private readonly folders: UserFolderRepository) {}
 
   /** Throws when the folder does not exist. */
   execute(id: string): void {

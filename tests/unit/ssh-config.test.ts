@@ -16,7 +16,7 @@ function makeConnection(overrides: Partial<Connection> = {}): Connection {
 function makeUser(overrides: Partial<User> = {}): User {
   return {
     id: 'u1', name: 'User', username: 'deploy', authType: 'password',
-    password: null, keyFilePath: null, keyPassword: null,
+    password: null, keyFilePath: null, keyPassword: null, folderId: null,
     ...overrides,
   };
 }

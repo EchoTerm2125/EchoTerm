@@ -10,7 +10,7 @@ import fs from 'fs';
 import path from 'path';
 
 import type { Vault, VaultUnlockResult } from '../../domain/ports/vault';
-import { defaultData } from './ssh-data';
+import { defaultData, migrateData } from './ssh-data';
 import type { SshData } from './ssh-data';
 
 const PBKDF2_ITERATIONS = 600000;
@@ -137,9 +137,10 @@ export class CryptoVault implements Vault {
 
     try {
       const json = aesDecrypt(dataFile.encrypted, dataFile.iv, dataFile.tag, key);
-      this.cachedData = JSON.parse(json);
+      const changed = this.setLoadedData(JSON.parse(json));
       this.sessionKey = key;
       this.customPasswordSet = true;
+      if (changed) this.persist();
       return { success: true };
     } catch {
       return { success: false, error: 'Failed to decrypt data. File may be corrupted.', errorCode: 'DECRYPT_FAILED' };
@@ -162,8 +163,9 @@ export class CryptoVault implements Vault {
         // safeStorage-encrypted data
         try {
           const decrypted = this.osCrypto.decryptString(Buffer.from(parsed._data, 'base64'));
-          this.cachedData = JSON.parse(decrypted);
+          const changed = this.setLoadedData(JSON.parse(decrypted));
           this.customPasswordSet = false;
+          if (changed) this.persist();
           return { success: true };
         } catch {
           this.cachedData = defaultData();
@@ -175,7 +177,9 @@ export class CryptoVault implements Vault {
         return { success: false, error: 'Master password required. Data is encrypted.', errorCode: 'MASTER_PASSWORD_REQUIRED' };
       }
       // Plain JSON (unencrypted)
-      this.cachedData = parsed;
+      const changed = this.setLoadedData(parsed);
+      this.customPasswordSet = false;
+      if (changed) this.persist();
       return { success: true };
     } catch {
       // Not valid JSON — fall back to default
@@ -243,6 +247,13 @@ export class CryptoVault implements Vault {
   }
 
   // ─── Internals ─────────────────────────────────────────────────────────────
+
+  /** Assign a freshly decrypted payload, migrating it to the current v3 shape. */
+  private setLoadedData(raw: unknown): boolean {
+    const { data, changed } = migrateData(raw);
+    this.cachedData = data;
+    return changed;
+  }
 
   private ensureDir(): void {
     const dir = path.dirname(this.dataFile);

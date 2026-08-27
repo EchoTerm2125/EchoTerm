@@ -1,8 +1,8 @@
 // Unit tests for src/domain/services/folder-tree.ts
 import { collectFolderAndDescendantIds, wouldCreateFolderCycle } from '../../src/domain/services/folder-tree';
-import type { Folder } from '../../src/domain/entities/ssh';
+import type { ConnectionFolder } from '../../src/domain/entities/ssh';
 
-function folder(id: string, parentId: string | null): Folder {
+function folder(id: string, parentId: string | null): ConnectionFolder {
   return { id, name: id, parentId };
 }
 

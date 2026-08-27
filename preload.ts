@@ -103,16 +103,20 @@ const api: WindowApi = {
   sshUserSave: (userData) => ipcRenderer.invoke('ssh:user-save', userData),
   sshUserDelete: (userId) => ipcRenderer.invoke('ssh:user-delete', userId),
 
+  sshUserFolderList: () => ipcRenderer.invoke('ssh:user-folder-list'),
+  sshUserFolderSave: (folderData) => ipcRenderer.invoke('ssh:user-folder-save', folderData),
+  sshUserFolderDelete: (folderId) => ipcRenderer.invoke('ssh:user-folder-delete', folderId),
+
   sshConnectionList: () => ipcRenderer.invoke('ssh:connection-list'),
   sshConnectionSave: (connData) => ipcRenderer.invoke('ssh:connection-save', connData),
   sshConnectionDelete: (connId) => ipcRenderer.invoke('ssh:connection-delete', connId),
 
-  sshFolderList: () => ipcRenderer.invoke('ssh:folder-list'),
-  sshFolderSave: (folderData) => ipcRenderer.invoke('ssh:folder-save', folderData),
-  sshFolderDelete: (folderId) => ipcRenderer.invoke('ssh:folder-delete', folderId),
+  sshConnectionFolderList: () => ipcRenderer.invoke('ssh:connection-folder-list'),
+  sshConnectionFolderSave: (folderData) => ipcRenderer.invoke('ssh:connection-folder-save', folderData),
+  sshConnectionFolderDelete: (folderId) => ipcRenderer.invoke('ssh:connection-folder-delete', folderId),
 
   sshConnect: (connectionId) => ipcRenderer.invoke('ssh:connect', connectionId),
-  sshOpenFolder: (folderId) => ipcRenderer.invoke('ssh:open-folder', folderId),
+  sshOpenConnectionFolder: (folderId) => ipcRenderer.invoke('ssh:open-connection-folder', folderId),
   sshImportConfig: (filePath) => ipcRenderer.invoke('ssh:import-config', filePath),
   sshImportApply: (request) => ipcRenderer.invoke('ssh:import-apply', request),
   sshExportConfig: () => ipcRenderer.invoke('ssh:export-config'),

@@ -1,15 +1,14 @@
 /* ═══════════════════════════════════════════════════════════════════════════
-   EchoTerm — Use case: create or update a folder
+   EchoTerm — Use case: list connection folders
    ═══════════════════════════════════════════════════════════════════════════ */
 
-import type { Folder } from '../../domain/entities/ssh';
-import type { FolderRepository } from '../../domain/ports/folder-repository';
+import type { ConnectionFolder } from '../../domain/entities/ssh';
+import type { ConnectionFolderRepository } from '../../domain/ports/connection-folder-repository';
 
-export class SaveFolder {
-  constructor(private readonly folders: FolderRepository) {}
+export class ListConnectionFolders {
+  constructor(private readonly folders: ConnectionFolderRepository) {}
 
-  /** Throws on circular folder references or when the folder does not exist. */
-  execute(folder: Folder): Folder {
-    return this.folders.save(folder);
+  execute(): ConnectionFolder[] {
+    return this.folders.list();
   }
 }

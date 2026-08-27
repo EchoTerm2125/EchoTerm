@@ -127,7 +127,7 @@ export class FileConnectionRepository implements ConnectionRepository {
 
     // Remove from old folder
     if (oldFolderId && oldFolderId !== newFolderId) {
-      const oldFolder = data.folders.find(f => f.id === oldFolderId);
+      const oldFolder = data.connectionFolders.find(f => f.id === oldFolderId);
       if (oldFolder) {
         const fidx = oldFolder.connectionIds.indexOf(connId);
         if (fidx !== -1) oldFolder.connectionIds.splice(fidx, 1);
@@ -136,7 +136,7 @@ export class FileConnectionRepository implements ConnectionRepository {
 
     // Add to new folder
     if (newFolderId) {
-      const newFolder = data.folders.find(f => f.id === newFolderId);
+      const newFolder = data.connectionFolders.find(f => f.id === newFolderId);
       if (newFolder && !newFolder.connectionIds.includes(connId)) {
         newFolder.connectionIds.push(connId);
       }
@@ -153,7 +153,7 @@ export class FileConnectionRepository implements ConnectionRepository {
     if (idx === -1) throw new Error('Connection not found.');
     data.connections.splice(idx, 1);
     // Remove from any folders
-    for (const folder of data.folders) {
+    for (const folder of data.connectionFolders) {
       const fidx = folder.connectionIds.indexOf(id);
       if (fidx !== -1) folder.connectionIds.splice(fidx, 1);
     }

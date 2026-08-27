@@ -8,16 +8,17 @@ import fs from 'fs';
 import os from 'os';
 import path from 'path';
 
-import type { Connection, Folder, User } from '../../domain/entities/ssh';
+import type { Connection, ConnectionFolder, User, UserFolder } from '../../domain/entities/ssh';
 import type { DialogService } from '../../domain/ports/dialog-service';
 import { parseSshConfigText } from '../../domain/services/ssh-config';
 import type {
   GetVaultStatus, SetMasterPassword, UseOsEncryption, UnlockWithPassword, UnlockWithOsCredentials,
   ClearSshData, ApplySshImport,
   ListUsers, SaveUser, DeleteUser,
+  ListUserFolders, SaveUserFolder, DeleteUserFolder,
   ListConnections, SaveConnection, DeleteConnection,
-  ListFolders, SaveFolder, DeleteFolder,
-  OpenFolder, ExportSshConfig, SpawnSshSession,
+  ListConnectionFolders, SaveConnectionFolder, DeleteConnectionFolder,
+  OpenConnectionFolder, ExportSshConfig, SpawnSshSession,
 } from '../../application/use-cases';
 import type { SshImportApplyRequest } from '../../../shared/ipc';
 import { sessionEvents } from './session-registry';
@@ -34,13 +35,16 @@ export class SshController {
     private readonly listUsersUseCase: ListUsers,
     private readonly saveUserUseCase: SaveUser,
     private readonly deleteUserUseCase: DeleteUser,
+    private readonly listUserFoldersUseCase: ListUserFolders,
+    private readonly saveUserFolderUseCase: SaveUserFolder,
+    private readonly deleteUserFolderUseCase: DeleteUserFolder,
     private readonly listConnectionsUseCase: ListConnections,
     private readonly saveConnectionUseCase: SaveConnection,
     private readonly deleteConnectionUseCase: DeleteConnection,
-    private readonly listFoldersUseCase: ListFolders,
-    private readonly saveFolderUseCase: SaveFolder,
-    private readonly deleteFolderUseCase: DeleteFolder,
-    private readonly openFolderUseCase: OpenFolder,
+    private readonly listConnectionFoldersUseCase: ListConnectionFolders,
+    private readonly saveConnectionFolderUseCase: SaveConnectionFolder,
+    private readonly deleteConnectionFolderUseCase: DeleteConnectionFolder,
+    private readonly openConnectionFolderUseCase: OpenConnectionFolder,
     private readonly exportSshConfigUseCase: ExportSshConfig,
     private readonly spawnSshSessionUseCase: SpawnSshSession,
     private readonly applySshImportUseCase: ApplySshImport,
@@ -150,28 +154,56 @@ export class SshController {
     }
   }
 
-  // ── Folders ──
+  // ── User folders ──
 
-  listFolders() {
-    const connections = this.listConnectionsUseCase.execute();
-    const folders = this.listFoldersUseCase.execute();
-    return folders.map(f => this.toFolderView(f, connections, folders));
+  listUserFolders() {
+    const users = this.listUsersUseCase.execute();
+    const folders = this.listUserFoldersUseCase.execute();
+    return folders.map(f => this.toUserFolderView(f, users, folders));
   }
 
-  saveFolder(folderData: Folder) {
+  saveUserFolder(folderData: UserFolder) {
     try {
-      const saved = this.saveFolderUseCase.execute(folderData);
-      const connections = this.listConnectionsUseCase.execute();
-      const folders = this.listFoldersUseCase.execute();
-      return { success: true, folder: this.toFolderView(saved, connections, folders) };
+      const saved = this.saveUserFolderUseCase.execute(folderData);
+      const users = this.listUsersUseCase.execute();
+      const folders = this.listUserFoldersUseCase.execute();
+      return { success: true, folder: this.toUserFolderView(saved, users, folders) };
     } catch (err) {
       return { error: err.message };
     }
   }
 
-  deleteFolder(folderId: string) {
+  deleteUserFolder(folderId: string) {
     try {
-      this.deleteFolderUseCase.execute(folderId);
+      this.deleteUserFolderUseCase.execute(folderId);
+      return { success: true };
+    } catch (err) {
+      return { error: err.message };
+    }
+  }
+
+  // ── Connection folders ──
+
+  listConnectionFolders() {
+    const connections = this.listConnectionsUseCase.execute();
+    const folders = this.listConnectionFoldersUseCase.execute();
+    return folders.map(f => this.toConnectionFolderView(f, connections, folders));
+  }
+
+  saveConnectionFolder(folderData: ConnectionFolder) {
+    try {
+      const saved = this.saveConnectionFolderUseCase.execute(folderData);
+      const connections = this.listConnectionsUseCase.execute();
+      const folders = this.listConnectionFoldersUseCase.execute();
+      return { success: true, folder: this.toConnectionFolderView(saved, connections, folders) };
+    } catch (err) {
+      return { error: err.message };
+    }
+  }
+
+  deleteConnectionFolder(folderId: string) {
+    try {
+      this.deleteConnectionFolderUseCase.execute(folderId);
       return { success: true };
     } catch (err) {
       return { error: err.message };
@@ -189,9 +221,9 @@ export class SshController {
     return { id: result.id, shell: 'ssh', label: result.label, host: result.host };
   }
 
-  openFolder(folderId: string) {
-    const result = this.openFolderUseCase.execute(folderId);
-    if (!result) return { error: 'Folder not found.', errorCode: 'FOLDER_NOT_FOUND' };
+  openConnectionFolder(folderId: string) {
+    const result = this.openConnectionFolderUseCase.execute(folderId);
+    if (!result) return { error: 'Connection folder not found.', errorCode: 'CONNECTION_FOLDER_NOT_FOUND' };
     return {
       name: result.name,
       connections: result.connections.map(c => ({
@@ -264,6 +296,7 @@ export class SshController {
     return {
       id: user.id, name: user.name, username: user.username,
       authType: user.authType, keyFilePath: user.keyFilePath,
+      folderId: user.folderId || null,
     };
   }
 
@@ -292,7 +325,7 @@ export class SshController {
     };
   }
 
-  private toFolderView(folder: Folder, connections: Connection[], folders: Folder[]) {
+  private toConnectionFolderView(folder: ConnectionFolder, connections: Connection[], folders: ConnectionFolder[]) {
     // Connections directly referencing this folder
     const connectionIds = connections.filter(c => c.folderId === folder.id).map(c => c.id);
     // Child folders
@@ -301,6 +334,18 @@ export class SshController {
       id: folder.id, name: folder.name, parentId: folder.parentId || null,
       connectionIds, childFolderIds,
       connectionCount: connectionIds.length, childCount: childFolderIds.length,
+    };
+  }
+
+  private toUserFolderView(folder: UserFolder, users: User[], folders: UserFolder[]) {
+    // Users directly referencing this folder
+    const userIds = users.filter(u => u.folderId === folder.id).map(u => u.id);
+    // Child folders
+    const childFolderIds = folders.filter(f => f.parentId === folder.id).map(f => f.id);
+    return {
+      id: folder.id, name: folder.name, parentId: folder.parentId || null,
+      userIds, childFolderIds,
+      userCount: userIds.length, childCount: childFolderIds.length,
     };
   }
 }

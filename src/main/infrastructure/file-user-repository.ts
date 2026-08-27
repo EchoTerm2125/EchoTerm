@@ -53,6 +53,7 @@ export class FileUserRepository implements UserRepository {
       password: user.password || '',
       keyFilePath: user.keyFilePath || null,
       keyPassword: user.keyPassword || null,
+      folderId: user.folderId || null,
     };
     users.push(stored);
     this.vault.persist();
@@ -81,6 +82,7 @@ export class FileUserRepository implements UserRepository {
       password: stored.password ?? null,
       keyFilePath: stored.keyFilePath || null,
       keyPassword: stored.keyPassword ?? null,
+      folderId: stored.folderId || null,
     };
   }
 }
