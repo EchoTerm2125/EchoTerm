@@ -1857,6 +1857,15 @@ import type { SshUser, SshConnection, SshConnectionFolder, SshUserFolder } from 
                   message += `\n${App.__('confirmDeleteMultiSshUserConnections', { users: affectedLines.join('\n') })}`;
                 }
               }
+              if (target.type === 'connFolder') {
+                // Cascade-deleting folders also permanently deletes every
+                // contained connection — warn just like the single-delete path.
+                const folders = await api.sshConnectionFolderList();
+                const selected = folders.filter(f => target.ids.includes(f.id));
+                const connections = selected.reduce((s, f) => s + (f.connectionCount ?? 0), 0);
+                const subfolders = selected.reduce((s, f) => s + (f.childCount ?? 0), 0);
+                message += `\n${App.__('confirmDeleteMultiSshConnectionFolder', { connections, subfolders })}`;
+              }
               App.Menus.showConfirm(
                 message,
                 async () => {

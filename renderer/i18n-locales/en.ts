@@ -114,6 +114,7 @@
     confirmCloseAllGroupTerminals: 'Close all {count} terminal{plural} in group "{name}"?\nAll sessions will be terminated.',
     confirmDeleteSshConnection: 'Delete SSH connection "{name}"?',
     confirmDeleteSshConnectionFolder: 'Delete connection folder "{name}"?\n{connections} connection(s) inside it and {subfolders} sub-folder(s) will be permanently deleted.',
+    confirmDeleteMultiSshConnectionFolder: 'This will also permanently delete {connections} connection(s) and {subfolders} sub-folder(s) inside them.',
     confirmDeleteSshUserFolder: 'Delete user folder "{name}"?\n{users} user(s) inside it and {subfolders} sub-folder(s) will be permanently deleted.',
     confirmDeleteSshUser: 'Delete SSH user "{name}"?',
     confirmDeleteSshUserConnections: 'Used by {count} connection{plural}: {names}.\nThey will need to be reassigned.',

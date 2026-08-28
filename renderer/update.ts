@@ -161,14 +161,26 @@ import type { UpdateSettings } from '../shared/ipc';
   // Portable/zip builds have nothing to install — the action opens the GitHub
   // releases page. Installed builds always warn first, since installing ends
   // every terminal session and is never silently skipped.
-  function installUpdateAction() {
+  async function installUpdateAction() {
     if (isPortable) {
-      api.updateInstall();
+      await installUpdateResult();
       return;
     }
     App.Menus.showConfirm(App.__('updInstallConfirmBody'), () => {
-      api.updateInstall();
+      installUpdateResult();
     }, undefined, 'updInstallNow');
+  }
+
+  async function installUpdateResult() {
+    const result = await api.updateInstall();
+    if (result && !result.success) {
+      // The main process reported the install could not start (e.g. another
+      // installer is running). Surface it in the banner status line, which is
+      // visible even while the options panel is open (a toast would sit
+      // underneath the overlay).
+      console.error('Update install failed:', result.error);
+      setStatus('error', null, null, result.error || App.__('updCheckFailedGeneric'));
+    }
   }
 
   function bindEvents() {

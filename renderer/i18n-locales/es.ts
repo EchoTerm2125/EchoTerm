@@ -113,6 +113,7 @@
     confirmCloseAllGroupTerminals: '¿Cerrar las terminales ({count}) del grupo "{name}"?\nTodas las sesiones terminarán.',
     confirmDeleteSshConnection: '¿Eliminar la conexión SSH "{name}"?',
     confirmDeleteSshConnectionFolder: '¿Eliminar la carpeta de conexión "{name}"?\n{connections} conexión(es) y {subfolders} subcarpeta(s) se eliminarán permanentemente.',
+    confirmDeleteMultiSshConnectionFolder: 'Esto también eliminará permanentemente {connections} conexión(es) y {subfolders} subcarpeta(s) en su interior.',
     confirmDeleteSshUserFolder: '¿Eliminar la carpeta de usuario "{name}"?\n{users} usuario(s) y {subfolders} subcarpeta(s) se eliminarán permanentemente.',
     confirmDeleteSshUser: '¿Eliminar el usuario SSH "{name}"?',
     confirmDeleteSshUserConnections: 'Conexiones que usan este usuario: {names} ({count}).\nDeberán reasignarse.',

@@ -113,6 +113,7 @@
     confirmCloseAllGroupTerminals: '그룹 "{name}"의 터미널 {count}개를 모두 닫을까요?\n모든 세션이 종료됩니다.',
     confirmDeleteSshConnection: 'SSH 연결 "{name}"을(를) 삭제할까요?',
     confirmDeleteSshConnectionFolder: '연결 폴더 "{name}"을(를) 삭제할까요?\n{connections}개의 연결과 {subfolders}개의 하위 폴더가 영구 삭제됩니다.',
+    confirmDeleteMultiSshConnectionFolder: '내부의 {connections}개의 연결과 {subfolders}개의 하위 폴더도 영구 삭제됩니다.',
     confirmDeleteSshUserFolder: '사용자 폴더 "{name}"을(를) 삭제할까요?\n{users}명의 사용자와 {subfolders}개의 하위 폴더가 영구 삭제됩니다.',
     confirmDeleteSshUser: 'SSH 사용자 "{name}"을(를) 삭제할까요?',
     confirmDeleteSshUserConnections: '{count}개 연결이 이 사용자를 사용합니다: {names}.\n다시 지정해야 합니다.',

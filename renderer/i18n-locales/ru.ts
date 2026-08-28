@@ -113,6 +113,7 @@
     confirmCloseAllGroupTerminals: 'Закрыть все терминалы ({count}) в группе «{name}»?\nВсе сеансы будут завершены.',
     confirmDeleteSshConnection: 'Удалить SSH-подключение «{name}»?',
     confirmDeleteSshConnectionFolder: 'Удалить папку подключений «{name}»?\n{connections} подключение(я) и {subfolders} вложенная(ые) папка(и) будут удалены навсегда.',
+    confirmDeleteMultiSshConnectionFolder: 'При этом также будут навсегда удалены {connections} подключение(я) и {subfolders} вложенная(ые) папка(и) внутри.',
     confirmDeleteSshUserFolder: 'Удалить папку пользователей «{name}»?\n{users} пользователь(ей) и {subfolders} вложенная(ые) папка(и) будут удалены навсегда.',
     confirmDeleteSshUser: 'Удалить SSH-пользователя «{name}»?',
     confirmDeleteSshUserConnections: 'Подключения, использующие этого пользователя: {names} ({count}).\nИх потребуется переназначить.',

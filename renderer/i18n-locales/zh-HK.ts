@@ -113,6 +113,7 @@
     confirmCloseAllGroupTerminals: '關閉群組「{name}」中的 {count} 個終端機？\n所有工作階段將被終止。',
     confirmDeleteSshConnection: '刪除 SSH 連線「{name}」？',
     confirmDeleteSshConnectionFolder: '刪除連線資料夾「{name}」？\n其中 {connections} 個連線和 {subfolders} 個子資料夾將被永久刪除。',
+    confirmDeleteMultiSshConnectionFolder: '這亦會永久刪除當中的 {connections} 個連線和 {subfolders} 個子資料夾。',
     confirmDeleteSshUserFolder: '刪除使用者資料夾「{name}」？\n其中 {users} 個使用者和 {subfolders} 個子資料夾將被永久刪除。',
     confirmDeleteSshUser: '刪除 SSH 使用者「{name}」？',
     confirmDeleteSshUserConnections: '{count} 個連線使用了此使用者：{names}。\n它們需要重新指派。',

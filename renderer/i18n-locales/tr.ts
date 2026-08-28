@@ -113,6 +113,7 @@
     confirmCloseAllGroupTerminals: '"{name}" grubundaki {count} terminalin tamamı kapatılsın mı?\nTüm oturumlar sonlandırılacak.',
     confirmDeleteSshConnection: 'SSH bağlantısı "{name}" silinsin mi?',
     confirmDeleteSshConnectionFolder: 'Bağlantı klasörü "{name}" silinsin mi?\nİçindeki {connections} bağlantı ve {subfolders} alt klasör kalıcı olarak silinecek.',
+    confirmDeleteMultiSshConnectionFolder: 'Bu, içlerindeki {connections} bağlantının ve {subfolders} alt klasörün de kalıcı olarak silinmesini sağlar.',
     confirmDeleteSshUserFolder: 'Kullanıcı klasörü "{name}" silinsin mi?\nİçindeki {users} kullanıcı ve {subfolders} alt klasör kalıcı olarak silinecek.',
     confirmDeleteSshUser: 'SSH kullanıcısı "{name}" silinsin mi?',
     confirmDeleteSshUserConnections: '{count} bağlantı bu kullanıcıyı kullanıyor: {names}.\nYeniden atanması gerekecek.',
