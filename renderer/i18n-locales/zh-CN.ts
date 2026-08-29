@@ -115,6 +115,7 @@
     confirmDeleteSshConnectionFolder: '删除连接文件夹 "{name}"？\n其中 {connections} 个连接和 {subfolders} 个子文件夹将被永久删除。',
     confirmDeleteMultiSshConnectionFolder: '这还将永久删除其中的 {connections} 个连接和 {subfolders} 个子文件夹。',
     confirmDeleteSshUserFolder: '删除用户文件夹 "{name}"？\n其中 {users} 个用户和 {subfolders} 个子文件夹将被永久删除。',
+    confirmDeleteMultiSshUserFolder: '这还将永久删除其中的 {users} 个用户和 {subfolders} 个子文件夹。',
     confirmDeleteSshUser: '删除 SSH 用户 "{name}"？',
     confirmDeleteSshUserConnections: '{count} 个连接使用了此用户：{names}。\n它们需要重新分配。',
     confirmDeleteSshUserMore: '另有 {count} 个',

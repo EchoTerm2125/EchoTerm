@@ -81,6 +81,10 @@ import type { UpdateSettings } from '../shared/ipc';
   let statusVersion: string | null = null;
   let statusPercent: number | null = null;
   let statusError: string | null = null;
+  // Mirrors the main-process flag: an installer is downloaded and ready for
+  // quitAndInstall. Kept across an install-start failure so the install
+  // buttons stay visible for a retry instead of requiring a full re-check.
+  let updateDownloaded = false;
 
   function statusMessage(state: UpdateStatusState): string {
     switch (state) {
@@ -118,9 +122,12 @@ import type { UpdateSettings } from '../shared/ipc';
   // Title-bar and Updates-banner install buttons share one visibility rule:
   // portable/zip builds show them as soon as an update is available (clicking
   // opens the GitHub page); installed builds only after the installer is
-  // downloaded (clicking installs). Hidden at all other times.
+  // downloaded (clicking installs). An install-start failure keeps the buttons
+  // visible while the installer is still downloaded so the user can retry.
   function updateInstallButtons() {
-    const show = isPortable ? statusState === 'available' : statusState === 'ready';
+    const show = isPortable
+      ? statusState === 'available'
+      : statusState === 'ready' || (statusState === 'error' && updateDownloaded);
     const label = isPortable ? App.__('updGetUpdate') : App.__('updInstallUpdate');
     for (const btn of [btnInstallUpdate, btnInstallBanner]) {
       if (!btn) continue;
@@ -217,10 +224,13 @@ import type { UpdateSettings } from '../shared/ipc';
 
   function subscribeEvents() {
     api.onUpdateAvailable((info) => {
+      // A fresh check supersedes any previously downloaded installer.
+      updateDownloaded = false;
       setStatus('available', info.version);
     });
 
     api.onUpdateNotAvailable(() => {
+      updateDownloaded = false;
       setStatus('uptodate');
     });
 
@@ -229,10 +239,12 @@ import type { UpdateSettings } from '../shared/ipc';
     });
 
     api.onUpdateDownloaded(() => {
+      updateDownloaded = true;
       setStatus('ready');
     });
 
     api.onUpdateError((info) => {
+      updateDownloaded = false;
       // Full detail goes to the log; the banner never shows the raw stack trace —
       // only SmartScreen guidance (where the user must act) or a friendly message.
       console.error('Auto-update error:', info.message);

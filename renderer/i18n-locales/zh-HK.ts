@@ -115,6 +115,7 @@
     confirmDeleteSshConnectionFolder: '刪除連線資料夾「{name}」？\n其中 {connections} 個連線和 {subfolders} 個子資料夾將被永久刪除。',
     confirmDeleteMultiSshConnectionFolder: '這亦會永久刪除當中的 {connections} 個連線和 {subfolders} 個子資料夾。',
     confirmDeleteSshUserFolder: '刪除使用者資料夾「{name}」？\n其中 {users} 個使用者和 {subfolders} 個子資料夾將被永久刪除。',
+    confirmDeleteMultiSshUserFolder: '這亦會永久刪除當中的 {users} 個使用者和 {subfolders} 個子資料夾。',
     confirmDeleteSshUser: '刪除 SSH 使用者「{name}」？',
     confirmDeleteSshUserConnections: '{count} 個連線使用了此使用者：{names}。\n它們需要重新指派。',
     confirmDeleteSshUserMore: '另有 {count} 個',

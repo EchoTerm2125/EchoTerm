@@ -115,6 +115,7 @@
     confirmDeleteSshConnectionFolder: 'Xóa thư mục kết nối "{name}"?\n{connections} kết nối và {subfolders} thư mục con bên trong sẽ bị xóa vĩnh viễn.',
     confirmDeleteMultiSshConnectionFolder: 'Thao tác này cũng sẽ xóa vĩnh viễn {connections} kết nối và {subfolders} thư mục con bên trong.',
     confirmDeleteSshUserFolder: 'Xóa thư mục người dùng "{name}"?\n{users} người dùng và {subfolders} thư mục con bên trong sẽ bị xóa vĩnh viễn.',
+    confirmDeleteMultiSshUserFolder: 'Thao tác này cũng sẽ xóa vĩnh viễn {users} người dùng và {subfolders} thư mục con bên trong.',
     confirmDeleteSshUser: 'Xóa người dùng SSH "{name}"?',
     confirmDeleteSshUserConnections: '{count} kết nối dùng người dùng này: {names}.\nChúng sẽ cần được gán lại.',
     confirmDeleteSshUserMore: 'và {count} nữa',

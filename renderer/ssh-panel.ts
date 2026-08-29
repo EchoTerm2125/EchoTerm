@@ -999,146 +999,13 @@ import type { SshUser, SshConnection, SshConnectionFolder, SshUserFolder } from 
     return item;
   }
 
+  // Root-level entry: render a user folder and its subtree into the user list.
   function renderUserFolderTree(folder, folderMap, folderUsers, folderChildren, collapsed, folderTotalUsers) {
-    const folderId = folder.id;
-
-    const folderEl = document.createElement('div');
-    folderEl.className = 'ssh-folder ssh-user-folder' + (collapsed.has(folderId) ? '' : ' expanded');
-    folderEl.dataset.userFolderId = folderId;
-    folderEl.draggable = true;
-    const userCount = (folderUsers.get(folderId) || []).length;
-    const totalUserCount = folderTotalUsers.get(folderId) || userCount;
-    folderEl.innerHTML = `
-      <span class="ssh-folder-arrow">▶</span>
-      <span class="ssh-folder-icon">👥</span>
-      <span class="ssh-folder-name">${escHtml(folder.name)}</span>
-      <span class="ssh-folder-count">${totalUserCount || ''}</span>
-      <span class="ssh-folder-actions">
-        <button class="ssh-action-btn" data-action="edit-user-folder" data-i18n-title="sshFolderEditTitle" title="Edit">✎</button>
-        <button class="ssh-action-btn" data-action="delete-user-folder" data-i18n-title="sshFolderDeleteTitle" title="Delete">×</button>
-      </span>
-    `;
-
-    // Drag start: dragging a user folder into another user folder
-    folderEl.addEventListener('dragstart', (e) => {
-      e.dataTransfer.effectAllowed = 'move';
-      e.dataTransfer.setData('text/plain', 'userFolder:' + folderId);
-      folderEl.classList.add('ssh-dragging');
-      const selectedUserFolders = [...sshSelected].filter(k => k.startsWith('userFolder:'));
-      if (selectedUserFolders.length > 1 && sshSelected.has(sshKey('userFolder', folderId))) {
-        for (const key of selectedUserFolders) {
-          const fid = key.split(':')[1];
-          const el = document.querySelector(`.ssh-user-folder[data-user-folder-id="${fid}"]`);
-          if (el) el.classList.add('ssh-dragging');
-        }
-      }
-    });
-    folderEl.addEventListener('dragend', () => {
-      folderEl.classList.remove('ssh-dragging');
-      for (const el of document.querySelectorAll('.ssh-user-folder.ssh-dragging')) {
-        el.classList.remove('ssh-dragging');
-      }
-      for (const el of document.querySelectorAll('.ssh-user-folder.drag-over')) {
-        el.classList.remove('drag-over');
-      }
-      if (sshUserList) sshUserList.classList.remove('ssh-root-drag-over');
-    });
-
-    // Click: select + toggle expand/collapse
-    folderEl.addEventListener('click', (e) => {
-      if (e.target.closest('.ssh-folder-actions')) return;
-      const ctrl = e.ctrlKey || e.metaKey;
-      const shift = e.shiftKey;
-      if (ctrl) {
-        e.preventDefault();
-        handleSshSelect('userFolder', folderId, ctrl, shift);
-      } else if (shift && sshLastClicked) {
-        e.preventDefault();
-        handleSshSelect('userFolder', folderId, ctrl, shift);
-      } else {
-        clearSshSelection();
-        handleSshSelect('userFolder', folderId, false, false);
-        const children = folderEl.nextElementSibling;
-        if (children && children.classList.contains('ssh-folder-children')) {
-          folderEl.classList.toggle('expanded');
-          persistUserCollapsedState();
-        }
-      }
-    });
-
-    // Drop target: accept dragged users AND user folders onto the folder header
-    folderEl.addEventListener('dragover', (e) => {
-      e.preventDefault();
-      e.dataTransfer.dropEffect = 'move';
-      folderEl.classList.add('drag-over');
-    });
-    folderEl.addEventListener('dragleave', () => {
-      folderEl.classList.remove('drag-over');
-    });
-    folderEl.addEventListener('drop', async (e) => {
-      e.preventDefault();
-      e.stopPropagation();
-      folderEl.classList.remove('drag-over');
-      const rawData = e.dataTransfer.getData('text/plain');
-      if (!rawData) return;
-
-      if (rawData.startsWith('userFolder:')) {
-        const draggedFolderId = rawData.slice('userFolder:'.length);
-        const result = await api.sshUserFolderSave({ id: draggedFolderId, parentId: folderId });
-        if (result.error) { App.UI.showToast(App.__('toastError', { message: result.error })); return; }
-        const selectedUserFolders = [...sshSelected].filter(k => k.startsWith('userFolder:'));
-        if (selectedUserFolders.length > 1 && sshSelected.has(sshKey('userFolder', draggedFolderId))) {
-          for (const key of selectedUserFolders) {
-            const fid = key.split(':')[1];
-            if (fid !== draggedFolderId) {
-              const r = await api.sshUserFolderSave({ id: fid, parentId: folderId });
-              if (r.error) { App.UI.showToast(App.__('toastError', { message: r.error })); }
-            }
-          }
-        }
-      } else if (rawData.startsWith('user:')) {
-        // Move user(s) into this folder
-        const userId = rawData.slice('user:'.length);
-        const result = await api.sshUserSave({ id: userId, folderId });
-        if (result.error) { App.UI.showToast(App.__('toastError', { message: result.error })); return; }
-        const selectedUsers = [...sshSelected].filter(k => k.startsWith('user:'));
-        if (selectedUsers.length > 1 && sshSelected.has(sshKey('user', userId))) {
-          for (const key of selectedUsers) {
-            const uid = key.split(':')[1];
-            if (uid !== userId) {
-              const r = await api.sshUserSave({ id: uid, folderId });
-              if (r.error) { App.UI.showToast(App.__('toastError', { message: r.error })); }
-            }
-          }
-        }
-      }
-      clearSshSelection();
-      await refreshUsers();
-    });
-
-    sshUserList.appendChild(folderEl);
-
-    // Children container
-    const childrenContainer = document.createElement('div');
-    childrenContainer.className = 'ssh-folder-children';
-    childrenContainer.addEventListener('dragover', (e) => {
-      e.preventDefault();
-      e.dataTransfer.dropEffect = 'move';
-    });
-
-    for (const user of (folderUsers.get(folderId) || [])) {
-      childrenContainer.appendChild(createUserItem(user));
-    }
-
-    const subFolders = folderChildren.get(folderId) || [];
-    for (const subFolder of subFolders) {
-      renderUserFolderTreeInto(subFolder, folderMap, folderUsers, folderChildren, collapsed, childrenContainer, folderTotalUsers);
-    }
-
-    sshUserList.appendChild(childrenContainer);
+    renderUserFolderTreeInto(folder, folderMap, folderUsers, folderChildren, collapsed, sshUserList, folderTotalUsers);
   }
 
-  // Like renderUserFolderTree but appends into a specific container (for nesting)
+  // Render a user folder and its subtree, appending into a container
+  // (the user list at root level, or a parent folder's children area).
   function renderUserFolderTreeInto(folder, folderMap, folderUsers, folderChildren, collapsed, parentContainer, folderTotalUsers) {
     const folderId = folder.id;
 
@@ -1866,6 +1733,17 @@ import type { SshUser, SshConnection, SshConnectionFolder, SshUserFolder } from 
                 const subfolders = selected.reduce((s, f) => s + (f.childCount ?? 0), 0);
                 message += `\n${App.__('confirmDeleteMultiSshConnectionFolder', { connections, subfolders })}`;
               }
+              if (target.type === 'userFolder') {
+                // Cascade-deleting user folders also permanently deletes every
+                // contained user — warn just like the single-delete path. The
+                // union of the selected subtrees is used so nested selections
+                // (e.g. a parent folder plus a child) are counted once.
+                const [folders, users] = await Promise.all([api.sshUserFolderList(), api.sshUserList()]);
+                const folderIds = collectUserFolderSubtree(folders, target.ids);
+                const subfolders = folderIds.size - target.ids.length;
+                const userCount = users.filter(u => u.folderId && folderIds.has(u.folderId)).length;
+                message += `\n${App.__('confirmDeleteMultiSshUserFolder', { users: userCount, subfolders })}`;
+              }
               App.Menus.showConfirm(
                 message,
                 async () => {
@@ -2144,6 +2022,26 @@ import type { SshUser, SshConnection, SshConnectionFolder, SshUserFolder } from 
       'skipSshDeleteConfirm',
       'confirmDelete'
     );
+  }
+
+  // Union of folder ids across several user-folder subtrees (used by the
+  // multi-delete warning; nested selections are counted once).
+  function collectUserFolderSubtree(folders, rootIds) {
+    const children = new Map();
+    for (const f of folders) {
+      const pid = f.parentId || '__root__';
+      if (!children.has(pid)) children.set(pid, []);
+      children.get(pid).push(f);
+    }
+    const folderIds = new Set();
+    const queue = [...rootIds];
+    while (queue.length > 0) {
+      const pid = queue.shift();
+      if (folderIds.has(pid)) continue;
+      folderIds.add(pid);
+      for (const f of (children.get(pid) || [])) queue.push(f.id);
+    }
+    return folderIds;
   }
 
   async function deleteUserFolder(folderId) {

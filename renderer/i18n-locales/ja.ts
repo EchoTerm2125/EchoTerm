@@ -115,6 +115,7 @@
     confirmDeleteSshConnectionFolder: '接続フォルダ「{name}」を削除しますか？\n{connections} 件の接続と {subfolders} 個のサブフォルダが完全に削除されます。',
     confirmDeleteMultiSshConnectionFolder: 'これにより、内部の {connections} 件の接続と {subfolders} 個のサブフォルダも完全に削除されます。',
     confirmDeleteSshUserFolder: 'ユーザーフォルダ「{name}」を削除しますか？\n{users} 人のユーザーと {subfolders} 個のサブフォルダが完全に削除されます。',
+    confirmDeleteMultiSshUserFolder: 'これにより、内部の {users} 人のユーザーと {subfolders} 個のサブフォルダも完全に削除されます。',
     confirmDeleteSshUser: 'SSH ユーザー「{name}」を削除しますか？',
     confirmDeleteSshUserConnections: '{count} 件の接続がこのユーザーを使用しています: {names}。\n再割り当てが必要になります。',
     confirmDeleteSshUserMore: 'ほか {count} 件',
