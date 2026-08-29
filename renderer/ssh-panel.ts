@@ -1722,11 +1722,15 @@ import type { SshUser, SshConnection, SshConnectionFolder, SshUserFolder } from 
               }
               if (target.type === 'connFolder') {
                 // Cascade-deleting folders also permanently deletes every
-                // contained connection — warn just like the single-delete path.
+                // contained connection — count the whole selected subtrees
+                // (union, so nested selections are counted once), matching the
+                // user-folder path below.
                 const folders = await api.sshConnectionFolderList();
-                const selected = folders.filter(f => target.ids.includes(f.id));
-                const connections = selected.reduce((s, f) => s + (f.connectionCount ?? 0), 0);
-                const subfolders = selected.reduce((s, f) => s + (f.childCount ?? 0), 0);
+                const folderIds = collectFolderSubtree(folders, target.ids);
+                const connections = folders
+                  .filter(f => folderIds.has(f.id))
+                  .reduce((s, f) => s + (f.connectionCount ?? 0), 0);
+                const subfolders = folderIds.size - target.ids.length;
                 message += `\n${App.__('confirmDeleteMultiSshConnectionFolder', { connections, subfolders })}`;
               }
               if (target.type === 'userFolder') {
@@ -1735,7 +1739,7 @@ import type { SshUser, SshConnection, SshConnectionFolder, SshUserFolder } from 
                 // union of the selected subtrees is used so nested selections
                 // (e.g. a parent folder plus a child) are counted once.
                 const [folders, users, connections] = await Promise.all([api.sshUserFolderList(), api.sshUserList(), api.sshConnectionList()]);
-                const folderIds = collectUserFolderSubtree(folders, target.ids);
+                const folderIds = collectFolderSubtree(folders, target.ids);
                 const subfolders = folderIds.size - target.ids.length;
                 const folderUsers = users.filter(u => u.folderId && folderIds.has(u.folderId));
                 const userCount = folderUsers.length;
@@ -1751,7 +1755,18 @@ import type { SshUser, SshConnection, SshConnectionFolder, SshUserFolder } from 
               App.Menus.showConfirm(
                 message,
                 async () => {
-                  for (const id of target.ids) {
+                  // A folder's cascade delete removes its whole subtree, so an
+                  // id nested inside another selected id is already covered by
+                  // the ancestor's delete — deleting it again would fail with
+                  // "Folder not found.".
+                  let ids = target.ids;
+                  if (target.type === 'connFolder' || target.type === 'userFolder') {
+                    const folders = target.type === 'connFolder'
+                      ? await api.sshConnectionFolderList()
+                      : await api.sshUserFolderList();
+                    ids = await topLevelFolderIds(target.ids, folders);
+                  }
+                  for (const id of ids) {
                     if (target.type === 'connection') await api.sshConnectionDelete(id);
                     else if (target.type === 'connFolder') await api.sshConnectionFolderDelete(id);
                     else if (target.type === 'userFolder') await api.sshUserFolderDelete(id);
@@ -2011,13 +2026,18 @@ import type { SshUser, SshConnection, SshConnectionFolder, SshUserFolder } from 
   async function deleteConnectionFolder(groupId) {
     const groups = await api.sshConnectionFolderList();
     const group = groups.find(g => g.id === groupId);
-    const connectionCount = group?.connectionCount ?? 0;
-    const childCount = group?.childCount ?? 0;
+    // The repository cascade-deletes the whole subtree and every connection
+    // inside it — count all of those, not just the folder's direct members,
+    // so the confirm reflects what is actually about to be permanently removed.
+    const folderIds = collectFolderSubtree(groups, [groupId]);
+    const connections = groups
+      .filter(f => folderIds.has(f.id))
+      .reduce((s, f) => s + (f.connectionCount ?? 0), 0);
     App.Menus.showConfirm(
       App.__('confirmDeleteSshConnectionFolder', {
         name: group?.name || groupId,
-        connections: connectionCount,
-        subfolders: childCount,
+        connections,
+        subfolders: folderIds.size - 1,
       }),
       async () => {
         await api.sshConnectionFolderDelete(groupId);
@@ -2028,9 +2048,9 @@ import type { SshUser, SshConnection, SshConnectionFolder, SshUserFolder } from 
     );
   }
 
-  // Union of folder ids across several user-folder subtrees (used by the
-  // multi-delete warning; nested selections are counted once).
-  function collectUserFolderSubtree(folders, rootIds) {
+  // Union of folder ids across several folder subtrees (used by the folder
+  // delete warnings; nested selections are counted once).
+  function collectFolderSubtree(folders, rootIds) {
     const children = new Map();
     for (const f of folders) {
       const pid = f.parentId || '__root__';
@@ -2046,6 +2066,14 @@ import type { SshUser, SshConnection, SshConnectionFolder, SshUserFolder } from 
       for (const f of (children.get(pid) || [])) queue.push(f.id);
     }
     return folderIds;
+  }
+
+  // Reduce a multi-folder selection to the top-most selected ids: the
+  // repository cascade-deletes whole subtrees, so an id that sits inside
+  // another selected id's subtree is already covered by that ancestor.
+  function topLevelFolderIds(ids, folders) {
+    const subtreeOf = (id) => collectFolderSubtree(folders, [id]);
+    return ids.filter(id => !ids.some(other => other !== id && subtreeOf(other).has(id)));
   }
 
   async function deleteUserFolder(folderId) {
