@@ -118,6 +118,7 @@
     confirmDeleteMultiSshUserFolder: 'Isso também excluirá permanentemente {users} usuário(s) e {subfolders} subpasta(s) dentro delas.',
     confirmDeleteSshUser: 'Excluir o usuário SSH "{name}"?',
     confirmDeleteSshUserConnections: 'Conexões que usam este usuário: {names} ({count}).\nElas precisarão ser reatribuídas.',
+    confirmDeleteSshUserFolderConnections: 'Isso também desconectará {count} conexões que usam os usuários excluídos.\nElas precisarão ser reatribuídas.',
     confirmDeleteSshUserMore: 'e mais {count}',
     confirmDeleteMultiSsh: 'Excluir {count} itens SSH?',
     confirmDeleteMultiSshUserConnections: 'As conexões que usam os usuários selecionados precisarão ser reatribuídas:\n{users}',

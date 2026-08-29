@@ -72,7 +72,6 @@ export interface SshConnection {
   userName?: string | null;
   /** Display string of the resolved jump host (e.g. "user@host" or referenced connection name) */
   jumpHostDisplay?: string | null;
-  groupId?: string | null;
   /** Jump host resolved from a reference at connect time (main process only) */
   resolvedJumpHost?: SshJumpHostManual | null;
 }

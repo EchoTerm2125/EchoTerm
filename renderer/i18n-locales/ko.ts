@@ -118,6 +118,7 @@
     confirmDeleteMultiSshUserFolder: '내부의 {users}명의 사용자와 {subfolders}개의 하위 폴더도 영구 삭제됩니다.',
     confirmDeleteSshUser: 'SSH 사용자 "{name}"을(를) 삭제할까요?',
     confirmDeleteSshUserConnections: '{count}개 연결이 이 사용자를 사용합니다: {names}.\n다시 지정해야 합니다.',
+    confirmDeleteSshUserFolderConnections: '삭제된 사용자를 사용하는 {count}개 연결도 끊깁니다.\n다시 지정해야 합니다.',
     confirmDeleteSshUserMore: '외 {count}개',
     confirmDeleteMultiSsh: 'SSH {type} {count}개를 삭제할까요?',
     confirmDeleteMultiSshUserConnections: '선택한 사용자를 사용하는 연결은 다시 지정해야 합니다:\n{users}',

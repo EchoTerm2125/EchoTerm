@@ -119,6 +119,7 @@
     confirmDeleteMultiSshUserFolder: 'This will also permanently delete {users} user(s) and {subfolders} sub-folder(s) inside them.',
     confirmDeleteSshUser: 'Delete SSH user "{name}"?',
     confirmDeleteSshUserConnections: 'Used by {count} connection{plural}: {names}.\nThey will need to be reassigned.',
+    confirmDeleteSshUserFolderConnections: 'This will also disconnect {count} connection{plural} using the deleted users.\nThey will need to be reassigned.',
     confirmDeleteSshUserMore: 'and {count} more',
     confirmDeleteMultiSsh: 'Delete {count} SSH {type}{plural}?',
     confirmDeleteMultiSshUserConnections: 'Connections using the selected users will need to be reassigned:\n{users}',

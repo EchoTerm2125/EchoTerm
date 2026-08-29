@@ -118,6 +118,7 @@
     confirmDeleteMultiSshUserFolder: '这还将永久删除其中的 {users} 个用户和 {subfolders} 个子文件夹。',
     confirmDeleteSshUser: '删除 SSH 用户 "{name}"？',
     confirmDeleteSshUserConnections: '{count} 个连接使用了此用户：{names}。\n它们需要重新分配。',
+    confirmDeleteSshUserFolderConnections: '此操作还会断开使用已删除用户的 {count} 个连接。\n它们需要重新分配。',
     confirmDeleteSshUserMore: '另有 {count} 个',
     confirmDeleteMultiSsh: '删除 {count} 个 SSH {type}？',
     confirmDeleteMultiSshUserConnections: '使用所选用户的连接需要重新分配：\n{users}',

@@ -118,6 +118,7 @@
     confirmDeleteMultiSshUserFolder: 'Cela supprimera aussi définitivement {users} utilisateur(s) et {subfolders} sous-dossier(s) contenus.',
     confirmDeleteSshUser: 'Supprimer l’utilisateur SSH « {name} » ?',
     confirmDeleteSshUserConnections: 'Connexions utilisant cet utilisateur : {names} ({count}).\nElles devront être réassignées.',
+    confirmDeleteSshUserFolderConnections: 'Cela déconnectera aussi {count} connexions utilisant les utilisateurs supprimés.\nElles devront être réassignées.',
     confirmDeleteSshUserMore: 'et {count} de plus',
     confirmDeleteMultiSsh: 'Supprimer {count} éléments SSH ?',
     confirmDeleteMultiSshUserConnections: 'Les connexions utilisant les utilisateurs sélectionnés devront être réassignées :\n{users}',

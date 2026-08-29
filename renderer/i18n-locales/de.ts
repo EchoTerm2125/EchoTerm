@@ -118,6 +118,7 @@
     confirmDeleteMultiSshUserFolder: 'Dabei werden auch {users} Benutzer und {subfolders} Unterordner darin dauerhaft gelöscht.',
     confirmDeleteSshUser: 'SSH-Benutzer „{name}“ löschen?',
     confirmDeleteSshUserConnections: 'Verbindungen, die diesen Benutzer verwenden: {names} ({count}).\nSie müssen neu zugewiesen werden.',
+    confirmDeleteSshUserFolderConnections: 'Dies trennt auch {count} Verbindungen, die die gelöschten Benutzer verwenden.\nSie müssen neu zugewiesen werden.',
     confirmDeleteSshUserMore: 'und {count} weitere',
     confirmDeleteMultiSsh: '{count} SSH-Elemente löschen?',
     confirmDeleteMultiSshUserConnections: 'Verbindungen, die die ausgewählten Benutzer verwenden, müssen neu zugewiesen werden:\n{users}',

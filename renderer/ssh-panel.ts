@@ -886,10 +886,6 @@ import type { SshUser, SshConnection, SshConnectionFolder, SshUserFolder } from 
     // Sort users alphabetically
     users.sort((a, b) => (a.name || '').localeCompare(b.name || ''));
 
-    // Index user folders
-    const folderMap = new Map();
-    for (const f of userFolders) folderMap.set(f.id, f);
-
     // Group users by folderId
     const folderUsers = new Map();
     for (const f of userFolders) folderUsers.set(f.id, []);
@@ -937,7 +933,7 @@ import type { SshUser, SshConnection, SshConnectionFolder, SshUserFolder } from 
     sshUserList.innerHTML = '';
 
     for (const folder of (folderChildren.get('__root__') || [])) {
-      renderUserFolderTree(folder, folderMap, folderUsers, folderChildren, collapsed, folderTotalUsers);
+      renderUserFolderTree(folder, folderUsers, folderChildren, collapsed, folderTotalUsers);
     }
 
     for (const user of ungrouped) {
@@ -1000,13 +996,13 @@ import type { SshUser, SshConnection, SshConnectionFolder, SshUserFolder } from 
   }
 
   // Root-level entry: render a user folder and its subtree into the user list.
-  function renderUserFolderTree(folder, folderMap, folderUsers, folderChildren, collapsed, folderTotalUsers) {
-    renderUserFolderTreeInto(folder, folderMap, folderUsers, folderChildren, collapsed, sshUserList, folderTotalUsers);
+  function renderUserFolderTree(folder, folderUsers, folderChildren, collapsed, folderTotalUsers) {
+    renderUserFolderTreeInto(folder, folderUsers, folderChildren, collapsed, sshUserList, folderTotalUsers);
   }
 
   // Render a user folder and its subtree, appending into a container
   // (the user list at root level, or a parent folder's children area).
-  function renderUserFolderTreeInto(folder, folderMap, folderUsers, folderChildren, collapsed, parentContainer, folderTotalUsers) {
+  function renderUserFolderTreeInto(folder, folderUsers, folderChildren, collapsed, parentContainer, folderTotalUsers) {
     const folderId = folder.id;
 
     const folderEl = document.createElement('div');
@@ -1134,7 +1130,7 @@ import type { SshUser, SshConnection, SshConnectionFolder, SshUserFolder } from 
 
     const subFolders = folderChildren.get(folderId) || [];
     for (const subFolder of subFolders) {
-      renderUserFolderTreeInto(subFolder, folderMap, folderUsers, folderChildren, collapsed, childrenContainer, folderTotalUsers);
+      renderUserFolderTreeInto(subFolder, folderUsers, folderChildren, collapsed, childrenContainer, folderTotalUsers);
     }
 
     parentContainer.appendChild(childrenContainer);
@@ -1738,11 +1734,19 @@ import type { SshUser, SshConnection, SshConnectionFolder, SshUserFolder } from 
                 // contained user — warn just like the single-delete path. The
                 // union of the selected subtrees is used so nested selections
                 // (e.g. a parent folder plus a child) are counted once.
-                const [folders, users] = await Promise.all([api.sshUserFolderList(), api.sshUserList()]);
+                const [folders, users, connections] = await Promise.all([api.sshUserFolderList(), api.sshUserList(), api.sshConnectionList()]);
                 const folderIds = collectUserFolderSubtree(folders, target.ids);
                 const subfolders = folderIds.size - target.ids.length;
-                const userCount = users.filter(u => u.folderId && folderIds.has(u.folderId)).length;
+                const folderUsers = users.filter(u => u.folderId && folderIds.has(u.folderId));
+                const userCount = folderUsers.length;
                 message += `\n${App.__('confirmDeleteMultiSshUserFolder', { users: userCount, subfolders })}`;
+                // The deleted users may back connections; warn that their
+                // credential link is severed (same as single-delete path).
+                const affectedUserIds = new Set(folderUsers.map(u => u.id));
+                const affectedCount = connections.filter(c => c.userId && affectedUserIds.has(c.userId)).length;
+                if (affectedCount > 0) {
+                  message += `\n${App._p('confirmDeleteSshUserFolderConnections', affectedCount)}`;
+                }
               }
               App.Menus.showConfirm(
                 message,
@@ -2045,7 +2049,7 @@ import type { SshUser, SshConnection, SshConnectionFolder, SshUserFolder } from 
   }
 
   async function deleteUserFolder(folderId) {
-    const [folders, users] = await Promise.all([api.sshUserFolderList(), api.sshUserList()]);
+    const [folders, users, connections] = await Promise.all([api.sshUserFolderList(), api.sshUserList(), api.sshConnectionList()]);
     const folder = folders.find(f => f.id === folderId);
     // Count total users in the folder subtree (folder + descendants)
     const folderChildren = new Map();
@@ -2063,13 +2067,22 @@ import type { SshUser, SshConnection, SshConnectionFolder, SshUserFolder } from 
         queue.push(f.id);
       }
     }
-    const userCount = users.filter(u => u.folderId && folderIds.has(u.folderId)).length;
+    const folderUsers = users.filter(u => u.folderId && folderIds.has(u.folderId));
+    const userCount = folderUsers.length;
+    let message = App.__('confirmDeleteSshUserFolder', {
+      name: folder?.name || folderId,
+      users: userCount,
+      subfolders: folderIds.size - 1,
+    });
+    // Cascade-deleting the folder also drops the users inside it; connections
+    // referencing them lose their credential link — warn like single-user delete.
+    const affectedUserIds = new Set(folderUsers.map(u => u.id));
+    const affectedCount = connections.filter(c => c.userId && affectedUserIds.has(c.userId)).length;
+    if (affectedCount > 0) {
+      message += `\n${App._p('confirmDeleteSshUserFolderConnections', affectedCount)}`;
+    }
     App.Menus.showConfirm(
-      App.__('confirmDeleteSshUserFolder', {
-        name: folder?.name || folderId,
-        users: userCount,
-        subfolders: folderIds.size - 1,
-      }),
+      message,
       async () => {
         await api.sshUserFolderDelete(folderId);
         await refreshAll();

@@ -118,6 +118,7 @@
     confirmDeleteMultiSshUserFolder: '這亦會永久刪除當中的 {users} 個使用者和 {subfolders} 個子資料夾。',
     confirmDeleteSshUser: '刪除 SSH 使用者「{name}」？',
     confirmDeleteSshUserConnections: '{count} 個連線使用了此使用者：{names}。\n它們需要重新指派。',
+    confirmDeleteSshUserFolderConnections: '此操作亦會切斷使用已刪除使用者的 {count} 個連線。\n它們需要重新指派。',
     confirmDeleteSshUserMore: '另有 {count} 個',
     confirmDeleteMultiSsh: '刪除 {count} 個 SSH {type}？',
     confirmDeleteMultiSshUserConnections: '使用所選使用者的連線需要重新指派：\n{users}',

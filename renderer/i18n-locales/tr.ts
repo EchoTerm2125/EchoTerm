@@ -118,6 +118,7 @@
     confirmDeleteMultiSshUserFolder: 'Bu, içlerindeki {users} kullanıcının ve {subfolders} alt klasörün de kalıcı olarak silinmesini sağlar.',
     confirmDeleteSshUser: 'SSH kullanıcısı "{name}" silinsin mi?',
     confirmDeleteSshUserConnections: '{count} bağlantı bu kullanıcıyı kullanıyor: {names}.\nYeniden atanması gerekecek.',
+    confirmDeleteSshUserFolderConnections: 'Bu işlem, silinen kullanıcıları kullanan {count} bağlantıyı da koparır.\nYeniden atanması gerekecektir.',
     confirmDeleteSshUserMore: 've {count} daha',
     confirmDeleteMultiSsh: '{count} SSH öğesi silinsin mi?',
     confirmDeleteMultiSshUserConnections: 'Seçili kullanıcıları kullanan bağlantıların yeniden atanması gerekecek:\n{users}',
