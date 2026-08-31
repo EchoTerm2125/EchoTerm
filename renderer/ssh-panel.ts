@@ -1,6 +1,13 @@
 /* EchoTerm — SSH Connection Panel (Sidebar + Dialogs) */
 
 import type { SshUser, SshConnection, SshConnectionFolder, SshUserFolder } from '../shared/ipc';
+import {
+  buildFolderChildrenMap,
+  collectFolderSubtree,
+  computeFolderTotalCounts,
+  groupItemsByFolder,
+  topLevelFolderIds,
+} from './ssh-tree';
 
 (function () {
   'use strict';
@@ -465,16 +472,7 @@ import type { SshUser, SshConnection, SshConnectionFolder, SshUserFolder } from 
     for (const g of groups) folderMap.set(g.id, g);
 
     // Group connections by folderId
-    const folderConns = new Map();
-    for (const g of groups) folderConns.set(g.id, []);
-    const ungrouped = [];
-    for (const conn of connections) {
-      if (conn.folderId && folderConns.has(conn.folderId)) {
-        folderConns.get(conn.folderId).push(conn);
-      } else {
-        ungrouped.push(conn);
-      }
-    }
+    const { grouped: folderConns, ungrouped } = groupItemsByFolder(groups, connections, c => c.folderId);
 
     // Sort connections within each folder
     for (const [, conns] of folderConns) {
@@ -482,34 +480,10 @@ import type { SshUser, SshConnection, SshConnectionFolder, SshUserFolder } from 
     }
 
     // Build children map for folders: parentId -> [child folders]
-    const folderChildren = new Map();
-    folderChildren.set('__root__', []);
-    for (const g of groups) {
-      const pid = g.parentId || '__root__';
-      if (!folderChildren.has(pid)) folderChildren.set(pid, []);
-      folderChildren.get(pid).push(g);
-    }
-    // Sort child folders by name
-    for (const [, children] of folderChildren) {
-      children.sort((a, b) => (a.name || '').localeCompare(b.name || ''));
-    }
+    const folderChildren = buildFolderChildrenMap(groups);
 
     // Pre-compute total connection count per folder (recursive, includes sub-folders)
-    const folderTotalConns = new Map();
-    const computing = new Set(); // cycle detection
-    function calcTotalConns(folderId) {
-      if (folderTotalConns.has(folderId)) return folderTotalConns.get(folderId);
-      if (computing.has(folderId)) return 0; // cycle detected, break
-      computing.add(folderId);
-      let count = (folderConns.get(folderId) || []).length;
-      for (const sub of (folderChildren.get(folderId) || [])) {
-        count += calcTotalConns(sub.id);
-      }
-      computing.delete(folderId);
-      folderTotalConns.set(folderId, count);
-      return count;
-    }
-    for (const g of groups) calcTotalConns(g.id);
+    const folderTotalConns = computeFolderTotalCounts(groups, folderChildren, folderConns);
 
     sshConnList.innerHTML = '';
 
@@ -540,8 +514,11 @@ import type { SshUser, SshConnection, SshConnectionFolder, SshUserFolder } from 
   }
 
   // --- Recursive folder rendering
-  function renderFolderTree(folder, folderMap, folderConns, folderChildren, collapsed, folderTotalConns) {
+  function renderFolderTree(folder, folderMap, folderConns, folderChildren, collapsed, folderTotalConns, visited = new Set()) {
     const groupId = folder.id;
+    // Cycle guard: a corrupt payload (folder cycles) must not recurse forever.
+    if (visited.has(groupId)) return;
+    visited.add(groupId);
 
     const folderEl = document.createElement('div');
     folderEl.className = 'ssh-folder' + (collapsed.has(groupId) ? '' : ' expanded');
@@ -676,15 +653,18 @@ import type { SshUser, SshConnection, SshConnectionFolder, SshUserFolder } from 
     // Render sub-folders recursively
     const subFolders = folderChildren.get(groupId) || [];
     for (const subFolder of subFolders) {
-      renderFolderTreeInto(subFolder, folderMap, folderConns, folderChildren, collapsed, childrenContainer, folderTotalConns);
+      renderFolderTreeInto(subFolder, folderMap, folderConns, folderChildren, collapsed, childrenContainer, folderTotalConns, visited);
     }
 
     sshConnList.appendChild(childrenContainer);
   }
 
   // Like renderFolderTree but appends into a specific container (for nesting)
-  function renderFolderTreeInto(folder, folderMap, folderConns, folderChildren, collapsed, parentContainer, folderTotalConns) {
+  function renderFolderTreeInto(folder, folderMap, folderConns, folderChildren, collapsed, parentContainer, folderTotalConns, visited) {
     const groupId = folder.id;
+    // Cycle guard: a corrupt payload (folder cycles) must not recurse forever.
+    if (visited.has(groupId)) return;
+    visited.add(groupId);
 
     const folderEl = document.createElement('div');
     folderEl.className = 'ssh-folder' + (collapsed.has(groupId) ? '' : ' expanded');
@@ -811,7 +791,7 @@ import type { SshUser, SshConnection, SshConnectionFolder, SshUserFolder } from 
 
     const subFolders = folderChildren.get(groupId) || [];
     for (const subFolder of subFolders) {
-      renderFolderTreeInto(subFolder, folderMap, folderConns, folderChildren, collapsed, childrenContainer, folderTotalConns);
+      renderFolderTreeInto(subFolder, folderMap, folderConns, folderChildren, collapsed, childrenContainer, folderTotalConns, visited);
     }
 
     parentContainer.appendChild(childrenContainer);
@@ -887,48 +867,16 @@ import type { SshUser, SshConnection, SshConnectionFolder, SshUserFolder } from 
     users.sort((a, b) => (a.name || '').localeCompare(b.name || ''));
 
     // Group users by folderId
-    const folderUsers = new Map();
-    for (const f of userFolders) folderUsers.set(f.id, []);
-    const ungrouped = [];
-    for (const user of users) {
-      if (user.folderId && folderUsers.has(user.folderId)) {
-        folderUsers.get(user.folderId).push(user);
-      } else {
-        ungrouped.push(user);
-      }
-    }
+    const { grouped: folderUsers, ungrouped } = groupItemsByFolder(userFolders, users, u => u.folderId);
     for (const [, us] of folderUsers) {
       us.sort((a, b) => (a.name || '').localeCompare(b.name || ''));
     }
 
     // Build children map: parentId -> [child user folders]
-    const folderChildren = new Map();
-    folderChildren.set('__root__', []);
-    for (const f of userFolders) {
-      const pid = f.parentId || '__root__';
-      if (!folderChildren.has(pid)) folderChildren.set(pid, []);
-      folderChildren.get(pid).push(f);
-    }
-    for (const [, children] of folderChildren) {
-      children.sort((a, b) => (a.name || '').localeCompare(b.name || ''));
-    }
+    const folderChildren = buildFolderChildrenMap(userFolders);
 
     // Pre-compute total user count per folder (recursive, includes sub-folders)
-    const folderTotalUsers = new Map();
-    const computing = new Set();
-    function calcTotalUsers(folderId) {
-      if (folderTotalUsers.has(folderId)) return folderTotalUsers.get(folderId);
-      if (computing.has(folderId)) return 0;
-      computing.add(folderId);
-      let count = (folderUsers.get(folderId) || []).length;
-      for (const sub of (folderChildren.get(folderId) || [])) {
-        count += calcTotalUsers(sub.id);
-      }
-      computing.delete(folderId);
-      folderTotalUsers.set(folderId, count);
-      return count;
-    }
-    for (const f of userFolders) calcTotalUsers(f.id);
+    const folderTotalUsers = computeFolderTotalCounts(userFolders, folderChildren, folderUsers);
 
     sshUserList.innerHTML = '';
 
@@ -997,13 +945,16 @@ import type { SshUser, SshConnection, SshConnectionFolder, SshUserFolder } from 
 
   // Root-level entry: render a user folder and its subtree into the user list.
   function renderUserFolderTree(folder, folderUsers, folderChildren, collapsed, folderTotalUsers) {
-    renderUserFolderTreeInto(folder, folderUsers, folderChildren, collapsed, sshUserList, folderTotalUsers);
+    renderUserFolderTreeInto(folder, folderUsers, folderChildren, collapsed, sshUserList, folderTotalUsers, new Set());
   }
 
   // Render a user folder and its subtree, appending into a container
   // (the user list at root level, or a parent folder's children area).
-  function renderUserFolderTreeInto(folder, folderUsers, folderChildren, collapsed, parentContainer, folderTotalUsers) {
+  function renderUserFolderTreeInto(folder, folderUsers, folderChildren, collapsed, parentContainer, folderTotalUsers, visited) {
     const folderId = folder.id;
+    // Cycle guard: a corrupt payload (folder cycles) must not recurse forever.
+    if (visited.has(folderId)) return;
+    visited.add(folderId);
 
     const folderEl = document.createElement('div');
     folderEl.className = 'ssh-folder ssh-user-folder' + (collapsed.has(folderId) ? '' : ' expanded');
@@ -1130,7 +1081,7 @@ import type { SshUser, SshConnection, SshConnectionFolder, SshUserFolder } from 
 
     const subFolders = folderChildren.get(folderId) || [];
     for (const subFolder of subFolders) {
-      renderUserFolderTreeInto(subFolder, folderUsers, folderChildren, collapsed, childrenContainer, folderTotalUsers);
+      renderUserFolderTreeInto(subFolder, folderUsers, folderChildren, collapsed, childrenContainer, folderTotalUsers, visited);
     }
 
     parentContainer.appendChild(childrenContainer);
@@ -1730,7 +1681,9 @@ import type { SshUser, SshConnection, SshConnectionFolder, SshUserFolder } from 
                 const connections = folders
                   .filter(f => folderIds.has(f.id))
                   .reduce((s, f) => s + (f.connectionCount ?? 0), 0);
-                const subfolders = folderIds.size - target.ids.length;
+                // The delete reduces a nested selection to its top-most ids, so
+                // count subfolders against those, not the raw selection size.
+                const subfolders = folderIds.size - topLevelFolderIds(target.ids, folders).length;
                 message += `\n${App.__('confirmDeleteMultiSshConnectionFolder', { connections, subfolders })}`;
               }
               if (target.type === 'userFolder') {
@@ -1740,7 +1693,9 @@ import type { SshUser, SshConnection, SshConnectionFolder, SshUserFolder } from 
                 // (e.g. a parent folder plus a child) are counted once.
                 const [folders, users, connections] = await Promise.all([api.sshUserFolderList(), api.sshUserList(), api.sshConnectionList()]);
                 const folderIds = collectFolderSubtree(folders, target.ids);
-                const subfolders = folderIds.size - target.ids.length;
+                // The delete reduces a nested selection to its top-most ids, so
+                // count subfolders against those, not the raw selection size.
+                const subfolders = folderIds.size - topLevelFolderIds(target.ids, folders).length;
                 const folderUsers = users.filter(u => u.folderId && folderIds.has(u.folderId));
                 const userCount = folderUsers.length;
                 message += `\n${App.__('confirmDeleteMultiSshUserFolder', { users: userCount, subfolders })}`;
@@ -2048,53 +2003,11 @@ import type { SshUser, SshConnection, SshConnectionFolder, SshUserFolder } from 
     );
   }
 
-  // Union of folder ids across several folder subtrees (used by the folder
-  // delete warnings; nested selections are counted once).
-  function collectFolderSubtree(folders, rootIds) {
-    const children = new Map();
-    for (const f of folders) {
-      const pid = f.parentId || '__root__';
-      if (!children.has(pid)) children.set(pid, []);
-      children.get(pid).push(f);
-    }
-    const folderIds = new Set();
-    const queue = [...rootIds];
-    while (queue.length > 0) {
-      const pid = queue.shift();
-      if (folderIds.has(pid)) continue;
-      folderIds.add(pid);
-      for (const f of (children.get(pid) || [])) queue.push(f.id);
-    }
-    return folderIds;
-  }
-
-  // Reduce a multi-folder selection to the top-most selected ids: the
-  // repository cascade-deletes whole subtrees, so an id that sits inside
-  // another selected id's subtree is already covered by that ancestor.
-  function topLevelFolderIds(ids, folders) {
-    const subtreeOf = (id) => collectFolderSubtree(folders, [id]);
-    return ids.filter(id => !ids.some(other => other !== id && subtreeOf(other).has(id)));
-  }
-
   async function deleteUserFolder(folderId) {
     const [folders, users, connections] = await Promise.all([api.sshUserFolderList(), api.sshUserList(), api.sshConnectionList()]);
     const folder = folders.find(f => f.id === folderId);
     // Count total users in the folder subtree (folder + descendants)
-    const folderChildren = new Map();
-    for (const f of folders) {
-      const pid = f.parentId || '__root__';
-      if (!folderChildren.has(pid)) folderChildren.set(pid, []);
-      folderChildren.get(pid).push(f);
-    }
-    const folderIds = new Set([folderId]);
-    const queue = [folderId];
-    while (queue.length > 0) {
-      const pid = queue.shift();
-      for (const f of (folderChildren.get(pid) || [])) {
-        folderIds.add(f.id);
-        queue.push(f.id);
-      }
-    }
+    const folderIds = collectFolderSubtree(folders, [folderId]);
     const folderUsers = users.filter(u => u.folderId && folderIds.has(u.folderId));
     const userCount = folderUsers.length;
     let message = App.__('confirmDeleteSshUserFolder', {
@@ -2637,27 +2550,17 @@ import type { SshUser, SshConnection, SshConnectionFolder, SshUserFolder } from 
 
   const NBSP = '\u00A0';
 
-  // Index folders by parentId, sorted by name within each level.
-  function buildFolderChildrenMap(folders) {
-    const children = new Map();
-    for (const f of folders) {
-      const pid = f.parentId || '__root__';
-      if (!children.has(pid)) children.set(pid, []);
-      children.get(pid).push(f);
-    }
-    for (const [, list] of children) {
-      list.sort((a, b) => (a.name || '').localeCompare(b.name || ''));
-    }
-    return children;
-  }
-
   // Folder-target selects: every folder is a selectable <option> in tree order.
   // `excludedIds` (self + descendants when editing a folder's parent) render as
   // disabled options so the tree stays intact while cycles are prevented.
   function folderSelectOptionsHtml(folders, selectedId, excludedIds = null) {
     const children = buildFolderChildrenMap(folders);
     let html = '';
+    const visited = new Set();
     const walk = (parentId, prefix) => {
+      // Cycle guard: a corrupt payload (folder cycles) must not recurse forever.
+      if (visited.has(parentId)) return;
+      visited.add(parentId);
       const list = children.get(parentId) || [];
       list.forEach((f, i) => {
         const last = i === list.length - 1;
@@ -2688,7 +2591,11 @@ import type { SshUser, SshConnection, SshConnectionFolder, SshUserFolder } from 
     const children = buildFolderChildrenMap(userFolders);
     const usedUserIds = new Set();
     let html = '';
+    const visited = new Set();
     const walk = (parentId, prefix) => {
+      // Cycle guard: a corrupt payload (folder cycles) must not recurse forever.
+      if (visited.has(parentId)) return;
+      visited.add(parentId);
       const list = children.get(parentId) || [];
       list.forEach((f, i) => {
         const last = i === list.length - 1;
