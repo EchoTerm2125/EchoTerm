@@ -140,7 +140,7 @@ export class CryptoVault implements Vault {
       const changed = this.setLoadedData(JSON.parse(json));
       this.sessionKey = key;
       this.customPasswordSet = true;
-      if (changed) this.persist();
+      if (changed) this.persistAfterMigration();
       return { success: true };
     } catch {
       return { success: false, error: 'Failed to decrypt data. File may be corrupted.', errorCode: 'DECRYPT_FAILED' };
@@ -165,7 +165,7 @@ export class CryptoVault implements Vault {
           const decrypted = this.osCrypto.decryptString(Buffer.from(parsed._data, 'base64'));
           const changed = this.setLoadedData(JSON.parse(decrypted));
           this.customPasswordSet = false;
-          if (changed) this.persist();
+          if (changed) this.persistAfterMigration();
           return { success: true };
         } catch {
           this.cachedData = defaultData();
@@ -179,7 +179,7 @@ export class CryptoVault implements Vault {
       // Plain JSON (unencrypted)
       const changed = this.setLoadedData(parsed);
       this.customPasswordSet = false;
-      if (changed) this.persist();
+      if (changed) this.persistAfterMigration();
       return { success: true };
     } catch {
       // Not valid JSON — fall back to default
@@ -253,6 +253,20 @@ export class CryptoVault implements Vault {
     const { data, changed } = migrateData(raw);
     this.cachedData = data;
     return changed;
+  }
+
+  /**
+   * Persist a payload that was rewritten by migration. A failure here must not
+   * fail the unlock or wipe the in-memory cache: the file on disk is left in
+   * its old shape and the migration simply retries on the next load.
+   */
+  private persistAfterMigration(): void {
+    if (!this.cachedData) return;
+    try {
+      this.persist();
+    } catch (err) {
+      console.error('Failed to persist migrated SSH data; will retry on next load:', err);
+    }
   }
 
   private ensureDir(): void {

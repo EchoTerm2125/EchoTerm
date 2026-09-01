@@ -578,6 +578,53 @@ describe('SshPanel (ssh-panel.ts)', () => {
       await flush();
       expect(window.api.sshConnectionFolderDelete).toHaveBeenCalledWith('f1');
     });
+
+    it('counts the whole subtree (nested folders and their connections) in the confirm', async () => {
+      const App = getApp();
+      const api = window.api;
+      vi.mocked(api.sshConnectionFolderList).mockResolvedValue([
+        { id: 'f1', name: 'Work', parentId: null, connectionCount: 0, childCount: 1 },
+        { id: 'f2', name: 'Prod', parentId: 'f1', connectionCount: 5, childCount: 0 },
+      ]);
+      await App.SshPanel.refreshAll();
+      await flush();
+
+      (document.querySelector('#sshConnectionList [data-action="delete-folder"]') as HTMLElement).click();
+      await flush();
+
+      const { dialog, message } = getConfirmElements();
+      expect(dialog.classList.contains('hidden')).toBe(false);
+      expect(message.textContent).toBe(App.__('confirmDeleteSshConnectionFolder', { name: 'Work', connections: 5, subfolders: 1 }));
+    });
+
+    it('deletes only the top-most folder when a nested pair is selected', async () => {
+      const App = getApp();
+      const api = window.api;
+      vi.mocked(api.sshConnectionFolderList).mockResolvedValue([
+        { id: 'f1', name: 'Work', parentId: null, connectionCount: 0, childCount: 1 },
+        { id: 'f2', name: 'Sub', parentId: 'f1', connectionCount: 0, childCount: 0 },
+      ]);
+      await App.SshPanel.refreshAll();
+      await flush();
+
+      const f1 = document.querySelector('.ssh-folder[data-folder-id="f1"]') as HTMLElement;
+      const f2 = document.querySelector('.ssh-folder[data-folder-id="f2"]') as HTMLElement;
+      f1.dispatchEvent(new MouseEvent('click', { bubbles: true, ctrlKey: true }));
+      f2.dispatchEvent(new MouseEvent('click', { bubbles: true, ctrlKey: true }));
+      f1.dispatchEvent(new MouseEvent('contextmenu', { bubbles: true, clientX: 100, clientY: 100 }));
+      await flush();
+
+      (document.querySelector('#sshContextMenu [data-action="ssh-delete"]') as HTMLElement).click();
+      await flush();
+      await flush();
+
+      getConfirmElements().ok.click();
+      await flush();
+
+      expect(window.api.sshConnectionFolderDelete).toHaveBeenCalledTimes(1);
+      expect(window.api.sshConnectionFolderDelete).toHaveBeenCalledWith('f1');
+      expect(window.api.sshConnectionFolderDelete).not.toHaveBeenCalledWith('f2');
+    });
   });
 
   describe('delete user', () => {

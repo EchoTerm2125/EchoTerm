@@ -62,8 +62,8 @@ export function defaultData(): SshData {
  * Migrate a raw (decrypted) payload into the current v3 shape.
  * v2 files carry `folders` for connection folders and no `userFolders`;
  * returns `changed: true` so the vault can persist the new format on load.
- * Legacy `groupId` on connections is left untouched — FileConnectionRepository
- * normalizes it on read.
+ * Legacy `groupId` on connections is normalized to `folderId` so every
+ * consumer (cascade delete, tree views) reads a single canonical field.
  */
 export function migrateData(raw: unknown): { data: SshData; changed: boolean } {
   if (!raw || typeof raw !== 'object') {
@@ -72,15 +72,36 @@ export function migrateData(raw: unknown): { data: SshData; changed: boolean } {
   const src = raw as Record<string, unknown>;
   let changed = false;
 
-  const users = Array.isArray(src.users) ? (src.users as StoredUser[]) : [];
-  const connections = Array.isArray(src.connections) ? (src.connections as StoredConnection[]) : [];
+  // Drop non-object entries before touching them: a NaN/string/null element
+  // would otherwise throw inside the groupId scan below and silently wipe the
+  // whole payload via the vault's "not valid JSON" fallback.
+  const asRecords = (arr: unknown): Record<string, unknown>[] =>
+    Array.isArray(arr) ? arr.filter((v): v is Record<string, unknown> => !!v && typeof v === 'object') : [];
+
+  const users = asRecords(src.users) as unknown as StoredUser[];
+  const rawConnections = asRecords(src.connections) as unknown as StoredConnection[];
+  // v2 → v3: a connection may carry only `groupId`; lift it into `folderId`
+  // and drop the legacy field so deletes and tree joins never see two shapes.
+  const hasLegacyGroupId = rawConnections.some(c => c.groupId !== undefined);
+  let connections = rawConnections;
+  if (hasLegacyGroupId) {
+    connections = rawConnections.map(c => {
+      if (c.groupId === undefined) return c;
+      const { groupId, ...rest } = c;
+      return { ...rest, folderId: rest.folderId ?? groupId ?? null };
+    });
+    changed = true;
+  }
+  // Missing keys are normalized to empty arrays; flag it so the canonical
+  // shape is persisted back instead of being re-derived on every load.
+  if (!Array.isArray(src.users) || !Array.isArray(src.connections)) changed = true;
 
   let connectionFolders: StoredConnectionFolder[];
   if (Array.isArray(src.connectionFolders)) {
-    connectionFolders = src.connectionFolders as StoredConnectionFolder[];
+    connectionFolders = asRecords(src.connectionFolders) as unknown as StoredConnectionFolder[];
   } else if (Array.isArray(src.folders)) {
     // v2 → v3: legacy `folders` key becomes `connectionFolders`
-    connectionFolders = src.folders as StoredConnectionFolder[];
+    connectionFolders = asRecords(src.folders) as unknown as StoredConnectionFolder[];
     changed = true;
   } else {
     connectionFolders = [];
@@ -89,7 +110,7 @@ export function migrateData(raw: unknown): { data: SshData; changed: boolean } {
 
   let userFolders: StoredUserFolder[];
   if (Array.isArray(src.userFolders)) {
-    userFolders = src.userFolders as StoredUserFolder[];
+    userFolders = asRecords(src.userFolders) as unknown as StoredUserFolder[];
   } else {
     userFolders = [];
     changed = true;

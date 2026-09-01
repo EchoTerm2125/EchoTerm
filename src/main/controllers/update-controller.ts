@@ -144,17 +144,19 @@ export class UpdateController {
     if (!this.updateDownloaded) {
       return { success: false, error: 'No downloaded update to install.' };
     }
-    this.updateDownloaded = false;
     // isSilent=false shows the NSIS wizard; the main process must bypass the
     // window close interceptor before calling this (see main.ts).
     // quitAndInstall is typed as void but can return false at runtime when the
     // install cannot start (e.g. another installer is already running); report
     // that so main.ts re-arms the close interceptor instead of leaving it
-    // bypassed for the rest of the session.
+    // bypassed for the rest of the session. The flag is only cleared once the
+    // install actually proceeds, so a failed start keeps it set and a retry
+    // does not hit the "no downloaded update" guard.
     const started = autoUpdater.quitAndInstall(false, true) as unknown as boolean | undefined;
     if (started === false) {
       return { success: false, error: 'Update install could not start.' };
     }
+    this.updateDownloaded = false;
     return { success: true };
   }
 

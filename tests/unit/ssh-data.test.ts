@@ -16,9 +16,23 @@ describe('migrateData', () => {
     expect(data.connectionFolders).toEqual([{ id: 'g1', name: 'Work', parentId: null, connectionIds: ['c1'] }]);
     expect((data as unknown as Record<string, unknown>).folders).toBeUndefined();
     expect(data.userFolders).toEqual([]);
-    // users/connections pass through; legacy groupId left for the connection repo
+    // users/connections pass through; legacy groupId is normalized to folderId
     expect(data.users).toHaveLength(1);
-    expect(data.connections[0].groupId).toBe('g1');
+    expect(data.connections[0].folderId).toBe('g1');
+    expect(data.connections[0].groupId).toBeUndefined();
+  });
+
+  it('lifts a connection with only legacy groupId into folderId', () => {
+    const raw = {
+      users: [],
+      connections: [{ id: 'c1', name: 'Srv', host: 'h', port: 22, groupId: 'g1' }],
+      folders: [{ id: 'g1', name: 'Work', parentId: null }],
+      version: 2,
+    };
+    const { data, changed } = migrateData(raw);
+    expect(changed).toBe(true);
+    expect(data.connections[0].folderId).toBe('g1');
+    expect(data.connections[0].groupId).toBeUndefined();
   });
 
   it('adds userFolders when absent', () => {
@@ -52,8 +66,9 @@ describe('migrateData', () => {
     expect(data).toEqual(defaultData());
   });
 
-  it('defaults missing arrays to empty', () => {
-    const { data } = migrateData({ version: 2 });
+  it('defaults missing arrays to empty and flags them for persistence', () => {
+    const { data, changed } = migrateData({ version: 2 });
+    expect(changed).toBe(true);
     expect(data.users).toEqual([]);
     expect(data.connections).toEqual([]);
     expect(data.connectionFolders).toEqual([]);
