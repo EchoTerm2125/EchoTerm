@@ -69,6 +69,10 @@ import './icons';
       fontSize: App.Theme.getTermFontSize(),
       fontFamily: "'Cascadia Code', 'Fira Code', 'Consolas', 'Courier New', 'Microsoft YaHei', 'Noto Sans Mono CJK SC', 'Noto Sans CJK SC', 'PingFang SC', 'WenQuanYi Micro Hei', monospace",
       bracketedPasteMode: true,
+      // Reflow the line under the cursor on resize (default is to truncate it).
+      // Echo-mode grid resizes constantly; truncating the input line corrupts
+      // long commands so copying the wrapped text yields stray newlines.
+      reflowCursorLine: true,
       theme: App.Theme.getXtermTheme(),
     } as any);
 
@@ -426,6 +430,10 @@ import './icons';
       fontSize: App.Theme.getTermFontSize(),
       fontFamily: "'Cascadia Code', 'Fira Code', 'Consolas', 'Courier New', 'Microsoft YaHei', 'Noto Sans Mono CJK SC', 'Noto Sans CJK SC', 'PingFang SC', 'WenQuanYi Micro Hei', monospace",
       bracketedPasteMode: true,
+      // Reflow the line under the cursor on resize (default is to truncate it).
+      // Echo-mode grid resizes constantly; truncating the input line corrupts
+      // long commands so copying the wrapped text yields stray newlines.
+      reflowCursorLine: true,
       theme: App.Theme.getXtermTheme(),
     } as any);
 
