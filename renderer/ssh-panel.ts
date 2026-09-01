@@ -19,6 +19,9 @@ import {
   const sidebarToggleBtn = $('#btnSidebarToggle');
   const sshConnList = $('#sshConnectionList');
   const sshUserList = $('#sshUserList');
+  const sshSplitHandle = $('#sshSplitHandle');
+  const sshScrollEl = document.querySelector('.ssh-sidebar-scroll');
+  const sshConnPane = sshConnList ? sshConnList.closest('.ssh-section') : null;
   const sshPasswordDialog = $('#sshPasswordDialog');
   const sshPasswordTitle = $('#sshPasswordTitle');
   const sshPasswordInput = $('#sshPasswordInput');
@@ -92,6 +95,7 @@ import {
 
     // --- Bind panel buttons
     bindPanelButtons();
+    bindSectionAddButtons();
     bindPasswordDialog();
     bindDialog();
     bindKeyboardShortcut();
@@ -137,6 +141,7 @@ import {
     if (btnMenuToggle && sshHeaderDropdown) {
       btnMenuToggle.addEventListener('click', (e) => {
         e.stopPropagation();
+        closeSshAddMenus();
         sshHeaderDropdown.classList.toggle('hidden');
       });
       document.addEventListener('click', (e) => {
@@ -153,6 +158,9 @@ import {
 
     // --- Sidebar resize handle
     bindSidebarResize();
+
+    // --- Sidebar split divider (Connections / Users panes)
+    bindSplitResize();
   }
 
   let importMode: 'import' | 'update' = 'import';
@@ -165,9 +173,18 @@ import {
     btn.title = status.masterPasswordSet ? App.__('sshPasswordBtnChangeTitle') : App.__('sshPasswordBtnSetTitle');
   }
 
+  // Close the section-header "+" add menus
+  function closeSshAddMenus() {
+    const connMenu = $('#sshConnAddMenu');
+    if (connMenu) connMenu.classList.add('hidden');
+    const userMenu = $('#sshUserAddMenu');
+    if (userMenu) userMenu.classList.add('hidden');
+  }
+
   function closeSshHeaderDropdown() {
     const dd = $('#sshHeaderDropdown');
     if (dd) dd.classList.add('hidden');
+    closeSshAddMenus();
   }
 
   // --- Search Filter
@@ -179,9 +196,6 @@ import {
       const query = input.value.toLowerCase().trim();
       filterSshList(sshConnList, query);
       filterSshUserList(sshUserList, query);
-      // Hide section headers when no visible items remain
-      updateSectionVisibility(sshConnList, query);
-      updateSectionVisibility(sshUserList, query);
     });
   }
 
@@ -303,15 +317,6 @@ import {
     for (const rf of rootFolders) {
       processFolder(rf);
     }
-  }
-
-  function updateSectionVisibility(container, query) {
-    if (!container) return;
-    const section = container.closest('.ssh-section');
-    if (!section) return;
-    const items = container.querySelectorAll('.ssh-item, .ssh-folder');
-    const anyVisible = [...items].some(el => el.style.display !== 'none');
-    section.style.display = (!query || anyVisible) ? '' : 'none';
   }
 
   // --- Password Dialogs
@@ -505,7 +510,6 @@ import {
     if (searchInput && searchInput.value.trim()) {
       const query = searchInput.value.toLowerCase().trim();
       filterSshList(sshConnList, query);
-      updateSectionVisibility(sshConnList, query);
     }
   }
 
@@ -828,7 +832,6 @@ import {
     if (searchInput && searchInput.value.trim()) {
       const query = searchInput.value.toLowerCase().trim();
       filterSshUserList(sshUserList, query);
-      updateSectionVisibility(sshUserList, query);
     }
   }
 
@@ -958,6 +961,37 @@ import {
       toggleSshSelection(type, id);
       sshLastClicked = sshKey(type, id);
     }
+  }
+
+  // --- Section header "+" add menus
+  function bindSectionAddButtons() {
+    const connBtn = $('#btnAddSshSectionConn');
+    const userBtn = $('#btnAddSshSectionUser');
+    const connMenu = $('#sshConnAddMenu');
+    const userMenu = $('#sshUserAddMenu');
+
+    if (connBtn && connMenu) {
+      connBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const wasOpen = !connMenu.classList.contains('hidden');
+        closeSshHeaderDropdown();
+        if (!wasOpen) connMenu.classList.remove('hidden');
+      });
+    }
+    if (userBtn && userMenu) {
+      userBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const wasOpen = !userMenu.classList.contains('hidden');
+        closeSshHeaderDropdown();
+        if (!wasOpen) userMenu.classList.remove('hidden');
+      });
+    }
+
+    // Close the add menus when clicking anywhere outside them
+    document.addEventListener('click', (e) => {
+      if (e.target.closest('.ssh-section-add-wrapper')) return;
+      closeSshAddMenus();
+    });
   }
 
   // --- Panel Button Bindings
@@ -1359,11 +1393,11 @@ import {
       });
     }
 
-    // Right-click on empty space in the sidebar scroll area (not on any item,
+    // Right-click on empty space in the sidebar panes (not on any item,
     // folder or action button): section-aware add menu.
-    // The sections stack top-to-bottom (Connections, then Users), so any blank
-    // area that is not inside a section lies below the Users section.
-    const sshScrollEl = document.querySelector('.ssh-sidebar-scroll');
+    // Each pane (Connections, then Users) contains its own list; any blank
+    // area that is not inside a pane lies on the split divider / wrapper and
+    // falls back to the Users section.
     if (sshScrollEl) {
       sshScrollEl.addEventListener('contextmenu', (e) => {
         // Item/folder right-clicks are handled (and stopped) by the list-level
@@ -2733,6 +2767,70 @@ import {
       document.body.style.cursor = '';
       document.body.style.userSelect = '';
       localStorage.setItem('sshSidebarWidth', sshSidebar.offsetWidth);
+    });
+  }
+
+  // --- Sidebar split divider (Connections / Users panes)
+  const MIN_PANE_HEIGHT = 60;
+
+  function bindSplitResize() {
+    const wrapper = sshScrollEl;
+    const connPane = sshConnPane;
+    if (!sshSplitHandle || !wrapper || !connPane) return;
+
+    const applyConnHeight = (px) => {
+      connPane.style.flex = '0 0 auto';
+      connPane.style.height = px + 'px';
+    };
+
+    const clampHeight = (px) => {
+      const maxHeight = Math.max(wrapper.clientHeight - MIN_PANE_HEIGHT, MIN_PANE_HEIGHT);
+      return Math.min(Math.max(px, MIN_PANE_HEIGHT), maxHeight);
+    };
+
+    // Restore saved split position (connections pane height in px)
+    const savedSplit = parseInt(localStorage.getItem('sshSidebarSplit'), 10);
+    if (!Number.isNaN(savedSplit) && savedSplit > 0) {
+      applyConnHeight(clampHeight(savedSplit));
+    }
+
+    let startY = 0;
+    let startHeight = 0;
+    let dragging = false;
+
+    sshSplitHandle.addEventListener('mousedown', (e) => {
+      if (sshSidebar.classList.contains('collapsed')) return;
+      e.preventDefault();
+      dragging = true;
+      startY = e.clientY;
+      startHeight = connPane.offsetHeight;
+      sshSplitHandle.classList.add('active');
+      wrapper.classList.add('resizing');
+      document.body.style.cursor = 'row-resize';
+      document.body.style.userSelect = 'none';
+    });
+
+    document.addEventListener('mousemove', (e) => {
+      if (!dragging) return;
+      const delta = e.clientY - startY;
+      applyConnHeight(clampHeight(startHeight + delta));
+    });
+
+    document.addEventListener('mouseup', () => {
+      if (!dragging) return;
+      dragging = false;
+      sshSplitHandle.classList.remove('active');
+      wrapper.classList.remove('resizing');
+      document.body.style.cursor = '';
+      document.body.style.userSelect = '';
+      localStorage.setItem('sshSidebarSplit', String(connPane.offsetHeight));
+    });
+
+    // Double-click resets the split to 50/50
+    sshSplitHandle.addEventListener('dblclick', () => {
+      if (sshSidebar.classList.contains('collapsed')) return;
+      applyConnHeight(Math.round(wrapper.clientHeight / 2));
+      localStorage.setItem('sshSidebarSplit', String(connPane.offsetHeight));
     });
   }
 
