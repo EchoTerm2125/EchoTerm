@@ -24,8 +24,8 @@ export function buildFolderChildrenMap(folders) {
  * Union of the ids of several folders and all their transitive descendants.
  * Nested roots are counted once (visited set).
  */
-export function collectFolderSubtree(folders, rootIds) {
-  const children = buildFolderChildrenMap(folders);
+/** Same as collectFolderSubtree but reuses a pre-built children map. */
+function collectFolderSubtreeFrom(children, rootIds) {
   const ids = new Set();
   const queue = [...rootIds];
   while (queue.length > 0) {
@@ -37,12 +37,23 @@ export function collectFolderSubtree(folders, rootIds) {
   return ids;
 }
 
+export function collectFolderSubtree(folders, rootIds) {
+  return collectFolderSubtreeFrom(buildFolderChildrenMap(folders), rootIds);
+}
+
 /**
  * Reduce a multi-folder selection to its top-most ids: an id that sits inside
  * another selected id's subtree is already covered by that ancestor's delete.
+ * Builds the children map once and memoizes each id's subtree, so the cost is
+ * O(N + k·subtree-size) instead of rebuilding the map for every pair (O(k²·N)).
  */
 export function topLevelFolderIds(ids, folders) {
-  const subtreeOf = (id) => collectFolderSubtree(folders, [id]);
+  const children = buildFolderChildrenMap(folders);
+  const memo = new Map();
+  const subtreeOf = (id) => {
+    if (!memo.has(id)) memo.set(id, collectFolderSubtreeFrom(children, [id]));
+    return memo.get(id);
+  };
   return ids.filter(id => !ids.some(other => other !== id && subtreeOf(other).has(id)));
 }
 

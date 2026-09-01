@@ -72,11 +72,14 @@ export function migrateData(raw: unknown): { data: SshData; changed: boolean } {
   const src = raw as Record<string, unknown>;
   let changed = false;
 
-  const hasUsers = Array.isArray(src.users);
-  const users = hasUsers ? (src.users as StoredUser[]) : [];
+  // Drop non-object entries before touching them: a NaN/string/null element
+  // would otherwise throw inside the groupId scan below and silently wipe the
+  // whole payload via the vault's "not valid JSON" fallback.
+  const asRecords = (arr: unknown): Record<string, unknown>[] =>
+    Array.isArray(arr) ? arr.filter((v): v is Record<string, unknown> => !!v && typeof v === 'object') : [];
 
-  const hasConnections = Array.isArray(src.connections);
-  const rawConnections = hasConnections ? (src.connections as StoredConnection[]) : [];
+  const users = asRecords(src.users) as unknown as StoredUser[];
+  const rawConnections = asRecords(src.connections) as unknown as StoredConnection[];
   // v2 → v3: a connection may carry only `groupId`; lift it into `folderId`
   // and drop the legacy field so deletes and tree joins never see two shapes.
   const hasLegacyGroupId = rawConnections.some(c => c.groupId !== undefined);
@@ -91,14 +94,14 @@ export function migrateData(raw: unknown): { data: SshData; changed: boolean } {
   }
   // Missing keys are normalized to empty arrays; flag it so the canonical
   // shape is persisted back instead of being re-derived on every load.
-  if (!hasUsers || !hasConnections) changed = true;
+  if (!Array.isArray(src.users) || !Array.isArray(src.connections)) changed = true;
 
   let connectionFolders: StoredConnectionFolder[];
   if (Array.isArray(src.connectionFolders)) {
-    connectionFolders = src.connectionFolders as StoredConnectionFolder[];
+    connectionFolders = asRecords(src.connectionFolders) as unknown as StoredConnectionFolder[];
   } else if (Array.isArray(src.folders)) {
     // v2 → v3: legacy `folders` key becomes `connectionFolders`
-    connectionFolders = src.folders as StoredConnectionFolder[];
+    connectionFolders = asRecords(src.folders) as unknown as StoredConnectionFolder[];
     changed = true;
   } else {
     connectionFolders = [];
@@ -107,7 +110,7 @@ export function migrateData(raw: unknown): { data: SshData; changed: boolean } {
 
   let userFolders: StoredUserFolder[];
   if (Array.isArray(src.userFolders)) {
-    userFolders = src.userFolders as StoredUserFolder[];
+    userFolders = asRecords(src.userFolders) as unknown as StoredUserFolder[];
   } else {
     userFolders = [];
     changed = true;
