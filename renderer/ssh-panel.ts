@@ -2790,16 +2790,27 @@ import {
 
     // Restore saved split position (connections pane height in px)
     const savedSplit = parseInt(localStorage.getItem('sshSidebarSplit'), 10);
+    let desiredHeight = 0; // 0 = never customized (CSS 50/50 flex split applies)
     if (!Number.isNaN(savedSplit) && savedSplit > 0) {
-      applyConnHeight(clampHeight(savedSplit));
+      desiredHeight = clampHeight(savedSplit);
+      applyConnHeight(desiredHeight);
     }
 
     let startY = 0;
     let startHeight = 0;
     let dragging = false;
 
+    // Keep the split reachable when the window shrinks: re-clamp the stored
+    // preference against the current wrapper height instead of leaving the
+    // divider + Users pane clipped below the overflow:hidden scroll area.
+    window.addEventListener('resize', () => {
+      if (dragging || desiredHeight <= 0) return;
+      applyConnHeight(clampHeight(desiredHeight));
+    });
+
     sshSplitHandle.addEventListener('mousedown', (e) => {
       if (sshSidebar.classList.contains('collapsed')) return;
+      if (e.button !== 0) return; // only the left button resizes the split
       e.preventDefault();
       dragging = true;
       startY = e.clientY;
@@ -2813,7 +2824,8 @@ import {
     document.addEventListener('mousemove', (e) => {
       if (!dragging) return;
       const delta = e.clientY - startY;
-      applyConnHeight(clampHeight(startHeight + delta));
+      desiredHeight = clampHeight(startHeight + delta);
+      applyConnHeight(desiredHeight);
     });
 
     document.addEventListener('mouseup', () => {
@@ -2829,8 +2841,9 @@ import {
     // Double-click resets the split to 50/50
     sshSplitHandle.addEventListener('dblclick', () => {
       if (sshSidebar.classList.contains('collapsed')) return;
-      applyConnHeight(Math.round(wrapper.clientHeight / 2));
-      localStorage.setItem('sshSidebarSplit', String(connPane.offsetHeight));
+      desiredHeight = clampHeight(Math.round(wrapper.clientHeight / 2));
+      applyConnHeight(desiredHeight);
+      localStorage.setItem('sshSidebarSplit', String(desiredHeight));
     });
   }
 

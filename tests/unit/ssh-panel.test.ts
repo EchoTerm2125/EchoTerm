@@ -464,11 +464,12 @@ describe('SshPanel (ssh-panel.ts)', () => {
       expect(menuBtn('ssh-add-folder').classList.contains('hidden')).toBe(true);
     });
 
-    it('treats blank space inside the Users pane as the Users section', async () => {
-      userSection().querySelector('.ssh-list').dispatchEvent(new MouseEvent('contextmenu', { bubbles: true, clientX: 100, clientY: 100 }));
+    it('treats a right-click on the split divider (outside any pane) as the Users section', async () => {
+      document.querySelector('.ssh-split-handle').dispatchEvent(new MouseEvent('contextmenu', { bubbles: true, clientX: 100, clientY: 100 }));
       await flush();
       expect(menuBtn('ssh-add-user').classList.contains('hidden')).toBe(false);
       expect(menuBtn('ssh-add-conn').classList.contains('hidden')).toBe(true);
+      expect(menuBtn('ssh-add-folder').classList.contains('hidden')).toBe(true);
     });
 
     it('Add Connection opens the connection dialog with no folder preselected', async () => {
