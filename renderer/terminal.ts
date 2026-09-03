@@ -177,7 +177,27 @@ import './icons';
 
     paneEl.addEventListener('click', (e) => {
       if (e.target.closest('.pane-checkbox') || e.target.closest('.pane-close') || e.target.closest('.pane-paste')) return;
-      if (state.echoModeActive && !state.echoSelection.has(id)) return;
+      if (state.echoModeActive) {
+        // A title-bar click is enable-then-activate: a deselected terminal is
+        // added to the echo selection (never removed) and made the active
+        // terminal. Body clicks on a deselected terminal remain a dead zone.
+        if (e.target.closest('.pane-titlebar')) {
+          App.Echo.enableEchoOnTerminal(id);
+          focusTerminal(id);
+          return;
+        }
+        if (!state.echoSelection.has(id)) return;
+      }
+      focusTerminal(id);
+    });
+
+    // A double click on the title bar makes echo exclusive to this terminal:
+    // it is enabled and every other terminal in the group is disabled.
+    paneEl.addEventListener('dblclick', (e) => {
+      if (e.target.closest('.pane-checkbox') || e.target.closest('.pane-close') || e.target.closest('.pane-paste')) return;
+      if (!state.echoModeActive) return;
+      if (!e.target.closest('.pane-titlebar')) return;
+      App.Echo.soloEchoOnTerminal(id);
       focusTerminal(id);
     });
 
@@ -538,7 +558,27 @@ import './icons';
 
     paneEl.addEventListener('click', (e) => {
       if (e.target.closest('.pane-checkbox') || e.target.closest('.pane-close') || e.target.closest('.pane-paste')) return;
-      if (state.echoModeActive && !state.echoSelection.has(id)) return;
+      if (state.echoModeActive) {
+        // A title-bar click is enable-then-activate: a deselected terminal is
+        // added to the echo selection (never removed) and made the active
+        // terminal. Body clicks on a deselected terminal remain a dead zone.
+        if (e.target.closest('.pane-titlebar')) {
+          App.Echo.enableEchoOnTerminal(id);
+          focusTerminal(id);
+          return;
+        }
+        if (!state.echoSelection.has(id)) return;
+      }
+      focusTerminal(id);
+    });
+
+    // A double click on the title bar makes echo exclusive to this terminal:
+    // it is enabled and every other terminal in the group is disabled.
+    paneEl.addEventListener('dblclick', (e) => {
+      if (e.target.closest('.pane-checkbox') || e.target.closest('.pane-close') || e.target.closest('.pane-paste')) return;
+      if (!state.echoModeActive) return;
+      if (!e.target.closest('.pane-titlebar')) return;
+      App.Echo.soloEchoOnTerminal(id);
       focusTerminal(id);
     });
 

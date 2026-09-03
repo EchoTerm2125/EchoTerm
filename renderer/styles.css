@@ -676,6 +676,10 @@ html, body {
   border-bottom: 1px solid var(--border);
   gap: calc(6px * var(--ui-scale));
   flex-shrink: 0;
+  /* Clicking a title bar in echo mode enables the terminal (docs/adr/0004);
+     keep it from also selecting the label text on a double click. */
+  user-select: none;
+  -webkit-user-select: none;
 }
 
 .pane .pane-titlebar .pane-label {

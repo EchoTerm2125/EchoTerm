@@ -166,4 +166,108 @@ describe('Integration: Terminal Lifecycle', () => {
       expect(App.api.killTerminal).toHaveBeenCalledWith(id);
     });
   });
+
+  describe('title-bar click in echo mode', () => {
+    // Real spawnTerminal wires the paneEl click listener, so dispatch through
+    // the DOM to exercise the enable-then-activate gesture (docs/adr/0004).
+    async function spawnTwo() {
+      await App.Terminal.spawnTerminal('powershell');
+      await App.Terminal.spawnTerminal('cmd');
+    }
+
+    function clickTimes(target, times) {
+      for (let i = 0; i < times; i++) {
+        target.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true }));
+      }
+    }
+
+    // Uncheck via the real checkbox change handler (remove from echo selection).
+    function deselectViaCheckbox(id) {
+      const entry = App.state.terminals.get(id);
+      const chk = entry.titlebar.querySelector('input[type="checkbox"]');
+      chk.checked = false;
+      chk.dispatchEvent(new Event('change', { bubbles: true }));
+    }
+
+    it('title-bar click enables a deselected terminal and makes it active', async () => {
+      await spawnTwo();
+      App.Echo.toggleEchoMode();
+      expect(App.state.echoModeActive).toBe(true);
+
+      // Both terminals start enabled; deselect the second one.
+      deselectViaCheckbox(2);
+      expect(App.state.echoSelection.has(2)).toBe(false);
+
+      const entry2 = App.state.terminals.get(2);
+      clickTimes(entry2.titlebar.querySelector('.pane-label'), 1);
+
+      expect(App.state.echoSelection.has(2)).toBe(true);
+      expect(App.state.activeTerminalId).toBe(2);
+      const chk = entry2.titlebar.querySelector('input[type="checkbox"]');
+      expect(chk.checked).toBe(true);
+      expect(entry2.paneEl.classList.contains('echo-selected')).toBe(true);
+    });
+
+    it('double title-bar click makes echo exclusive to that terminal', async () => {
+      await spawnTwo();
+      App.Echo.toggleEchoMode();
+      expect(App.state.echoSelection.has(1)).toBe(true);
+      expect(App.state.echoSelection.has(2)).toBe(true);
+
+      // jsdom does not synthesize a dblclick from two click events.
+      const entry1 = App.state.terminals.get(1);
+      entry1.titlebar.querySelector('.pane-label').dispatchEvent(
+        new MouseEvent('dblclick', { bubbles: true, cancelable: true }),
+      );
+
+      expect(App.state.echoSelection.has(1)).toBe(true);
+      expect(App.state.echoSelection.has(2)).toBe(false);
+      expect(App.state.activeTerminalId).toBe(1);
+      const chk2 = App.state.terminals.get(2).titlebar.querySelector('input[type="checkbox"]');
+      expect(chk2.checked).toBe(false);
+      expect(App.state.terminals.get(2).paneEl.classList.contains('echo-selected')).toBe(false);
+    });
+
+    it('double-click on a deselected terminal enables it exclusively', async () => {
+      await spawnTwo();
+      App.Echo.toggleEchoMode();
+      deselectViaCheckbox(2);
+      expect(App.state.echoSelection.has(2)).toBe(false);
+
+      const entry2 = App.state.terminals.get(2);
+      entry2.titlebar.querySelector('.pane-label').dispatchEvent(
+        new MouseEvent('dblclick', { bubbles: true, cancelable: true }),
+      );
+
+      expect(App.state.echoSelection.has(2)).toBe(true);
+      expect(App.state.echoSelection.has(1)).toBe(false);
+      expect(App.state.activeTerminalId).toBe(2);
+      expect(App.state.terminals.get(2).titlebar.querySelector('input[type="checkbox"]').checked).toBe(true);
+    });
+
+    it('body click of a deselected terminal stays a dead zone', async () => {
+      await spawnTwo();
+      App.Echo.toggleEchoMode();
+      deselectViaCheckbox(2); // refocus falls back to terminal 1
+      expect(App.state.activeTerminalId).toBe(1);
+
+      const entry2 = App.state.terminals.get(2);
+      clickTimes(entry2.paneEl.querySelector('.xterm-container'), 1);
+
+      expect(App.state.echoSelection.has(2)).toBe(false);
+      expect(App.state.activeTerminalId).toBe(1);
+    });
+
+    it('title-bar click outside echo mode keeps plain focus behavior', async () => {
+      await spawnTwo();
+      App.Terminal.focusTerminal(2);
+      expect(App.state.activeTerminalId).toBe(2);
+
+      const entry1 = App.state.terminals.get(1);
+      clickTimes(entry1.titlebar.querySelector('.pane-label'), 1);
+
+      expect(App.state.activeTerminalId).toBe(1);
+      expect(App.state.echoSelection.size).toBe(0);
+    });
+  });
 });
