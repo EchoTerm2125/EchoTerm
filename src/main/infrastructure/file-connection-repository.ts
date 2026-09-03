@@ -86,7 +86,6 @@ export class FileConnectionRepository implements ConnectionRepository {
     if (connData.groupId !== undefined && connData.folderId === undefined) {
       connData.folderId = connData.groupId;
     }
-    const effectiveFolderId = connData.folderId !== undefined ? connData.folderId : null;
 
     // Track old folder for sync (use folderId or legacy groupId)
     let oldFolderId: string | null = null;
@@ -94,6 +93,10 @@ export class FileConnectionRepository implements ConnectionRepository {
       const existing = connections.find(c => c.id === connData.id);
       if (existing) oldFolderId = existing.folderId || existing.groupId || null;
     }
+    // A partial update that omits folderId is not a "move to root" — that is
+    // only an explicit folderId: null. Falling back to the stored folder keeps
+    // the denormalized connectionIds in sync with the (unchanged) folderId.
+    const effectiveFolderId = connData.folderId !== undefined ? connData.folderId : oldFolderId;
 
     let saved: StoredConnection;
     if (connData.id) {

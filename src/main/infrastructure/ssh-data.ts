@@ -74,9 +74,15 @@ export function migrateData(raw: unknown): { data: SshData; changed: boolean } {
 
   // Drop non-object entries before touching them: a NaN/string/null element
   // would otherwise throw inside the groupId scan below and silently wipe the
-  // whole payload via the vault's "not valid JSON" fallback.
-  const asRecords = (arr: unknown): Record<string, unknown>[] =>
-    Array.isArray(arr) ? arr.filter((v): v is Record<string, unknown> => !!v && typeof v === 'object') : [];
+  // whole payload via the vault's "not valid JSON" fallback. When an entry is
+  // dropped the payload no longer matches disk, so flag it for re-persist.
+  let droppedEntries = false;
+  const asRecords = (arr: unknown): Record<string, unknown>[] => {
+    if (!Array.isArray(arr)) return [];
+    const records = arr.filter((v): v is Record<string, unknown> => !!v && typeof v === 'object');
+    if (records.length !== arr.length) droppedEntries = true;
+    return records;
+  };
 
   const users = asRecords(src.users) as unknown as StoredUser[];
   const rawConnections = asRecords(src.connections) as unknown as StoredConnection[];
@@ -118,6 +124,7 @@ export function migrateData(raw: unknown): { data: SshData; changed: boolean } {
 
   const version = typeof src.version === 'number' ? src.version : 2;
   if (version !== 3) changed = true;
+  if (droppedEntries) changed = true;
 
   return { data: { users, connections, connectionFolders, userFolders, version: 3 }, changed };
 }

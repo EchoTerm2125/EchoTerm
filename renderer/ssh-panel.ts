@@ -57,6 +57,11 @@ import {
   let sshLastClicked = null;      // "type:id" string
   let sshSelectType = null;       // 'connFolder' | 'userFolder' | 'connection' | 'user'
 
+  // Tree the in-flight drag originated from ('conn' | 'user'); null when no
+  // drag is active. Used to keep cross-tree drags from offering themselves as
+  // drop targets (stale root/header highlights on drag cancel).
+  let sshDragSourceTree = null;
+
   // --- Initialization
   async function init() {
     if (!sshSidebar) return;
@@ -511,6 +516,9 @@ import {
       const query = searchInput.value.toLowerCase().trim();
       filterSshList(sshConnList, query);
     }
+
+    // Rebuilt the rows: drop selection keys whose rows are gone and re-mark survivors.
+    reconcileSshSelection();
   }
 
   // ─── Shared folder-tree rendering ─────────────────────────────────────────
@@ -530,6 +538,7 @@ import {
     idKey: 'folderId',
     idAttr: 'data-folder-id',
     rowSelector: '.ssh-folder',
+    tree: 'conn',
     getRootEl: () => sshConnList,
     rowHtml: (folder, totalCount) => `
       <span class="ssh-folder-arrow">▶</span>
@@ -563,6 +572,7 @@ import {
     idKey: 'userFolderId',
     idAttr: 'data-user-folder-id',
     rowSelector: '.ssh-user-folder',
+    tree: 'user',
     getRootEl: () => sshUserList,
     rowHtml: (folder, totalCount) => `
       <span class="ssh-folder-arrow">▶</span>
@@ -608,6 +618,7 @@ import {
     folderEl.addEventListener('dragstart', (e) => {
       e.dataTransfer.effectAllowed = 'move';
       e.dataTransfer.setData('text/plain', cfg.payloadPrefix + folderId);
+      sshDragSourceTree = cfg.tree;
       folderEl.classList.add('ssh-dragging');
       const selectedFolders = [...sshSelected].filter(k => k.startsWith(cfg.selectKeyPrefix));
       if (selectedFolders.length > 1 && sshSelected.has(sshKey(cfg.selectType, folderId))) {
@@ -619,15 +630,10 @@ import {
       }
     });
     folderEl.addEventListener('dragend', () => {
-      folderEl.classList.remove('ssh-dragging');
       for (const el of document.querySelectorAll(`${cfg.rowSelector}.ssh-dragging`)) {
         el.classList.remove('ssh-dragging');
       }
-      for (const el of document.querySelectorAll(`${cfg.rowSelector}.drag-over`)) {
-        el.classList.remove('drag-over');
-      }
-      const rootEl = cfg.getRootEl();
-      if (rootEl) rootEl.classList.remove('ssh-root-drag-over');
+      clearDragHighlights();
     });
 
     // Click: select + toggle expand/collapse
@@ -654,6 +660,8 @@ import {
 
     // Drop target: accept dragged folders AND items of this tree onto the header
     folderEl.addEventListener('dragover', (e) => {
+      // A drag from the other tree is not a valid drop target for this folder.
+      if (sshDragSourceTree && sshDragSourceTree !== cfg.tree) return;
       e.preventDefault();
       e.dataTransfer.dropEffect = 'move';
       folderEl.classList.add('drag-over');
@@ -664,6 +672,7 @@ import {
     folderEl.addEventListener('drop', async (e) => {
       e.preventDefault();
       e.stopPropagation();
+      sshDragSourceTree = null;
       folderEl.classList.remove('drag-over');
       const rawData = e.dataTransfer.getData('text/plain');
       if (!rawData) return;
@@ -671,15 +680,19 @@ import {
       if (rawData.startsWith(cfg.payloadPrefix)) {
         // Re-parent dragged folder(s) into this folder
         const draggedFolderId = rawData.slice(cfg.payloadPrefix.length);
-        const result = await cfg.saveFolder({ id: draggedFolderId, parentId: folderId });
-        if (result.error) { App.UI.showToast(App.__('toastError', { message: result.error })); return; }
-        const selectedFolders = [...sshSelected].filter(k => k.startsWith(cfg.selectKeyPrefix));
-        if (selectedFolders.length > 1 && sshSelected.has(sshKey(cfg.selectType, draggedFolderId))) {
-          for (const key of selectedFolders) {
-            const fid = key.split(':')[1];
-            if (fid !== draggedFolderId) {
-              const r = await cfg.saveFolder({ id: fid, parentId: folderId });
-              if (r.error) { App.UI.showToast(App.__('toastError', { message: r.error })); }
+        // Dropping a folder onto itself is a no-op, not an error.
+        if (draggedFolderId !== folderId) {
+          const result = await cfg.saveFolder({ id: draggedFolderId, parentId: folderId });
+          if (result.error) { App.UI.showToast(App.__('toastError', { message: result.error })); return; }
+          const selectedFolders = [...sshSelected].filter(k => k.startsWith(cfg.selectKeyPrefix));
+          if (selectedFolders.length > 1 && sshSelected.has(sshKey(cfg.selectType, draggedFolderId))) {
+            for (const key of selectedFolders) {
+              const fid = key.split(':')[1];
+              // Skip the dragged folder AND the drop target (which may itself be selected).
+              if (fid !== draggedFolderId && fid !== folderId) {
+                const r = await cfg.saveFolder({ id: fid, parentId: folderId });
+                if (r.error) { App.UI.showToast(App.__('toastError', { message: r.error })); }
+              }
             }
           }
         }
@@ -758,6 +771,8 @@ import {
     });
     // Allow drops on connection items (for ungrouping via drag-out)
     item.addEventListener('dragover', (e) => {
+      // A user-tree drag is not a valid drop target for a connection row.
+      if (sshDragSourceTree === 'user') return;
       e.preventDefault();
       e.dataTransfer.dropEffect = 'move';
     });
@@ -765,15 +780,12 @@ import {
     item.addEventListener('dragstart', (e) => {
       e.dataTransfer.effectAllowed = 'move';
       e.dataTransfer.setData('text/plain', conn.id);
+      sshDragSourceTree = 'conn';
       item.classList.add('ssh-dragging');
     });
     item.addEventListener('dragend', () => {
       item.classList.remove('ssh-dragging');
-      for (const el of document.querySelectorAll('.ssh-folder.drag-over')) {
-        el.classList.remove('drag-over');
-      }
-      // Clean up root drag indicator
-      if (sshConnList) sshConnList.classList.remove('ssh-root-drag-over');
+      clearDragHighlights();
     });
     return item;
   }
@@ -833,6 +845,9 @@ import {
       const query = searchInput.value.toLowerCase().trim();
       filterSshUserList(sshUserList, query);
     }
+
+    // Rebuilt the rows: drop selection keys whose rows are gone and re-mark survivors.
+    reconcileSshSelection();
   }
 
   function createUserItem(user) {
@@ -856,20 +871,20 @@ import {
     });
     // Allow drops on user items (for ungrouping via drag-out)
     item.addEventListener('dragover', (e) => {
+      // A connection-tree drag is not a valid drop target for a user row.
+      if (sshDragSourceTree === 'conn') return;
       e.preventDefault();
       e.dataTransfer.dropEffect = 'move';
     });
     item.addEventListener('dragstart', (e) => {
       e.dataTransfer.effectAllowed = 'move';
       e.dataTransfer.setData('text/plain', 'user:' + user.id);
+      sshDragSourceTree = 'user';
       item.classList.add('ssh-dragging');
     });
     item.addEventListener('dragend', () => {
       item.classList.remove('ssh-dragging');
-      for (const el of document.querySelectorAll('.ssh-user-folder.drag-over')) {
-        el.classList.remove('drag-over');
-      }
-      if (sshUserList) sshUserList.classList.remove('ssh-root-drag-over');
+      clearDragHighlights();
     });
     return item;
   }
@@ -894,6 +909,36 @@ import {
     sshLastClicked = null;
   }
 
+  // Removes every drag visual (root drop-zone, folder header, ghost rows) from
+  // both trees and forgets the in-flight drag source. Bound to every dragend so
+  // a cancelled drag can never leave a highlight stuck on the other tree.
+  function clearDragHighlights() {
+    if (sshConnList) sshConnList.classList.remove('ssh-root-drag-over');
+    if (sshUserList) sshUserList.classList.remove('ssh-root-drag-over');
+    for (const el of document.querySelectorAll('.ssh-folder.drag-over, .ssh-conn-item.drag-over, .ssh-user-item.drag-over, .ssh-dragging')) {
+      el.classList.remove('drag-over', 'ssh-dragging');
+    }
+    sshDragSourceTree = null;
+  }
+
+  // Re-rendering rebuilds every row, so drop selection keys whose rows are gone
+  // and re-apply the .selected class to survivors. Keeps the multi-action menus
+  // from counting rows that are no longer (visibly) in the tree.
+  function reconcileSshSelection() {
+    for (const key of [...sshSelected]) {
+      const sep = key.indexOf(':');
+      if (sep === -1) { sshSelected.delete(key); continue; }
+      const el = findSshElement(key.slice(0, sep), key.slice(sep + 1));
+      if (el) el.classList.add('selected');
+      else sshSelected.delete(key);
+    }
+    if (sshLastClicked) {
+      const sep = sshLastClicked.indexOf(':');
+      if (sep === -1 || !findSshElement(sshLastClicked.slice(0, sep), sshLastClicked.slice(sep + 1))) sshLastClicked = null;
+    }
+    if (sshSelected.size === 0) sshSelectType = null;
+  }
+
   function toggleSshSelection(type, id) {
     const key = sshKey(type, id);
     if (sshSelected.has(key)) {
@@ -916,13 +961,28 @@ import {
     return null;
   }
 
+  // True when a row is actually visible to the user: not hidden by the search
+  // filter and not nested inside a collapsed folder's children area.
+  function isSshRowVisible(el, container) {
+    if (el.style.display === 'none') return false;
+    for (let node = el.parentElement; node && node !== container; node = node.parentElement) {
+      if (node.style.display === 'none') return false;
+      if (node.classList.contains('ssh-folder-children')) {
+        const row = node.previousElementSibling;
+        if (row && row.classList.contains('ssh-folder') && !row.classList.contains('expanded')) return false;
+      }
+    }
+    return true;
+  }
+
   function selectSshRange(type, fromId, toId) {
     const container = type === 'user' || type === 'userFolder' ? sshUserList : sshConnList;
     if (!container) return;
     const selector = type === 'connFolder' ? '.ssh-folder' : type === 'userFolder' ? '.ssh-user-folder' : type === 'connection' ? '.ssh-conn-item' : '.ssh-user-item';
     const attr = type === 'connFolder' ? 'data-folder-id' : type === 'userFolder' ? 'data-user-folder-id' : type === 'connection' ? 'data-conn-id' : 'data-user-id';
-    // Only consider visible items so shift-select respects the active filter
-    const items = [...container.querySelectorAll(selector)].filter(el => el.style.display !== 'none');
+    // Only consider effectively-visible items so shift-select respects both the
+    // active filter and rows hidden inside collapsed folders.
+    const items = [...container.querySelectorAll(selector)].filter(el => isSshRowVisible(el, container));
     const fromIdx = items.findIndex(el => el.getAttribute(attr) === fromId);
     const toIdx = items.findIndex(el => el.getAttribute(attr) === toId);
     if (fromIdx === -1 || toIdx === -1) return;
@@ -1071,6 +1131,8 @@ import {
       let highlightedFolder = null;
 
       sshConnList.addEventListener('dragover', (e) => {
+        // A user-tree drag must not turn the connection list into a drop target.
+        if (sshDragSourceTree === 'user') return;
         const folderEl = e.target.closest('.ssh-folder');
         const childrenEl = e.target.closest('.ssh-folder-children');
 
@@ -1116,6 +1178,7 @@ import {
       });
 
       sshConnList.addEventListener('drop', async (e) => {
+        sshDragSourceTree = null;
         sshConnList.classList.remove('ssh-root-drag-over');
         if (highlightedFolder) {
           highlightedFolder.classList.remove('drag-over');
@@ -1142,15 +1205,19 @@ import {
         if (rawData.startsWith('folder:')) {
           // Re-parent dragged folder(s)
           const draggedFolderId = rawData.slice(7);
-          const result = await api.sshConnectionFolderSave({ id: draggedFolderId, parentId: targetFolderId });
-          if (result.error) { App.UI.showToast(App.__('toastError', { message: result.error })); return; }
-          const selectedGroups = [...sshSelected].filter(k => k.startsWith('connFolder:'));
-          if (selectedGroups.length > 1 && sshSelected.has(sshKey('connFolder', draggedFolderId))) {
-            for (const key of selectedGroups) {
-              const gid = key.split(':')[1];
-              if (gid !== draggedFolderId) {
-                const r = await api.sshConnectionFolderSave({ id: gid, parentId: targetFolderId });
-                if (r.error) { App.UI.showToast(App.__('toastError', { message: r.error })); }
+          // Dropping a folder onto itself (e.g. its own children area) is a no-op.
+          if (draggedFolderId !== targetFolderId) {
+            const result = await api.sshConnectionFolderSave({ id: draggedFolderId, parentId: targetFolderId });
+            if (result.error) { App.UI.showToast(App.__('toastError', { message: result.error })); return; }
+            const selectedGroups = [...sshSelected].filter(k => k.startsWith('connFolder:'));
+            if (selectedGroups.length > 1 && sshSelected.has(sshKey('connFolder', draggedFolderId))) {
+              for (const key of selectedGroups) {
+                const gid = key.split(':')[1];
+                // Skip the dragged folder AND the drop target (which may itself be selected).
+                if (gid !== draggedFolderId && gid !== targetFolderId) {
+                  const r = await api.sshConnectionFolderSave({ id: gid, parentId: targetFolderId });
+                  if (r.error) { App.UI.showToast(App.__('toastError', { message: r.error })); }
+                }
               }
             }
           }
@@ -1181,6 +1248,8 @@ import {
       let highlightedUserFolder = null;
 
       sshUserList.addEventListener('dragover', (e) => {
+        // A connection-tree drag must not turn the user list into a drop target.
+        if (sshDragSourceTree === 'conn') return;
         const folderEl = e.target.closest('.ssh-user-folder');
         const childrenEl = e.target.closest('.ssh-folder-children');
 
@@ -1224,6 +1293,7 @@ import {
       });
 
       sshUserList.addEventListener('drop', async (e) => {
+        sshDragSourceTree = null;
         sshUserList.classList.remove('ssh-root-drag-over');
         if (highlightedUserFolder) {
           highlightedUserFolder.classList.remove('drag-over');
@@ -1248,15 +1318,19 @@ import {
 
         if (rawData.startsWith('userFolder:')) {
           const draggedFolderId = rawData.slice('userFolder:'.length);
-          const result = await api.sshUserFolderSave({ id: draggedFolderId, parentId: targetUserFolderId });
-          if (result.error) { App.UI.showToast(App.__('toastError', { message: result.error })); return; }
-          const selectedUserFolders = [...sshSelected].filter(k => k.startsWith('userFolder:'));
-          if (selectedUserFolders.length > 1 && sshSelected.has(sshKey('userFolder', draggedFolderId))) {
-            for (const key of selectedUserFolders) {
-              const fid = key.split(':')[1];
-              if (fid !== draggedFolderId) {
-                const r = await api.sshUserFolderSave({ id: fid, parentId: targetUserFolderId });
-                if (r.error) { App.UI.showToast(App.__('toastError', { message: r.error })); }
+          // Dropping a folder onto itself (e.g. its own children area) is a no-op.
+          if (draggedFolderId !== targetUserFolderId) {
+            const result = await api.sshUserFolderSave({ id: draggedFolderId, parentId: targetUserFolderId });
+            if (result.error) { App.UI.showToast(App.__('toastError', { message: result.error })); return; }
+            const selectedUserFolders = [...sshSelected].filter(k => k.startsWith('userFolder:'));
+            if (selectedUserFolders.length > 1 && sshSelected.has(sshKey('userFolder', draggedFolderId))) {
+              for (const key of selectedUserFolders) {
+                const fid = key.split(':')[1];
+                // Skip the dragged folder AND the drop target (which may itself be selected).
+                if (fid !== draggedFolderId && fid !== targetUserFolderId) {
+                  const r = await api.sshUserFolderSave({ id: fid, parentId: targetUserFolderId });
+                  if (r.error) { App.UI.showToast(App.__('toastError', { message: r.error })); }
+                }
               }
             }
           }
