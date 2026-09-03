@@ -71,7 +71,30 @@ export class FileConnectionFolderRepository implements ConnectionFolderRepositor
     // Collect the folder and all descendant folders (domain service)
     const deletedIds = collectFolderAndDescendantIds(this.list(), id);
     // Cascade: delete every connection inside the deleted subtree
-    data.connections = data.connections.filter(conn => !(conn.folderId && deletedIds.has(conn.folderId)));
+    const deletedConnectionIds = new Set<string>();
+    data.connections = data.connections.filter(conn => {
+      if (conn.folderId && deletedIds.has(conn.folderId)) {
+        deletedConnectionIds.add(conn.id);
+        return false;
+      }
+      return true;
+    });
+    // A surviving connection may reference a deleted connection as its jump
+    // host; sever the link so connect never silently drops the jump hop.
+    for (const conn of data.connections) {
+      if (conn.jumpHost && conn.jumpHost.type === 'reference' && deletedConnectionIds.has(conn.jumpHost.connectionId)) {
+        conn.jumpHost = null;
+      }
+    }
+    // Sweep the deleted connection ids out of surviving folders' denormalized
+    // connectionIds arrays (mirrors the single-connection delete cleanup).
+    if (deletedConnectionIds.size > 0) {
+      for (const folder of data.connectionFolders) {
+        if (folder.connectionIds && folder.connectionIds.length > 0) {
+          folder.connectionIds = folder.connectionIds.filter(cid => !deletedConnectionIds.has(cid));
+        }
+      }
+    }
     data.connectionFolders = data.connectionFolders.filter(f => !deletedIds.has(f.id));
     this.vault.persist();
   }

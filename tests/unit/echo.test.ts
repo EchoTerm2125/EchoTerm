@@ -164,4 +164,103 @@ describe('Echo (echo.js)', () => {
       expect(App.state.activeTerminalId).toBe(1);
     });
   });
+
+  describe('enableEchoOnTerminal', () => {
+    function setupTerminals(count) {
+      for (let i = 1; i <= count; i++) {
+        injectTerminal(i);
+        App.state.terminalGroups.set(i, 'g1');
+        App.state.groups.get('g1').terminalIds.add(i);
+      }
+    }
+
+    it('adds a deselected terminal to the selection and syncs its UI', () => {
+      setupTerminals(2);
+      App.state.echoModeActive = true;
+      App.state.echoSelection.add(1);
+      const entry2 = App.state.terminals.get(2);
+
+      App.Echo.enableEchoOnTerminal(2);
+
+      expect(App.state.echoSelection.has(2)).toBe(true);
+      expect(entry2.paneEl.classList.contains('echo-selected')).toBe(true);
+      const cbLabel = entry2.titlebar.querySelector('.pane-checkbox');
+      expect(cbLabel.classList.contains('selected')).toBe(true);
+      const chk = entry2.titlebar.querySelector('input[type="checkbox"]');
+      expect(chk.checked).toBe(true);
+    });
+
+    it('is idempotent — enabling an already-enabled terminal changes nothing', () => {
+      setupTerminals(2);
+      App.state.echoModeActive = true;
+      App.state.echoSelection.add(1);
+      App.state.echoSelection.add(2);
+
+      App.Echo.enableEchoOnTerminal(2);
+
+      expect(App.state.echoSelection.has(2)).toBe(true);
+      expect(App.state.echoSelection.size).toBe(2);
+    });
+
+    it('ignores unknown terminal ids', () => {
+      setupTerminals(1);
+      App.state.echoModeActive = true;
+
+      expect(() => App.Echo.enableEchoOnTerminal(999)).not.toThrow();
+      expect(App.state.echoSelection.size).toBe(0);
+    });
+  });
+
+  describe('soloEchoOnTerminal', () => {
+    function setupTerminals(count) {
+      for (let i = 1; i <= count; i++) {
+        injectTerminal(i);
+        App.state.terminalGroups.set(i, 'g1');
+        App.state.groups.get('g1').terminalIds.add(i);
+      }
+    }
+
+    it('keeps only the clicked terminal when all were enabled', () => {
+      setupTerminals(3);
+      App.state.echoModeActive = true;
+      App.state.echoSelection.add(1);
+      App.state.echoSelection.add(2);
+      App.state.echoSelection.add(3);
+
+      App.Echo.soloEchoOnTerminal(2);
+
+      expect(App.state.echoSelection.has(2)).toBe(true);
+      expect(App.state.echoSelection.has(1)).toBe(false);
+      expect(App.state.echoSelection.has(3)).toBe(false);
+      const chk1 = App.state.terminals.get(1).titlebar.querySelector('input[type="checkbox"]');
+      expect(chk1.checked).toBe(false);
+      expect(App.state.terminals.get(1).paneEl.classList.contains('echo-selected')).toBe(false);
+    });
+
+    it('enables a deselected terminal and disables the others', () => {
+      setupTerminals(3);
+      App.state.echoModeActive = true;
+      App.state.echoSelection.add(1);
+      App.state.echoSelection.add(2); // 3 is missing
+
+      App.Echo.soloEchoOnTerminal(3);
+
+      expect(App.state.echoSelection.has(3)).toBe(true);
+      expect(App.state.echoSelection.has(1)).toBe(false);
+      expect(App.state.echoSelection.has(2)).toBe(false);
+      const chk3 = App.state.terminals.get(3).titlebar.querySelector('input[type="checkbox"]');
+      expect(chk3.checked).toBe(true);
+    });
+
+    it('is a no-op when the terminal is already the only one enabled', () => {
+      setupTerminals(3);
+      App.state.echoModeActive = true;
+      App.state.echoSelection.add(2);
+
+      App.Echo.soloEchoOnTerminal(2);
+
+      expect(App.state.echoSelection.size).toBe(1);
+      expect(App.state.echoSelection.has(2)).toBe(true);
+    });
+  });
 });

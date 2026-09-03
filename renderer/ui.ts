@@ -9,11 +9,13 @@
 
   // localStorage keys holding user-configurable settings, cleared by
   // "Reset all settings" in the Danger Zone of the options panel.
+  // Deliberately NOT listed: SSH folder collapse state and the sidebar split
+  // position are transient UI view state, not "settings" — they survive reset.
   const SETTINGS_STORAGE_KEYS = [
     'appTheme', 'uiFontSize', 'termFontSize', 'defaultShell',
     'skipTabCloseConfirm', 'skipCloseConfirm', 'skipGroupCloseConfirm',
     'skipSshJumpWarn', 'skipPastePreview', 'skipRightClickPaste',
-    'i18nLocale', 'sshSidebarWidth', 'sshCollapsedFolders',
+    'i18nLocale', 'sshSidebarWidth',
   ];
 
   function bindToolbar() {

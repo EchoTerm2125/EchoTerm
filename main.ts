@@ -285,10 +285,12 @@ ipcMain.handle('update:set-settings', (event, patch) => updateController.setSett
 ipcMain.handle('update:get-build-type', () => ({ portable: updateController.isPortableBuild() }));
 ipcMain.handle('update:install', () => {
   // Only bypass the close interceptor when the install will actually quit the
-  // app: portable/zip builds open the GitHub page (no app close), and an
-  // installed build with nothing downloaded must not silently disable the
-  // close-confirm for the rest of the session.
-  if (!updateController.isPortableBuild() && app.isPackaged && updateController.isUpdateDownloaded()) {
+  // app: portable/zip builds open the GitHub page (no app close), and a run
+  // with nothing downloaded must not silently disable the close-confirm for
+  // the rest of the session. The bypass is intentionally NOT gated on
+  // app.isPackaged: dev runs are allowed to quitAndInstall so the update flow
+  // (dev-app-update.yml) can be exercised during development.
+  if (!updateController.isPortableBuild() && updateController.isUpdateDownloaded()) {
     installingUpdate = true;
   }
   try {

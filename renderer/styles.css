@@ -676,6 +676,10 @@ html, body {
   border-bottom: 1px solid var(--border);
   gap: calc(6px * var(--ui-scale));
   flex-shrink: 0;
+  /* Clicking a title bar in echo mode enables the terminal (docs/adr/0004);
+     keep it from also selecting the label text on a double click. */
+  user-select: none;
+  -webkit-user-select: none;
 }
 
 .pane .pane-titlebar .pane-label {
@@ -1884,8 +1888,40 @@ html, body {
 
 .ssh-sidebar-scroll {
   flex: 1;
-  overflow-y: auto;
-  overflow-x: hidden;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.ssh-sidebar-scroll.resizing {
+  transition: none;
+}
+
+/* ── SSH Split Divider ── */
+.ssh-split-handle {
+  height: calc(4px * var(--ui-scale));
+  cursor: row-resize;
+  flex-shrink: 0;
+  position: relative;
+  z-index: 10;
+  transition: background-color var(--transition);
+}
+
+/* Painted hairline centered in the hit box; grows to full accent bar on hover/drag */
+.ssh-split-handle::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  margin-block: auto;
+  height: calc(2px * var(--ui-scale));
+  background: var(--border);
+  transition: height var(--transition), background-color var(--transition);
+}
+
+.ssh-split-handle:hover::before,
+.ssh-split-handle.active::before {
+  height: 100%;
+  background: var(--accent);
 }
 
 /* SSH search bar */
@@ -1914,29 +1950,75 @@ html, body {
   box-shadow: 0 0 0 3px var(--accent-wash);
 }
 
-.ssh-sidebar-scroll::-webkit-scrollbar { width: 3px; }
-.ssh-sidebar-scroll::-webkit-scrollbar-thumb {
-  background: var(--border);
-  border-radius: 2px;
+/* ── SSH Sections (split panes) ── */
+.ssh-section.ssh-pane {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  /* visible so the header "+" add menus can overlay the neighbouring pane */
+  overflow: visible;
 }
 
-/* ── SSH Sections ── */
 .ssh-section {
   padding: calc(4px * var(--ui-scale)) 0;
 }
 
 .ssh-section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: calc(4px * var(--ui-scale));
   font-size: calc(var(--app-font-size) * 0.692);
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.5px;
   color: var(--text-muted);
   padding: calc(4px * var(--ui-scale)) calc(10px * var(--ui-scale)) calc(2px * var(--ui-scale));
+  flex-shrink: 0;
+}
+
+.ssh-section-add-wrapper {
+  position: relative;
+}
+
+.ssh-section-add-btn {
+  border: none;
+  background: transparent;
+  color: var(--text-muted);
+  font-size: calc(var(--app-font-size) * 0.923);
+  line-height: 1;
+  padding: 0 calc(4px * var(--ui-scale));
+  border-radius: 3px;
+  cursor: pointer;
+}
+.ssh-section-add-btn:hover {
+  background: var(--bg-hover);
+  color: var(--text-primary);
+}
+
+/* Add menus anchored to a section header open downward by default; the
+   bottom Users pane opens upward so the menu stays inside the sidebar. */
+.ssh-header-dropdown-up {
+  top: auto;
+  bottom: 100%;
+  margin-top: 0;
+  margin-bottom: calc(6px * var(--ui-scale));
 }
 
 .ssh-list {
   display: flex;
   flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+.ssh-list::-webkit-scrollbar { width: 3px; }
+.ssh-list::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 2px;
 }
 
 /* ── SSH Items ── */

@@ -71,12 +71,6 @@
               <button id="btnSshImport" class="ssh-sidebar-dd-btn" data-i18n="sshDropdownImportBtn" data-i18n-title="sshImportBtnTitle" title="Import new from ~/.ssh/config">Import</button>
               <button id="btnSshUpdate" class="ssh-sidebar-dd-btn" data-i18n="sshDropdownUpdateBtn" data-i18n-title="sshUpdateBtnTitle" title="Update existing from ~/.ssh/config">Update</button>
               <button id="btnSshExport" class="ssh-sidebar-dd-btn" data-i18n="sshDropdownExportBtn" data-i18n-title="sshExportBtnTitle" title="Export connections to SSH config">Export</button>
-              <div class="context-separator"></div>
-              <div class="ssh-dropdown-header" data-i18n="sshDropdownCreate">Create</div>
-              <button id="btnAddSshConn" class="ssh-sidebar-dd-btn" data-i18n="sshDropdownConnBtn" data-i18n-title="sshNewConnBtnTitle" title="New Connection">Connection</button>
-              <button id="btnAddSshFolder" class="ssh-sidebar-dd-btn" data-i18n="sshDropdownFolderBtn" data-i18n-title="sshNewFolderBtnTitle" title="New Connection Folder">Connection Folder</button>
-              <button id="btnAddSshUser" class="ssh-sidebar-dd-btn" data-i18n="sshDropdownUserBtn" data-i18n-title="sshNewUserBtnTitle" title="New User">User</button>
-              <button id="btnAddUserFolder" class="ssh-sidebar-dd-btn" data-i18n="sshDropdownUserFolderBtn" data-i18n-title="sshNewUserFolderBtnTitle" title="New User Folder">User Folder</button>
             </div>
           </div>
         </div>
@@ -85,14 +79,36 @@
         <input type="text" id="sshSearchInput" class="ssh-search-input" placeholder="Search..." data-i18n-placeholder="sshSearchPlaceholder" />
       </div>
       <div class="ssh-sidebar-scroll">
-        <!-- Connections Tree (groups as folders, connections as children) -->
-        <div class="ssh-section">
-          <div class="ssh-section-header" data-i18n="sshSectionConnections">Connections</div>
+        <!-- Connections pane (groups as folders, connections as children) -->
+        <div class="ssh-section ssh-pane">
+          <div class="ssh-section-header">
+            <span data-i18n="sshSectionConnections">Connections</span>
+            <div class="ssh-section-add-wrapper">
+              <button id="btnAddSshSectionConn" class="ssh-section-add-btn" data-i18n-title="sshNewConnBtnTitle" title="New Connection">+</button>
+              <div id="sshConnAddMenu" class="ssh-header-dropdown hidden">
+                <div class="ssh-dropdown-header" data-i18n="sshDropdownCreate">Create</div>
+                <button id="btnAddSshConn" class="ssh-sidebar-dd-btn" data-i18n="sshDropdownConnBtn" data-i18n-title="sshNewConnBtnTitle" title="New Connection">Connection</button>
+                <button id="btnAddSshFolder" class="ssh-sidebar-dd-btn" data-i18n="sshDropdownFolderBtn" data-i18n-title="sshNewFolderBtnTitle" title="New Connection Folder">Connection Folder</button>
+              </div>
+            </div>
+          </div>
           <div id="sshConnectionList" class="ssh-list"></div>
         </div>
-        <!-- Users Section -->
-        <div class="ssh-section">
-          <div class="ssh-section-header" data-i18n="sshSectionUsers">Users</div>
+        <!-- Split divider: drag to resize the Connections/Users split -->
+        <div id="sshSplitHandle" class="ssh-split-handle"></div>
+        <!-- Users pane -->
+        <div class="ssh-section ssh-pane">
+          <div class="ssh-section-header">
+            <span data-i18n="sshSectionUsers">Users</span>
+            <div class="ssh-section-add-wrapper">
+              <button id="btnAddSshSectionUser" class="ssh-section-add-btn" data-i18n-title="sshNewUserBtnTitle" title="New User">+</button>
+              <div id="sshUserAddMenu" class="ssh-header-dropdown ssh-header-dropdown-up hidden">
+                <div class="ssh-dropdown-header" data-i18n="sshDropdownCreate">Create</div>
+                <button id="btnAddSshUser" class="ssh-sidebar-dd-btn" data-i18n="sshDropdownUserBtn" data-i18n-title="sshNewUserBtnTitle" title="New User">User</button>
+                <button id="btnAddUserFolder" class="ssh-sidebar-dd-btn" data-i18n="sshDropdownUserFolderBtn" data-i18n-title="sshNewUserFolderBtnTitle" title="New User Folder">User Folder</button>
+              </div>
+            </div>
+          </div>
           <div id="sshUserList" class="ssh-list"></div>
         </div>
       </div>

@@ -266,6 +266,53 @@
     if (nextId) App.Terminal.focusTerminal(nextId);
   }
 
+  // Title-bar clicks call this in echo mode (see docs/adr/0004). It is
+  // enable-only: a deselected terminal is added to the echo selection and its
+  // UI is synced, but clicking never removes one. Idempotent, so a double
+  // click's repeated clicks are harmless — exclusivity is applied separately
+  // by soloEchoOnTerminal. The checkbox and the Enable All / Toggle All
+  // buttons remain the way to disable a terminal.
+  function enableEchoOnTerminal(id) {
+    if (state.echoSelection.has(id)) return;
+    const t = state.terminals.get(id);
+    if (!t) return;
+    state.echoSelection.add(id);
+    t.paneEl.classList.add('echo-selected');
+    const cbLabel = t.titlebar.querySelector('.pane-checkbox');
+    if (cbLabel) cbLabel.classList.add('selected');
+    const chk = t.titlebar.querySelector('input[type="checkbox"]');
+    if (chk) chk.checked = true;
+    updateEchoAllButton();
+    App.UI.updateStatusBar();
+  }
+
+  // Inverse of enableEchoOnTerminal: removes a terminal from the echo
+  // selection and syncs its UI. Called only via soloEchoOnTerminal.
+  function disableEchoOnTerminal(id) {
+    if (!state.echoSelection.has(id)) return;
+    const t = state.terminals.get(id);
+    if (!t) return;
+    state.echoSelection.delete(id);
+    t.paneEl.classList.remove('echo-selected');
+    const cbLabel = t.titlebar.querySelector('.pane-checkbox');
+    if (cbLabel) cbLabel.classList.remove('selected');
+    const chk = t.titlebar.querySelector('input[type="checkbox"]');
+    if (chk) chk.checked = false;
+  }
+
+  // A double click on a title bar makes echo exclusive to that terminal:
+  // it is enabled (additively, like a single click) and every other terminal
+  // in the active group is disabled. See docs/adr/0004.
+  function soloEchoOnTerminal(id) {
+    const groupIds = App.Groups.getGroupTerminalIds(state.activeGroupId);
+    for (const bid of groupIds) {
+      if (bid === id) enableEchoOnTerminal(bid);
+      else disableEchoOnTerminal(bid);
+    }
+    updateEchoAllButton();
+    App.UI.updateStatusBar();
+  }
+
   function updateEchoAllButton() {
     if (!App.btnEchoAll) return;
     const groupIds = App.Groups.getGroupTerminalIds(state.activeGroupId);
@@ -308,6 +355,7 @@
     applyGridLayout, destroyGrid,
     fitAllTerminals,
     toggleEchoAll, toggleEachEcho, refocusEchoTerminal,
+    enableEchoOnTerminal, soloEchoOnTerminal,
     updateEchoAllButton, bindEchoControls,
     setEchoButtonLabel
   };

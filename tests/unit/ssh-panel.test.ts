@@ -4,7 +4,7 @@ import { resetTestEnv, loadModules, getApp } from '../setup.js';
 
 // ─── DOM scaffolding for the SSH panel (mirrors renderer/index.html) ────────
 const SSH_DIV_IDS = [
-  'sshSidebar', 'sshConnectionList', 'sshUserList',
+  'sshSidebar', 'sshConnectionList', 'sshUserList', 'sshSplitHandle',
   'sshPasswordDialog', 'sshPasswordTitle', 'sshPasswordConfirmGroup', 'sshPasswordError',
   'sshImportDialog', 'sshImportBody',
   'sshContextMenu',
@@ -69,15 +69,22 @@ function scaffoldSshDom() {
     document.body.appendChild(el);
   }
   // Wrap the connection/user lists in the same structure as renderer/index.html:
-  // .ssh-sidebar-scroll > .ssh-section > #sshConnectionList / #sshUserList
+  // .ssh-sidebar-scroll > .ssh-section.ssh-pane > #sshConnectionList
+  //                    > #sshSplitHandle
+  //                    > .ssh-section.ssh-pane > #sshUserList
+  document.getElementById('sshConnectionList').className = 'ssh-list';
+  document.getElementById('sshUserList').className = 'ssh-list';
   const scrollEl = document.createElement('div');
   scrollEl.className = 'ssh-sidebar-scroll';
   const connSection = document.createElement('div');
-  connSection.className = 'ssh-section';
+  connSection.className = 'ssh-section ssh-pane';
   connSection.appendChild(document.getElementById('sshConnectionList'));
   scrollEl.appendChild(connSection);
+  const splitHandle = document.getElementById('sshSplitHandle');
+  splitHandle.className = 'ssh-split-handle';
+  scrollEl.appendChild(splitHandle);
   const userSection = document.createElement('div');
-  userSection.className = 'ssh-section';
+  userSection.className = 'ssh-section ssh-pane';
   userSection.appendChild(document.getElementById('sshUserList'));
   scrollEl.appendChild(userSection);
   document.body.appendChild(scrollEl);
@@ -440,10 +447,9 @@ describe('SshPanel (ssh-panel.ts)', () => {
     const menuBtn = (action): HTMLElement => document.querySelector(`#sshContextMenu [data-action="${action}"]`) as HTMLElement;
     const connSection = () => document.querySelector('.ssh-sidebar-scroll .ssh-section:first-child');
     const userSection = () => document.querySelector('.ssh-sidebar-scroll .ssh-section:last-child');
-    const scrollEl = () => document.querySelector('.ssh-sidebar-scroll');
 
     it('shows Add Connection and Add Folder when right-clicking Connections empty space', async () => {
-      connSection().dispatchEvent(new MouseEvent('contextmenu', { bubbles: true, clientX: 100, clientY: 100 }));
+      connSection().querySelector('.ssh-list').dispatchEvent(new MouseEvent('contextmenu', { bubbles: true, clientX: 100, clientY: 100 }));
       await flush();
       expect(menuBtn('ssh-add-conn').classList.contains('hidden')).toBe(false);
       expect(menuBtn('ssh-add-folder').classList.contains('hidden')).toBe(false);
@@ -451,18 +457,19 @@ describe('SshPanel (ssh-panel.ts)', () => {
     });
 
     it('shows only Add User when right-clicking Users empty space', async () => {
-      userSection().dispatchEvent(new MouseEvent('contextmenu', { bubbles: true, clientX: 100, clientY: 100 }));
+      userSection().querySelector('.ssh-list').dispatchEvent(new MouseEvent('contextmenu', { bubbles: true, clientX: 100, clientY: 100 }));
       await flush();
       expect(menuBtn('ssh-add-user').classList.contains('hidden')).toBe(false);
       expect(menuBtn('ssh-add-conn').classList.contains('hidden')).toBe(true);
       expect(menuBtn('ssh-add-folder').classList.contains('hidden')).toBe(true);
     });
 
-    it('treats the scroll-area blank below the sections as the Users section', async () => {
-      scrollEl().dispatchEvent(new MouseEvent('contextmenu', { bubbles: true, clientX: 100, clientY: 100 }));
+    it('treats a right-click on the split divider (outside any pane) as the Users section', async () => {
+      document.querySelector('.ssh-split-handle').dispatchEvent(new MouseEvent('contextmenu', { bubbles: true, clientX: 100, clientY: 100 }));
       await flush();
       expect(menuBtn('ssh-add-user').classList.contains('hidden')).toBe(false);
       expect(menuBtn('ssh-add-conn').classList.contains('hidden')).toBe(true);
+      expect(menuBtn('ssh-add-folder').classList.contains('hidden')).toBe(true);
     });
 
     it('Add Connection opens the connection dialog with no folder preselected', async () => {
