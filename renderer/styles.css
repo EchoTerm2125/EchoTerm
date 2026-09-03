@@ -1897,15 +1897,26 @@ html, body {
 .ssh-split-handle {
   height: calc(4px * var(--ui-scale));
   cursor: row-resize;
-  background: var(--border);
   flex-shrink: 0;
   position: relative;
   z-index: 10;
-  transition: background var(--transition);
+  transition: background-color var(--transition);
 }
 
-.ssh-split-handle:hover,
-.ssh-split-handle.active {
+/* Painted hairline centered in the hit box; grows to full accent bar on hover/drag */
+.ssh-split-handle::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  margin-block: auto;
+  height: calc(2px * var(--ui-scale));
+  background: var(--border);
+  transition: height var(--transition), background-color var(--transition);
+}
+
+.ssh-split-handle:hover::before,
+.ssh-split-handle.active::before {
+  height: 100%;
   background: var(--accent);
 }
 
