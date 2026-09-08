@@ -227,12 +227,13 @@ if (gotTheLock) {
 
     createWindow();
 
-    // Auto-update: check for updates shortly after launch so the check never
-    // competes with terminal spawn at startup. Runs for both packaged and dev
-    // runs (dev consults dev-app-update.yml, see UpdateController.init()); the
-    // user's "check automatically" setting still governs via update policy.
+    // Auto-update: check shortly after launch, then every 3 hours while the
+    // app runs. Runs for both packaged and dev runs (dev consults
+    // dev-app-update.yml, see UpdateController.init()); the user's "check
+    // automatically" setting still governs via the update policy, and a tick
+    // is skipped while a previous check/download is busy.
     updateController.init();
-    setTimeout(() => updateController.checkForUpdates(false), 5000);
+    updateController.startAutoUpdateSchedule();
 
     app.on('activate', () => {
       if (BrowserWindow.getAllWindows().length === 0) createWindow();
