@@ -932,6 +932,7 @@ html, body {
   padding: calc(4px * var(--ui-scale));
   z-index: 310;
   min-width: calc(150px * var(--ui-scale));
+  width: max-content;
   box-shadow: var(--shadow-lg), var(--top-highlight);
   display: flex;
   flex-direction: column;
@@ -947,6 +948,7 @@ html, body {
   display: block;
   width: 100%;
   text-align: left;
+  white-space: nowrap;
   padding: calc(6px * var(--ui-scale)) calc(12px * var(--ui-scale));
   border: none;
   border-radius: var(--radius-sm);

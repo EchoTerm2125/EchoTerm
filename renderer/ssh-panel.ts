@@ -5,6 +5,7 @@ import {
   buildFolderChildrenMap,
   collectFolderSubtree,
   computeFolderTotalCounts,
+  folderTreeLabelEntries,
   groupItemsByFolder,
   topLevelFolderIds,
 } from './ssh-tree';
@@ -1774,34 +1775,34 @@ import {
       }
 
       sshCtxFolderSubmenu.innerHTML = '';
+      // Depth-first tree order with the dialog selects' ├─ / └─ labels, so each
+      // target reads exactly as the folder name does in the dialogs.
       let hasGroups = false;
-      // Sort groups alphabetically by name
-      const sortedGroups = [...folders].sort((a, b) => (a.name || '').localeCompare(b.name || ''));
-      for (const g of sortedGroups) {
+      for (const { id: folderId, label } of folderTreeLabelEntries(folders)) {
         // Skip current parent (already here) and excluded folders
-        if (itemIds.length === 1 && g.id === currentParentId) continue;
-        if ((isFolderMove || isUserFolderMove) && excludedFolderIds.has(g.id)) continue;
+        if (itemIds.length === 1 && folderId === currentParentId) continue;
+        if ((isFolderMove || isUserFolderMove) && excludedFolderIds.has(folderId)) continue;
         hasGroups = true;
         const btn = document.createElement('button');
-        btn.textContent = g.name;
+        btn.textContent = label;
         btn.addEventListener('click', async () => {
           sshContextMenu.classList.add('hidden');
           if (sshCtxFolderSubmenu) sshCtxFolderSubmenu.classList.add('hidden');
           if (isFolderMove) {
             for (const id of itemIds) {
-              await api.sshConnectionFolderSave({ id, parentId: g.id });
+              await api.sshConnectionFolderSave({ id, parentId: folderId });
             }
           } else if (isUserFolderMove) {
             for (const id of itemIds) {
-              await api.sshUserFolderSave({ id, parentId: g.id });
+              await api.sshUserFolderSave({ id, parentId: folderId });
             }
           } else if (isUserMove) {
             for (const id of itemIds) {
-              await api.sshUserSave({ id, folderId: g.id });
+              await api.sshUserSave({ id, folderId });
             }
           } else {
             for (const id of itemIds) {
-              await api.sshConnectionSave({ id, folderId: g.id });
+              await api.sshConnectionSave({ id, folderId });
             }
           }
           clearSshSelection();
@@ -2451,24 +2452,12 @@ import {
   // `excludedIds` (self + descendants when editing a folder's parent) render as
   // disabled options so the tree stays intact while cycles are prevented.
   function folderSelectOptionsHtml(folders, selectedId, excludedIds = null) {
-    const children = buildFolderChildrenMap(folders);
-    let html = '';
-    const visited = new Set();
-    const walk = (parentId, prefix) => {
-      // Cycle guard: a corrupt payload (folder cycles) must not recurse forever.
-      if (visited.has(parentId)) return;
-      visited.add(parentId);
-      const list = children.get(parentId) || [];
-      list.forEach((f, i) => {
-        const last = i === list.length - 1;
-        const connector = last ? '└─ ' : '├─ ';
-        const excluded = excludedIds ? excludedIds.has(f.id) : false;
-        html += `<option value="${escHtml(f.id)}" ${f.id === selectedId ? 'selected' : ''}${excluded ? ' disabled' : ''}>${escHtml(prefix + connector + f.name)}</option>`;
-        walk(f.id, prefix + (last ? NBSP.repeat(3) : '│' + NBSP.repeat(2)));
-      });
-    };
-    walk('__root__', '');
-    return html;
+    // Labels and order come from the shared tree walk so the "Move to folder"
+    // submenu and every folder <select> render folder names identically.
+    return folderTreeLabelEntries(folders)
+      .map(({ id, label }) =>
+        `<option value="${escHtml(id)}" ${id === selectedId ? 'selected' : ''}${excludedIds && excludedIds.has(id) ? ' disabled' : ''}>${escHtml(label)}</option>`)
+      .join('');
   }
 
   // User-target selects: one optgroup per folder (all folders shown, even
