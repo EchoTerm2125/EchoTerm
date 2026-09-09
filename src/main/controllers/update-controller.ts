@@ -26,6 +26,10 @@ const LAUNCH_CHECK_DELAY_MS = 5000;
 /** Automatic check cadence — every 3 hours of wall-clock time anchored at launch. */
 const PERIODIC_CHECK_INTERVAL_MS = 3 * 60 * 60 * 1000;
 
+/** Stall watchdog for the background auto-download — if no progress event arrives
+ *  within this window, the in-flight gate is released so periodic checks resume. */
+const DOWNLOAD_STALL_TIMEOUT_MS = 30 * 60 * 1000;
+
 /**
  * Whether this copy is a portable/zip artifact rather than the NSIS install.
  * The electron-builder portable target sets PORTABLE_EXECUTABLE_DIR at runtime;
@@ -43,6 +47,9 @@ export class UpdateController {
   /** True from the moment a check starts until a terminal event resolves it (an auto-download keeps it in flight). */
   private updateInFlight = false;
 
+  /** Timer that releases the in-flight gate when the background download stalls. */
+  private downloadWatchdog: ReturnType<typeof setTimeout> | null = null;
+
   constructor(
     private readonly settingsStore: UpdateSettingsStore,
     private readonly send: SendToRenderer,
@@ -56,6 +63,25 @@ export class UpdateController {
   /** Whether a full installer has been downloaded and is ready for quitAndInstall. */
   isUpdateDownloaded(): boolean {
     return this.updateDownloaded;
+  }
+
+  /** (Re)arm the download stall watchdog; each progress event resets it. */
+  private armDownloadWatchdog(): void {
+    this.clearDownloadWatchdog();
+    this.downloadWatchdog = setTimeout(() => {
+      this.downloadWatchdog = null;
+      // A stalled download must not suppress automatic checks for the rest of
+      // the session. Release the gate; if the download later errors or
+      // completes, its events are still handled in init().
+      this.updateInFlight = false;
+    }, DOWNLOAD_STALL_TIMEOUT_MS);
+  }
+
+  private clearDownloadWatchdog(): void {
+    if (this.downloadWatchdog) {
+      clearTimeout(this.downloadWatchdog);
+      this.downloadWatchdog = null;
+    }
   }
 
   /** Wire electron-updater events and push them to the renderer. Call once at startup. */
@@ -93,6 +119,9 @@ export class UpdateController {
       // electron-updater dedupes re-downloads itself (in-flight promise +
       // sha512-validated disk cache), so no version guard is needed here.
       if (!detectPortableBuild()) {
+        // Watch for a download that stalls without emitting a terminal event;
+        // without this it would keep the busy gate up for the whole session.
+        this.armDownloadWatchdog();
         autoUpdater.downloadUpdate().catch(() => {
           // electron-updater already emitted 'error' (handled in init()).
         });
@@ -103,10 +132,13 @@ export class UpdateController {
       // No newer version exists; any earlier downloaded installer is stale.
       this.updateDownloaded = false;
       this.updateInFlight = false;
+      this.clearDownloadWatchdog();
       this.send('update:not-available', {});
     });
 
     autoUpdater.on('download-progress', (progress) => {
+      // Any progress means the download is alive — reset the stall watchdog.
+      this.armDownloadWatchdog();
       this.send('update:progress', { percent: Math.round(progress.percent ?? 0) });
     });
 
@@ -115,6 +147,7 @@ export class UpdateController {
       // auto-install on quit. The renderer shows the button on this event.
       this.updateDownloaded = true;
       this.updateInFlight = false;
+      this.clearDownloadWatchdog();
       this.send('update:downloaded', { version: info.version });
     });
 
@@ -123,6 +156,7 @@ export class UpdateController {
       // a possibly-stale or incomplete download until the next successful check.
       this.updateDownloaded = false;
       this.updateInFlight = false;
+      this.clearDownloadWatchdog();
       this.send('update:error', { message: err?.message ?? String(err) });
     });
   }
@@ -164,7 +198,9 @@ export class UpdateController {
         this.send('update:not-available', {});
       }
     }).catch(() => {
-      // electron-updater already emitted 'error' (handled in init()).
+      // electron-updater already emitted 'error' (handled in init()); clearing
+      // the flag here too is belt-and-braces so the gate never stays up.
+      this.updateInFlight = false;
     });
     return { started: true };
   }
