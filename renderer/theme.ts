@@ -11,7 +11,12 @@
   const XTERM_THEMES = {
     dark: {
       background: '#11111b', foreground: '#cdd6f4', cursor: '#f5e0dc',
-      selectionBackground: '#585b7055',
+      // Selection highlight made obvious: opaque band, flattened high-contrast
+      // fg (otherwise #585b70 brightBlack chars vanish under the band), and a
+      // weaker band when the terminal is unfocused.
+      selectionBackground: '#585b70',
+      selectionForeground: '#cdd6f4',
+      selectionInactiveBackground: '#585b70a8',
       black: '#45475a', red: '#f38ba8', green: '#a6e3a1', yellow: '#f9e2af',
       blue: '#89b4fa', magenta: '#f5c2e7', cyan: '#94e2d5', white: '#bac2de',
       brightBlack: '#585b70', brightRed: '#f38ba8', brightGreen: '#a6e3a1',
@@ -20,7 +25,11 @@
     },
     light: {
       background: '#eff1f5', foreground: '#4c4f69', cursor: '#dc8a78',
-      selectionBackground: '#acb0be55',
+      // Selection highlight made obvious: opaque band, flattened high-contrast
+      // fg, and a weaker band when the terminal is unfocused.
+      selectionBackground: '#acb0be',
+      selectionForeground: '#4c4f69',
+      selectionInactiveBackground: '#acb0bea8',
       black: '#5c5f77', red: '#d20f39', green: '#40a02b', yellow: '#df8e1d',
       blue: '#1e66f5', magenta: '#ea76cb', cyan: '#179299', white: '#acb0be',
       brightBlack: '#6c6f85', brightRed: '#d20f39', brightGreen: '#40a02b',
