@@ -32,10 +32,25 @@ const configs = [
     format: 'cjs',
     external: ['electron'],
   },
+  // Search panel window preload (CommonJS, electron stays external)
+  {
+    entryPoints: ['preload-search.ts'],
+    outfile: 'build/preload-search.js',
+    platform: 'node',
+    format: 'cjs',
+    external: ['electron'],
+  },
   // Renderer bundle (browser IIFE)
   {
     entryPoints: ['renderer/entry.ts'],
     outfile: 'build/renderer.js',
+    platform: 'browser',
+    format: 'iife',
+  },
+  // Search panel window bundle (browser IIFE)
+  {
+    entryPoints: ['renderer/search-window.ts'],
+    outfile: 'build/search-window.js',
     platform: 'browser',
     format: 'iife',
   },

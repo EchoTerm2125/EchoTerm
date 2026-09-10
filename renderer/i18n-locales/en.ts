@@ -309,6 +309,22 @@
     pastePreviewCancel: 'Cancel',
     pastePreviewPaste: 'Paste',
 
+    // ── Terminal search ──────────────────────────────────────────────────────
+    findPlaceholder: 'Find',
+    findNextTitle: 'Next match (Enter)',
+    findPrevTitle: 'Previous match (Shift+Enter)',
+    findCaseTitle: 'Match case',
+    findWordTitle: 'Match whole word',
+    findNoResults: 'No results',
+    searchPanelTitle: 'Search All Terminals',
+    searchPanelPlaceholder: 'Search visible terminals…',
+    searchPanelRun: 'Search',
+    searchPanelHint: 'Searches the terminals on screen. Click a result to jump to it.',
+    searchPanelEmpty: 'No tab opened',
+    searchPanelNoResults: 'No matches',
+    searchPanelTruncated: 'Showing the first {count} matches',
+    searchPanelCloseTitle: 'Close',
+
     // ── Error messages ───────────────────────────────────────────────────────
     errorUnknownShell: 'Unknown shell: {shell}',
     errorConnectionNotFound: 'Connection not found.',

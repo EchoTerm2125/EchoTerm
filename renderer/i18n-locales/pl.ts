@@ -308,6 +308,22 @@
     pastePreviewCancel: 'Anuluj',
     pastePreviewPaste: 'Wklej',
 
+    // ── Terminal search ──────────────────────────────────────────────────────
+    findPlaceholder: 'Znajdź',
+    findNextTitle: 'Następne trafienie (Enter)',
+    findPrevTitle: 'Poprzednie trafienie (Shift+Enter)',
+    findCaseTitle: 'Uwzględniaj wielkość liter',
+    findWordTitle: 'Całe wyrazy',
+    findNoResults: 'Brak wyników',
+    searchPanelTitle: 'Przeszukaj wszystkie terminale',
+    searchPanelPlaceholder: 'Przeszukaj widoczne terminale…',
+    searchPanelRun: 'Szukaj',
+    searchPanelHint: 'Przeszukuje terminale na ekranie. Kliknij wynik, aby do niego przejść.',
+    searchPanelEmpty: 'Nie otwarto żadnej karty',
+    searchPanelNoResults: 'Brak dopasowań',
+    searchPanelTruncated: 'Wyświetlanie pierwszych {count} dopasowań',
+    searchPanelCloseTitle: 'Zamknij',
+
     // ── Error messages ───────────────────────────────────────────────────────
     errorUnknownShell: 'Nieznana powłoka: {shell}',
     errorConnectionNotFound: 'Nie znaleziono połączenia.',

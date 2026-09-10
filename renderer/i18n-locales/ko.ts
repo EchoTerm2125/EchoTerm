@@ -308,6 +308,22 @@
     pastePreviewCancel: '취소',
     pastePreviewPaste: '붙여넣기',
 
+    // ── Terminal search ──────────────────────────────────────────────────────
+    findPlaceholder: '찾기',
+    findNextTitle: '다음 일치 (Enter)',
+    findPrevTitle: '이전 일치 (Shift+Enter)',
+    findCaseTitle: '대/소문자 구분',
+    findWordTitle: '단어 단위로 일치',
+    findNoResults: '결과 없음',
+    searchPanelTitle: '모든 터미널 검색',
+    searchPanelPlaceholder: '표시된 터미널 검색…',
+    searchPanelRun: '검색',
+    searchPanelHint: '화면에 표시된 터미널을 검색합니다. 결과를 클릭하면 해당 터미널로 이동합니다.',
+    searchPanelEmpty: '열린 탭 없음',
+    searchPanelNoResults: '일치하는 항목 없음',
+    searchPanelTruncated: '처음 {count}개 일치 항목 표시',
+    searchPanelCloseTitle: '닫기',
+
     // ── Error messages ───────────────────────────────────────────────────────
     errorUnknownShell: '알 수 없는 셸: {shell}',
     errorConnectionNotFound: '연결을 찾을 수 없습니다.',

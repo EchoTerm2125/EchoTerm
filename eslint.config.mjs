@@ -26,7 +26,7 @@ export default defineConfig(
 
   // ─── Main process + preload (Node) ────────────────────────────────────────
   {
-    files: ['main.ts', 'preload.ts', 'main/**/*.ts'],
+    files: ['main.ts', 'preload.ts', 'preload-search.ts', 'main/**/*.ts'],
     languageOptions: {
       globals: {
         ...globals.node,

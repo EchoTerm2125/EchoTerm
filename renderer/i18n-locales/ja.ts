@@ -308,6 +308,22 @@
     pastePreviewCancel: 'キャンセル',
     pastePreviewPaste: '貼り付け',
 
+    // ── Terminal search ──────────────────────────────────────────────────────
+    findPlaceholder: '検索',
+    findNextTitle: '次の一致 (Enter)',
+    findPrevTitle: '前の一致 (Shift+Enter)',
+    findCaseTitle: '大文字と小文字を区別',
+    findWordTitle: '単語単位で一致',
+    findNoResults: '結果なし',
+    searchPanelTitle: 'すべてのターミナルを検索',
+    searchPanelPlaceholder: '表示中のターミナルを検索…',
+    searchPanelRun: '検索',
+    searchPanelHint: '画面に表示されているターミナルを検索します。結果をクリックするとそのターミナルに移動します。',
+    searchPanelEmpty: 'タブが開かれていません',
+    searchPanelNoResults: '一致する項目なし',
+    searchPanelTruncated: '最初の {count} 件の一致を表示',
+    searchPanelCloseTitle: '閉じる',
+
     // ── Error messages ───────────────────────────────────────────────────────
     errorUnknownShell: '不明なシェル: {shell}',
     errorConnectionNotFound: '接続が見つかりません。',

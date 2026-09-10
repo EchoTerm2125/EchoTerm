@@ -334,6 +334,22 @@
     updInstallUpdate: '安装更新',
     updInstallConfirmBody: '更新已准备就绪。关闭 EchoTerm 将结束所有终端会话。现在安装吗？',
 
+    // ── Terminal search ──────────────────────────────────────────────────────
+    findPlaceholder: '查找',
+    findNextTitle: '下一个匹配 (Enter)',
+    findPrevTitle: '上一个匹配 (Shift+Enter)',
+    findCaseTitle: '区分大小写',
+    findWordTitle: '全字匹配',
+    findNoResults: '无结果',
+    searchPanelTitle: '搜索所有终端',
+    searchPanelPlaceholder: '搜索可见终端…',
+    searchPanelRun: '搜索',
+    searchPanelHint: '搜索屏幕上的终端。点击结果可跳转至该终端。',
+    searchPanelEmpty: '未打开任何标签',
+    searchPanelNoResults: '无匹配项',
+    searchPanelTruncated: '显示前 {count} 个匹配项',
+    searchPanelCloseTitle: '关闭',
+
     // ── Error messages ───────────────────────────────────────────────────────
     errorUnknownShell: '未知 Shell: {shell}',
     errorConnectionNotFound: '未找到连接。',

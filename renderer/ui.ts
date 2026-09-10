@@ -520,6 +520,8 @@
       if (ctrl && e.shiftKey && e.code === 'KeyN') { e.preventDefault(); e.stopPropagation(); const count = state.groups.size + 1; const group = App.Groups.createGroup(App.__('groupDefaultName', { n: count })); App.Groups.switchGroup(group.id); App.Terminal.spawnTerminal(state.selectedShell); return; }
       if (ctrl && e.shiftKey && e.code === 'KeyT') { e.preventDefault(); e.stopPropagation(); App.Echo.toggleEchoMode(); return; }
       if (ctrl && !e.shiftKey && e.code === 'KeyW') { e.preventDefault(); e.stopPropagation(); if (state.activeTerminalId) App.Menus.showConfirm(App.__('confirmCloseTerminal'), () => App.Terminal.closeTerminal(state.activeTerminalId), 'skipTabCloseConfirm'); return; }
+      if (ctrl && !e.shiftKey && e.code === 'KeyF') { e.preventDefault(); e.stopPropagation(); App.Search.handleShortcut(false); return; }
+      if (ctrl && e.shiftKey && e.code === 'KeyF') { e.preventDefault(); e.stopPropagation(); App.Search.handleShortcut(true); return; }
       if (ctrl && e.key === 'Tab') { e.preventDefault(); e.stopPropagation(); App.Terminal.cycleTerminal(e.shiftKey ? -1 : 1); return; }
     }, true);
   }

@@ -49,6 +49,7 @@
     App.Menus.bindSubmenuHover();
     App.Echo.bindEchoControls();
     App.Groups.bindGroupBar();
+    App.Search.init();
     await App.SshPanel.init();
 
     // ── IPC listeners ──

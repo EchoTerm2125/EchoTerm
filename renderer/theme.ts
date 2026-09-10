@@ -41,6 +41,23 @@
   const UI_FONT_MIN = 8, UI_FONT_MAX = 24, UI_FONT_DEFAULT = 13;
   const TERM_FONT_MIN = 8, TERM_FONT_MAX = 24, TERM_FONT_DEFAULT = 13;
 
+  // ─── Search match colors per theme ────────────────────────────────────────
+  // xterm's search decorations require opaque #RRGGBB backgrounds and the band
+  // is painted behind the glyphs, so each tone is picked to keep terminal text
+  // readable. Deliberately distinct from the selection band (#585b70 dark /
+  // #acb0be light) and split per search surface so the find bar and the search
+  // panel can highlight the same buffer at once without looking alike.
+  const SEARCH_COLORS = {
+    dark: {
+      barMatch: '#6b5320', barActiveMatch: '#a8842f',
+      panelMatch: '#27406b', panelActiveMatch: '#3d69a8',
+    },
+    light: {
+      barMatch: '#fbe7b4', barActiveMatch: '#f2c85c',
+      panelMatch: '#cfe0ff', panelActiveMatch: '#9dc0ff',
+    },
+  };
+
   function clamp(n, min, max) {
     return Math.min(max, Math.max(min, n));
   }
@@ -52,6 +69,10 @@
 
   function getXtermTheme() {
     return XTERM_THEMES[getTheme()];
+  }
+
+  function getSearchColors() {
+    return SEARCH_COLORS[getTheme()];
   }
 
   function getUiFontSize() {
@@ -74,11 +95,17 @@
   }
 
   // ─── Setters (persist + apply live) ─────────────────────────────────────────
+  const _themeChangeListeners = [];
+  function onThemeChange(fn) {
+    _themeChangeListeners.push(fn);
+  }
+
   function setTheme(name) {
     const theme = name === 'light' ? 'light' : 'dark';
     localStorage.setItem('appTheme', theme);
     applyThemeToDom();
     applyToTerminals();
+    for (const fn of _themeChangeListeners) fn(theme);
   }
 
   function applyThemeToDom() {
@@ -125,14 +152,17 @@
   window.App = window.App || ({} as AppGlobal);
   App.Theme = {
     XTERM_THEMES,
+    SEARCH_COLORS,
     getTheme,
     getXtermTheme,
+    getSearchColors,
     getUiFontSize,
     getTermFontSize,
     setTheme,
     setUiFontSize,
     setTermFontSize,
     applyToTerminals,
+    onThemeChange,
   };
 })();
 

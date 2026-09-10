@@ -73,6 +73,9 @@ import './icons';
       // Echo-mode grid resizes constantly; truncating the input line corrupts
       // long commands so copying the wrapped text yields stray newlines.
       reflowCursorLine: true,
+      // Required by @xterm/addon-search's decorations (registerDecoration is
+      // still an experimental xterm API).
+      allowProposedApi: true,
       theme: App.Theme.getXtermTheme(),
     } as any);
 
@@ -259,6 +262,7 @@ import './icons';
     state.echoSelection.delete(id);
     state.selectedTabs.delete(id);
     state.terminals.delete(id);
+    if (App.Search) App.Search.notifyTerminalClosed(id);
 
     const grpId = state.terminalGroups.get(id);
     if (grpId && state.groups.has(grpId)) {
@@ -341,6 +345,7 @@ import './icons';
     state.echoSelection.delete(id);
     state.selectedTabs.delete(id);
     state.terminals.delete(id);
+    if (App.Search) App.Search.notifyTerminalClosed(id);
 
     const groupId = state.terminalGroups.get(id);
     if (groupId && state.groups.has(groupId)) {
@@ -454,6 +459,9 @@ import './icons';
       // Echo-mode grid resizes constantly; truncating the input line corrupts
       // long commands so copying the wrapped text yields stray newlines.
       reflowCursorLine: true,
+      // Required by @xterm/addon-search's decorations (registerDecoration is
+      // still an experimental xterm API).
+      allowProposedApi: true,
       theme: App.Theme.getXtermTheme(),
     } as any);
 

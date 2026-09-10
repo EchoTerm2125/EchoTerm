@@ -308,6 +308,22 @@
     pastePreviewCancel: 'Annuler',
     pastePreviewPaste: 'Coller',
 
+    // ── Terminal search ──────────────────────────────────────────────────────
+    findPlaceholder: 'Rechercher',
+    findNextTitle: 'Correspondance suivante (Entrée)',
+    findPrevTitle: 'Correspondance précédente (Maj+Entrée)',
+    findCaseTitle: 'Respecter la casse',
+    findWordTitle: 'Mot entier',
+    findNoResults: 'Aucun résultat',
+    searchPanelTitle: 'Rechercher dans tous les terminaux',
+    searchPanelPlaceholder: 'Rechercher dans les terminaux visibles…',
+    searchPanelRun: 'Rechercher',
+    searchPanelHint: 'Recherche dans les terminaux à l’écran. Cliquez sur un résultat pour y accéder.',
+    searchPanelEmpty: 'Aucun onglet ouvert',
+    searchPanelNoResults: 'Aucune correspondance',
+    searchPanelTruncated: 'Affichage des {count} premières correspondances',
+    searchPanelCloseTitle: 'Fermer',
+
     // ── Error messages ───────────────────────────────────────────────────────
     errorUnknownShell: 'Shell inconnu : {shell}',
     errorConnectionNotFound: 'Connexion introuvable.',

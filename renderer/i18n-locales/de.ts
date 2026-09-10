@@ -308,6 +308,22 @@
     pastePreviewCancel: 'Abbrechen',
     pastePreviewPaste: 'Einfügen',
 
+    // ── Terminal search ──────────────────────────────────────────────────────
+    findPlaceholder: 'Suchen',
+    findNextTitle: 'Nächster Treffer (Eingabe)',
+    findPrevTitle: 'Vorheriger Treffer (Umschalt+Eingabe)',
+    findCaseTitle: 'Groß-/Kleinschreibung beachten',
+    findWordTitle: 'Nur ganze Wörter',
+    findNoResults: 'Keine Ergebnisse',
+    searchPanelTitle: 'Alle Terminals durchsuchen',
+    searchPanelPlaceholder: 'Sichtbare Terminals durchsuchen…',
+    searchPanelRun: 'Suchen',
+    searchPanelHint: 'Durchsucht die Terminals auf dem Bildschirm. Klicken Sie auf ein Ergebnis, um dorthin zu springen.',
+    searchPanelEmpty: 'Kein Tab geöffnet',
+    searchPanelNoResults: 'Keine Treffer',
+    searchPanelTruncated: 'Die ersten {count} Treffer werden angezeigt',
+    searchPanelCloseTitle: 'Schließen',
+
     // ── Error messages ───────────────────────────────────────────────────────
     errorUnknownShell: 'Unbekannte Shell: {shell}',
     errorConnectionNotFound: 'Verbindung nicht gefunden.',

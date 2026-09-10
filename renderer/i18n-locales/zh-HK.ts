@@ -334,6 +334,22 @@
     updInstallUpdate: '安裝更新',
     updInstallConfirmBody: '更新已準備就緒。關閉 EchoTerm 會結束所有終端工作階段。現在安裝嗎？',
 
+    // ── Terminal search ──────────────────────────────────────────────────────
+    findPlaceholder: '尋找',
+    findNextTitle: '下一個符合項目 (Enter)',
+    findPrevTitle: '上一個符合項目 (Shift+Enter)',
+    findCaseTitle: '區分大小寫',
+    findWordTitle: '全字匹配',
+    findNoResults: '沒有結果',
+    searchPanelTitle: '搜尋所有終端',
+    searchPanelPlaceholder: '搜尋可見終端…',
+    searchPanelRun: '搜尋',
+    searchPanelHint: '搜尋畫面上的終端。點擊結果即可跳轉至該終端。',
+    searchPanelEmpty: '未開啟任何標籤',
+    searchPanelNoResults: '沒有符合項目',
+    searchPanelTruncated: '顯示前 {count} 個符合項目',
+    searchPanelCloseTitle: '關閉',
+
     // ── Error messages ───────────────────────────────────────────────────────
     errorUnknownShell: '未知 Shell: {shell}',
     errorConnectionNotFound: '找不到連線。',

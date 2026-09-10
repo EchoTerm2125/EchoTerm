@@ -308,6 +308,22 @@
     pastePreviewCancel: 'Cancelar',
     pastePreviewPaste: 'Pegar',
 
+    // ── Terminal search ──────────────────────────────────────────────────────
+    findPlaceholder: 'Buscar',
+    findNextTitle: 'Siguiente coincidencia (Intro)',
+    findPrevTitle: 'Coincidencia anterior (Mayús+Intro)',
+    findCaseTitle: 'Distinguir mayúsculas y minúsculas',
+    findWordTitle: 'Coincidir palabra completa',
+    findNoResults: 'Sin resultados',
+    searchPanelTitle: 'Buscar en todos los terminales',
+    searchPanelPlaceholder: 'Buscar en los terminales visibles…',
+    searchPanelRun: 'Buscar',
+    searchPanelHint: 'Busca en los terminales en pantalla. Haz clic en un resultado para ir a él.',
+    searchPanelEmpty: 'Ninguna pestaña abierta',
+    searchPanelNoResults: 'Sin coincidencias',
+    searchPanelTruncated: 'Mostrando las primeras {count} coincidencias',
+    searchPanelCloseTitle: 'Cerrar',
+
     // ── Error messages ───────────────────────────────────────────────────────
     errorUnknownShell: 'Shell desconocido: {shell}',
     errorConnectionNotFound: 'Conexión no encontrada.',

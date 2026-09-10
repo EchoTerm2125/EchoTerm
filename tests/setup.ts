@@ -40,8 +40,38 @@ class MockFitAddon {
   fit() {}
 }
 
+class MockSearchAddon {
+  [key: string]: any;
+  constructor(opts?: any) {
+    this.options = opts;
+    this._resultListeners = [];
+    this.calls = { findNext: [], findPrevious: [], clearDecorations: 0 };
+  }
+  loadAddon() {}
+  activate() {}
+  dispose() { this._disposed = true; }
+  findNext(term, options) {
+    this.calls.findNext.push({ term, options });
+    this.lastTerm = term;
+    return true;
+  }
+  findPrevious(term, options) {
+    this.calls.findPrevious.push({ term, options });
+    this.lastTerm = term;
+    return true;
+  }
+  clearDecorations() { this.calls.clearDecorations++; }
+  clearActiveDecoration() {}
+  onDidChangeResults(cb) {
+    this._resultListeners.push(cb);
+    return { dispose() {} };
+  }
+  _fireResults(e) { for (const cb of this._resultListeners) cb(e); }
+}
+
 (globalThis as any).Terminal = MockTerminal;
 (globalThis as any).FitAddon = { FitAddon: MockFitAddon };
+(globalThis as any).SearchAddon = { SearchAddon: MockSearchAddon };
 
 (globalThis as any).Split = vi.fn((elements, opts) => ({
   destroy: vi.fn(),
@@ -136,6 +166,13 @@ window.api = {
   sshImportConfig: vi.fn(() => Promise.resolve({ canceled: true })),
   sshImportApply: vi.fn(() => Promise.resolve({ success: true, imported: 0, updated: 0, skipped: [] })),
   sshExportConfig: vi.fn(() => Promise.resolve({ canceled: true })),
+  // Terminal search panel (Ctrl+Shift+F popup window)
+  panelOpen: vi.fn(() => Promise.resolve({ success: true })),
+  onPanelRun: vi.fn(() => vi.fn()),
+  panelRunResult: vi.fn(),
+  onPanelJump: vi.fn(() => vi.fn()),
+  onPanelClosed: vi.fn(() => vi.fn()),
+  panelPushTheme: vi.fn(),
 } as unknown as WindowApi;
 // Inject the fake through the renderer IPC gateway
 setIpcClient(window.api);
@@ -182,6 +219,9 @@ const DOM_IDS = [
   'langSelectDropdown', 'langSearchInput', 'langOptionsList',
   // Tab bar wrapper (children are nested into it below)
   'tabBar',
+  // Terminal find bar (Ctrl+F)
+  'findBar', 'findBarInput', 'findBarCount',
+  'findBarPrev', 'findBarNext', 'findBarCase', 'findBarWord', 'findBarClose',
 ];
 
 function scaffoldDom() {
@@ -196,6 +236,12 @@ function scaffoldDom() {
       el = document.createElement('button');
     } else if (id === 'pastePreviewCancel' || id === 'pastePreviewConfirm') {
       el = document.createElement('button');
+    } else if (id === 'findBarPrev' || id === 'findBarNext' || id === 'findBarCase' ||
+               id === 'findBarWord' || id === 'findBarClose') {
+      el = document.createElement('button');
+    } else if (id === 'findBarInput') {
+      el = document.createElement('input');
+      el.type = 'text';
     } else if (id === 'confirmDontShowAgain' || id === 'optTabCloseConfirm' ||
                id === 'optWindowCloseConfirm' || id === 'optGroupCloseConfirm' ||
                id === 'optSshJumpWarn' || id === 'optPastePreview' ||
@@ -213,6 +259,13 @@ function scaffoldDom() {
       el.classList.add('hidden');
     }
     if (id === 'pastePreviewDialog') {
+      el.classList.add('hidden');
+    }
+    // Mirror the real index.html: every overlay carries data-overlay and starts
+    // hidden, so ui.ts/_anyOverlayOpen and App.Search's shortcut guard see them.
+    if (['optionsPanel', 'confirmDialog', 'pastePreviewDialog', 'findBar',
+         'contextMenu', 'tabContextMenu', 'groupContextMenu', 'sshContextMenu'].includes(id)) {
+      el.setAttribute('data-overlay', '');
       el.classList.add('hidden');
     }
     document.body.appendChild(el);

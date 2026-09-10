@@ -308,6 +308,22 @@
     pastePreviewCancel: 'Отмена',
     pastePreviewPaste: 'Вставить',
 
+    // ── Terminal search ──────────────────────────────────────────────────────
+    findPlaceholder: 'Найти',
+    findNextTitle: 'Следующее совпадение (Enter)',
+    findPrevTitle: 'Предыдущее совпадение (Shift+Enter)',
+    findCaseTitle: 'Учитывать регистр',
+    findWordTitle: 'Слово целиком',
+    findNoResults: 'Нет результатов',
+    searchPanelTitle: 'Поиск во всех терминалах',
+    searchPanelPlaceholder: 'Поиск в видимых терминалах…',
+    searchPanelRun: 'Поиск',
+    searchPanelHint: 'Ищет в терминалах на экране. Щёлкните результат, чтобы перейти к нему.',
+    searchPanelEmpty: 'Нет открытых вкладок',
+    searchPanelNoResults: 'Нет совпадений',
+    searchPanelTruncated: 'Показаны первые {count} совпадений',
+    searchPanelCloseTitle: 'Закрыть',
+
     // ── Error messages ───────────────────────────────────────────────────────
     errorUnknownShell: 'Неизвестная оболочка: {shell}',
     errorConnectionNotFound: 'Подключение не найдено.',

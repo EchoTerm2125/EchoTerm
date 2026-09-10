@@ -641,6 +641,72 @@ html, body {
   min-height: 0;
 }
 
+/* ═══ Terminal find bar (Ctrl+F) ═══ */
+.find-bar {
+  position: absolute;
+  top: calc(8px * var(--ui-scale));
+  right: calc(8px * var(--ui-scale));
+  z-index: 120;
+  display: flex;
+  align-items: center;
+  gap: calc(3px * var(--ui-scale));
+  padding: calc(4px * var(--ui-scale));
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  box-shadow: var(--shadow-md);
+}
+
+.find-bar-input {
+  width: calc(180px * var(--ui-scale));
+  padding: calc(3px * var(--ui-scale)) calc(6px * var(--ui-scale));
+  font-size: calc(var(--app-font-size) * 0.923);
+  color: var(--text-primary);
+  background: var(--bg-primary);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  outline: none;
+}
+
+.find-bar-input:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-wash);
+}
+
+.find-bar-count {
+  min-width: calc(46px * var(--ui-scale));
+  font-size: calc(var(--app-font-size) * 0.769);
+  color: var(--text-muted);
+  text-align: center;
+  white-space: nowrap;
+}
+
+.find-bar-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: calc(22px * var(--ui-scale));
+  height: calc(22px * var(--ui-scale));
+  font-size: calc(var(--app-font-size) * 0.846);
+  line-height: 1;
+  color: var(--text-secondary);
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.find-bar-btn:hover {
+  background: var(--bg-hover);
+  color: var(--text-primary);
+}
+
+.find-bar-toggle.active {
+  color: var(--accent);
+  background: var(--accent-wash-strong);
+  border-color: var(--accent);
+}
+
 /* Pane wrapper (used by split.js) */
 .pane {
   position: relative;

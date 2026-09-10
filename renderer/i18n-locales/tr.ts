@@ -308,6 +308,22 @@
     pastePreviewCancel: 'İptal',
     pastePreviewPaste: 'Yapıştır',
 
+    // ── Terminal search ──────────────────────────────────────────────────────
+    findPlaceholder: 'Ara',
+    findNextTitle: 'Sonraki eşleşme (Enter)',
+    findPrevTitle: 'Önceki eşleşme (Shift+Enter)',
+    findCaseTitle: 'Büyük/küçük harf eşleştir',
+    findWordTitle: 'Tam sözcük eşleştir',
+    findNoResults: 'Sonuç yok',
+    searchPanelTitle: 'Tüm Terminallerde Ara',
+    searchPanelPlaceholder: 'Görünür terminallerde ara…',
+    searchPanelRun: 'Ara',
+    searchPanelHint: 'Ekrandaki terminallerde arama yapar. Bir sonuca tıklayarak o terminale gidin.',
+    searchPanelEmpty: 'Açık sekme yok',
+    searchPanelNoResults: 'Eşleşme yok',
+    searchPanelTruncated: 'İlk {count} eşleşme gösteriliyor',
+    searchPanelCloseTitle: 'Kapat',
+
     // ── Error messages ───────────────────────────────────────────────────────
     errorUnknownShell: 'Bilinmeyen kabuk: {shell}',
     errorConnectionNotFound: 'Bağlantı bulunamadı.',

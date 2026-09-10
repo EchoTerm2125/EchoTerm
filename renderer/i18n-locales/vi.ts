@@ -308,6 +308,22 @@
     pastePreviewCancel: 'Hủy',
     pastePreviewPaste: 'Dán',
 
+    // ── Terminal search ──────────────────────────────────────────────────────
+    findPlaceholder: 'Tìm',
+    findNextTitle: 'Kết quả khớp tiếp theo (Enter)',
+    findPrevTitle: 'Kết quả khớp trước đó (Shift+Enter)',
+    findCaseTitle: 'Phân biệt chữ hoa chữ thường',
+    findWordTitle: 'Khớp toàn bộ từ',
+    findNoResults: 'Không có kết quả',
+    searchPanelTitle: 'Tìm kiếm tất cả terminal',
+    searchPanelPlaceholder: 'Tìm trong các terminal hiển thị…',
+    searchPanelRun: 'Tìm kiếm',
+    searchPanelHint: 'Tìm kiếm trong các terminal trên màn hình. Nhấp vào một kết quả để chuyển đến đó.',
+    searchPanelEmpty: 'Chưa mở tab nào',
+    searchPanelNoResults: 'Không có kết quả khớp',
+    searchPanelTruncated: 'Đang hiển thị {count} kết quả khớp đầu tiên',
+    searchPanelCloseTitle: 'Đóng',
+
     // ── Error messages ───────────────────────────────────────────────────────
     errorUnknownShell: 'Shell không xác định: {shell}',
     errorConnectionNotFound: 'Không tìm thấy kết nối.',
