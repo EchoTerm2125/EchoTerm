@@ -340,6 +340,7 @@
     findPrevTitle: '上一個符合項目 (Shift+Enter)',
     findCaseTitle: '區分大小寫',
     findWordTitle: '全字匹配',
+    findRegexTitle: '使用正則表達式',
     findNoResults: '沒有結果',
     searchPanelTitle: '搜尋所有終端',
     searchPanelPlaceholder: '搜尋可見終端…',

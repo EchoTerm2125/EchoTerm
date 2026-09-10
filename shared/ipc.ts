@@ -231,6 +231,13 @@ export interface SearchResults {
   error?: string;
 }
 
+/** Matching options the search panel window sends with each query. */
+export interface PanelSearchOptions {
+  caseSensitive: boolean;
+  wholeWord: boolean;
+  regex: boolean;
+}
+
 /** Translatable strings the search panel window renders. */
 export interface SearchPanelLabels {
   title: string;
@@ -241,11 +248,21 @@ export interface SearchPanelLabels {
   noResults: string;
   truncated: string;
   closeTitle: string;
+  caseTitle: string;
+  wordTitle: string;
+  regexTitle: string;
 }
 
 export interface SearchPanelTheme {
   theme: 'dark' | 'light';
   labels: SearchPanelLabels;
+}
+
+/** One group's last search, restored when the user switches back to that group. */
+export interface PanelGroupState {
+  query: string;
+  options: PanelSearchOptions;
+  results: SearchResults;
 }
 
 // ─── The typed bridge exposed by preload.ts as window.api ───────────────────
@@ -339,7 +356,7 @@ export interface WindowApi {
   /** Open (or focus) the search panel window. */
   panelOpen(): Promise<IpcOutcome>;
   /** The panel asked for a search; reply with panelRunResult(requestId, …). */
-  onPanelRun(callback: (requestId: number, query: string) => void): () => void;
+  onPanelRun(callback: (requestId: number, query: string, options: PanelSearchOptions) => void): () => void;
   panelRunResult(requestId: number, results: SearchResults): void;
   /** The panel asked to jump to one of its results. */
   onPanelJump(callback: (match: SearchMatch) => void): () => void;
@@ -347,4 +364,6 @@ export interface WindowApi {
   onPanelClosed(callback: () => void): () => void;
   /** Push the current theme + UI strings to the panel window. */
   panelPushTheme(info: SearchPanelTheme): void;
+  /** Push the active group's last search (null when it has none). */
+  panelShowResults(state: PanelGroupState | null): void;
 }

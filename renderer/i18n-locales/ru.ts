@@ -314,6 +314,7 @@
     findPrevTitle: 'Предыдущее совпадение (Shift+Enter)',
     findCaseTitle: 'Учитывать регистр',
     findWordTitle: 'Слово целиком',
+    findRegexTitle: 'Использовать регулярное выражение',
     findNoResults: 'Нет результатов',
     searchPanelTitle: 'Поиск во всех терминалах',
     searchPanelPlaceholder: 'Поиск в видимых терминалах…',

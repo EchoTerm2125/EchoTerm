@@ -314,6 +314,7 @@
     findPrevTitle: 'Kết quả khớp trước đó (Shift+Enter)',
     findCaseTitle: 'Phân biệt chữ hoa chữ thường',
     findWordTitle: 'Khớp toàn bộ từ',
+    findRegexTitle: 'Dùng biểu thức chính quy',
     findNoResults: 'Không có kết quả',
     searchPanelTitle: 'Tìm kiếm tất cả terminal',
     searchPanelPlaceholder: 'Tìm trong các terminal hiển thị…',

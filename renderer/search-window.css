@@ -136,6 +136,29 @@ body {
   background: var(--accent-wash);
 }
 
+.panel-opt {
+  width: 28px;
+  padding: 5px 0;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--text-secondary);
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.panel-opt:hover {
+  color: var(--text-primary);
+  background: var(--bg-hover);
+}
+
+.panel-opt.active {
+  color: var(--accent);
+  background: var(--accent-wash-strong);
+  border-color: var(--accent);
+}
+
 .panel-hint {
   padding: 0 10px 6px;
   font-size: 11px;

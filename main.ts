@@ -58,6 +58,7 @@ let installingUpdate = false;
 // window's renderer, which is the only place the xterm buffers live.
 let searchWindow: Electron.BrowserWindow | null = null;
 let lastPanelTheme: unknown = null;
+let lastPanelGroupState: unknown = null;
 let panelRequestSeq = 0;
 const pendingPanelRuns = new Map<number, (results: unknown) => void>();
 const searchPanelBounds = new FileWindowBounds(path.join(app.getPath('userData'), 'search-panel.json'));
@@ -357,17 +358,26 @@ ipcMain.handle('panel:open', () => {
 
 ipcMain.handle('panel:init', () => lastPanelTheme || { theme: 'dark', labels: {} });
 
+// The active group's last search, cached so a freshly opened panel can restore
+// it (the main window pushes it before opening the window).
+ipcMain.handle('panel:group-state', () => lastPanelGroupState);
+
+ipcMain.on('panel:show', (event, state) => {
+  lastPanelGroupState = state ?? null;
+  if (searchWindow && !searchWindow.isDestroyed()) searchWindow.webContents.send('panel:show', lastPanelGroupState);
+});
+
 ipcMain.on('panel:theme-push', (event, info) => {
   lastPanelTheme = info;
   if (searchWindow && !searchWindow.isDestroyed()) searchWindow.webContents.send('panel:theme', info);
 });
 
-ipcMain.handle('panel:run', (event, query) => {
+ipcMain.handle('panel:run', (event, query, options) => {
   if (!mainWindow || mainWindow.isDestroyed()) return EMPTY_SEARCH_RESULTS;
   return new Promise((resolve) => {
     const requestId = ++panelRequestSeq;
     pendingPanelRuns.set(requestId, resolve);
-    mainWindow.webContents.send('panel:run', requestId, query);
+    mainWindow.webContents.send('panel:run', requestId, query, options);
     // Never leave the panel hanging if the main window is busy or gone.
     setTimeout(() => {
       const pending = pendingPanelRuns.get(requestId);

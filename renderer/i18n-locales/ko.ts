@@ -314,6 +314,7 @@
     findPrevTitle: '이전 일치 (Shift+Enter)',
     findCaseTitle: '대/소문자 구분',
     findWordTitle: '단어 단위로 일치',
+    findRegexTitle: '정규식 사용',
     findNoResults: '결과 없음',
     searchPanelTitle: '모든 터미널 검색',
     searchPanelPlaceholder: '표시된 터미널 검색…',

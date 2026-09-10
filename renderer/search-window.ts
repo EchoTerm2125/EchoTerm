@@ -5,11 +5,20 @@
    that searching reads live only in the main window.
    ═══════════════════════════════════════════════════════════════════════════ */
 
-import type { SearchMatch, SearchPanelLabels, SearchPanelTheme, SearchResults } from '../shared/ipc';
+import type {
+  PanelGroupState,
+  PanelSearchOptions,
+  SearchMatch,
+  SearchPanelLabels,
+  SearchPanelTheme,
+  SearchResults,
+} from '../shared/ipc';
 
 interface SearchApi {
   init(): Promise<SearchPanelTheme>;
-  run(query: string): Promise<SearchResults>;
+  groupState(): Promise<PanelGroupState | null>;
+  onShow(callback: (state: PanelGroupState | null) => void): () => void;
+  run(query: string, options: PanelSearchOptions): Promise<SearchResults>;
   jump(match: SearchMatch): void;
   close(): void;
   onTheme(callback: (info: SearchPanelTheme) => void): () => void;
@@ -20,6 +29,10 @@ interface SearchApi {
   const api = (window as unknown as { searchApi: SearchApi }).searchApi;
 
   let labels: Partial<SearchPanelLabels> = {};
+  const options: PanelSearchOptions = { caseSensitive: false, wholeWord: false, regex: false };
+  // A group-state push that arrives while the window is loading wins over the
+  // state fetched at startup, which may be older.
+  let gotGroupPush = false;
 
   const $ = (id: string) => document.getElementById(id);
 
@@ -42,6 +55,22 @@ interface SearchApi {
     if (run) run.textContent = labels.run || 'Search';
     if (hint) hint.textContent = labels.hint || '';
     if (close) close.title = labels.closeTitle || 'Close';
+
+    const caseBtn = $('panelCase');
+    const wordBtn = $('panelWord');
+    const regexBtn = $('panelRegex');
+    if (caseBtn) caseBtn.title = labels.caseTitle || '';
+    if (wordBtn) wordBtn.title = labels.wordTitle || '';
+    if (regexBtn) regexBtn.title = labels.regexTitle || '';
+  }
+
+  function syncToggles() {
+    const caseBtn = $('panelCase');
+    const wordBtn = $('panelWord');
+    const regexBtn = $('panelRegex');
+    if (caseBtn) caseBtn.classList.toggle('active', options.caseSensitive);
+    if (wordBtn) wordBtn.classList.toggle('active', options.wholeWord);
+    if (regexBtn) regexBtn.classList.toggle('active', options.regex);
   }
 
   function renderMessage(text: string) {
@@ -111,7 +140,41 @@ interface SearchApi {
     const input = $('panelInput') as HTMLInputElement | null;
     const query = input ? input.value : '';
     if (!query) { renderMessage(labels.empty || ''); return; }
-    Promise.resolve(api.run(query)).then(renderResults).catch(() => renderMessage(labels.noResults || ''));
+    Promise.resolve(api.run(query, { ...options })).then(renderResults).catch(() => renderMessage(labels.noResults || ''));
+  }
+
+  // A group's remembered search: its query, toggles and result list. Null means
+  // the group has never been searched, so the panel resets to the empty state.
+  function applyGroupState(state: PanelGroupState | null) {
+    const input = $('panelInput') as HTMLInputElement | null;
+    if (!state) {
+      if (input) input.value = '';
+      options.caseSensitive = false;
+      options.wholeWord = false;
+      options.regex = false;
+      syncToggles();
+      renderMessage(labels.empty || '');
+      return;
+    }
+    if (input) input.value = state.query || '';
+    const saved = state.options || { caseSensitive: false, wholeWord: false, regex: false };
+    options.caseSensitive = !!saved.caseSensitive;
+    options.wholeWord = !!saved.wholeWord;
+    options.regex = !!saved.regex;
+    syncToggles();
+    renderResults(state.results);
+  }
+
+  function bindToggle(id: string, key: keyof PanelSearchOptions) {
+    const btn = $(id);
+    if (!btn) return;
+    btn.addEventListener('click', () => {
+      options[key] = !options[key];
+      syncToggles();
+      // Re-run so the list reflects the new matching immediately.
+      const input = $('panelInput') as HTMLInputElement | null;
+      if (input && input.value) runSearch();
+    });
   }
 
   function init() {
@@ -127,10 +190,27 @@ interface SearchApi {
         else if (e.key === 'Escape') { e.preventDefault(); api.close(); }
       });
     }
+    bindToggle('panelCase', 'caseSensitive');
+    bindToggle('panelWord', 'wholeWord');
+    bindToggle('panelRegex', 'regex');
+    syncToggles();
 
-    // Subscribe before asking for the current theme so no update is missed.
+    // Subscribe before asking for anything so no update is missed.
     api.onTheme(applyTheme);
-    api.init().then(applyTheme).catch(() => {});
+    api.onShow((state) => {
+      gotGroupPush = true;
+      applyGroupState(state);
+    });
+    api.init()
+      .then((theme) => {
+        applyTheme(theme);
+        return api.groupState();
+      })
+      .then((state) => {
+        if (!gotGroupPush) applyGroupState(state);
+      })
+      .catch(() => {});
+
     renderMessage(labels.empty || '');
     if (input) input.focus();
   }

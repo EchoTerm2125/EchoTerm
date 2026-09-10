@@ -329,6 +329,7 @@ import './icons';
       termState.paneEl.remove();
       state.terminals.delete(id);
       state.paneOrder = [];
+      if (App.Search) App.Search.notifyTerminalClosed(id);
       const now = Date.now();
       if (now - lastAutoRespawnAt >= 1500) {
         lastAutoRespawnAt = now;

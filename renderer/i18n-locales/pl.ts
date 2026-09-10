@@ -314,6 +314,7 @@
     findPrevTitle: 'Poprzednie trafienie (Shift+Enter)',
     findCaseTitle: 'Uwzględniaj wielkość liter',
     findWordTitle: 'Całe wyrazy',
+    findRegexTitle: 'Użyj wyrażenia regularnego',
     findNoResults: 'Brak wyników',
     searchPanelTitle: 'Przeszukaj wszystkie terminale',
     searchPanelPlaceholder: 'Przeszukaj widoczne terminale…',

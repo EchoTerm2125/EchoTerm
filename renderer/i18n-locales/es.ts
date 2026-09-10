@@ -314,6 +314,7 @@
     findPrevTitle: 'Coincidencia anterior (Mayús+Intro)',
     findCaseTitle: 'Distinguir mayúsculas y minúsculas',
     findWordTitle: 'Coincidir palabra completa',
+    findRegexTitle: 'Usar expresión regular',
     findNoResults: 'Sin resultados',
     searchPanelTitle: 'Buscar en todos los terminales',
     searchPanelPlaceholder: 'Buscar en los terminales visibles…',

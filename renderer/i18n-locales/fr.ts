@@ -314,6 +314,7 @@
     findPrevTitle: 'Correspondance précédente (Maj+Entrée)',
     findCaseTitle: 'Respecter la casse',
     findWordTitle: 'Mot entier',
+    findRegexTitle: 'Utiliser une expression régulière',
     findNoResults: 'Aucun résultat',
     searchPanelTitle: 'Rechercher dans tous les terminaux',
     searchPanelPlaceholder: 'Rechercher dans les terminaux visibles…',

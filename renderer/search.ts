@@ -79,7 +79,7 @@ import './theme';
 
   function memoryFor(id) {
     if (!findMemory.has(id)) {
-      findMemory.set(id, { query: '', caseSensitive: false, wholeWord: false });
+      findMemory.set(id, { query: '', caseSensitive: false, wholeWord: false, regex: false });
     }
     return findMemory.get(id);
   }
@@ -88,6 +88,7 @@ import './theme';
     return {
       caseSensitive: mem.caseSensitive,
       wholeWord: mem.wholeWord,
+      regex: mem.regex,
       incremental: false,
       decorations: decorations('bar'),
     };
@@ -140,8 +141,10 @@ import './theme';
   function syncToggles(mem) {
     const caseBtn = document.getElementById('findBarCase');
     const wordBtn = document.getElementById('findBarWord');
+    const regexBtn = document.getElementById('findBarRegex');
     if (caseBtn) caseBtn.classList.toggle('active', mem.caseSensitive);
     if (wordBtn) wordBtn.classList.toggle('active', mem.wholeWord);
+    if (regexBtn) regexBtn.classList.toggle('active', mem.regex);
   }
 
   // direction: 'first' re-runs from the top of the buffer, otherwise it walks
@@ -182,6 +185,7 @@ import './theme';
     const next = document.getElementById('findBarNext');
     const caseBtn = document.getElementById('findBarCase');
     const wordBtn = document.getElementById('findBarWord');
+    const regexBtn = document.getElementById('findBarRegex');
     const closeBtn = document.getElementById('findBarClose');
     if (!input) return;
 
@@ -211,12 +215,41 @@ import './theme';
       syncToggles(mem);
       runFind('first');
     });
+    if (regexBtn) regexBtn.addEventListener('click', () => {
+      if (!activePaneId) return;
+      const mem = memoryFor(activePaneId);
+      mem.regex = !mem.regex;
+      syncToggles(mem);
+      runFind('first');
+    });
     if (closeBtn) closeBtn.addEventListener('click', () => closeFindBar());
   }
 
   // ─── Search panel ──────────────────────────────────────────────────────────
   // Scope: the panes currently on screen — every pane of the active group in
   // echo mode, otherwise just the active pane.
+  // The last search is kept per group so switching groups restores what that
+  // group was showing (and shows the empty state when it was never searched).
+  const groupResults = new Map(); // groupId -> { query, options, results }
+
+  function pushGroupState() {
+    if (!api.panelShowResults) return;
+    const entry = state.activeGroupId ? groupResults.get(state.activeGroupId) : null;
+    try {
+      api.panelShowResults(entry
+        ? { query: entry.query, options: entry.options, results: entry.results }
+        : null);
+    } catch { /* no popup support */ }
+  }
+
+  function onActiveGroupChanged() {
+    pushGroupState();
+  }
+
+  function onGroupDeleted(groupId) {
+    groupResults.delete(groupId);
+  }
+
   function visibleTerminals() {
     const ids = state.echoModeActive
       ? App.Groups.getGroupTerminalIds(state.activeGroupId)
@@ -234,14 +267,37 @@ import './theme';
     return (!before || !WORD_CHAR.test(before)) && (!after || !WORD_CHAR.test(after));
   }
 
+  // Normalizes the options the search panel sends: every flag defaults to off.
+  function normalizeOptions(raw) {
+    return {
+      caseSensitive: !!(raw && raw.caseSensitive),
+      wholeWord: !!(raw && raw.wholeWord),
+      regex: !!(raw && raw.regex),
+    };
+  }
+
+  // Builds the line matcher for a scan: a compiled RegExp for regex search, or
+  // a lower-cased needle for plain search. Returns null when a regex is invalid
+  // so the caller can report "no matches" instead of throwing.
+  function compileMatcher(query, options) {
+    if (!options.regex) {
+      return { needle: options.caseSensitive ? query : query.toLowerCase(), regex: null };
+    }
+    try {
+      return { needle: null, regex: new RegExp(query, options.caseSensitive ? 'g' : 'gi') };
+    } catch {
+      return null;
+    }
+  }
+
   // Reads a pane's buffer and returns its matches. The addon only reports
   // counts, so the results list needs its own scan over the buffer lines.
   function scanPane(ts, query, options, remaining) {
     const matches = [];
     const buffer = ts.term && ts.term.buffer && ts.term.buffer.active;
-    if (!buffer) return matches;
-    const needle = options.caseSensitive ? query : query.toLowerCase();
-    if (!needle) return matches;
+    if (!buffer || !query) return matches;
+    const matcher = compileMatcher(query, options);
+    if (!matcher) return matches;
 
     const total = buffer.length;
     for (let row = 0; row < total && matches.length < remaining; row++) {
@@ -249,24 +305,37 @@ import './theme';
       if (!line) continue;
       const text = line.translateToString(true);
       if (!text) continue;
-      const hay = options.caseSensitive ? text : text.toLowerCase();
       const preview = text.trim().slice(0, PREVIEW_LEN);
-      let from = 0;
-      while (matches.length < remaining) {
-        const idx = hay.indexOf(needle, from);
-        if (idx === -1) break;
-        if (!options.wholeWord || isWholeWord(text, idx, needle.length)) {
-          matches.push({ terminalId: ts.id, line: row, col: idx, length: needle.length, text: preview });
+
+      const push = (col, length) => {
+        if (options.wholeWord && !isWholeWord(text, col, length)) return;
+        matches.push({ terminalId: ts.id, line: row, col, length, text: preview });
+      };
+
+      if (matcher.regex) {
+        matcher.regex.lastIndex = 0;
+        let m;
+        while (matches.length < remaining && (m = matcher.regex.exec(text)) !== null) {
+          push(m.index, m[0].length);
+          // A zero-length match would otherwise loop forever.
+          if (m[0].length === 0) matcher.regex.lastIndex++;
         }
-        from = idx + needle.length;
+      } else {
+        const hay = options.caseSensitive ? text : text.toLowerCase();
+        let from = 0;
+        while (matches.length < remaining) {
+          const idx = hay.indexOf(matcher.needle, from);
+          if (idx === -1) break;
+          push(idx, matcher.needle.length);
+          from = idx + matcher.needle.length;
+        }
       }
     }
     return matches;
   }
 
-  const PANEL_OPTIONS = { caseSensitive: false, wholeWord: false };
-
-  function runPanelSearch(query) {
+  function runPanelSearch(query, rawOptions) {
+    const options = normalizeOptions(rawOptions);
     const panes = visibleTerminals();
     const groups = [];
     let total = 0;
@@ -274,7 +343,7 @@ import './theme';
 
     for (const ts of panes) {
       const remaining = MATCH_LIMIT - total;
-      const matches = remaining > 0 ? scanPane(ts, query, PANEL_OPTIONS, remaining) : [];
+      const matches = remaining > 0 ? scanPane(ts, query, options, remaining) : [];
       total += matches.length;
       if (total >= MATCH_LIMIT) truncated = true;
 
@@ -283,15 +352,18 @@ import './theme';
       if (addon && query) {
         try {
           addon.clearDecorations();
-          addon.findNext(query, { ...PANEL_OPTIONS, decorations: decorations('panel') });
-        } catch { /* pane not ready */ }
+          addon.findNext(query, { ...options, decorations: decorations('panel') });
+        } catch { /* invalid pattern or pane not ready */ }
       }
       if (matches.length > 0 || panes.length === 1) {
         groups.push({ terminalId: ts.id, label: paneLabel(ts), matches });
       }
     }
 
-    return { empty: panes.length === 0, groups, total, truncated, query };
+    const results = { empty: panes.length === 0, groups, total, truncated, query };
+    // Remember this group's search so switching away and back restores it.
+    if (state.activeGroupId) groupResults.set(state.activeGroupId, { query, options, results });
+    return results;
   }
 
   function jumpToMatch(match) {
@@ -315,6 +387,7 @@ import './theme';
   function openSearchPanel() {
     if (!api.panelOpen) return;
     pushThemeToPanel();
+    pushGroupState();
     api.panelOpen().catch(() => {});
   }
 
@@ -328,6 +401,9 @@ import './theme';
       noResults: App.__('searchPanelNoResults'),
       truncated: App.__('searchPanelTruncated', { count: MATCH_LIMIT }),
       closeTitle: App.__('searchPanelCloseTitle'),
+      caseTitle: App.__('findCaseTitle'),
+      wordTitle: App.__('findWordTitle'),
+      regexTitle: App.__('findRegexTitle'),
     };
   }
 
@@ -340,10 +416,10 @@ import './theme';
 
   function bindPanelEvents() {
     if (api.onPanelRun) {
-      api.onPanelRun((requestId, query) => {
+      api.onPanelRun((requestId, query, options) => {
         let results;
         try {
-          results = runPanelSearch(query);
+          results = runPanelSearch(query, options);
         } catch {
           results = { empty: true, groups: [], total: 0, truncated: false, query };
         }
@@ -381,9 +457,27 @@ import './theme';
   }
 
   // Called by the terminal lifecycle when a pane disappears so the find bar
-  // never stays open over a dead pane.
+  // never stays open over a dead pane and no remembered result points at it.
   function notifyTerminalClosed(id) {
     if (activePaneId === id) closeFindBar();
+    pruneClosedPane(id);
+  }
+
+  // Drops a closed pane's matches from every group's remembered search. The
+  // group keeps its query and options so the panel falls back to "no matches"
+  // instead of listing rows that can no longer be jumped to.
+  function pruneClosedPane(id) {
+    let activeChanged = false;
+    for (const [groupId, entry] of groupResults) {
+      const groups = entry.results.groups;
+      if (!groups.some((g) => g.terminalId === id)) continue;
+      const kept = groups.filter((g) => g.terminalId !== id);
+      let total = 0;
+      for (const g of kept) total += g.matches.length;
+      entry.results = { ...entry.results, groups: kept, total, truncated: total >= MATCH_LIMIT };
+      if (groupId === state.activeGroupId) activeChanged = true;
+    }
+    if (activeChanged) pushGroupState();
   }
 
   // ─── Expose ─────────────────────────────────────────────────────────────────
@@ -393,6 +487,7 @@ import './theme';
     toggleFindBar, openFindBar, closeFindBar,
     openSearchPanel, runPanelSearch, jumpToMatch, clearPanelHighlights,
     pushThemeToPanel, notifyTerminalClosed,
+    onActiveGroupChanged, onGroupDeleted,
     // exported for tests
     visibleTerminals, scanPane, MATCH_LIMIT,
   };

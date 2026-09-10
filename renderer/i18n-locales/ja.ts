@@ -314,6 +314,7 @@
     findPrevTitle: '前の一致 (Shift+Enter)',
     findCaseTitle: '大文字と小文字を区別',
     findWordTitle: '単語単位で一致',
+    findRegexTitle: '正規表現を使用',
     findNoResults: '結果なし',
     searchPanelTitle: 'すべてのターミナルを検索',
     searchPanelPlaceholder: '表示中のターミナルを検索…',

@@ -314,6 +314,7 @@
     findPrevTitle: 'Correspondência anterior (Shift+Enter)',
     findCaseTitle: 'Diferenciar maiúsculas e minúsculas',
     findWordTitle: 'Corresponder palavra inteira',
+    findRegexTitle: 'Usar expressão regular',
     findNoResults: 'Sem resultados',
     searchPanelTitle: 'Pesquisar em todos os terminais',
     searchPanelPlaceholder: 'Pesquisar nos terminais visíveis…',

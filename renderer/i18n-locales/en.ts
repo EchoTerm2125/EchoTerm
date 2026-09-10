@@ -315,6 +315,7 @@
     findPrevTitle: 'Previous match (Shift+Enter)',
     findCaseTitle: 'Match case',
     findWordTitle: 'Match whole word',
+    findRegexTitle: 'Use regular expression',
     findNoResults: 'No results',
     searchPanelTitle: 'Search All Terminals',
     searchPanelPlaceholder: 'Search visible terminals…',

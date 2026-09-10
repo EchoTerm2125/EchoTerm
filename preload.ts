@@ -124,7 +124,8 @@ const api: WindowApi = {
   // ─── Terminal search panel (Ctrl+Shift+F popup window) ────────────────────
   panelOpen: () => ipcRenderer.invoke('panel:open'),
   onPanelRun: (callback) => {
-    const listener = (_event: unknown, requestId: number, query: string) => callback(requestId, query);
+    const listener = (_event: unknown, requestId: number, query: string, options: unknown) =>
+      callback(requestId, query, options as never);
     ipcRenderer.on('panel:run', listener);
     return () => ipcRenderer.removeListener('panel:run', listener);
   },
@@ -140,6 +141,7 @@ const api: WindowApi = {
     return () => ipcRenderer.removeListener('panel:closed', listener);
   },
   panelPushTheme: (info) => ipcRenderer.send('panel:theme-push', info),
+  panelShowResults: (state) => ipcRenderer.send('panel:show', state),
 };
 
 contextBridge.exposeInMainWorld('api', api);

@@ -314,6 +314,7 @@
     findPrevTitle: 'Önceki eşleşme (Shift+Enter)',
     findCaseTitle: 'Büyük/küçük harf eşleştir',
     findWordTitle: 'Tam sözcük eşleştir',
+    findRegexTitle: 'Düzenli ifade kullan',
     findNoResults: 'Sonuç yok',
     searchPanelTitle: 'Tüm Terminallerde Ara',
     searchPanelPlaceholder: 'Görünür terminallerde ara…',

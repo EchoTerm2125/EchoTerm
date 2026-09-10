@@ -173,6 +173,7 @@ window.api = {
   onPanelJump: vi.fn(() => vi.fn()),
   onPanelClosed: vi.fn(() => vi.fn()),
   panelPushTheme: vi.fn(),
+  panelShowResults: vi.fn(),
 } as unknown as WindowApi;
 // Inject the fake through the renderer IPC gateway
 setIpcClient(window.api);
@@ -221,7 +222,7 @@ const DOM_IDS = [
   'tabBar',
   // Terminal find bar (Ctrl+F)
   'findBar', 'findBarInput', 'findBarCount',
-  'findBarPrev', 'findBarNext', 'findBarCase', 'findBarWord', 'findBarClose',
+  'findBarPrev', 'findBarNext', 'findBarCase', 'findBarWord', 'findBarRegex', 'findBarClose',
 ];
 
 function scaffoldDom() {
@@ -237,7 +238,7 @@ function scaffoldDom() {
     } else if (id === 'pastePreviewCancel' || id === 'pastePreviewConfirm') {
       el = document.createElement('button');
     } else if (id === 'findBarPrev' || id === 'findBarNext' || id === 'findBarCase' ||
-               id === 'findBarWord' || id === 'findBarClose') {
+               id === 'findBarWord' || id === 'findBarRegex' || id === 'findBarClose') {
       el = document.createElement('button');
     } else if (id === 'findBarInput') {
       el = document.createElement('input');
