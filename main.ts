@@ -97,12 +97,23 @@ function createSearchWindow(): Electron.BrowserWindow | null {
   searchWindow.loadFile(path.join(__dirname, '..', 'renderer', 'search-window.html'));
   searchWindow.once('ready-to-show', () => { if (searchWindow) searchWindow.show(); });
 
+  // 'move'/'resize' fire continuously during a drag and save() writes
+  // synchronously, so coalesce the writes and flush the last position on close.
+  let boundsTimer: ReturnType<typeof setTimeout> | null = null;
   const persistBounds = () => {
-    if (!searchWindow || searchWindow.isDestroyed()) return;
-    searchPanelBounds.save(searchWindow.getBounds());
+    if (boundsTimer) clearTimeout(boundsTimer);
+    boundsTimer = setTimeout(() => {
+      boundsTimer = null;
+      if (!searchWindow || searchWindow.isDestroyed()) return;
+      searchPanelBounds.save(searchWindow.getBounds());
+    }, 300);
   };
   searchWindow.on('resize', persistBounds);
   searchWindow.on('move', persistBounds);
+  searchWindow.on('close', () => {
+    if (boundsTimer) { clearTimeout(boundsTimer); boundsTimer = null; }
+    if (searchWindow && !searchWindow.isDestroyed()) searchPanelBounds.save(searchWindow.getBounds());
+  });
 
   searchWindow.on('closed', () => {
     for (const resolve of pendingPanelRuns.values()) resolve(EMPTY_SEARCH_RESULTS);
@@ -351,8 +362,13 @@ ipcMain.handle('panel:open', () => {
   const win = createSearchWindow();
   if (!win) return { success: false, error: 'WINDOW_FAILED' };
   if (win.isMinimized()) win.restore();
-  win.show();
-  win.focus();
+  // A freshly created window is still loading; showing it here would flash an
+  // unrendered (background-only) window, so let 'ready-to-show' do the first
+  // show and only show/focus directly once the page has loaded.
+  if (!win.webContents.isLoading()) {
+    win.show();
+    win.focus();
+  }
   return { success: true };
 });
 

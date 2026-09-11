@@ -139,7 +139,13 @@ interface SearchApi {
   function runSearch() {
     const input = $('panelInput') as HTMLInputElement | null;
     const query = input ? input.value : '';
-    if (!query) { renderMessage(labels.empty || ''); return; }
+    if (!query) {
+      // Nothing to search for: clear the list instead of showing the "no tab
+      // opened" empty state, which would be misleading with tabs open.
+      const container = $('panelResults');
+      if (container) container.textContent = '';
+      return;
+    }
     Promise.resolve(api.run(query, { ...options })).then(renderResults).catch(() => renderMessage(labels.noResults || ''));
   }
 

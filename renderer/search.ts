@@ -449,10 +449,32 @@ import './theme';
     toggleFindBar();
   }
 
+  // Decoration colors are baked in when the addons run, so a theme change must
+  // re-apply them or the existing highlights keep the old theme's tones.
+  function refreshDecorations() {
+    if (findOpen) runFind('first');
+    const entry = state.activeGroupId ? groupResults.get(state.activeGroupId) : null;
+    if (!entry || !entry.query) return;
+    for (const group of entry.results.groups) {
+      const ts = state.terminals.get(group.terminalId);
+      const addon = ts && ts._searchPanel;
+      if (!addon) continue;
+      try {
+        addon.clearDecorations();
+        addon.findNext(entry.query, { ...entry.options, decorations: decorations('panel') });
+      } catch { /* pane not ready */ }
+    }
+  }
+
   function init() {
     bindFindBarEvents();
     bindPanelEvents();
-    if (App.Theme && App.Theme.onThemeChange) App.Theme.onThemeChange(() => pushThemeToPanel());
+    if (App.Theme && App.Theme.onThemeChange) {
+      App.Theme.onThemeChange(() => {
+        pushThemeToPanel();
+        refreshDecorations();
+      });
+    }
     if (App.i18n && App.i18n.onLocaleChange) App.i18n.onLocaleChange(() => pushThemeToPanel());
   }
 
