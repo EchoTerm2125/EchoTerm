@@ -15,4 +15,9 @@ export interface ConnectionFolderRepository {
   save(folder: ConnectionFolder): ConnectionFolder;
   /** Cascade-deletes the folder subtree: all sub-folders and every contained connection. */
   delete(id: string): void;
+  /**
+   * Deep-copies the folder subtree (sub-folders and every contained
+   * connection) as a sibling of the source, returning the copied root folder.
+   */
+  duplicate(id: string): ConnectionFolder;
 }

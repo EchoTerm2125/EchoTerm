@@ -409,7 +409,7 @@ describe('SshPanel (ssh-panel.ts)', () => {
   });
 
   describe('context menu separator visibility', () => {
-    it('hides the Move separator when no option sits between it and the add section', async () => {
+    it('keeps the Move separator when Duplicate sits between it and the add section', async () => {
       const api = window.api;
       vi.mocked(api.sshConnectionFolderList).mockResolvedValue([
         { id: 'f1', name: 'Work', parentId: null },
@@ -425,10 +425,12 @@ describe('SshPanel (ssh-panel.ts)', () => {
       f1.dispatchEvent(new MouseEvent('contextmenu', { bubbles: true, clientX: 100, clientY: 100 }));
       await flush();
 
-      // The menu shows: Add Parent Folder, Move to Folder, Delete, Open All —
-      // no content sits between the add separator and the Move separator
+      // The menu shows: Add Parent Folder, Duplicate, Move to Folder, Delete,
+      // Open All — Duplicate now sits between the add and Move separators
       const moveSep = document.getElementById('sshCtxMoveSep');
-      expect(moveSep.classList.contains('hidden')).toBe(true);
+      const duplicateBtn = document.querySelector('#sshContextMenu [data-action="ssh-duplicate"]') as HTMLElement;
+      expect(duplicateBtn.classList.contains('hidden')).toBe(false);
+      expect(moveSep.classList.contains('hidden')).toBe(false);
       expect(document.getElementById('sshCtxAddSep').classList.contains('hidden')).toBe(false);
       expect(document.getElementById('sshCtxDelSep').classList.contains('hidden')).toBe(false);
     });
@@ -991,6 +993,79 @@ describe('SshPanel (ssh-panel.ts)', () => {
       ok.click();
       await flush();
       expect(window.api.sshUserFolderDelete).toHaveBeenCalledWith('uf1');
+    });
+  });
+
+  describe('duplicate actions', () => {
+    it('duplicates a user silently via the context menu', async () => {
+      const api = window.api;
+      vi.mocked(api.sshUserList).mockResolvedValue([
+        { id: 'u1', name: 'Admin', username: 'admin', authType: 'password', folderId: null },
+      ]);
+      await getApp().SshPanel.refreshAll();
+      await flush();
+
+      const userEl = document.querySelector('.ssh-user-item[data-user-id="u1"]') as HTMLElement;
+      userEl.dispatchEvent(new MouseEvent('contextmenu', { bubbles: true, clientX: 100, clientY: 100 }));
+      await flush();
+
+      (document.querySelector('#sshContextMenu [data-action="ssh-duplicate"]') as HTMLElement).click();
+      await flush();
+
+      expect(api.sshUserDuplicate).toHaveBeenCalledWith('u1');
+    });
+
+    it('duplicates a user folder after a count-aware confirm', async () => {
+      const App = getApp();
+      const api = window.api;
+      vi.mocked(api.sshUserFolderList).mockResolvedValue([
+        { id: 'uf1', name: 'Team A', parentId: null },
+      ]);
+      vi.mocked(api.sshUserList).mockResolvedValue([
+        { id: 'u1', name: 'Admin', username: 'admin', authType: 'password', folderId: 'uf1' },
+      ]);
+      await App.SshPanel.refreshAll();
+      await flush();
+
+      const folderEl = document.querySelector('.ssh-user-folder[data-user-folder-id="uf1"]') as HTMLElement;
+      folderEl.dispatchEvent(new MouseEvent('contextmenu', { bubbles: true, clientX: 100, clientY: 100 }));
+      await flush();
+
+      (document.querySelector('#sshContextMenu [data-action="ssh-duplicate"]') as HTMLElement).click();
+      await flush();
+
+      const { dialog, message, ok } = getConfirmElements();
+      expect(dialog.classList.contains('hidden')).toBe(false);
+      expect(message.textContent).toBe(App.__('confirmDuplicateSshUserFolder', { name: 'Team A', users: 1, subfolders: 0 }));
+
+      ok.click();
+      await flush();
+      expect(api.sshUserFolderDuplicate).toHaveBeenCalledWith('uf1');
+    });
+
+    it('duplicates a connection folder deeply after a count-aware confirm', async () => {
+      const App = getApp();
+      const api = window.api;
+      vi.mocked(api.sshConnectionFolderList).mockResolvedValue([
+        { id: 'g1', name: 'Prod', parentId: null, connectionCount: 2 },
+      ]);
+      await App.SshPanel.refreshAll();
+      await flush();
+
+      const folderEl = document.querySelector('.ssh-folder[data-folder-id="g1"]') as HTMLElement;
+      folderEl.dispatchEvent(new MouseEvent('contextmenu', { bubbles: true, clientX: 100, clientY: 100 }));
+      await flush();
+
+      (document.querySelector('#sshContextMenu [data-action="ssh-duplicate"]') as HTMLElement).click();
+      await flush();
+
+      const { dialog, message, ok } = getConfirmElements();
+      expect(dialog.classList.contains('hidden')).toBe(false);
+      expect(message.textContent).toBe(App.__('confirmDuplicateSshConnectionFolder', { name: 'Prod', connections: 2, subfolders: 0 }));
+
+      ok.click();
+      await flush();
+      expect(api.sshConnectionFolderDuplicate).toHaveBeenCalledWith('g1');
     });
   });
 

@@ -103,6 +103,7 @@
     confirmCancel: '取消',
     confirmClose: '關閉',
     confirmDelete: '刪除',
+    confirmDuplicate: '複製',
     confirmDontShowAgain: '不再顯示',
     confirmCloseTerminal: '關閉此終端機？\n工作階段將被終止。',
     confirmCloseSelectedTerminals: '關閉 {count} 個已選取的終端機？\n所有工作階段將被終止。',
@@ -123,6 +124,10 @@
     confirmDeleteMultiSsh: '刪除 {count} 個 SSH {type}？',
     confirmDeleteMultiSshUserConnections: '使用所選使用者的連線需要重新指派：\n{users}',
     confirmDeleteMultiSshUserLine: '{user} → {connections}',
+    confirmDuplicateSshConnectionFolder: '複製連線資料夾「{name}」？\n其中的 {connections} 個連線與 {subfolders} 個子資料夾也會一併複製。',
+    confirmDuplicateSshUserFolder: '複製使用者資料夾「{name}」？\n其中的 {users} 個使用者與 {subfolders} 個子資料夾也會一併複製。',
+    confirmDuplicateMultiSshConnectionFolder: '複製 {folders} 個連線資料夾？\n其中的 {connections} 個連線與 {subfolders} 個子資料夾也會一併複製。',
+    confirmDuplicateMultiSshUserFolder: '複製 {folders} 個使用者資料夾？\n其中的 {users} 個使用者與 {subfolders} 個子資料夾也會一併複製。',
     confirmJumpHostsMissing: '以下跳板機未被選取：\n\n{names}\n\n仍然匯入？',
 
     // ── SSH Sidebar ──────────────────────────────────────────────────────────

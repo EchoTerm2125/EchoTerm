@@ -103,6 +103,7 @@
     confirmCancel: 'キャンセル',
     confirmClose: '閉じる',
     confirmDelete: '削除',
+    confirmDuplicate: '複製',
     confirmDontShowAgain: '今後表示しない',
     confirmCloseTerminal: 'このターミナルを閉じますか？\nセッションが終了します。',
     confirmCloseSelectedTerminals: '選択した {count} 台のターミナルを閉じますか？\nすべてのセッションが終了します。',
@@ -123,6 +124,10 @@
     confirmDeleteMultiSsh: 'SSH {type} を {count} 件削除しますか？',
     confirmDeleteMultiSshUserConnections: '選択したユーザーを使用している接続は再割り当てが必要になります:\n{users}',
     confirmDeleteMultiSshUserLine: '{user} → {connections}',
+    confirmDuplicateSshConnectionFolder: '接続フォルダ「{name}」を複製しますか？\nその中の接続 {connections} 件とサブフォルダ {subfolders} 件もコピーされます。',
+    confirmDuplicateSshUserFolder: 'ユーザーフォルダ「{name}」を複製しますか？\nその中のユーザー {users} 件とサブフォルダ {subfolders} 件もコピーされます。',
+    confirmDuplicateMultiSshConnectionFolder: '接続フォルダ {folders} 件を複製しますか？\nその中の接続 {connections} 件とサブフォルダ {subfolders} 件もコピーされます。',
+    confirmDuplicateMultiSshUserFolder: 'ユーザーフォルダ {folders} 件を複製しますか？\nその中のユーザー {users} 件とサブフォルダ {subfolders} 件もコピーされます。',
     confirmJumpHostsMissing: '次のジャンプホストが選択されていません：\n\n{names}\n\nそれでもインポートしますか？',
 
     // ── SSH Sidebar ──────────────────────────────────────────────────────────

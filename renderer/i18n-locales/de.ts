@@ -103,6 +103,7 @@
     confirmCancel: 'Abbrechen',
     confirmClose: 'Schließen',
     confirmDelete: 'Löschen',
+    confirmDuplicate: 'Duplizieren',
     confirmDontShowAgain: 'Nicht erneut anzeigen',
     confirmCloseTerminal: 'Dieses Terminal schließen?\nDie Sitzung wird beendet.',
     confirmCloseSelectedTerminals: 'Ausgewählte Terminals schließen ({count})?\nAlle Sitzungen werden beendet.',
@@ -123,6 +124,10 @@
     confirmDeleteMultiSsh: '{count} SSH-Elemente löschen?',
     confirmDeleteMultiSshUserConnections: 'Verbindungen, die die ausgewählten Benutzer verwenden, müssen neu zugewiesen werden:\n{users}',
     confirmDeleteMultiSshUserLine: '{user} → {connections}',
+    confirmDuplicateSshConnectionFolder: 'Verbindungsordner „{name}“ duplizieren?\n{connections} Verbindung(en) und {subfolders} Unterordner darin werden ebenfalls kopiert.',
+    confirmDuplicateSshUserFolder: 'Benutzerordner „{name}“ duplizieren?\n{users} Benutzer und {subfolders} Unterordner darin werden ebenfalls kopiert.',
+    confirmDuplicateMultiSshConnectionFolder: '{folders} Verbindungsordner duplizieren?\n{connections} Verbindung(en) und {subfolders} Unterordner darin werden ebenfalls kopiert.',
+    confirmDuplicateMultiSshUserFolder: '{folders} Benutzerordner duplizieren?\n{users} Benutzer und {subfolders} Unterordner darin werden ebenfalls kopiert.',
     confirmJumpHostsMissing: 'Die folgenden Sprunghosts sind nicht ausgewählt:\n\n{names}\n\nTrotzdem importieren?',
 
     // ── SSH Sidebar ──────────────────────────────────────────────────────────

@@ -103,6 +103,7 @@
     confirmCancel: 'Annuler',
     confirmClose: 'Fermer',
     confirmDelete: 'Supprimer',
+    confirmDuplicate: 'Dupliquer',
     confirmDontShowAgain: 'Ne plus afficher',
     confirmCloseTerminal: 'Fermer ce terminal ?\nLa session sera terminée.',
     confirmCloseSelectedTerminals: 'Fermer les terminaux sélectionnés ({count}) ?\nToutes les sessions seront terminées.',
@@ -123,6 +124,10 @@
     confirmDeleteMultiSsh: 'Supprimer {count} éléments SSH ?',
     confirmDeleteMultiSshUserConnections: 'Les connexions utilisant les utilisateurs sélectionnés devront être réassignées :\n{users}',
     confirmDeleteMultiSshUserLine: '{user} → {connections}',
+    confirmDuplicateSshConnectionFolder: 'Dupliquer le dossier de connexions « {name} » ?\n{connections} connexion(s) et {subfolders} sous-dossier(s) dedans seront aussi copiés.',
+    confirmDuplicateSshUserFolder: 'Dupliquer le dossier utilisateurs « {name} » ?\n{users} utilisateur(s) et {subfolders} sous-dossier(s) dedans seront aussi copiés.',
+    confirmDuplicateMultiSshConnectionFolder: 'Dupliquer {folders} dossiers de connexions ?\n{connections} connexion(s) et {subfolders} sous-dossier(s) dedans seront aussi copiés.',
+    confirmDuplicateMultiSshUserFolder: 'Dupliquer {folders} dossiers utilisateurs ?\n{users} utilisateur(s) et {subfolders} sous-dossier(s) dedans seront aussi copiés.',
     confirmJumpHostsMissing: 'Les hôtes de saut suivants ne sont pas sélectionnés :\n\n{names}\n\nImporter quand même ?',
 
     // ── SSH Sidebar ──────────────────────────────────────────────────────────

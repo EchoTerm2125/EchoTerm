@@ -5,10 +5,10 @@
 
 import type { ConnectionFolder } from '../../domain/entities/ssh';
 import type { ConnectionFolderRepository } from '../../domain/ports/connection-folder-repository';
-import { collectFolderAndDescendantIds, wouldCreateFolderCycle } from '../../domain/services/folder-tree';
+import { collectFolderAndDescendantIds, cloneFolderSubtree, wouldCreateFolderCycle } from '../../domain/services/folder-tree';
 import type { CryptoVault } from './crypto-vault';
-import { nextId } from './ssh-data';
-import type { StoredConnectionFolder } from './ssh-data';
+import { createIdMinter, nextId } from './ssh-data';
+import type { StoredConnection, StoredConnectionFolder } from './ssh-data';
 
 export class FileConnectionFolderRepository implements ConnectionFolderRepository {
   constructor(private readonly vault: CryptoVault) {}
@@ -97,6 +97,49 @@ export class FileConnectionFolderRepository implements ConnectionFolderRepositor
     }
     data.connectionFolders = data.connectionFolders.filter(f => !deletedIds.has(f.id));
     this.vault.persist();
+  }
+
+  /** Deep-copies the folder subtree, its connections, and one persist. */
+  duplicate(id: string): ConnectionFolder {
+    const data = this.vault.ensureData();
+    const source = data.connectionFolders.find(f => f.id === id);
+    if (!source) throw new Error('Folder not found.');
+
+    const mintFolderId = createIdMinter('g', data.connectionFolders);
+    const { nodes, idMap } = cloneFolderSubtree(data.connectionFolders, id, source.parentId ?? null, mintFolderId);
+
+    // Copy every connection inside the subtree, remapping it to its copied folder.
+    const mintConnId = createIdMinter('c', data.connections);
+    const copiedIdByOldId = new Map<string, string>();
+    const copiedConnections: StoredConnection[] = [];
+    for (const conn of data.connections) {
+      if (!conn.folderId || !idMap.has(conn.folderId)) continue;
+      const newId = mintConnId();
+      copiedIdByOldId.set(conn.id, newId);
+      copiedConnections.push({ ...conn, id: newId, folderId: idMap.get(conn.folderId)! });
+    }
+    // A copied connection whose jump host is another copied connection must
+    // point at the copy: the original may later be deleted, and the severs
+    // performed on delete would otherwise break the copy's jump hop.
+    for (const conn of copiedConnections) {
+      if (conn.jumpHost?.type === 'reference') {
+        const remapped = copiedIdByOldId.get(conn.jumpHost.connectionId);
+        if (remapped) conn.jumpHost = { type: 'reference', connectionId: remapped };
+      }
+    }
+    data.connections.push(...copiedConnections);
+
+    // Keep each new folder's denormalized connectionIds in sync with the copies.
+    data.connectionFolders.push(...nodes.map(n => ({
+      id: n.id,
+      name: n.name,
+      parentId: n.parentId,
+      connectionIds: copiedConnections.filter(c => c.folderId === n.id).map(c => c.id),
+    })));
+    this.vault.persist();
+
+    const rootNode = nodes.find(n => n.oldId === id)!;
+    return { id: rootNode.id, name: rootNode.name, parentId: rootNode.parentId };
   }
 
   private toEntity(stored: StoredConnectionFolder): ConnectionFolder {

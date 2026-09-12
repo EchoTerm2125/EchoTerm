@@ -103,6 +103,7 @@
     confirmCancel: 'Отмена',
     confirmClose: 'Закрыть',
     confirmDelete: 'Удалить',
+    confirmDuplicate: 'Дублировать',
     confirmDontShowAgain: 'Больше не показывать',
     confirmCloseTerminal: 'Закрыть этот терминал?\nСеанс будет завершён.',
     confirmCloseSelectedTerminals: 'Закрыть выбранные терминалы ({count})?\nВсе сеансы будут завершены.',
@@ -123,6 +124,10 @@
     confirmDeleteMultiSsh: 'Удалить SSH-элементы ({count})?',
     confirmDeleteMultiSshUserConnections: 'Подключения, использующие выбранных пользователей, потребуется переназначить:\n{users}',
     confirmDeleteMultiSshUserLine: '{user} → {connections}',
+    confirmDuplicateSshConnectionFolder: 'Дублировать папку подключений «{name}»?\n{connections} подключени(й) и {subfolders} подпапок внутри неё также будут скопированы.',
+    confirmDuplicateSshUserFolder: 'Дублировать папку пользователей «{name}»?\n{users} пользовател(ей) и {subfolders} подпапок внутри неё также будут скопированы.',
+    confirmDuplicateMultiSshConnectionFolder: 'Дублировать папки подключений ({folders})?\n{connections} подключени(й) и {subfolders} подпапок внутри них также будут скопированы.',
+    confirmDuplicateMultiSshUserFolder: 'Дублировать папки пользователей ({folders})?\n{users} пользовател(ей) и {subfolders} подпапок внутри них также будут скопированы.',
     confirmJumpHostsMissing: 'Следующие хосты перехода не выбраны:\n\n{names}\n\nВсё равно импортировать?',
 
     // ── SSH Sidebar ──────────────────────────────────────────────────────────

@@ -1,5 +1,5 @@
 // Unit tests for src/domain/services/folder-tree.ts
-import { collectFolderAndDescendantIds, wouldCreateFolderCycle } from '../../src/domain/services/folder-tree';
+import { collectFolderAndDescendantIds, cloneFolderSubtree, wouldCreateFolderCycle } from '../../src/domain/services/folder-tree';
 import type { ConnectionFolder } from '../../src/domain/entities/ssh';
 
 function folder(id: string, parentId: string | null): ConnectionFolder {
@@ -83,5 +83,30 @@ describe('wouldCreateFolderCycle', () => {
 
   it('handles parent id pointing to a non-existent folder', () => {
     expect(wouldCreateFolderCycle([folder('a', null)], 'a', 'missing')).toBe(false);
+  });
+});
+
+describe('cloneFolderSubtree', () => {
+  it('mints fresh ids, reparents copies, and renames only the root', () => {
+    const folders = [
+      folder('g1', null),
+      folder('g2', 'g1'),
+      folder('g9', null),
+    ];
+    let n = 9;
+    const { nodes, idMap } = cloneFolderSubtree(folders, 'g1', 'g9', () => `g${++n}`);
+
+    expect(idMap.get('g1')).toBe('g10');
+    expect(idMap.get('g2')).toBe('g11');
+    expect(nodes).toEqual([
+      { oldId: 'g1', id: 'g10', name: 'g1 (copy)', parentId: 'g9' },
+      { oldId: 'g2', id: 'g11', name: 'g2', parentId: 'g10' },
+    ]);
+  });
+
+  it('returns only the renamed root when the folder has no descendants', () => {
+    let n = 0;
+    const { nodes } = cloneFolderSubtree([folder('g1', null)], 'g1', null, () => `n${++n}`);
+    expect(nodes).toEqual([{ oldId: 'g1', id: 'n1', name: 'g1 (copy)', parentId: null }]);
   });
 });

@@ -103,6 +103,7 @@
     confirmCancel: '취소',
     confirmClose: '닫기',
     confirmDelete: '삭제',
+    confirmDuplicate: '복제',
     confirmDontShowAgain: '다시 표시하지 않음',
     confirmCloseTerminal: '이 터미널을 닫을까요?\n세션이 종료됩니다.',
     confirmCloseSelectedTerminals: '선택한 터미널 {count}개를 닫을까요?\n모든 세션이 종료됩니다.',
@@ -123,6 +124,10 @@
     confirmDeleteMultiSsh: 'SSH {type} {count}개를 삭제할까요?',
     confirmDeleteMultiSshUserConnections: '선택한 사용자를 사용하는 연결은 다시 지정해야 합니다:\n{users}',
     confirmDeleteMultiSshUserLine: '{user} → {connections}',
+    confirmDuplicateSshConnectionFolder: '연결 폴더 "{name}"을(를) 복제할까요?\n폴더 안의 연결 {connections}개와 하위 폴더 {subfolders}개도 함께 복사됩니다.',
+    confirmDuplicateSshUserFolder: '사용자 폴더 "{name}"을(를) 복제할까요?\n폴더 안의 사용자 {users}명과 하위 폴더 {subfolders}개도 함께 복사됩니다.',
+    confirmDuplicateMultiSshConnectionFolder: '연결 폴더 {folders}개를 복제할까요?\n각 폴더 안의 연결 {connections}개와 하위 폴더 {subfolders}개도 함께 복사됩니다.',
+    confirmDuplicateMultiSshUserFolder: '사용자 폴더 {folders}개를 복제할까요?\n각 폴더 안의 사용자 {users}명과 하위 폴더 {subfolders}개도 함께 복사됩니다.',
     confirmJumpHostsMissing: '다음 점프 호스트가 선택되지 않았습니다:\n\n{names}\n\n그래도 가져올까요?',
 
     // ── SSH Sidebar ──────────────────────────────────────────────────────────

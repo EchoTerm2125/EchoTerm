@@ -103,6 +103,7 @@
     confirmCancel: 'Cancelar',
     confirmClose: 'Fechar',
     confirmDelete: 'Excluir',
+    confirmDuplicate: 'Duplicar',
     confirmDontShowAgain: 'Não mostrar novamente',
     confirmCloseTerminal: 'Fechar esta terminal?\nA sessão será encerrada.',
     confirmCloseSelectedTerminals: 'Fechar terminais selecionadas ({count})?\nTodas as sessões serão encerradas.',
@@ -123,6 +124,10 @@
     confirmDeleteMultiSsh: 'Excluir {count} itens SSH?',
     confirmDeleteMultiSshUserConnections: 'As conexões que usam os usuários selecionados precisarão ser reatribuídas:\n{users}',
     confirmDeleteMultiSshUserLine: '{user} → {connections}',
+    confirmDuplicateSshConnectionFolder: 'Duplicar a pasta de conexões "{name}"?\n{connections} conexão(ões) e {subfolders} subpasta(s) dentro dela também serão copiadas.',
+    confirmDuplicateSshUserFolder: 'Duplicar a pasta de usuários "{name}"?\n{users} usuário(s) e {subfolders} subpasta(s) dentro dela também serão copiados.',
+    confirmDuplicateMultiSshConnectionFolder: 'Duplicar {folders} pastas de conexões?\n{connections} conexão(ões) e {subfolders} subpasta(s) dentro delas também serão copiadas.',
+    confirmDuplicateMultiSshUserFolder: 'Duplicar {folders} pastas de usuários?\n{users} usuário(s) e {subfolders} subpasta(s) dentro delas também serão copiados.',
     confirmJumpHostsMissing: 'Os seguintes hosts de salto não estão selecionados:\n\n{names}\n\nImportar mesmo assim?',
 
     // ── SSH Sidebar ──────────────────────────────────────────────────────────

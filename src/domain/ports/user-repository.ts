@@ -12,4 +12,6 @@ export interface UserRepository {
   save(user: User): User;
   /** Deletes the user and clears its reference from any connections. */
   delete(id: string): void;
+  /** Copies the user (credentials included) under a new id, returning the copy. */
+  duplicate(id: string): User;
 }

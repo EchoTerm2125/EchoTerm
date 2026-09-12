@@ -73,6 +73,22 @@ export class FileUserRepository implements UserRepository {
     this.vault.persist();
   }
 
+  duplicate(id: string): User {
+    const data = this.vault.ensureData();
+    const source = data.users.find(u => u.id === id);
+    if (!source) throw new Error('User not found.');
+    // Copies every credential field verbatim — duplicating a user clones a
+    // working identity rather than blanking the secrets.
+    const copy: StoredUser = {
+      ...source,
+      id: nextId('u', data.users),
+      name: `${source.name} (copy)`,
+    };
+    data.users.push(copy);
+    this.vault.persist();
+    return this.toEntity(copy);
+  }
+
   private toEntity(stored: StoredUser): User {
     return {
       id: stored.id,

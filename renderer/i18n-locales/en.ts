@@ -104,6 +104,7 @@
     confirmCancel: 'Cancel',
     confirmClose: 'Close',
     confirmDelete: 'Delete',
+    confirmDuplicate: 'Duplicate',
     confirmDontShowAgain: 'Don\'t show this again',
     confirmCloseTerminal: 'Close this terminal?\nThe session will be terminated.',
     confirmCloseSelectedTerminals: 'Close {count} selected terminal{plural}?\nAll sessions will be terminated.',
@@ -124,6 +125,10 @@
     confirmDeleteMultiSsh: 'Delete {count} SSH {type}{plural}?',
     confirmDeleteMultiSshUserConnections: 'Connections using the selected users will need to be reassigned:\n{users}',
     confirmDeleteMultiSshUserLine: '{user} → {connections}',
+    confirmDuplicateSshConnectionFolder: 'Duplicate connection folder "{name}"?\n{connections} connection(s) and {subfolders} sub-folder(s) inside it will also be copied.',
+    confirmDuplicateSshUserFolder: 'Duplicate user folder "{name}"?\n{users} user(s) and {subfolders} sub-folder(s) inside it will also be copied.',
+    confirmDuplicateMultiSshConnectionFolder: 'Duplicate {folders} connection folder(s)?\n{connections} connection(s) and {subfolders} sub-folder(s) inside them will also be copied.',
+    confirmDuplicateMultiSshUserFolder: 'Duplicate {folders} user folder(s)?\n{users} user(s) and {subfolders} sub-folder(s) inside them will also be copied.',
     confirmJumpHostsMissing: 'The following jump hosts are not selected:\n\n{names}\n\nImport anyway?',
 
     // ── SSH Sidebar ──────────────────────────────────────────────────────────

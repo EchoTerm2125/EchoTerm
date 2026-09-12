@@ -1393,8 +1393,9 @@ import {
             // Multi-select bulk actions for groups
             sshContextTarget = { type: 'connFolder', id: null, multi: true, ids: selectedGroups.map(k => k.split(':')[1]) };
             setBtnText('ssh-open-folder', App.__('sshCtxOpenAllMulti', { count: selectedGroups.length }));
+            setBtnText('ssh-duplicate', App.__('sshCtxDuplicateSelected', { count: selectedGroups.length }));
             setBtnText('ssh-delete', App.__('sshCtxDeleteSelected', { count: selectedGroups.length }));
-            const actions = ['ssh-open-folder', 'ssh-move', 'ssh-delete'];
+            const actions = ['ssh-open-folder', 'ssh-duplicate', 'ssh-move', 'ssh-delete'];
             // "Add Parent Folder" only makes sense when all selected folders share the same parent
             const folders = await api.sshConnectionFolderList();
             const selected = folders.filter(f => sshContextTarget.ids.includes(f.id));
@@ -1404,7 +1405,7 @@ import {
             showSshContextMenu(e, actions);
           } else {
             sshContextTarget = { type: 'connFolder', id: folderId };
-            showSshContextMenu(e, ['ssh-add-conn', 'ssh-add-subfolder', 'ssh-add-parent-folder', 'ssh-open-folder', 'ssh-edit', 'ssh-move', 'ssh-delete']);
+            showSshContextMenu(e, ['ssh-add-conn', 'ssh-add-subfolder', 'ssh-add-parent-folder', 'ssh-open-folder', 'ssh-edit', 'ssh-duplicate', 'ssh-move', 'ssh-delete']);
           }
         } else if (connItem) {
           const connId = connItem.dataset.connId;
@@ -1446,11 +1447,12 @@ import {
           if (selectedUserFolders.length > 1 && sshSelected.has(sshKey('userFolder', folderId))) {
             // Multi-select bulk actions for user folders
             sshContextTarget = { type: 'userFolder', id: null, multi: true, ids: selectedUserFolders.map(k => k.split(':')[1]) };
+            setBtnText('ssh-duplicate', App.__('sshCtxDuplicateSelected', { count: selectedUserFolders.length }));
             setBtnText('ssh-delete', App.__('sshCtxDeleteSelected', { count: selectedUserFolders.length }));
-            showSshContextMenu(e, ['ssh-move', 'ssh-delete']);
+            showSshContextMenu(e, ['ssh-duplicate', 'ssh-move', 'ssh-delete']);
           } else {
             sshContextTarget = { type: 'userFolder', id: folderId };
-            showSshContextMenu(e, ['ssh-add-user-folder', 'ssh-add-user', 'ssh-edit', 'ssh-move', 'ssh-delete']);
+            showSshContextMenu(e, ['ssh-add-user-folder', 'ssh-add-user', 'ssh-edit', 'ssh-duplicate', 'ssh-move', 'ssh-delete']);
           }
           return;
         }
@@ -1459,11 +1461,12 @@ import {
         const selectedUsers = [...sshSelected].filter(k => k.startsWith('user:'));
         if (selectedUsers.length > 1 && sshSelected.has(sshKey('user', userId))) {
           sshContextTarget = { type: 'user', id: null, multi: true, ids: selectedUsers.map(k => k.split(':')[1]) };
+          setBtnText('ssh-duplicate', App.__('sshCtxDuplicateSelected', { count: selectedUsers.length }));
           setBtnText('ssh-delete', App.__('sshCtxDeleteSelected', { count: selectedUsers.length }));
-          showSshContextMenu(e, ['ssh-move', 'ssh-delete']);
+          showSshContextMenu(e, ['ssh-duplicate', 'ssh-move', 'ssh-delete']);
         } else {
           sshContextTarget = { type: 'user', id: userId };
-          showSshContextMenu(e, ['ssh-edit', 'ssh-move', 'ssh-delete']);
+          showSshContextMenu(e, ['ssh-edit', 'ssh-duplicate', 'ssh-move', 'ssh-delete']);
         }
       });
     }
@@ -1638,31 +1641,38 @@ import {
               else if (target.type === 'user') deleteUser(target.id);
             }
             break;
-          case 'ssh-duplicate': {
-            const connections = await api.sshConnectionList();
-            const ids = target.multi ? target.ids : [target.id];
-            for (const id of ids) {
-              const src = connections.find(c => c.id === id);
-              if (!src) continue;
-              await api.sshConnectionSave({
-                name: src.name + ' (copy)',
-                host: src.host,
-                port: src.port,
-                userId: src.userId,
-                folderId: src.folderId,
-                jumpHost: src.jumpHost,
-                hostKeyAlgorithms: src.hostKeyAlgorithms ?? null,
-                kexAlgorithms: src.kexAlgorithms ?? null,
-                pubkeyAcceptedAlgorithms: src.pubkeyAcceptedAlgorithms ?? null,
-                ciphers: src.ciphers ?? null,
-                macs: src.macs ?? null,
-                caSignatureAlgorithms: src.caSignatureAlgorithms ?? null,
-                compression: src.compression ?? null,
-              });
+          case 'ssh-duplicate':
+            if (target.type === 'connection') {
+              const connections = await api.sshConnectionList();
+              const ids = target.multi ? target.ids : [target.id];
+              for (const id of ids) {
+                const src = connections.find(c => c.id === id);
+                if (!src) continue;
+                await api.sshConnectionSave({
+                  name: src.name + ' (copy)',
+                  host: src.host,
+                  port: src.port,
+                  userId: src.userId,
+                  folderId: src.folderId,
+                  jumpHost: src.jumpHost,
+                  hostKeyAlgorithms: src.hostKeyAlgorithms ?? null,
+                  kexAlgorithms: src.kexAlgorithms ?? null,
+                  pubkeyAcceptedAlgorithms: src.pubkeyAcceptedAlgorithms ?? null,
+                  ciphers: src.ciphers ?? null,
+                  macs: src.macs ?? null,
+                  caSignatureAlgorithms: src.caSignatureAlgorithms ?? null,
+                  compression: src.compression ?? null,
+                });
+              }
+              await refreshConnectionTree();
+            } else if (target.type === 'user') {
+              await duplicateUsers(target);
+            } else if (target.type === 'connFolder') {
+              await duplicateConnectionFolders(target);
+            } else if (target.type === 'userFolder') {
+              await duplicateUserFolders(target);
             }
-            await refreshConnectionTree();
             break;
-          }
           case 'ssh-open-folder':
             if (target.multi) {
               for (const id of target.ids) openSshConnectionFolder(id);
@@ -1974,6 +1984,117 @@ import {
       },
       'skipSshDeleteConfirm',
       'confirmDelete'
+    );
+  }
+
+  // Mark a freshly created set of rows as selected (replacing any prior selection).
+  function applySshSelection(type, ids) {
+    clearSshSelection();
+    for (const id of ids) {
+      sshSelected.add(sshKey(type, id));
+      const el = findSshElement(type, id);
+      if (el) el.classList.add('selected');
+    }
+    if (ids.length > 0) sshSelectType = type;
+  }
+
+  // Drop folders from the persisted collapsed set so a duplicated copy is
+  // visible after the tree re-renders (the copy itself is never collapsed).
+  function expandCollapsedFolders(storageKey, folderIds) {
+    if (folderIds.size === 0) return;
+    let collapsed;
+    try {
+      collapsed = new Set(JSON.parse(localStorage.getItem(storageKey) || '[]'));
+    } catch {
+      collapsed = new Set();
+    }
+    let changed = false;
+    for (const id of folderIds) {
+      if (collapsed.delete(id)) changed = true;
+    }
+    if (changed) localStorage.setItem(storageKey, JSON.stringify([...collapsed]));
+  }
+
+  // Duplicating users is silent: every credential field is cloned into the new
+  // records, and nothing references a user by a shared key.
+  async function duplicateUsers(target) {
+    const ids = target.multi ? target.ids : [target.id];
+    clearSshSelection();
+    const newIds = [];
+    for (const id of ids) {
+      const res = await api.sshUserDuplicate(id);
+      if (res?.user?.id) newIds.push(res.user.id);
+    }
+    await refreshUsers();
+    applySshSelection('user', newIds);
+  }
+
+  // Duplicating a folder deep-copies its whole subtree, so it is always gated
+  // by a count-aware confirm (single or aggregate for a multi-selection).
+  async function duplicateConnectionFolders(target) {
+    const folders = await api.sshConnectionFolderList();
+    const ids = target.multi ? target.ids : [target.id];
+    // A nested selection is already covered by its ancestor's copy.
+    const roots = target.multi ? topLevelFolderIds(ids, folders) : ids;
+    const subtree = collectFolderSubtree(folders, roots);
+    const connections = folders
+      .filter(f => subtree.has(f.id))
+      .reduce((s, f) => s + (f.connectionCount ?? 0), 0);
+    const subfolders = subtree.size - roots.length;
+    const source = folders.find(f => f.id === roots[0]);
+    const message = !target.multi && roots.length === 1
+      ? App.__('confirmDuplicateSshConnectionFolder', { name: source?.name || roots[0], connections, subfolders })
+      : App.__('confirmDuplicateMultiSshConnectionFolder', { folders: roots.length, connections, subfolders });
+    App.Menus.showConfirm(
+      message,
+      async () => {
+        clearSshSelection();
+        const newIds = [];
+        const parentsToExpand = new Set();
+        for (const id of roots) {
+          const src = folders.find(f => f.id === id);
+          if (src?.parentId) parentsToExpand.add(src.parentId);
+          const res = await api.sshConnectionFolderDuplicate(id);
+          if (res?.folder?.id) newIds.push(res.folder.id);
+        }
+        expandCollapsedFolders('sshCollapsedFolders', parentsToExpand);
+        await refreshConnectionTree();
+        applySshSelection('connFolder', newIds);
+      },
+      null,
+      'confirmDuplicate'
+    );
+  }
+
+  async function duplicateUserFolders(target) {
+    const [folders, users] = await Promise.all([api.sshUserFolderList(), api.sshUserList()]);
+    const ids = target.multi ? target.ids : [target.id];
+    const roots = target.multi ? topLevelFolderIds(ids, folders) : ids;
+    const subtree = collectFolderSubtree(folders, roots);
+    const copiedUsers = users.filter(u => u.folderId && subtree.has(u.folderId)).length;
+    const subfolders = subtree.size - roots.length;
+    const source = folders.find(f => f.id === roots[0]);
+    const message = !target.multi && roots.length === 1
+      ? App.__('confirmDuplicateSshUserFolder', { name: source?.name || roots[0], users: copiedUsers, subfolders })
+      : App.__('confirmDuplicateMultiSshUserFolder', { folders: roots.length, users: copiedUsers, subfolders });
+    App.Menus.showConfirm(
+      message,
+      async () => {
+        clearSshSelection();
+        const newIds = [];
+        const parentsToExpand = new Set();
+        for (const id of roots) {
+          const src = folders.find(f => f.id === id);
+          if (src?.parentId) parentsToExpand.add(src.parentId);
+          const res = await api.sshUserFolderDuplicate(id);
+          if (res?.folder?.id) newIds.push(res.folder.id);
+        }
+        expandCollapsedFolders('sshCollapsedUserFolders', parentsToExpand);
+        await refreshUsers();
+        applySshSelection('userFolder', newIds);
+      },
+      null,
+      'confirmDuplicate'
     );
   }
 

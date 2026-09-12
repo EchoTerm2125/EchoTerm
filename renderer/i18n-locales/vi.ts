@@ -103,6 +103,7 @@
     confirmCancel: 'Hủy',
     confirmClose: 'Đóng',
     confirmDelete: 'Xóa',
+    confirmDuplicate: 'Nhân bản',
     confirmDontShowAgain: 'Không hiển thị lại',
     confirmCloseTerminal: 'Đóng terminal này?\nPhiên sẽ bị chấm dứt.',
     confirmCloseSelectedTerminals: 'Đóng {count} terminal đã chọn?\nTất cả phiên sẽ bị chấm dứt.',
@@ -123,6 +124,10 @@
     confirmDeleteMultiSsh: 'Xóa {count} mục SSH?',
     confirmDeleteMultiSshUserConnections: 'Các kết nối dùng những người dùng đã chọn sẽ cần được gán lại:\n{users}',
     confirmDeleteMultiSshUserLine: '{user} → {connections}',
+    confirmDuplicateSshConnectionFolder: 'Nhân bản thư mục kết nối "{name}"?\n{connections} kết nối và {subfolders} thư mục con bên trong cũng sẽ được sao chép.',
+    confirmDuplicateSshUserFolder: 'Nhân bản thư mục người dùng "{name}"?\n{users} người dùng và {subfolders} thư mục con bên trong cũng sẽ được sao chép.',
+    confirmDuplicateMultiSshConnectionFolder: 'Nhân bản {folders} thư mục kết nối?\n{connections} kết nối và {subfolders} thư mục con bên trong chúng cũng sẽ được sao chép.',
+    confirmDuplicateMultiSshUserFolder: 'Nhân bản {folders} thư mục người dùng?\n{users} người dùng và {subfolders} thư mục con bên trong chúng cũng sẽ được sao chép.',
     confirmJumpHostsMissing: 'Các máy chủ trung gian sau chưa được chọn:\n\n{names}\n\nVẫn nhập?',
 
     // ── SSH Sidebar ──────────────────────────────────────────────────────────

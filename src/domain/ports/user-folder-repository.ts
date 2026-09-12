@@ -15,4 +15,9 @@ export interface UserFolderRepository {
   save(folder: UserFolder): UserFolder;
   /** Cascade-deletes the folder subtree: all sub-folders and every contained user. */
   delete(id: string): void;
+  /**
+   * Deep-copies the folder subtree (sub-folders and every contained user) as a
+   * sibling of the source, returning the copied root folder.
+   */
+  duplicate(id: string): UserFolder;
 }

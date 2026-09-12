@@ -134,10 +134,19 @@ export function migrateData(raw: unknown): { data: SshData; changed: boolean } {
 }
 
 export function nextId(prefix: string, items: { id: string }[]): string {
+  return createIdMinter(prefix, items)();
+}
+
+/**
+ * Stateful id minter seeded from the existing ids: each call returns the next
+ * id for `prefix`. Used when one operation must mint several ids without
+ * re-scanning the growing array (deep folder duplicate).
+ */
+export function createIdMinter(prefix: string, items: { id: string }[]): () => string {
   let max = 0;
   for (const item of items) {
     const num = parseInt(item.id.replace(prefix, ''), 10);
     if (!isNaN(num) && num > max) max = num;
   }
-  return `${prefix}${max + 1}`;
+  return () => `${prefix}${++max}`;
 }

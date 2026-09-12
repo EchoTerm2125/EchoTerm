@@ -103,6 +103,7 @@
     confirmCancel: 'İptal',
     confirmClose: 'Kapat',
     confirmDelete: 'Sil',
+    confirmDuplicate: 'Çoğalt',
     confirmDontShowAgain: 'Bir daha gösterme',
     confirmCloseTerminal: 'Bu terminal kapatılsın mı?\nOturum sonlandırılacak.',
     confirmCloseSelectedTerminals: 'Seçili terminaller ({count}) kapatılsın mı?\nTüm oturumlar sonlandırılacak.',
@@ -123,6 +124,10 @@
     confirmDeleteMultiSsh: '{count} SSH öğesi silinsin mi?',
     confirmDeleteMultiSshUserConnections: 'Seçili kullanıcıları kullanan bağlantıların yeniden atanması gerekecek:\n{users}',
     confirmDeleteMultiSshUserLine: '{user} → {connections}',
+    confirmDuplicateSshConnectionFolder: '"{name}" bağlantı klasörü çoğaltılsın mı?\nİçindeki {connections} bağlantı ve {subfolders} alt klasör de kopyalanacak.',
+    confirmDuplicateSshUserFolder: '"{name}" kullanıcı klasörü çoğaltılsın mı?\nİçindeki {users} kullanıcı ve {subfolders} alt klasör de kopyalanacak.',
+    confirmDuplicateMultiSshConnectionFolder: '{folders} bağlantı klasörü çoğaltılsın mı?\nİçlerindeki {connections} bağlantı ve {subfolders} alt klasör de kopyalanacak.',
+    confirmDuplicateMultiSshUserFolder: '{folders} kullanıcı klasörü çoğaltılsın mı?\nİçlerindeki {users} kullanıcı ve {subfolders} alt klasör de kopyalanacak.',
     confirmJumpHostsMissing: 'Aşağıdaki atlama sunucuları seçili değil:\n\n{names}\n\nYine de içe aktarılsın mı?',
 
     // ── SSH Sidebar ──────────────────────────────────────────────────────────
