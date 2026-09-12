@@ -275,6 +275,8 @@
     optionsThemeLight: 'Açık',
     optionsUiFontSize: 'Arayüz yazı tipi boyutu',
     optionsTermFontSize: 'Terminal yazı tipi boyutu',
+    optionsMaxRetainedLines: 'Maksimum saklanan satır',
+    confirmRetainedLinesHigh: '{lines} saklanan satır girdiniz. 100.000 üzerindeki değerler çok fazla bellek kullanabilir.\nYine de devam edilsin mi?',
     optionsTitleDefaultShell: 'Varsayılan Kabuk',
     optionsTitleWarnings: 'Uyarılar',
     optionsTitleMouse: 'Fare',

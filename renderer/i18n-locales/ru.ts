@@ -275,6 +275,8 @@
     optionsThemeLight: 'Светлая',
     optionsUiFontSize: 'Размер шрифта интерфейса',
     optionsTermFontSize: 'Размер шрифта терминала',
+    optionsMaxRetainedLines: 'Максимум сохраняемых строк',
+    confirmRetainedLinesHigh: 'Вы указали {lines} сохраняемых строк. Значения выше 100 000 могут потреблять много памяти.\nВсё равно продолжить?',
     optionsTitleDefaultShell: 'Оболочка по умолчанию',
     optionsTitleWarnings: 'Предупреждения',
     optionsTitleMouse: 'Мышь',

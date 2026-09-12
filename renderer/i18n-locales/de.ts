@@ -275,6 +275,8 @@
     optionsThemeLight: 'Hell',
     optionsUiFontSize: 'Schriftgröße der Oberfläche',
     optionsTermFontSize: 'Schriftgröße des Terminals',
+    optionsMaxRetainedLines: 'Maximal beibehaltene Zeilen',
+    confirmRetainedLinesHigh: 'Du hast {lines} beibehaltene Zeilen eingegeben. Werte über 100.000 können viel Arbeitsspeicher verbrauchen.\nTrotzdem fortfahren?',
     optionsTitleDefaultShell: 'Standard-Shell',
     optionsTitleWarnings: 'Warnungen',
     optionsTitleMouse: 'Maus',

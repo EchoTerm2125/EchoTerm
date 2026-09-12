@@ -39,11 +39,14 @@ interface ThemeEngine {
   getTheme(): 'dark' | 'light';
   getXtermTheme(): Record<string, string>;
   getSearchColors(): SearchColors;
+  RETAINED_STOPS: readonly number[];
   getUiFontSize(): number;
   getTermFontSize(): number;
+  getMaxRetainedLines(): number;
   setTheme(name: string): void;
   setUiFontSize(px: number): void;
   setTermFontSize(px: number): void;
+  setMaxRetainedLines(lines: number): void;
   applyToTerminals(): void;
   onThemeChange(fn: (theme: 'dark' | 'light') => void): void;
 }

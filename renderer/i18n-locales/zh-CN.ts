@@ -275,6 +275,8 @@
     optionsThemeLight: '浅色',
     optionsUiFontSize: '界面字体大小',
     optionsTermFontSize: '终端字体大小',
+    optionsMaxRetainedLines: '最大保留行数',
+    confirmRetainedLinesHigh: '你输入了 {lines} 保留行数。超过 100,000 可能会占用大量内存。\n是否继续？',
     optionsTitleDefaultShell: '默认 Shell',
     optionsTitleWarnings: '警告',
     optionsTitleMouse: '鼠标',

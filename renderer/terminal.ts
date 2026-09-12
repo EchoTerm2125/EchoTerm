@@ -67,6 +67,7 @@ import './icons';
       cursorBlink: true,
       cursorStyle: 'bar',
       fontSize: App.Theme.getTermFontSize(),
+      scrollback: App.Theme.getMaxRetainedLines(),
       fontFamily: "'Cascadia Code', 'Fira Code', 'Consolas', 'Courier New', 'Microsoft YaHei', 'Noto Sans Mono CJK SC', 'Noto Sans CJK SC', 'PingFang SC', 'WenQuanYi Micro Hei', monospace",
       bracketedPasteMode: true,
       // Reflow the line under the cursor on resize (default is to truncate it).
@@ -454,6 +455,7 @@ import './icons';
       cursorBlink: true,
       cursorStyle: 'bar',
       fontSize: App.Theme.getTermFontSize(),
+      scrollback: App.Theme.getMaxRetainedLines(),
       fontFamily: "'Cascadia Code', 'Fira Code', 'Consolas', 'Courier New', 'Microsoft YaHei', 'Noto Sans Mono CJK SC', 'Noto Sans CJK SC', 'PingFang SC', 'WenQuanYi Micro Hei', monospace",
       bracketedPasteMode: true,
       // Reflow the line under the cursor on resize (default is to truncate it).

@@ -275,6 +275,8 @@
     optionsThemeLight: 'Claro',
     optionsUiFontSize: 'Tamaño de fuente de la interfaz',
     optionsTermFontSize: 'Tamaño de fuente del terminal',
+    optionsMaxRetainedLines: 'Máximo de líneas retenidas',
+    confirmRetainedLinesHigh: 'Has introducido {lines} líneas retenidas. Los valores superiores a 100.000 pueden consumir mucha memoria.\n¿Continuar de todos modos?',
     optionsTitleDefaultShell: 'Shell predeterminado',
     optionsTitleWarnings: 'Advertencias',
     optionsTitleMouse: 'Ratón',

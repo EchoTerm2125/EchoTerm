@@ -275,6 +275,8 @@
     optionsThemeLight: 'Jasny',
     optionsUiFontSize: 'Rozmiar czcionki interfejsu',
     optionsTermFontSize: 'Rozmiar czcionki terminala',
+    optionsMaxRetainedLines: 'Maksymalna liczba zachowanych wierszy',
+    confirmRetainedLinesHigh: 'Wprowadzono {lines} zachowanych wierszy. Wartości powyżej 100 000 mogą zużywać dużo pamięci.\nKontynuować mimo to?',
     optionsTitleDefaultShell: 'Domyślna powłoka',
     optionsTitleWarnings: 'Ostrzeżenia',
     optionsTitleMouse: 'Mysz',

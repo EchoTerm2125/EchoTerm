@@ -40,6 +40,10 @@
 
   const UI_FONT_MIN = 8, UI_FONT_MAX = 24, UI_FONT_DEFAULT = 13;
   const TERM_FONT_MIN = 8, TERM_FONT_MAX = 24, TERM_FONT_DEFAULT = 13;
+  // Max retained lines (xterm scrollback): free 100..1000000, with preset stops
+  // the settings slider snaps to.
+  const RETAINED_MIN = 100, RETAINED_MAX = 1000000, RETAINED_DEFAULT = 1000;
+  const RETAINED_STOPS = [1000, 2000, 5000, 10000, 25000, 50000, 100000];
 
   // ─── Search match colors per theme ────────────────────────────────────────
   // xterm's search decorations require opaque #RRGGBB backgrounds and the band
@@ -83,6 +87,11 @@
   function getTermFontSize() {
     const v = parseInt(localStorage.getItem('termFontSize') || '', 10);
     return Number.isFinite(v) ? clamp(v, TERM_FONT_MIN, TERM_FONT_MAX) : TERM_FONT_DEFAULT;
+  }
+
+  function getMaxRetainedLines() {
+    const v = parseInt(localStorage.getItem('maxRetainedLines') || '', 10);
+    return Number.isFinite(v) ? clamp(v, RETAINED_MIN, RETAINED_MAX) : RETAINED_DEFAULT;
   }
 
   // ─── Apply current xterm theme to all live terminals ────────────────────────
@@ -141,6 +150,19 @@
     });
   }
 
+  // Bounds how many lines a pane retains above the viewport. Lowering this on a
+  // live pane makes xterm discard the oldest buffered lines immediately.
+  function setMaxRetainedLines(lines) {
+    const n = Math.round(lines);
+    if (!Number.isFinite(n)) return;
+    const value = clamp(n, RETAINED_MIN, RETAINED_MAX);
+    localStorage.setItem('maxRetainedLines', String(value));
+    if (!window.App || !App.state || !App.state.terminals) return;
+    App.state.terminals.forEach((t) => {
+      try { t.term.options.scrollback = value; } catch { /* pane not ready */ }
+    });
+  }
+
   // ─── Apply saved appearance immediately at import time ──────────────────────
   // The bundle executes synchronously before first paint, so there is no
   // visible dark→light flash. (CSP forbids inline scripts, so the bundle is
@@ -158,9 +180,12 @@
     getSearchColors,
     getUiFontSize,
     getTermFontSize,
+    getMaxRetainedLines,
     setTheme,
     setUiFontSize,
     setTermFontSize,
+    setMaxRetainedLines,
+    RETAINED_STOPS,
     applyToTerminals,
     onThemeChange,
   };

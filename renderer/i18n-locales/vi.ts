@@ -275,6 +275,8 @@
     optionsThemeLight: 'Sáng',
     optionsUiFontSize: 'Cỡ chữ giao diện',
     optionsTermFontSize: 'Cỡ chữ terminal',
+    optionsMaxRetainedLines: 'Số dòng lưu giữ tối đa',
+    confirmRetainedLinesHigh: 'Bạn đã nhập {lines} dòng lưu giữ. Giá trị trên 100.000 có thể dùng nhiều bộ nhớ.\nVẫn tiếp tục?',
     optionsTitleDefaultShell: 'Shell mặc định',
     optionsTitleWarnings: 'Cảnh báo',
     optionsTitleMouse: 'Chuột',

@@ -275,6 +275,8 @@
     optionsThemeLight: '淺色',
     optionsUiFontSize: '介面字體大小',
     optionsTermFontSize: '終端機字體大小',
+    optionsMaxRetainedLines: '最大保留行數',
+    confirmRetainedLinesHigh: '你輸入了 {lines} 保留行數。超過 100,000 可能會佔用大量記憶體。\n是否繼續？',
     optionsTitleDefaultShell: '預設 Shell',
     optionsTitleWarnings: '警告',
     optionsTitleMouse: '滑鼠',

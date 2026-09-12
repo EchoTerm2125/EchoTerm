@@ -275,6 +275,8 @@
     optionsThemeLight: 'Clair',
     optionsUiFontSize: 'Taille de police de l\'interface',
     optionsTermFontSize: 'Taille de police du terminal',
+    optionsMaxRetainedLines: 'Nombre maximal de lignes conservées',
+    confirmRetainedLinesHigh: 'Vous avez saisi {lines} lignes conservées. Les valeurs supérieures à 100 000 peuvent consommer beaucoup de mémoire.\nContinuer quand même ?',
     optionsTitleDefaultShell: 'Shell par défaut',
     optionsTitleWarnings: 'Avertissements',
     optionsTitleMouse: 'Souris',

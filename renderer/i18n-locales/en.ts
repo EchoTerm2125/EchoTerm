@@ -276,6 +276,8 @@
     optionsThemeLight: 'Light',
     optionsUiFontSize: 'UI font size',
     optionsTermFontSize: 'Terminal font size',
+    optionsMaxRetainedLines: 'Max retained lines',
+    confirmRetainedLinesHigh: 'You entered {lines} retained lines. Values above 100,000 can use a large amount of memory.\nContinue anyway?',
     optionsTitleDefaultShell: 'Default Shell',
     optionsTitleWarnings: 'Warnings',
     optionsTitleMouse: 'Mouse',

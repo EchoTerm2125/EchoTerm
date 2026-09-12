@@ -12,11 +12,31 @@
   // Deliberately NOT listed: SSH folder collapse state and the sidebar split
   // position are transient UI view state, not "settings" — they survive reset.
   const SETTINGS_STORAGE_KEYS = [
-    'appTheme', 'uiFontSize', 'termFontSize', 'defaultShell',
+    'appTheme', 'uiFontSize', 'termFontSize', 'maxRetainedLines', 'defaultShell',
     'skipTabCloseConfirm', 'skipCloseConfirm', 'skipGroupCloseConfirm',
     'skipSshJumpWarn', 'skipPastePreview', 'skipRightClickPaste',
     'i18nLocale', 'sshSidebarWidth',
   ];
+
+  // Preset stops for the retained-lines slider. Empty until the theme module
+  // has loaded, so callers must tolerate a zero-length list.
+  function retainedStops() {
+    return (App.Theme && App.Theme.RETAINED_STOPS) || [];
+  }
+
+  // Retained-line values above the largest slider preset (100k) need a
+  // memory warning before they are applied.
+  const RETAINED_WARN_THRESHOLD = 100000;
+
+  // Index of the preset stop nearest to `value`, for the retained-lines slider.
+  function nearestRetainedStopIndex(value) {
+    const stops = retainedStops();
+    let best = 0;
+    for (let i = 1; i < stops.length; i++) {
+      if (Math.abs(stops[i] - value) < Math.abs(stops[best] - value)) best = i;
+    }
+    return best;
+  }
 
   function bindToolbar() {
     App.btnNewTerminal.addEventListener('click', () => {
@@ -136,6 +156,16 @@
         termSlider.value = String(App.Theme.getTermFontSize());
         termNum.value = termSlider.value;
       }
+      const retSlider = App.optionsPanel.querySelector('#optMaxRetainedLines');
+      const retNum = App.optionsPanel.querySelector('#optMaxRetainedLinesNum');
+      if (retSlider && retNum) {
+        const v = App.Theme.getMaxRetainedLines();
+        retNum.value = String(v);
+        // The slider is index-based, so derive its range from the preset stops
+        // instead of relying on a hardcoded max in the markup.
+        retSlider.max = String(retainedStops().length - 1);
+        retSlider.value = String(nearestRetainedStopIndex(v));
+      }
     }
 
     // Shell radio
@@ -247,6 +277,44 @@
       });
     }
 
+    // Max retained lines (preset slider + free number input)
+    const retSlider = App.optionsPanel.querySelector('#optMaxRetainedLines');
+    const retNum = App.optionsPanel.querySelector('#optMaxRetainedLinesNum');
+    if (retSlider && retNum) {
+      retSlider.addEventListener('input', () => {
+        const stops = retainedStops();
+        const v = stops[+retSlider.value];
+        if (v === undefined) return;
+        retNum.value = String(v);
+        if (App.Theme) App.Theme.setMaxRetainedLines(v);
+      });
+      retNum.addEventListener('change', () => {
+        const requested = Math.round(+retNum.value);
+        const current = App.Theme ? App.Theme.getMaxRetainedLines() : 1000;
+        const apply = (value) => {
+          if (App.Theme) App.Theme.setMaxRetainedLines(value);
+          const v = App.Theme ? App.Theme.getMaxRetainedLines() : value;
+          retNum.value = String(v);
+          retSlider.value = String(nearestRetainedStopIndex(v));
+        };
+        if (Number.isFinite(requested) && requested > RETAINED_WARN_THRESHOLD &&
+            App.Menus && App.Menus.showConfirm) {
+          // Revert the field immediately; the value only changes if the user
+          // confirms the memory warning. Cancelling leaves the old value.
+          retNum.value = String(current);
+          retSlider.value = String(nearestRetainedStopIndex(current));
+          App.Menus.showConfirm(
+            App.__('confirmRetainedLinesHigh', { lines: requested }),
+            () => apply(requested),
+            null,
+            'confirmUseDefaultEncryptionOk'
+          );
+          return;
+        }
+        apply(requested);
+      });
+    }
+
     // Shell selection
     App.optionsPanel.querySelectorAll('input[name="optShell"]').forEach((radio) => {
       radio.addEventListener('change', () => {
@@ -324,6 +392,7 @@
               App.Theme.setTheme('dark');
               App.Theme.setUiFontSize(13);
               App.Theme.setTermFontSize(13);
+              App.Theme.setMaxRetainedLines(1000);
             }
             if (App.i18n && App.i18n.setLocale) App.i18n.setLocale('en');
             refreshOptionsPanel();
