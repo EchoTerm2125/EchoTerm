@@ -1805,15 +1805,26 @@ html, body {
 .ssh-resize-handle {
   width: calc(4px * var(--ui-scale));
   cursor: col-resize;
-  background: transparent;
   flex-shrink: 0;
   position: relative;
   z-index: 10;
-  transition: background var(--transition);
+  transition: background-color var(--transition);
 }
 
-.ssh-resize-handle:hover,
-.ssh-resize-handle.active {
+/* Painted hairline centered in the hit box; grows to full accent bar on hover/drag */
+.ssh-resize-handle::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  margin-inline: auto;
+  width: calc(2px * var(--ui-scale));
+  background: var(--border);
+  transition: width var(--transition), background-color var(--transition);
+}
+
+.ssh-resize-handle:hover::before,
+.ssh-resize-handle.active::before {
+  width: 100%;
   background: var(--accent);
 }
 
@@ -1827,7 +1838,6 @@ html, body {
   min-width: calc(150px * var(--ui-scale));
   max-width: calc(500px * var(--ui-scale));
   background: var(--bg-secondary);
-  border-right: 1px solid var(--border);
   display: flex;
   flex-direction: column;
   overflow: hidden;
@@ -1841,7 +1851,6 @@ html, body {
 .ssh-sidebar.collapsed {
   width: 0;
   min-width: 0;
-  border-right: none;
 }
 
 .ssh-sidebar-header {
