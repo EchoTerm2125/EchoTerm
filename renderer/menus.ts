@@ -50,6 +50,27 @@
     submenu.style.top = overflowBottom > 0 ? `${-4 - overflowBottom}px` : '';
   }
 
+  // Hide the given menu items: a multi-selection activates the batch actions,
+  // so items that only make sense for one target disappear.
+  function toggleMenuItems(menu, actions, hidden) {
+    for (const action of actions) {
+      const btn = menu.querySelector(`[data-action="${action}"]`);
+      if (btn) btn.classList.toggle('hidden', hidden);
+    }
+  }
+
+  // Hide any separator that no longer divides two visible items, so hiding a
+  // menu item never leaves a dangling or leading/trailing divider.
+  function syncSeparators(menu) {
+    const children = [...menu.children];
+    children.forEach((el, i) => {
+      if (!el.classList.contains('context-separator')) return;
+      const before = children.slice(0, i).some((c) => !c.classList.contains('hidden'));
+      const after = children.slice(i + 1).some((c) => !c.classList.contains('hidden'));
+      el.classList.toggle('hidden', !before || !after);
+    });
+  }
+
   function bindContextMenu(paneEl, id) {
     const echoBtn = $('#ctxEcho');
     const echoSep = $('#ctxEchoSep');
@@ -77,13 +98,29 @@
       state.lastClickedTabId = id;
     }
     const selCount = state.selectedTabs.size;
+    const multi = selCount > 1;
     const btnCloseSelected = $('#btnCloseSelected');
     if (btnCloseSelected) {
-      if (selCount > 1) {
+      if (multi) {
         btnCloseSelected.textContent = App.__('tabCtxCloseSelected') + ` (${selCount})`;
         btnCloseSelected.classList.remove('hidden');
       } else {
         btnCloseSelected.classList.add('hidden');
+      }
+    }
+    // Single-target items disappear under a multi-selection.
+    toggleMenuItems(tabContextMenu, ['tab-rename', 'tab-close'], multi);
+
+    // "Close Others" is selection-relative and shows how many tabs it closes.
+    const btnCloseOthers = tabContextMenu.querySelector('[data-action="tab-close-others"]');
+    if (btnCloseOthers) {
+      const others = App.Groups.getGroupTerminalIds(state.activeGroupId)
+        .filter((tid) => !state.selectedTabs.has(tid));
+      if (others.length > 0) {
+        btnCloseOthers.textContent = App.__('tabCtxCloseOthers') + ` (${others.length})`;
+        btnCloseOthers.classList.remove('hidden');
+      } else {
+        btnCloseOthers.classList.add('hidden');
       }
     }
 
@@ -119,6 +156,7 @@
     // Ensure submenu starts hidden
     submenu.classList.add('hidden');
 
+    syncSeparators(tabContextMenu);
     positionContextMenu(tabContextMenu, e.clientX, e.clientY);
   }
 
@@ -135,11 +173,15 @@
 
     const group = state.groups.get(groupId);
     const termCount = group ? group.terminalIds.size : 0;
+    const multi = state.selectedGroups.size > 1;
+
+    // Single-target items disappear under a multi-selection.
+    toggleMenuItems(groupContextMenu, ['group-rename', 'group-delete'], multi);
 
     // Show/hide "Close All Terminals" based on whether group has terminals
     const btnCloseTerminals = groupContextMenu.querySelector('[data-action="group-close-terminals"]');
     if (btnCloseTerminals) {
-      if (termCount > 0) {
+      if (!multi && termCount > 0) {
         btnCloseTerminals.textContent = App.__('groupCtxCloseTerminals') + ` (${termCount})`;
         btnCloseTerminals.classList.remove('hidden');
       } else {
@@ -170,6 +212,7 @@
       }
     }
 
+    syncSeparators(groupContextMenu);
     positionContextMenu(groupContextMenu, e.clientX, e.clientY);
   }
 
@@ -296,8 +339,10 @@
             break;
           }
           case 'tab-close-others': {
+            // "Others" is relative to the whole selection, not the right-clicked
+            // tab, so the other selected tabs survive.
             const ids = App.Groups.getGroupTerminalIds(state.activeGroupId);
-            const others = ids.filter(tid => tid !== id);
+            const others = ids.filter(tid => !state.selectedTabs.has(tid));
             const count = others.length;
             showConfirm(
               App._p('confirmCloseOtherTerminals', count),

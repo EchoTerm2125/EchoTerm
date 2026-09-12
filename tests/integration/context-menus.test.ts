@@ -67,6 +67,106 @@ describe('Integration: Context Menus', () => {
     });
   });
 
+  describe('showTabContextMenu — multi-tab actions', () => {
+    function buildTabMenu(): HTMLElement {
+      const menu = document.getElementById('tabContextMenu') as HTMLElement;
+      menu.innerHTML = `
+        <button data-action="tab-rename"></button>
+        <div class="context-separator"></div>
+        <button data-action="tab-close"></button>
+        <button data-action="tab-close-selected" id="btnCloseSelected"></button>
+        <div class="context-separator"></div>
+        <button data-action="tab-close-others"></button>
+      `;
+      return menu;
+    }
+
+    function show(targetId: number) {
+      App.Menus.showTabContextMenu(
+        new MouseEvent('contextmenu', { bubbles: true, clientX: 100, clientY: 200 }),
+        targetId
+      );
+    }
+
+    it('hides single-target items when several tabs are selected', () => {
+      const menu = buildTabMenu();
+      App.Tabs.toggleTabSelection(1);
+      App.Tabs.toggleTabSelection(2);
+
+      show(1);
+
+      for (const action of ['tab-rename', 'tab-close']) {
+        const btn = menu.querySelector(`[data-action="${action}"]`) as HTMLElement;
+        expect(btn.classList.contains('hidden')).toBe(true);
+      }
+      const closeOthers = menu.querySelector('[data-action="tab-close-others"]') as HTMLElement;
+      expect(closeOthers.classList.contains('hidden')).toBe(false);
+      expect(closeOthers.textContent).toBe('Close Others (1)');
+      const closeSelected = menu.querySelector('[data-action="tab-close-selected"]') as HTMLElement;
+      expect(closeSelected.classList.contains('hidden')).toBe(false);
+      expect(closeSelected.textContent).toBe('Close Selected (2)');
+    });
+
+    it('shows single-target items for a single selection', () => {
+      const menu = buildTabMenu();
+
+      show(1);
+
+      for (const action of ['tab-rename', 'tab-close']) {
+        const btn = menu.querySelector(`[data-action="${action}"]`) as HTMLElement;
+        expect(btn.classList.contains('hidden')).toBe(false);
+      }
+      const closeOthers = menu.querySelector('[data-action="tab-close-others"]') as HTMLElement;
+      expect(closeOthers.classList.contains('hidden')).toBe(false);
+      expect(closeOthers.textContent).toBe('Close Others (2)');
+      const closeSelected = menu.querySelector('[data-action="tab-close-selected"]') as HTMLElement;
+      expect(closeSelected.classList.contains('hidden')).toBe(true);
+    });
+
+    it('hides Close Others when every tab is selected', () => {
+      const menu = buildTabMenu();
+      App.Tabs.selectTabRange(1, 3);
+
+      show(1);
+
+      const closeOthers = menu.querySelector('[data-action="tab-close-others"]') as HTMLElement;
+      expect(closeOthers.classList.contains('hidden')).toBe(true);
+    });
+
+    it('restores single-target items after a multi-selection', () => {
+      const menu = buildTabMenu();
+      App.Tabs.toggleTabSelection(1);
+      App.Tabs.toggleTabSelection(2);
+      show(1);
+
+      App.Tabs.clearTabSelection();
+      show(2);
+
+      const rename = menu.querySelector('[data-action="tab-rename"]') as HTMLElement;
+      expect(rename.classList.contains('hidden')).toBe(false);
+    });
+
+    it('closes every tab outside the selection when Close Others is clicked', () => {
+      injectTerminal(4);
+      App.state.terminalGroups.set(4, 'g1');
+      App.state.groups.get('g1').terminalIds.add(4);
+      App.Tabs.addTab(4, 'powershell');
+
+      const menu = buildTabMenu();
+      App.Menus.setupContextMenu();
+      const closeSpy = vi.spyOn(App.Terminal, 'closeTerminal').mockImplementation(() => {});
+      localStorage.setItem('skipTabCloseConfirm', 'true');
+      App.Tabs.toggleTabSelection(2);
+      App.Tabs.toggleTabSelection(3);
+
+      show(2);
+      (menu.querySelector('[data-action="tab-close-others"]') as HTMLElement).click();
+
+      const closed = closeSpy.mock.calls.map((call: any[]) => call[0]).sort();
+      expect(closed).toEqual([1, 4]);
+    });
+  });
+
   describe('showGroupContextMenu', () => {
     it('makes group context menu visible', () => {
       App.Menus.showGroupContextMenu(
@@ -96,6 +196,7 @@ describe('Integration: Context Menus', () => {
         <button data-action="group-delete"></button>
         <button data-action="group-close-selected"></button>
         <button data-action="group-close-others"></button>
+        <div class="context-separator"></div>
         <button data-action="group-close-terminals"></button>
       `;
       return menu;
@@ -139,6 +240,35 @@ describe('Integration: Context Menus', () => {
       App.Groups.toggleGroupSelection('g2');
       show('g1');
       expect(btn.classList.contains('hidden')).toBe(true);
+    });
+
+    it('hides single-target items and their separator when several groups are selected', () => {
+      const menu = buildMenuButtons();
+      App.Groups.toggleGroupSelection('g1');
+      App.Groups.toggleGroupSelection('g2');
+
+      show('g1');
+
+      for (const action of ['group-rename', 'group-delete', 'group-close-terminals']) {
+        const btn = menu.querySelector(`[data-action="${action}"]`) as HTMLElement;
+        expect(btn.classList.contains('hidden')).toBe(true);
+      }
+      const separator = menu.querySelector('.context-separator') as HTMLElement;
+      expect(separator.classList.contains('hidden')).toBe(true);
+    });
+
+    it('shows single-target items for a single selection', () => {
+      const menu = buildMenuButtons();
+
+      show('g1');
+
+      for (const action of ['group-rename', 'group-delete']) {
+        const btn = menu.querySelector(`[data-action="${action}"]`) as HTMLElement;
+        expect(btn.classList.contains('hidden')).toBe(false);
+      }
+      const closeTerminals = menu.querySelector('[data-action="group-close-terminals"]') as HTMLElement;
+      expect(closeTerminals.classList.contains('hidden')).toBe(false);
+      expect(closeTerminals.textContent).toBe('Close All Terminals (3)');
     });
   });
 
