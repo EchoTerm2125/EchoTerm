@@ -2023,6 +2023,7 @@ import {
     const newIds = [];
     for (const id of ids) {
       const res = await api.sshUserDuplicate(id);
+      if (res?.error) App.UI.showToast(App.__('toastError', { message: res.error }));
       if (res?.user?.id) newIds.push(res.user.id);
     }
     await refreshUsers();
@@ -2055,6 +2056,7 @@ import {
           const src = folders.find(f => f.id === id);
           if (src?.parentId) parentsToExpand.add(src.parentId);
           const res = await api.sshConnectionFolderDuplicate(id);
+          if (res?.error) App.UI.showToast(App.__('toastError', { message: res.error }));
           if (res?.folder?.id) newIds.push(res.folder.id);
         }
         expandCollapsedFolders('sshCollapsedFolders', parentsToExpand);
@@ -2087,6 +2089,7 @@ import {
           const src = folders.find(f => f.id === id);
           if (src?.parentId) parentsToExpand.add(src.parentId);
           const res = await api.sshUserFolderDuplicate(id);
+          if (res?.error) App.UI.showToast(App.__('toastError', { message: res.error }));
           if (res?.folder?.id) newIds.push(res.folder.id);
         }
         expandCollapsedFolders('sshCollapsedUserFolders', parentsToExpand);
