@@ -139,13 +139,28 @@ describe('Integration: Group Switching', () => {
       expect(App.state.activeGroupId).toBe(g1.id);
     });
 
-    it('does not delete the last group', () => {
+    it('recreates a group with a terminal when the last group is deleted', async () => {
       const g1 = App.Groups.createGroup('Group 1', true);
 
       App.Groups.deleteGroup(g1.id);
+      await new Promise((resolve) => setTimeout(resolve, 0));
 
-      // Should still exist
-      expect(App.state.groups.has(g1.id)).toBe(true);
+      expect(App.state.groups.has(g1.id)).toBe(false);
+      expect(App.state.groups.size).toBe(1);
+      expect(App.state.groupOrder).toHaveLength(1);
+      const replacementId = App.state.groupOrder[0];
+      expect(App.state.activeGroupId).toBe(replacementId);
+      expect(App.state.groups.get(replacementId).terminalIds.size).toBe(1);
+    });
+
+    it('drops the deleted group from the selection', () => {
+      App.Groups.createGroup('Group 1', true);
+      const g2 = App.Groups.createGroup('Group 2', false);
+      App.Groups.toggleGroupSelection(g2.id);
+
+      App.Groups.deleteGroup(g2.id);
+
+      expect(App.state.selectedGroups.has(g2.id)).toBe(false);
     });
 
     it('closes all terminals in deleted group', () => {
@@ -187,6 +202,44 @@ describe('Integration: Group Switching', () => {
       expect(App.btnEchoAll.classList.contains('hidden')).toBe(true);
       expect(App.btnEchoToggle.classList.contains('hidden')).toBe(true);
       expect(App.btnEchoPaste.classList.contains('hidden')).toBe(true);
+    });
+  });
+
+  describe('closeGroups', () => {
+    it('closes every given group', () => {
+      const g1 = App.Groups.createGroup('Group 1', true);
+      const g2 = App.Groups.createGroup('Group 2', false);
+      const g3 = App.Groups.createGroup('Group 3', false);
+
+      App.Groups.closeGroups([g2.id, g3.id]);
+
+      expect(App.state.groups.has(g2.id)).toBe(false);
+      expect(App.state.groups.has(g3.id)).toBe(false);
+      expect(App.state.groups.has(g1.id)).toBe(true);
+    });
+
+    it('keeps a surviving active group and clears the selection', () => {
+      const g1 = App.Groups.createGroup('Group 1', true);
+      const g2 = App.Groups.createGroup('Group 2', false);
+      App.Groups.toggleGroupSelection(g2.id);
+
+      App.Groups.closeGroups([g2.id]);
+
+      expect(App.state.activeGroupId).toBe(g1.id);
+      expect(App.state.selectedGroups.size).toBe(0);
+    });
+
+    it('recreates a group with a terminal when every group is closed', async () => {
+      const g1 = App.Groups.createGroup('Group 1', true);
+      const g2 = App.Groups.createGroup('Group 2', false);
+
+      App.Groups.closeGroups([g1.id, g2.id]);
+      await new Promise((resolve) => setTimeout(resolve, 0));
+
+      expect(App.state.groups.size).toBe(1);
+      const replacementId = App.state.groupOrder[0];
+      expect(App.state.activeGroupId).toBe(replacementId);
+      expect(App.state.groups.get(replacementId).terminalIds.size).toBe(1);
     });
   });
 

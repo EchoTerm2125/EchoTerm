@@ -3,7 +3,7 @@ import { buildSshArgs } from '../../src/domain/services/ssh-args';
 import type { ResolvedConnection } from '../../src/domain/entities/ssh';
 
 function makeTarget(overrides: Partial<ResolvedConnection> = {}): ResolvedConnection {
-  return {
+  const base: ResolvedConnection = {
     id: 'c1',
     name: 'Test',
     host: 'example.com',
@@ -17,8 +17,12 @@ function makeTarget(overrides: Partial<ResolvedConnection> = {}): ResolvedConnec
     hostKeyAlgorithms: null,
     kexAlgorithms: null,
     pubkeyAcceptedAlgorithms: null,
-    ...overrides,
+    ciphers: null,
+    macs: null,
+    caSignatureAlgorithms: null,
+    compression: null,
   };
+  return { ...base, ...overrides };
 }
 
 describe('buildSshArgs', () => {
@@ -106,6 +110,22 @@ describe('buildSshArgs', () => {
       '-o', 'HostKeyAlgorithms=+ssh-rsa,ssh-dss',
       '-o', 'KexAlgorithms=+diffie-hellman-group1-sha1',
       '-o', 'PubkeyAcceptedAlgorithms=+ssh-rsa',
+      'alice@example.com',
+    ]);
+  });
+
+  it('cipher, MAC, CA signature and compression overrides add -o options', () => {
+    const args = buildSshArgs(makeTarget({
+      ciphers: '+aes128-cbc',
+      macs: '+hmac-sha1',
+      caSignatureAlgorithms: 'ssh-rsa',
+      compression: 'yes',
+    }));
+    expect(args).toEqual([
+      '-o', 'Ciphers=+aes128-cbc',
+      '-o', 'MACs=+hmac-sha1',
+      '-o', 'CASignatureAlgorithms=ssh-rsa',
+      '-o', 'Compression=yes',
       'alice@example.com',
     ]);
   });

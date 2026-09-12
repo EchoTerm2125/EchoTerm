@@ -208,13 +208,9 @@
   function deleteGroup(groupId) {
     const group = state.groups.get(groupId);
     if (!group) return;
-    if (state.groups.size <= 1) {
-      App.UI.showToast(App.__('toastCannotDeleteLastGroup'));
-      return;
-    }
 
+    const isLastGroup = state.groups.size <= 1;
     const wasActive = state.activeGroupId === groupId;
-    const targetGroupId = state.groupOrder.find(gid => gid !== groupId);
 
     // Close all terminals in this group first
     const termIds = [...group.terminalIds];
@@ -225,11 +221,22 @@
     // Remove the group from state
     if (group._tabEl) group._tabEl.remove();
     state.groups.delete(groupId);
+    state.selectedGroups.delete(groupId);
+    if (state.lastClickedGroupId === groupId) state.lastClickedGroupId = null;
     state.groupEchoActive.delete(groupId);
     state.groupEchoSelection.delete(groupId);
     state.groupEchoTerminals.delete(groupId);
     const idx = state.groupOrder.indexOf(groupId);
     if (idx !== -1) state.groupOrder.splice(idx, 1);
+
+    // Closing the last group leaves an empty one behind so the app always has
+    // an active group (see ADR 0008).
+    let replacementId = null;
+    if (isLastGroup) {
+      replacementId = createGroup(App.__('groupDefaultName', { n: state.groups.size + 1 })).id;
+      App.UI.showToast(App.__('toastAllGroupsClosed'));
+    }
+    const targetGroupId = replacementId || state.groupOrder.find(gid => gid !== groupId);
 
     if (wasActive) {
       // Clean up echo grid/state from the old group if it was active
@@ -306,10 +313,31 @@
       App.Search.onGroupDeleted(groupId);
       App.Search.onActiveGroupChanged();
     }
+
+    // Seed the replacement group with a terminal so closing the last group
+    // leaves a usable session rather than an empty group (see ADR 0008).
+    if (replacementId) {
+      App.Terminal.spawnTerminal(state.selectedShell);
+    }
   }
 
   function getGroupTerminalIds(groupId) {
     return state.paneOrder.filter(id => state.terminalGroups.get(id) === groupId);
+  }
+
+  /**
+   * Close several groups at once. Deletes each group, then keeps a surviving
+   * group active and clears the group selection.
+   */
+  function closeGroups(groupIds) {
+    const ids = [...new Set(groupIds)].filter(gid => state.groups.has(gid));
+    if (ids.length === 0) return;
+
+    // deleteGroup falls back to another group when the active one is closed.
+    for (const gid of ids) deleteGroup(gid);
+
+    clearGroupSelection();
+    state.lastClickedGroupId = null;
   }
 
   function refreshGroupVisibility() {
@@ -501,7 +529,7 @@
   }
 
   App.Groups = {
-    createGroup, switchGroup, deleteGroup,
+    createGroup, switchGroup, deleteGroup, closeGroups,
     getGroupTerminalIds, refreshGroupVisibility, updateGroupTabs,
     bindGroupBar, moveTerminalToGroup, reorderGroups,
     toggleGroupSelection, clearGroupSelection, selectGroupRange,

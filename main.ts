@@ -16,6 +16,7 @@ import { WindowsShellDetector } from './src/main/infrastructure/windows-shell-de
 // Application use cases
 import {
   ClearSshData, DeleteConnection, DeleteConnectionFolder, DeleteUser, DeleteUserFolder,
+  DuplicateConnectionFolder, DuplicateUser, DuplicateUserFolder,
   ExportSshConfig, GetVaultStatus, ListConnectionFolders, ListConnections,
   ListUserFolders, ListUsers, OpenConnectionFolder, SaveConnection, SaveConnectionFolder,
   SaveUser, SaveUserFolder, SetMasterPassword, SpawnShellSession, SpawnSshSession,
@@ -173,15 +174,18 @@ const sshController = new SshController(
   new ListUsers(userRepo),
   new SaveUser(userRepo),
   new DeleteUser(userRepo),
+  new DuplicateUser(userRepo),
   new ListUserFolders(userFolderRepo),
   new SaveUserFolder(userFolderRepo),
   new DeleteUserFolder(userFolderRepo),
+  new DuplicateUserFolder(userFolderRepo),
   new ListConnections(connectionRepo),
   new SaveConnection(connectionRepo),
   new DeleteConnection(connectionRepo),
   new ListConnectionFolders(connectionFolderRepo),
   new SaveConnectionFolder(connectionFolderRepo),
   new DeleteConnectionFolder(connectionFolderRepo),
+  new DuplicateConnectionFolder(connectionFolderRepo),
   new OpenConnectionFolder(connectionRepo, connectionFolderRepo),
   new ExportSshConfig(connectionRepo, userRepo),
   new SpawnSshSession(connectionRepo, ptyGateway),
@@ -340,15 +344,18 @@ ipcMain.handle('ssh:clear-all', () => sshController.clearAll());
 ipcMain.handle('ssh:user-list', () => sshController.listUsers());
 ipcMain.handle('ssh:user-save', (event, userData) => sshController.saveUser(userData));
 ipcMain.handle('ssh:user-delete', (event, userId) => sshController.deleteUser(userId));
+ipcMain.handle('ssh:user-duplicate', (event, userId) => sshController.duplicateUser(userId));
 ipcMain.handle('ssh:user-folder-list', () => sshController.listUserFolders());
 ipcMain.handle('ssh:user-folder-save', (event, folderData) => sshController.saveUserFolder(folderData));
 ipcMain.handle('ssh:user-folder-delete', (event, folderId) => sshController.deleteUserFolder(folderId));
+ipcMain.handle('ssh:user-folder-duplicate', (event, folderId) => sshController.duplicateUserFolder(folderId));
 ipcMain.handle('ssh:connection-list', () => sshController.listConnections());
 ipcMain.handle('ssh:connection-save', (event, connData) => sshController.saveConnection(connData));
 ipcMain.handle('ssh:connection-delete', (event, connId) => sshController.deleteConnection(connId));
 ipcMain.handle('ssh:connection-folder-list', () => sshController.listConnectionFolders());
 ipcMain.handle('ssh:connection-folder-save', (event, folderData) => sshController.saveConnectionFolder(folderData));
 ipcMain.handle('ssh:connection-folder-delete', (event, folderId) => sshController.deleteConnectionFolder(folderId));
+ipcMain.handle('ssh:connection-folder-duplicate', (event, folderId) => sshController.duplicateConnectionFolder(folderId));
 ipcMain.handle('ssh:connect', (event, connectionId) => sshController.connect(connectionId));
 ipcMain.handle('ssh:open-connection-folder', (event, folderId) => sshController.openConnectionFolder(folderId));
 ipcMain.handle('ssh:import-config', (event, customPath) => sshController.importConfig(customPath));

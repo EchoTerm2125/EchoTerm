@@ -68,6 +68,10 @@ export interface SshConnection {
   hostKeyAlgorithms?: string | null;
   kexAlgorithms?: string | null;
   pubkeyAcceptedAlgorithms?: string | null;
+  ciphers?: string | null;
+  macs?: string | null;
+  caSignatureAlgorithms?: string | null;
+  compression?: string | null;
   /** Resolved display fields returned by main-process queries */
   userName?: string | null;
   /** Display string of the resolved jump host (e.g. "user@host" or referenced connection name) */
@@ -132,6 +136,10 @@ export interface SshConfigHost {
   hostKeyAlgorithms?: string | null;
   kexAlgorithms?: string | null;
   pubkeyAcceptedAlgorithms?: string | null;
+  ciphers?: string | null;
+  macs?: string | null;
+  caSignatureAlgorithms?: string | null;
+  compression?: string | null;
 }
 
 export interface ImportConfigResult {
@@ -159,6 +167,10 @@ export interface SshImportApplyHost {
   hostKeyAlgorithms: string | null;
   kexAlgorithms: string | null;
   pubkeyAcceptedAlgorithms: string | null;
+  ciphers: string | null;
+  macs: string | null;
+  caSignatureAlgorithms: string | null;
+  compression: string | null;
   existingConnId: string | null;
 }
 
@@ -329,11 +341,13 @@ export interface WindowApi {
   sshUserList(): Promise<SshUser[]>;
   sshUserSave(userData: SshUser): Promise<IpcOutcome & { user?: SshUser }>;
   sshUserDelete(userId: string): Promise<IpcOutcome>;
+  sshUserDuplicate(userId: string): Promise<IpcOutcome & { user?: SshUser }>;
 
   // SSH user folders
   sshUserFolderList(): Promise<SshUserFolder[]>;
   sshUserFolderSave(folderData: SshUserFolder): Promise<IpcOutcome & { folder?: SshUserFolder }>;
   sshUserFolderDelete(folderId: string): Promise<IpcOutcome>;
+  sshUserFolderDuplicate(folderId: string): Promise<IpcOutcome & { folder?: SshUserFolder }>;
 
   // SSH connections
   sshConnectionList(): Promise<SshConnection[]>;
@@ -344,6 +358,7 @@ export interface WindowApi {
   sshConnectionFolderList(): Promise<SshConnectionFolder[]>;
   sshConnectionFolderSave(folderData: SshConnectionFolder): Promise<IpcOutcome & { folder?: SshConnectionFolder }>;
   sshConnectionFolderDelete(folderId: string): Promise<IpcOutcome>;
+  sshConnectionFolderDuplicate(folderId: string): Promise<IpcOutcome & { folder?: SshConnectionFolder }>;
 
   // SSH actions
   sshConnect(connectionId: string): Promise<SpawnResult>;

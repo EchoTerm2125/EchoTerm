@@ -14,10 +14,10 @@ import { parseSshConfigText } from '../../domain/services/ssh-config';
 import type {
   GetVaultStatus, SetMasterPassword, UseOsEncryption, UnlockWithPassword, UnlockWithOsCredentials,
   ClearSshData, ApplySshImport,
-  ListUsers, SaveUser, DeleteUser,
-  ListUserFolders, SaveUserFolder, DeleteUserFolder,
+  ListUsers, SaveUser, DeleteUser, DuplicateUser,
+  ListUserFolders, SaveUserFolder, DeleteUserFolder, DuplicateUserFolder,
   ListConnections, SaveConnection, DeleteConnection,
-  ListConnectionFolders, SaveConnectionFolder, DeleteConnectionFolder,
+  ListConnectionFolders, SaveConnectionFolder, DeleteConnectionFolder, DuplicateConnectionFolder,
   OpenConnectionFolder, ExportSshConfig, SpawnSshSession,
 } from '../../application/use-cases';
 import type { SshImportApplyRequest } from '../../../shared/ipc';
@@ -35,15 +35,18 @@ export class SshController {
     private readonly listUsersUseCase: ListUsers,
     private readonly saveUserUseCase: SaveUser,
     private readonly deleteUserUseCase: DeleteUser,
+    private readonly duplicateUserUseCase: DuplicateUser,
     private readonly listUserFoldersUseCase: ListUserFolders,
     private readonly saveUserFolderUseCase: SaveUserFolder,
     private readonly deleteUserFolderUseCase: DeleteUserFolder,
+    private readonly duplicateUserFolderUseCase: DuplicateUserFolder,
     private readonly listConnectionsUseCase: ListConnections,
     private readonly saveConnectionUseCase: SaveConnection,
     private readonly deleteConnectionUseCase: DeleteConnection,
     private readonly listConnectionFoldersUseCase: ListConnectionFolders,
     private readonly saveConnectionFolderUseCase: SaveConnectionFolder,
     private readonly deleteConnectionFolderUseCase: DeleteConnectionFolder,
+    private readonly duplicateConnectionFolderUseCase: DuplicateConnectionFolder,
     private readonly openConnectionFolderUseCase: OpenConnectionFolder,
     private readonly exportSshConfigUseCase: ExportSshConfig,
     private readonly spawnSshSessionUseCase: SpawnSshSession,
@@ -126,6 +129,15 @@ export class SshController {
     }
   }
 
+  duplicateUser(userId: string) {
+    try {
+      const copy = this.duplicateUserUseCase.execute(userId);
+      return { success: true, user: this.maskUser(copy) };
+    } catch (err) {
+      return { error: err.message };
+    }
+  }
+
   // ── Connections ──
 
   listConnections() {
@@ -182,6 +194,17 @@ export class SshController {
     }
   }
 
+  duplicateUserFolder(folderId: string) {
+    try {
+      const copy = this.duplicateUserFolderUseCase.execute(folderId);
+      const users = this.listUsersUseCase.execute();
+      const folders = this.listUserFoldersUseCase.execute();
+      return { success: true, folder: this.toUserFolderView(copy, users, folders) };
+    } catch (err) {
+      return { error: err.message };
+    }
+  }
+
   // ── Connection folders ──
 
   listConnectionFolders() {
@@ -205,6 +228,17 @@ export class SshController {
     try {
       this.deleteConnectionFolderUseCase.execute(folderId);
       return { success: true };
+    } catch (err) {
+      return { error: err.message };
+    }
+  }
+
+  duplicateConnectionFolder(folderId: string) {
+    try {
+      const copy = this.duplicateConnectionFolderUseCase.execute(folderId);
+      const connections = this.listConnectionsUseCase.execute();
+      const folders = this.listConnectionFoldersUseCase.execute();
+      return { success: true, folder: this.toConnectionFolderView(copy, connections, folders) };
     } catch (err) {
       return { error: err.message };
     }
@@ -322,6 +356,10 @@ export class SshController {
       hostKeyAlgorithms: conn.hostKeyAlgorithms || null,
       kexAlgorithms: conn.kexAlgorithms || null,
       pubkeyAcceptedAlgorithms: conn.pubkeyAcceptedAlgorithms || null,
+      ciphers: conn.ciphers || null,
+      macs: conn.macs || null,
+      caSignatureAlgorithms: conn.caSignatureAlgorithms || null,
+      compression: conn.compression || null,
     };
   }
 

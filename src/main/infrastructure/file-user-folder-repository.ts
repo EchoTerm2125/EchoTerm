@@ -5,10 +5,10 @@
 
 import type { UserFolder } from '../../domain/entities/ssh';
 import type { UserFolderRepository } from '../../domain/ports/user-folder-repository';
-import { collectFolderAndDescendantIds, wouldCreateFolderCycle } from '../../domain/services/folder-tree';
+import { collectFolderAndDescendantIds, cloneFolderSubtree, wouldCreateFolderCycle } from '../../domain/services/folder-tree';
 import type { CryptoVault } from './crypto-vault';
-import { nextId } from './ssh-data';
-import type { StoredUserFolder } from './ssh-data';
+import { createIdMinter, nextId } from './ssh-data';
+import type { StoredUser, StoredUserFolder } from './ssh-data';
 
 export class FileUserFolderRepository implements UserFolderRepository {
   constructor(private readonly vault: CryptoVault) {}
@@ -81,6 +81,32 @@ export class FileUserFolderRepository implements UserFolderRepository {
     }
     data.userFolders = data.userFolders.filter(f => !deletedIds.has(f.id));
     this.vault.persist();
+  }
+
+  /**
+   * Deep-copies the folder subtree and its users, one persist. Copies are
+   * independent: connections referencing the original users are left untouched.
+   */
+  duplicate(id: string): UserFolder {
+    const data = this.vault.ensureData();
+    const source = data.userFolders.find(f => f.id === id);
+    if (!source) throw new Error('Folder not found.');
+
+    const mintFolderId = createIdMinter('uf', data.userFolders);
+    const { nodes, idMap } = cloneFolderSubtree(data.userFolders, id, source.parentId ?? null, mintFolderId);
+
+    const mintUserId = createIdMinter('u', data.users);
+    const copiedUsers: StoredUser[] = [];
+    for (const user of data.users) {
+      if (!user.folderId || !idMap.has(user.folderId)) continue;
+      copiedUsers.push({ ...user, id: mintUserId(), folderId: idMap.get(user.folderId)! });
+    }
+    data.users.push(...copiedUsers);
+    data.userFolders.push(...nodes.map(n => ({ id: n.id, name: n.name, parentId: n.parentId })));
+    this.vault.persist();
+
+    const rootNode = nodes.find(n => n.oldId === id)!;
+    return { id: rootNode.id, name: rootNode.name, parentId: rootNode.parentId };
   }
 
   private toEntity(stored: StoredUserFolder): UserFolder {

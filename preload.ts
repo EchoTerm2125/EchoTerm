@@ -102,10 +102,12 @@ const api: WindowApi = {
   sshUserList: () => ipcRenderer.invoke('ssh:user-list'),
   sshUserSave: (userData) => ipcRenderer.invoke('ssh:user-save', userData),
   sshUserDelete: (userId) => ipcRenderer.invoke('ssh:user-delete', userId),
+  sshUserDuplicate: (userId) => ipcRenderer.invoke('ssh:user-duplicate', userId),
 
   sshUserFolderList: () => ipcRenderer.invoke('ssh:user-folder-list'),
   sshUserFolderSave: (folderData) => ipcRenderer.invoke('ssh:user-folder-save', folderData),
   sshUserFolderDelete: (folderId) => ipcRenderer.invoke('ssh:user-folder-delete', folderId),
+  sshUserFolderDuplicate: (folderId) => ipcRenderer.invoke('ssh:user-folder-duplicate', folderId),
 
   sshConnectionList: () => ipcRenderer.invoke('ssh:connection-list'),
   sshConnectionSave: (connData) => ipcRenderer.invoke('ssh:connection-save', connData),
@@ -114,6 +116,7 @@ const api: WindowApi = {
   sshConnectionFolderList: () => ipcRenderer.invoke('ssh:connection-folder-list'),
   sshConnectionFolderSave: (folderData) => ipcRenderer.invoke('ssh:connection-folder-save', folderData),
   sshConnectionFolderDelete: (folderId) => ipcRenderer.invoke('ssh:connection-folder-delete', folderId),
+  sshConnectionFolderDuplicate: (folderId) => ipcRenderer.invoke('ssh:connection-folder-duplicate', folderId),
 
   sshConnect: (connectionId) => ipcRenderer.invoke('ssh:connect', connectionId),
   sshOpenConnectionFolder: (folderId) => ipcRenderer.invoke('ssh:open-connection-folder', folderId),

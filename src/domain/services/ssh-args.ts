@@ -42,6 +42,10 @@ export function buildSshArgs(target: ResolvedConnection): string[] {
   if (target.hostKeyAlgorithms) args.push('-o', `HostKeyAlgorithms=${target.hostKeyAlgorithms}`);
   if (target.kexAlgorithms) args.push('-o', `KexAlgorithms=${target.kexAlgorithms}`);
   if (target.pubkeyAcceptedAlgorithms) args.push('-o', `PubkeyAcceptedAlgorithms=${target.pubkeyAcceptedAlgorithms}`);
+  if (target.ciphers) args.push('-o', `Ciphers=${target.ciphers}`);
+  if (target.macs) args.push('-o', `MACs=${target.macs}`);
+  if (target.caSignatureAlgorithms) args.push('-o', `CASignatureAlgorithms=${target.caSignatureAlgorithms}`);
+  if (target.compression) args.push('-o', `Compression=${target.compression}`);
 
   if (target.port && target.port !== 22) args.push('-p', String(target.port));
   if (target.authType === 'keyfile' && target.keyFilePath) {
