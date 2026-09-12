@@ -72,7 +72,7 @@
     toastGitBashNotFound: '找不到 Git Bash。請定位 bash.exe 以開啟 Git Bash 終端機。',
     toastTerminalExited: '終端機已結束。正在產生新的...',
     toastNeedTwoTerminals: '此群組至少需要 2 個終端機才能使用回顯模式。',
-    toastCannotDeleteLastGroup: '無法刪除最後一個群組。',
+    toastAllGroupsClosed: '已關閉所有群組。已建立新的群組。',
     toastError: '錯誤: {message}',
     toastSshError: 'SSH 錯誤: {message}',
     toastSshErrorNamed: 'SSH 錯誤 ({name}): {message}',
@@ -97,6 +97,8 @@
     tabCtxSubmenuArrow: '▶',
     groupCtxRename: '重新命名群組',
     groupCtxDelete: '關閉群組',
+    groupCtxCloseSelected: '關閉已選取',
+    groupCtxCloseOthers: '關閉其他',
     groupCtxCloseTerminals: '關閉所有終端機',
 
     // ── Confirm dialogs ──────────────────────────────────────────────────────
@@ -108,6 +110,8 @@
     confirmCloseTerminal: '關閉此終端機？\n工作階段將被終止。',
     confirmCloseSelectedTerminals: '關閉 {count} 個已選取的終端機？\n所有工作階段將被終止。',
     confirmCloseOtherTerminals: '關閉 {count} 個其他終端機？\n所有工作階段將被終止。',
+    confirmCloseSelectedGroups: '關閉 {count} 個已選取的群組？\n其所有終端機將被終止。',
+    confirmCloseOtherGroups: '關閉 {count} 個其他的群組？\n其所有終端機將被終止。',
     confirmCloseGroup: '關閉群組「{name}」？',
     confirmCloseGroupWithTerminals: '關閉群組「{name}」？\n{count} 個終端機將被關閉。',
     confirmCloseApp: '關閉 EchoTerm？\n所有終端機工作階段將被終止。',

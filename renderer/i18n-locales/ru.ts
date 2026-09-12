@@ -72,7 +72,7 @@
     toastGitBashNotFound: 'Git Bash не найден. Укажите путь к bash.exe, чтобы открыть терминал Git Bash.',
     toastTerminalExited: 'Терминал завершён. Запуск нового...',
     toastNeedTwoTerminals: 'Для режима эхо в этой группе нужно как минимум 2 терминала.',
-    toastCannotDeleteLastGroup: 'Нельзя удалить последнюю группу.',
+    toastAllGroupsClosed: 'Все группы закрыты. Создана новая группа.',
     toastError: 'Ошибка: {message}',
     toastSshError: 'Ошибка SSH: {message}',
     toastSshErrorNamed: 'Ошибка SSH ({name}): {message}',
@@ -97,6 +97,8 @@
     tabCtxSubmenuArrow: '▶',
     groupCtxRename: 'Переименовать группу',
     groupCtxDelete: 'Закрыть группу',
+    groupCtxCloseSelected: 'Закрыть выбранные',
+    groupCtxCloseOthers: 'Закрыть остальные',
     groupCtxCloseTerminals: 'Закрыть все терминалы',
 
     // ── Confirm dialogs ──────────────────────────────────────────────────────
@@ -108,6 +110,8 @@
     confirmCloseTerminal: 'Закрыть этот терминал?\nСеанс будет завершён.',
     confirmCloseSelectedTerminals: 'Закрыть выбранные терминалы ({count})?\nВсе сеансы будут завершены.',
     confirmCloseOtherTerminals: 'Закрыть остальные терминалы ({count})?\nВсе сеансы будут завершены.',
+    confirmCloseSelectedGroups: 'Закрыть выбранные группы ({count})?\nВсе их терминалы будут закрыты.',
+    confirmCloseOtherGroups: 'Закрыть остальные группы ({count})?\nВсе их терминалы будут закрыты.',
     confirmCloseGroup: 'Закрыть группу «{name}»?',
     confirmCloseGroupWithTerminals: 'Закрыть группу «{name}»?\nБудет закрыто терминалов: {count}.',
     confirmCloseApp: 'Закрыть EchoTerm?\nВсе терминальные сеансы будут завершены.',

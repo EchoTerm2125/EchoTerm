@@ -72,7 +72,7 @@
     toastGitBashNotFound: '未找到 Git Bash。请定位 bash.exe 以打开 Git Bash 终端。',
     toastTerminalExited: '终端已退出。正在生成新的...',
     toastNeedTwoTerminals: '此组至少需要 2 个终端才能使用回显模式。',
-    toastCannotDeleteLastGroup: '无法删除最后一个组。',
+    toastAllGroupsClosed: '已关闭所有组。已创建一个新组。',
     toastError: '错误: {message}',
     toastSshError: 'SSH 错误: {message}',
     toastSshErrorNamed: 'SSH 错误 ({name}): {message}',
@@ -97,6 +97,8 @@
     tabCtxSubmenuArrow: '▶',
     groupCtxRename: '重命名组',
     groupCtxDelete: '关闭组',
+    groupCtxCloseSelected: '关闭选中',
+    groupCtxCloseOthers: '关闭其他',
     groupCtxCloseTerminals: '关闭所有终端',
 
     // ── Confirm dialogs ──────────────────────────────────────────────────────
@@ -108,6 +110,8 @@
     confirmCloseTerminal: '关闭此终端？\n会话将被终止。',
     confirmCloseSelectedTerminals: '关闭 {count} 个选中的终端？\n所有会话将被终止。',
     confirmCloseOtherTerminals: '关闭 {count} 个其他终端？\n所有会话将被终止。',
+    confirmCloseSelectedGroups: '关闭 {count} 个选中的组？\n其所有终端将被终止。',
+    confirmCloseOtherGroups: '关闭 {count} 个其他的组？\n其所有终端将被终止。',
     confirmCloseGroup: '关闭组 "{name}"？',
     confirmCloseGroupWithTerminals: '关闭组 "{name}"？\n{count} 个终端将被关闭。',
     confirmCloseApp: '关闭 EchoTerm？\n所有终端会话将被终止。',

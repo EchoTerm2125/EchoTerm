@@ -73,7 +73,7 @@
     toastGitBashNotFound: 'Git Bash not found. Please locate bash.exe to open a Git Bash terminal.',
     toastTerminalExited: 'Terminal exited. Spawning a new one...',
     toastNeedTwoTerminals: 'Need at least 2 terminals in this group for Echo mode.',
-    toastCannotDeleteLastGroup: 'Cannot delete the last group.',
+    toastAllGroupsClosed: 'All groups closed. Created a new group.',
     toastError: 'Error: {message}',
     toastSshError: 'SSH Error: {message}',
     toastSshErrorNamed: 'SSH Error ({name}): {message}',
@@ -98,6 +98,8 @@
     tabCtxSubmenuArrow: '▶',
     groupCtxRename: 'Rename Group',
     groupCtxDelete: 'Close Group',
+    groupCtxCloseSelected: 'Close Selected',
+    groupCtxCloseOthers: 'Close Others',
     groupCtxCloseTerminals: 'Close All Terminals',
 
     // ── Confirm dialogs ──────────────────────────────────────────────────────
@@ -109,6 +111,8 @@
     confirmCloseTerminal: 'Close this terminal?\nThe session will be terminated.',
     confirmCloseSelectedTerminals: 'Close {count} selected terminal{plural}?\nAll sessions will be terminated.',
     confirmCloseOtherTerminals: 'Close {count} other terminal{plural}?\nAll sessions will be terminated.',
+    confirmCloseSelectedGroups: 'Close {count} selected group{plural}?\nAll their terminals will be terminated.',
+    confirmCloseOtherGroups: 'Close {count} other group{plural}?\nAll their terminals will be terminated.',
     confirmCloseGroup: 'Close group "{name}"?',
     confirmCloseGroupWithTerminals: 'Close group "{name}"?\n{count} terminal{plural} will be closed.',
     confirmCloseApp: 'Close EchoTerm?\nAll terminal sessions will be terminated.',

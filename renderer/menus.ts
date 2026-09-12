@@ -147,10 +147,27 @@
       }
     }
 
-    // Show/hide "Close Group" based on whether it's the last group
-    const btnDelete = groupContextMenu.querySelector('[data-action="group-delete"]');
-    if (btnDelete) {
-      btnDelete.classList.toggle('hidden', state.groups.size <= 1);
+    // "Close Selected" needs a multi-selection; "Close Others" needs at least
+    // one group left out of it.
+    const selCount = state.selectedGroups.size;
+    const btnCloseSelected = groupContextMenu.querySelector('[data-action="group-close-selected"]');
+    if (btnCloseSelected) {
+      if (selCount > 1) {
+        btnCloseSelected.textContent = App.__('groupCtxCloseSelected') + ` (${selCount})`;
+        btnCloseSelected.classList.remove('hidden');
+      } else {
+        btnCloseSelected.classList.add('hidden');
+      }
+    }
+    const btnCloseOthers = groupContextMenu.querySelector('[data-action="group-close-others"]');
+    if (btnCloseOthers) {
+      const otherCount = state.groups.size - selCount;
+      if (otherCount > 0) {
+        btnCloseOthers.textContent = App.__('groupCtxCloseOthers') + ` (${otherCount})`;
+        btnCloseOthers.classList.remove('hidden');
+      } else {
+        btnCloseOthers.classList.add('hidden');
+      }
     }
 
     positionContextMenu(groupContextMenu, e.clientX, e.clientY);
@@ -313,6 +330,28 @@
               ? App.__('confirmCloseGroupWithTerminals', { name: group?.name, count }).replace('{plural}', count !== 1 ? App.__('statusTerminalPlural') : '')
               : App.__('confirmCloseGroup', { name: group?.name });
             showConfirm(msg, () => App.Groups.deleteGroup(id), 'skipGroupCloseConfirm');
+            break;
+          }
+          case 'group-close-selected': {
+            const ids = [...state.selectedGroups];
+            const count = ids.length;
+            if (count === 0) return;
+            showConfirm(
+              App._p('confirmCloseSelectedGroups', count),
+              () => App.Groups.closeGroups(ids),
+              'skipGroupCloseConfirm'
+            );
+            break;
+          }
+          case 'group-close-others': {
+            const others = state.groupOrder.filter(gid => !state.selectedGroups.has(gid));
+            const count = others.length;
+            if (count === 0) return;
+            showConfirm(
+              App._p('confirmCloseOtherGroups', count),
+              () => App.Groups.closeGroups(others),
+              'skipGroupCloseConfirm'
+            );
             break;
           }
           case 'group-close-terminals': {

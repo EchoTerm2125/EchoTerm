@@ -72,7 +72,7 @@
     toastGitBashNotFound: 'Không tìm thấy Git Bash. Vui lòng định vị bash.exe để mở terminal Git Bash.',
     toastTerminalExited: 'Terminal đã thoát. Đang mở terminal mới...',
     toastNeedTwoTerminals: 'Cần ít nhất 2 terminal trong nhóm này để dùng chế độ tiếng vọng.',
-    toastCannotDeleteLastGroup: 'Không thể xóa nhóm cuối cùng.',
+    toastAllGroupsClosed: 'Đã đóng tất cả nhóm. Đã tạo nhóm mới.',
     toastError: 'Lỗi: {message}',
     toastSshError: 'Lỗi SSH: {message}',
     toastSshErrorNamed: 'Lỗi SSH ({name}): {message}',
@@ -97,6 +97,8 @@
     tabCtxSubmenuArrow: '▶',
     groupCtxRename: 'Đổi tên nhóm',
     groupCtxDelete: 'Đóng nhóm',
+    groupCtxCloseSelected: 'Đóng các nhóm đã chọn',
+    groupCtxCloseOthers: 'Đóng các nhóm khác',
     groupCtxCloseTerminals: 'Đóng tất cả terminal',
 
     // ── Confirm dialogs ──────────────────────────────────────────────────────
@@ -108,6 +110,8 @@
     confirmCloseTerminal: 'Đóng terminal này?\nPhiên sẽ bị chấm dứt.',
     confirmCloseSelectedTerminals: 'Đóng {count} terminal đã chọn?\nTất cả phiên sẽ bị chấm dứt.',
     confirmCloseOtherTerminals: 'Đóng {count} terminal khác?\nTất cả phiên sẽ bị chấm dứt.',
+    confirmCloseSelectedGroups: 'Đóng {count} nhóm đã chọn?\nTất cả terminal của chúng sẽ bị chấm dứt.',
+    confirmCloseOtherGroups: 'Đóng {count} nhóm khác?\nTất cả terminal của chúng sẽ bị chấm dứt.',
     confirmCloseGroup: 'Đóng nhóm "{name}"?',
     confirmCloseGroupWithTerminals: 'Đóng nhóm "{name}"?\n{count} terminal sẽ được đóng.',
     confirmCloseApp: 'Đóng EchoTerm?\nTất cả phiên terminal sẽ bị chấm dứt.',

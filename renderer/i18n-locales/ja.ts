@@ -72,7 +72,7 @@
     toastGitBashNotFound: 'Git Bash が見つかりません。Git Bash ターミナルを開くには bash.exe を指定してください。',
     toastTerminalExited: 'ターミナルが終了しました。新しいターミナルを起動しています...',
     toastNeedTwoTerminals: 'エコーモードを使用するには、このグループに 2 つ以上のターミナルが必要です。',
-    toastCannotDeleteLastGroup: '最後のグループは削除できません。',
+    toastAllGroupsClosed: 'すべてのグループを閉じました。新しいグループを作成しました。',
     toastError: 'エラー: {message}',
     toastSshError: 'SSH エラー: {message}',
     toastSshErrorNamed: 'SSH エラー ({name}): {message}',
@@ -97,6 +97,8 @@
     tabCtxSubmenuArrow: '▶',
     groupCtxRename: 'グループ名を変更',
     groupCtxDelete: 'グループを閉じる',
+    groupCtxCloseSelected: '選択したグループを閉じる',
+    groupCtxCloseOthers: '他のグループを閉じる',
     groupCtxCloseTerminals: 'すべてのターミナルを閉じる',
 
     // ── Confirm dialogs ──────────────────────────────────────────────────────
@@ -108,6 +110,8 @@
     confirmCloseTerminal: 'このターミナルを閉じますか？\nセッションが終了します。',
     confirmCloseSelectedTerminals: '選択した {count} 台のターミナルを閉じますか？\nすべてのセッションが終了します。',
     confirmCloseOtherTerminals: '他の {count} 台のターミナルを閉じますか？\nすべてのセッションが終了します。',
+    confirmCloseSelectedGroups: '選択した {count} 個のグループを閉じますか？\nすべてのターミナルが終了します。',
+    confirmCloseOtherGroups: '他の {count} 個のグループを閉じますか？\nすべてのターミナルが終了します。',
     confirmCloseGroup: 'グループ「{name}」を閉じますか？',
     confirmCloseGroupWithTerminals: 'グループ「{name}」を閉じますか？\n{count} 台のターミナルが閉じられます。',
     confirmCloseApp: 'EchoTerm を閉じますか？\nすべてのターミナルセッションが終了します。',

@@ -72,7 +72,7 @@
     toastGitBashNotFound: 'Git Bash bulunamadı. Git Bash terminali açmak için lütfen bash.exe yolunu belirtin.',
     toastTerminalExited: 'Terminal sona erdi. Yeni bir tane başlatılıyor...',
     toastNeedTwoTerminals: 'Yankı modu için bu grupta en az 2 terminal gerekir.',
-    toastCannotDeleteLastGroup: 'Son grup silinemez.',
+    toastAllGroupsClosed: 'Tüm gruplar kapatıldı. Yeni bir grup oluşturuldu.',
     toastError: 'Hata: {message}',
     toastSshError: 'SSH Hatası: {message}',
     toastSshErrorNamed: 'SSH Hatası ({name}): {message}',
@@ -97,6 +97,8 @@
     tabCtxSubmenuArrow: '▶',
     groupCtxRename: 'Grubu Yeniden Adlandır',
     groupCtxDelete: 'Grubu Kapat',
+    groupCtxCloseSelected: 'Seçilen Grupları Kapat',
+    groupCtxCloseOthers: 'Diğer Grupları Kapat',
     groupCtxCloseTerminals: 'Tüm Terminalleri Kapat',
 
     // ── Confirm dialogs ──────────────────────────────────────────────────────
@@ -108,6 +110,8 @@
     confirmCloseTerminal: 'Bu terminal kapatılsın mı?\nOturum sonlandırılacak.',
     confirmCloseSelectedTerminals: 'Seçili terminaller ({count}) kapatılsın mı?\nTüm oturumlar sonlandırılacak.',
     confirmCloseOtherTerminals: 'Diğer terminaller ({count}) kapatılsın mı?\nTüm oturumlar sonlandırılacak.',
+    confirmCloseSelectedGroups: 'Seçili gruplar ({count}) kapatılsın mı?\nTüm terminalleri sonlandırılacak.',
+    confirmCloseOtherGroups: 'Diğer gruplar ({count}) kapatılsın mı?\nTüm terminalleri sonlandırılacak.',
     confirmCloseGroup: '"{name}" grubu kapatılsın mı?',
     confirmCloseGroupWithTerminals: '"{name}" grubu kapatılsın mı?\n{count} terminal kapatılacak.',
     confirmCloseApp: 'EchoTerm kapatılsın mı?\nTüm terminal oturumları sonlandırılacak.',

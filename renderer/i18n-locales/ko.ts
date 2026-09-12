@@ -72,7 +72,7 @@
     toastGitBashNotFound: 'Git Bash를 찾을 수 없습니다. Git Bash 터미널을 열려면 bash.exe의 위치를 지정하세요.',
     toastTerminalExited: '터미널이 종료되었습니다. 새 터미널을 시작하는 중...',
     toastNeedTwoTerminals: '에코 모드를 사용하려면 이 그룹에 터미널이 2개 이상 필요합니다.',
-    toastCannotDeleteLastGroup: '마지막 그룹은 삭제할 수 없습니다.',
+    toastAllGroupsClosed: '모든 그룹을 닫았습니다. 새 그룹을 만들었습니다.',
     toastError: '오류: {message}',
     toastSshError: 'SSH 오류: {message}',
     toastSshErrorNamed: 'SSH 오류 ({name}): {message}',
@@ -97,6 +97,8 @@
     tabCtxSubmenuArrow: '▶',
     groupCtxRename: '그룹 이름 바꾸기',
     groupCtxDelete: '그룹 닫기',
+    groupCtxCloseSelected: '선택한 그룹 닫기',
+    groupCtxCloseOthers: '다른 그룹 닫기',
     groupCtxCloseTerminals: '모든 터미널 닫기',
 
     // ── Confirm dialogs ──────────────────────────────────────────────────────
@@ -108,6 +110,8 @@
     confirmCloseTerminal: '이 터미널을 닫을까요?\n세션이 종료됩니다.',
     confirmCloseSelectedTerminals: '선택한 터미널 {count}개를 닫을까요?\n모든 세션이 종료됩니다.',
     confirmCloseOtherTerminals: '다른 터미널 {count}개를 닫을까요?\n모든 세션이 종료됩니다.',
+    confirmCloseSelectedGroups: '선택한 그룹 {count}개를 닫을까요?\n모든 터미널이 종료됩니다.',
+    confirmCloseOtherGroups: '다른 그룹 {count}개를 닫을까요?\n모든 터미널이 종료됩니다.',
     confirmCloseGroup: '그룹 "{name}"을(를) 닫을까요?',
     confirmCloseGroupWithTerminals: '그룹 "{name}"을(를) 닫을까요?\n터미널 {count}개가 닫힙니다.',
     confirmCloseApp: 'EchoTerm을 닫을까요?\n모든 터미널 세션이 종료됩니다.',

@@ -88,6 +88,60 @@ describe('Integration: Context Menus', () => {
     });
   });
 
+  describe('showGroupContextMenu — multi-group actions', () => {
+    function buildMenuButtons(): HTMLElement {
+      const menu = document.getElementById('groupContextMenu') as HTMLElement;
+      menu.innerHTML = `
+        <button data-action="group-rename"></button>
+        <button data-action="group-delete"></button>
+        <button data-action="group-close-selected"></button>
+        <button data-action="group-close-others"></button>
+        <button data-action="group-close-terminals"></button>
+      `;
+      return menu;
+    }
+
+    function show(targetId: string) {
+      App.Menus.showGroupContextMenu(
+        new MouseEvent('contextmenu', { bubbles: true, clientX: 100, clientY: 200 }),
+        targetId
+      );
+    }
+
+    it('hides Close Selected for a single selection', () => {
+      const menu = buildMenuButtons();
+
+      show('g1');
+
+      const btn = menu.querySelector('[data-action="group-close-selected"]') as HTMLElement;
+      expect(btn.classList.contains('hidden')).toBe(true);
+    });
+
+    it('shows Close Selected with a count when several groups are selected', () => {
+      const menu = buildMenuButtons();
+      App.Groups.toggleGroupSelection('g1');
+      App.Groups.toggleGroupSelection('g2');
+
+      show('g1');
+
+      const btn = menu.querySelector('[data-action="group-close-selected"]') as HTMLElement;
+      expect(btn.classList.contains('hidden')).toBe(false);
+      expect(btn.textContent).toBe('Close Selected (2)');
+    });
+
+    it('hides Close Others when every group is selected', () => {
+      const menu = buildMenuButtons();
+      const btn = menu.querySelector('[data-action="group-close-others"]') as HTMLElement;
+
+      show('g1');
+      expect(btn.textContent).toBe('Close Others (1)');
+
+      App.Groups.toggleGroupSelection('g2');
+      show('g1');
+      expect(btn.classList.contains('hidden')).toBe(true);
+    });
+  });
+
   describe('showConfirm integration', () => {
     it('fires callback immediately when skip is set (close terminal)', () => {
       localStorage.setItem('skipTabCloseConfirm', 'true');
