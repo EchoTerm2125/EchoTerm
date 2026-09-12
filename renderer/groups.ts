@@ -333,14 +333,9 @@
     const ids = [...new Set(groupIds)].filter(gid => state.groups.has(gid));
     if (ids.length === 0) return;
 
-    const previousActive = state.activeGroupId;
+    // deleteGroup falls back to another group when the active one is closed.
     for (const gid of ids) deleteGroup(gid);
 
-    // deleteGroup already falls back to another group when the active one is
-    // closed; restore the original active group if it survived the batch.
-    if (previousActive && state.groups.has(previousActive) && state.activeGroupId !== previousActive) {
-      switchGroup(previousActive);
-    }
     clearGroupSelection();
     state.lastClickedGroupId = null;
   }
