@@ -19,6 +19,10 @@ export interface SshConfigHostEntry {
   hostKeyAlgorithms: string | null;
   kexAlgorithms: string | null;
   pubkeyAcceptedAlgorithms: string | null;
+  ciphers: string | null;
+  macs: string | null;
+  caSignatureAlgorithms: string | null;
+  compression: string | null;
 }
 
 /**
@@ -50,6 +54,7 @@ export function parseSshConfigText(content: string, homePrefix: string): SshConf
         name: aliases[0], aliases, host: '', port: 22, user: '',
         identityFile: null, proxyJump: null,
         hostKeyAlgorithms: null, kexAlgorithms: null, pubkeyAcceptedAlgorithms: null,
+        ciphers: null, macs: null, caSignatureAlgorithms: null, compression: null,
       };
     } else if (current) {
       switch (keyword) {
@@ -69,6 +74,10 @@ export function parseSshConfigText(content: string, homePrefix: string): SshConf
         case 'pubkeyacceptedkeytypes': // pre-8.5 name of the same option
           current.pubkeyAcceptedAlgorithms = value;
           break;
+        case 'ciphers': current.ciphers = value; break;
+        case 'macs': current.macs = value; break;
+        case 'casignaturealgorithms': current.caSignatureAlgorithms = value; break;
+        case 'compression': current.compression = value; break;
       }
     }
   }
@@ -107,6 +116,10 @@ export function renderSshConfig(connections: Connection[], users: User[]): strin
     if (conn.hostKeyAlgorithms) configText += `  HostKeyAlgorithms ${conn.hostKeyAlgorithms}\n`;
     if (conn.kexAlgorithms) configText += `  KexAlgorithms ${conn.kexAlgorithms}\n`;
     if (conn.pubkeyAcceptedAlgorithms) configText += `  PubkeyAcceptedAlgorithms ${conn.pubkeyAcceptedAlgorithms}\n`;
+    if (conn.ciphers) configText += `  Ciphers ${conn.ciphers}\n`;
+    if (conn.macs) configText += `  MACs ${conn.macs}\n`;
+    if (conn.caSignatureAlgorithms) configText += `  CASignatureAlgorithms ${conn.caSignatureAlgorithms}\n`;
+    if (conn.compression) configText += `  Compression ${conn.compression}\n`;
     configText += '\n';
   }
   return configText;

@@ -50,6 +50,10 @@ export interface Connection {
   hostKeyAlgorithms: string | null;
   kexAlgorithms: string | null;
   pubkeyAcceptedAlgorithms: string | null;
+  ciphers: string | null;
+  macs: string | null;
+  caSignatureAlgorithms: string | null;
+  compression: string | null;
 }
 
 /** Connection folder grouping connections and sub-folders (tree via parentId). */
@@ -91,4 +95,8 @@ export interface ResolvedConnection {
   hostKeyAlgorithms: string | null;
   kexAlgorithms: string | null;
   pubkeyAcceptedAlgorithms: string | null;
+  ciphers: string | null;
+  macs: string | null;
+  caSignatureAlgorithms: string | null;
+  compression: string | null;
 }

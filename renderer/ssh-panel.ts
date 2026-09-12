@@ -1654,6 +1654,10 @@ import {
                 hostKeyAlgorithms: src.hostKeyAlgorithms ?? null,
                 kexAlgorithms: src.kexAlgorithms ?? null,
                 pubkeyAcceptedAlgorithms: src.pubkeyAcceptedAlgorithms ?? null,
+                ciphers: src.ciphers ?? null,
+                macs: src.macs ?? null,
+                caSignatureAlgorithms: src.caSignatureAlgorithms ?? null,
+                compression: src.compression ?? null,
               });
             }
             await refreshConnectionTree();
@@ -2076,6 +2080,10 @@ import {
             if (host.hostKeyAlgorithms && existing.hostKeyAlgorithms !== host.hostKeyAlgorithms) optChanges.push(`HostKeyAlgorithms=${escHtml(host.hostKeyAlgorithms)}`);
             if (host.kexAlgorithms && existing.kexAlgorithms !== host.kexAlgorithms) optChanges.push(`KexAlgorithms=${escHtml(host.kexAlgorithms)}`);
             if (host.pubkeyAcceptedAlgorithms && existing.pubkeyAcceptedAlgorithms !== host.pubkeyAcceptedAlgorithms) optChanges.push(`PubkeyAcceptedAlgorithms=${escHtml(host.pubkeyAcceptedAlgorithms)}`);
+            if (host.ciphers && existing.ciphers !== host.ciphers) optChanges.push(`Ciphers=${escHtml(host.ciphers)}`);
+            if (host.macs && existing.macs !== host.macs) optChanges.push(`MACs=${escHtml(host.macs)}`);
+            if (host.caSignatureAlgorithms && existing.caSignatureAlgorithms !== host.caSignatureAlgorithms) optChanges.push(`CASignatureAlgorithms=${escHtml(host.caSignatureAlgorithms)}`);
+            if (host.compression && existing.compression !== host.compression) optChanges.push(`Compression=${escHtml(host.compression)}`);
             if (optChanges.length > 0) diffs.push(`${App.__('sshImportDiffOptions')}: ${optChanges.join(', ')}`);
           }
         }
@@ -2228,6 +2236,10 @@ import {
           hostKeyAlgorithms: host.hostKeyAlgorithms || null,
           kexAlgorithms: host.kexAlgorithms || null,
           pubkeyAcceptedAlgorithms: host.pubkeyAcceptedAlgorithms || null,
+          ciphers: host.ciphers || null,
+          macs: host.macs || null,
+          caSignatureAlgorithms: host.caSignatureAlgorithms || null,
+          compression: host.compression || null,
           existingConnId: row._existingConn ? row._existingConn.id : null,
         });
       }
@@ -2330,6 +2342,10 @@ import {
           hostKeyAlgorithms: (data.connHostKeyAlgs || '').trim() || null,
           kexAlgorithms: (data.connKexAlgs || '').trim() || null,
           pubkeyAcceptedAlgorithms: (data.connPubkeyAlgs || '').trim() || null,
+          ciphers: (data.connCiphers || '').trim() || null,
+          macs: (data.connMacs || '').trim() || null,
+          caSignatureAlgorithms: (data.connCaSignatureAlgs || '').trim() || null,
+          compression: (data.connCompression || '').trim() || null,
         };
         const result = await api.sshConnectionSave(connData);
         if (result.error) { App.UI.showToast(App.__('toastError', { message: result.error })); return; }
@@ -2585,9 +2601,21 @@ import {
         <!-- Advanced SSH options (legacy server compatibility) -->
         <fieldset class="ssh-fieldset">
           <legend>${App.__('sshFormAdvancedOptional')}</legend>
-          <label>${App.__('sshFormHostKeyAlgorithms')} <input name="connHostKeyAlgs" value="${escHtml(conn ? conn.hostKeyAlgorithms || '' : '')}" placeholder="+ssh-rsa,ssh-dss" /></label>
-          <label>${App.__('sshFormKexAlgorithms')} <input name="connKexAlgs" value="${escHtml(conn ? conn.kexAlgorithms || '' : '')}" placeholder="+diffie-hellman-group14-sha1" /></label>
-          <label>${App.__('sshFormPubkeyAcceptedAlgorithms')} <input name="connPubkeyAlgs" value="${escHtml(conn ? conn.pubkeyAcceptedAlgorithms || '' : '')}" placeholder="+ssh-rsa" /></label>
+          <div class="ssh-field-subhead">${App.__('sshFormAlgorithmGroup')}</div>
+          <label>${App.__('sshFormHostKeyAlgorithms')} <input name="connHostKeyAlgs" value="${escHtml(conn ? conn.hostKeyAlgorithms || '' : '')}" placeholder="e.g. +ssh-rsa,ssh-dss" /></label>
+          <label>${App.__('sshFormKexAlgorithms')} <input name="connKexAlgs" value="${escHtml(conn ? conn.kexAlgorithms || '' : '')}" placeholder="e.g. +diffie-hellman-group14-sha1" /></label>
+          <label>${App.__('sshFormPubkeyAcceptedAlgorithms')} <input name="connPubkeyAlgs" value="${escHtml(conn ? conn.pubkeyAcceptedAlgorithms || '' : '')}" placeholder="e.g. +ssh-rsa" /></label>
+          <label>${App.__('sshFormCiphers')} <input name="connCiphers" value="${escHtml(conn ? conn.ciphers || '' : '')}" placeholder="e.g. +aes128-cbc" /></label>
+          <label>${App.__('sshFormMacs')} <input name="connMacs" value="${escHtml(conn ? conn.macs || '' : '')}" placeholder="e.g. +hmac-sha1" /></label>
+          <label>${App.__('sshFormCaSignatureAlgorithms')} <input name="connCaSignatureAlgs" value="${escHtml(conn ? conn.caSignatureAlgorithms || '' : '')}" placeholder="e.g. ssh-rsa" /></label>
+          <div class="ssh-field-subhead">${App.__('sshFormCompressionGroup')}</div>
+          <label>${App.__('sshFormCompression')}
+            <select name="connCompression">
+              <option value="">${App.__('sshFormNone')}</option>
+              <option value="yes" ${conn && conn.compression === 'yes' ? 'selected' : ''}>yes</option>
+              <option value="no" ${conn && conn.compression === 'no' ? 'selected' : ''}>no</option>
+            </select>
+          </label>
         </fieldset>
       </form>
     `;

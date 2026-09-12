@@ -131,6 +131,18 @@ export class ApplySshImport {
       conn.pubkeyAcceptedAlgorithms = opts.doOptions
         ? (host.pubkeyAcceptedAlgorithms || existing.pubkeyAcceptedAlgorithms || null)
         : (existing.pubkeyAcceptedAlgorithms ?? null);
+      conn.ciphers = opts.doOptions
+        ? (host.ciphers || existing.ciphers || null)
+        : (existing.ciphers ?? null);
+      conn.macs = opts.doOptions
+        ? (host.macs || existing.macs || null)
+        : (existing.macs ?? null);
+      conn.caSignatureAlgorithms = opts.doOptions
+        ? (host.caSignatureAlgorithms || existing.caSignatureAlgorithms || null)
+        : (existing.caSignatureAlgorithms ?? null);
+      conn.compression = opts.doOptions
+        ? (host.compression || existing.compression || null)
+        : (existing.compression ?? null);
       if (!opts.doHost) {
         conn.host = existing.host;
         conn.port = existing.port;
@@ -142,6 +154,10 @@ export class ApplySshImport {
       conn.hostKeyAlgorithms = host.hostKeyAlgorithms || null;
       conn.kexAlgorithms = host.kexAlgorithms || null;
       conn.pubkeyAcceptedAlgorithms = host.pubkeyAcceptedAlgorithms || null;
+      conn.ciphers = host.ciphers || null;
+      conn.macs = host.macs || null;
+      conn.caSignatureAlgorithms = host.caSignatureAlgorithms || null;
+      conn.compression = host.compression || null;
     }
 
     return conn;

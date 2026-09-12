@@ -322,6 +322,10 @@ export class SshController {
       hostKeyAlgorithms: conn.hostKeyAlgorithms || null,
       kexAlgorithms: conn.kexAlgorithms || null,
       pubkeyAcceptedAlgorithms: conn.pubkeyAcceptedAlgorithms || null,
+      ciphers: conn.ciphers || null,
+      macs: conn.macs || null,
+      caSignatureAlgorithms: conn.caSignatureAlgorithms || null,
+      compression: conn.compression || null,
     };
   }
 

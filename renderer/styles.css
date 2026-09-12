@@ -2561,6 +2561,21 @@ html, body {
   padding: 0 calc(4px * var(--ui-scale));
 }
 
+.ssh-field-subhead {
+  font-size: calc(var(--app-font-size) * 0.846);
+  font-weight: 600;
+  color: var(--text-muted);
+  margin: calc(8px * var(--ui-scale)) 0 calc(4px * var(--ui-scale));
+  padding-top: calc(4px * var(--ui-scale));
+  border-top: 1px solid var(--border);
+}
+
+.ssh-field-subhead:first-of-type {
+  margin-top: 0;
+  padding-top: 0;
+  border-top: none;
+}
+
 /* ═══ Language Page (settings window) ═══ */
 .options-section.active[data-options-section="language"] {
   display: flex;

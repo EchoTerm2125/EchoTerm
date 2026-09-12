@@ -68,6 +68,10 @@ export interface SshConnection {
   hostKeyAlgorithms?: string | null;
   kexAlgorithms?: string | null;
   pubkeyAcceptedAlgorithms?: string | null;
+  ciphers?: string | null;
+  macs?: string | null;
+  caSignatureAlgorithms?: string | null;
+  compression?: string | null;
   /** Resolved display fields returned by main-process queries */
   userName?: string | null;
   /** Display string of the resolved jump host (e.g. "user@host" or referenced connection name) */
@@ -132,6 +136,10 @@ export interface SshConfigHost {
   hostKeyAlgorithms?: string | null;
   kexAlgorithms?: string | null;
   pubkeyAcceptedAlgorithms?: string | null;
+  ciphers?: string | null;
+  macs?: string | null;
+  caSignatureAlgorithms?: string | null;
+  compression?: string | null;
 }
 
 export interface ImportConfigResult {
@@ -159,6 +167,10 @@ export interface SshImportApplyHost {
   hostKeyAlgorithms: string | null;
   kexAlgorithms: string | null;
   pubkeyAcceptedAlgorithms: string | null;
+  ciphers: string | null;
+  macs: string | null;
+  caSignatureAlgorithms: string | null;
+  compression: string | null;
   existingConnId: string | null;
 }
 

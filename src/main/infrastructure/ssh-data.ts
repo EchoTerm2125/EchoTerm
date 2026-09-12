@@ -30,6 +30,10 @@ export interface StoredConnection {
   hostKeyAlgorithms?: string | null;
   kexAlgorithms?: string | null;
   pubkeyAcceptedAlgorithms?: string | null;
+  ciphers?: string | null;
+  macs?: string | null;
+  caSignatureAlgorithms?: string | null;
+  compression?: string | null;
 }
 
 export interface StoredConnectionFolder {

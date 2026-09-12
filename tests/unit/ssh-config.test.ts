@@ -9,6 +9,7 @@ function makeConnection(overrides: Partial<Connection> = {}): Connection {
     id: 'c1', name: 'conn', host: 'example.com', port: 22,
     userId: null, folderId: null, jumpHost: null,
     hostKeyAlgorithms: null, kexAlgorithms: null, pubkeyAcceptedAlgorithms: null,
+    ciphers: null, macs: null, caSignatureAlgorithms: null, compression: null,
     ...overrides,
   };
 }
@@ -45,6 +46,10 @@ describe('parseSshConfigText', () => {
       hostKeyAlgorithms: null,
       kexAlgorithms: null,
       pubkeyAcceptedAlgorithms: null,
+      ciphers: null,
+      macs: null,
+      caSignatureAlgorithms: null,
+      compression: null,
     });
   });
 
@@ -67,6 +72,23 @@ describe('parseSshConfigText', () => {
     const content = 'Host legacy\n  HostName legacy.example.com\n  PubkeyAcceptedKeyTypes +ssh-rsa\n';
     const hosts = parseSshConfigText(content, HOME_PREFIX);
     expect(hosts[0].pubkeyAcceptedAlgorithms).toBe('+ssh-rsa');
+  });
+
+  it('parses cipher, MAC, CA signature and compression options', () => {
+    const content = [
+      'Host legacy',
+      '  HostName legacy.example.com',
+      '  Ciphers +aes128-cbc',
+      '  MACs +hmac-sha1',
+      '  CASignatureAlgorithms ssh-rsa',
+      '  Compression yes',
+    ].join('\n');
+
+    const hosts = parseSshConfigText(content, HOME_PREFIX);
+    expect(hosts[0].ciphers).toBe('+aes128-cbc');
+    expect(hosts[0].macs).toBe('+hmac-sha1');
+    expect(hosts[0].caSignatureAlgorithms).toBe('ssh-rsa');
+    expect(hosts[0].compression).toBe('yes');
   });
 
   it('skips comments, blank lines and wildcard-only hosts', () => {
@@ -195,6 +217,28 @@ describe('renderSshConfig', () => {
       '  HostKeyAlgorithms +ssh-rsa,ssh-dss\n' +
       '  KexAlgorithms +diffie-hellman-group1-sha1\n' +
       '  PubkeyAcceptedAlgorithms +ssh-rsa\n' +
+      '\n',
+    );
+  });
+
+  it('renders cipher, MAC, CA signature and compression options when configured', () => {
+    const text = renderSshConfig(
+      [makeConnection({
+        name: 'legacy', host: 'legacy.local',
+        ciphers: '+aes128-cbc',
+        macs: '+hmac-sha1',
+        caSignatureAlgorithms: 'ssh-rsa',
+        compression: 'yes',
+      })],
+      [],
+    );
+    expect(text).toBe(
+      'Host legacy\n' +
+      '  HostName legacy.local\n' +
+      '  Ciphers +aes128-cbc\n' +
+      '  MACs +hmac-sha1\n' +
+      '  CASignatureAlgorithms ssh-rsa\n' +
+      '  Compression yes\n' +
       '\n',
     );
   });

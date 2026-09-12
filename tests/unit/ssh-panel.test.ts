@@ -1417,5 +1417,28 @@ describe('SshPanel (ssh-panel.ts)', () => {
         ]),
       }));
     });
+
+    it('flags a change when cipher and compression options are added in the config', async () => {
+      const api = window.api;
+      vi.mocked(api.sshConnectionList).mockResolvedValue([
+        { id: 'c1', name: 'legacy', host: 'example.com', port: 22, userId: null, folderId: null },
+      ]);
+      vi.mocked(api.sshImportConfig).mockResolvedValue({
+        canceled: false,
+        path: '/tmp/ssh_config',
+        hosts: [
+          { name: 'legacy', aliases: [], host: 'example.com', port: 22, user: '', identityFile: null, proxyJump: null, ciphers: '+aes128-cbc', compression: 'yes' },
+        ],
+      });
+
+      (document.getElementById('btnSshUpdate') as HTMLElement).click();
+      await flush();
+
+      const rows = document.querySelectorAll('#sshImportBody .ssh-import-row');
+      expect(rows.length).toBe(1);
+      const changes = rows[0].querySelector('.ssh-import-changes').textContent;
+      expect(changes).toContain('Ciphers=+aes128-cbc');
+      expect(changes).toContain('Compression=yes');
+    });
   });
 });

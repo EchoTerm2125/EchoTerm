@@ -73,6 +73,10 @@ export class FileConnectionRepository implements ConnectionRepository {
       hostKeyAlgorithms: conn.hostKeyAlgorithms || null,
       kexAlgorithms: conn.kexAlgorithms || null,
       pubkeyAcceptedAlgorithms: conn.pubkeyAcceptedAlgorithms || null,
+      ciphers: conn.ciphers || null,
+      macs: conn.macs || null,
+      caSignatureAlgorithms: conn.caSignatureAlgorithms || null,
+      compression: conn.compression || null,
     };
   }
 
@@ -120,6 +124,10 @@ export class FileConnectionRepository implements ConnectionRepository {
         hostKeyAlgorithms: connData.hostKeyAlgorithms || null,
         kexAlgorithms: connData.kexAlgorithms || null,
         pubkeyAcceptedAlgorithms: connData.pubkeyAcceptedAlgorithms || null,
+        ciphers: connData.ciphers || null,
+        macs: connData.macs || null,
+        caSignatureAlgorithms: connData.caSignatureAlgorithms || null,
+        compression: connData.compression || null,
       };
       connections.push(saved);
     }
@@ -175,6 +183,10 @@ export class FileConnectionRepository implements ConnectionRepository {
       hostKeyAlgorithms: stored.hostKeyAlgorithms || null,
       kexAlgorithms: stored.kexAlgorithms || null,
       pubkeyAcceptedAlgorithms: stored.pubkeyAcceptedAlgorithms || null,
+      ciphers: stored.ciphers || null,
+      macs: stored.macs || null,
+      caSignatureAlgorithms: stored.caSignatureAlgorithms || null,
+      compression: stored.compression || null,
     };
   }
 }
