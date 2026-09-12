@@ -275,6 +275,8 @@
     optionsThemeLight: '浅色',
     optionsUiFontSize: '界面字体大小',
     optionsTermFontSize: '终端字体大小',
+    optionsMaxRetainedLines: '最大保留行数',
+    confirmRetainedLinesHigh: '你输入了 {lines} 保留行数。超过 100,000 可能会占用大量内存。\n是否继续？',
     optionsTitleDefaultShell: '默认 Shell',
     optionsTitleWarnings: '警告',
     optionsTitleMouse: '鼠标',
@@ -333,6 +335,23 @@
     updGetUpdate: '获取更新',
     updInstallUpdate: '安装更新',
     updInstallConfirmBody: '更新已准备就绪。关闭 EchoTerm 将结束所有终端会话。现在安装吗？',
+
+    // ── Terminal search ──────────────────────────────────────────────────────
+    findPlaceholder: '查找',
+    findNextTitle: '下一个匹配 (Enter)',
+    findPrevTitle: '上一个匹配 (Shift+Enter)',
+    findCaseTitle: '区分大小写',
+    findWordTitle: '全字匹配',
+    findRegexTitle: '使用正则表达式',
+    findNoResults: '无结果',
+    searchPanelTitle: '搜索所有终端',
+    searchPanelPlaceholder: '搜索可见终端…',
+    searchPanelRun: '搜索',
+    searchPanelHint: '搜索屏幕上的终端。点击结果可跳转至该终端。',
+    searchPanelEmpty: '未打开任何标签',
+    searchPanelNoResults: '无匹配项',
+    searchPanelTruncated: '显示前 {count} 个匹配项',
+    searchPanelCloseTitle: '关闭',
 
     // ── Error messages ───────────────────────────────────────────────────────
     errorUnknownShell: '未知 Shell: {shell}',

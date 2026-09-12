@@ -120,6 +120,28 @@ const api: WindowApi = {
   sshImportConfig: (filePath) => ipcRenderer.invoke('ssh:import-config', filePath),
   sshImportApply: (request) => ipcRenderer.invoke('ssh:import-apply', request),
   sshExportConfig: () => ipcRenderer.invoke('ssh:export-config'),
+
+  // ─── Terminal search panel (Ctrl+Shift+F popup window) ────────────────────
+  panelOpen: () => ipcRenderer.invoke('panel:open'),
+  onPanelRun: (callback) => {
+    const listener = (_event: unknown, requestId: number, query: string, options: unknown) =>
+      callback(requestId, query, options as never);
+    ipcRenderer.on('panel:run', listener);
+    return () => ipcRenderer.removeListener('panel:run', listener);
+  },
+  panelRunResult: (requestId, results) => ipcRenderer.send('panel:run-result', requestId, results),
+  onPanelJump: (callback) => {
+    const listener = (_event: unknown, match: unknown) => callback(match as never);
+    ipcRenderer.on('panel:jump', listener);
+    return () => ipcRenderer.removeListener('panel:jump', listener);
+  },
+  onPanelClosed: (callback) => {
+    const listener = () => callback();
+    ipcRenderer.on('panel:closed', listener);
+    return () => ipcRenderer.removeListener('panel:closed', listener);
+  },
+  panelPushTheme: (info) => ipcRenderer.send('panel:theme-push', info),
+  panelShowResults: (state) => ipcRenderer.send('panel:show', state),
 };
 
 contextBridge.exposeInMainWorld('api', api);

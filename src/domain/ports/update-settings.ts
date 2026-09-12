@@ -9,7 +9,7 @@
 export interface UpdateSettings {
   /** Offer prerelease (beta) builds when checking for updates. */
   includePrerelease: boolean;
-  /** Run the automatic startup check. */
+  /** Run automatic checks — at launch and every 3 hours while the app runs. */
   checkForUpdatesAutomatically: boolean;
 }
 

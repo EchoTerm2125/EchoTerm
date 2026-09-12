@@ -276,6 +276,10 @@
     if (state.echoSelection.has(id)) return;
     const t = state.terminals.get(id);
     if (!t) return;
+    // Echo selection is scoped to the active group; a terminal from another
+    // group must never be added (it would corrupt the active group's saved
+    // per-group selection snapshot).
+    if (state.terminalGroups.get(id) !== state.activeGroupId) return;
     state.echoSelection.add(id);
     t.paneEl.classList.add('echo-selected');
     const cbLabel = t.titlebar.querySelector('.pane-checkbox');
@@ -305,6 +309,9 @@
   // in the active group is disabled. See docs/adr/0004.
   function soloEchoOnTerminal(id) {
     const groupIds = App.Groups.getGroupTerminalIds(state.activeGroupId);
+    // id must belong to the active group; otherwise every group member would
+    // be disabled while a hidden terminal from another group is enabled.
+    if (!groupIds.includes(id)) return;
     for (const bid of groupIds) {
       if (bid === id) enableEchoOnTerminal(bid);
       else disableEchoOnTerminal(bid);

@@ -994,6 +994,80 @@ describe('SshPanel (ssh-panel.ts)', () => {
     });
   });
 
+  describe('move to folder submenu labels', () => {
+    const submenuLabels = () =>
+      [...document.getElementById('sshCtxFolderSubmenu').querySelectorAll('button')].map(b => b.textContent);
+
+    it('decorates connection-folder targets in tree order like the dialog folder select', async () => {
+      const api = window.api;
+      vi.mocked(api.sshConnectionFolderList).mockResolvedValue([
+        { id: 'f1', name: 'Alpha', parentId: null },
+        { id: 'f2', name: 'Gamma', parentId: 'f1' },
+        { id: 'f3', name: 'Beta', parentId: null },
+      ]);
+      await getApp().SshPanel.refreshAll();
+      await flush();
+
+      const connEl = document.querySelector('.ssh-conn-item[data-conn-id="c1"]') as HTMLElement;
+      connEl.dispatchEvent(new MouseEvent('contextmenu', { bubbles: true, clientX: 100, clientY: 100 }));
+      await flush();
+
+      // c1 is ungrouped, so every folder is a valid target; the DFS order and
+      // ├─/└─/│ labels must match the folder <select> in the connection dialog.
+      expect(submenuLabels()).toEqual([
+        '├─ Alpha',
+        '│\u00A0\u00A0└─ Gamma',
+        '└─ Beta',
+      ]);
+    });
+
+    it('skips the current parent of a single connection and still decorates the rest', async () => {
+      const api = window.api;
+      vi.mocked(api.sshConnectionList).mockResolvedValue([
+        { id: 'c1', name: 'My Server', host: 'example.com', port: 22, userId: null, folderId: 'f2' },
+      ]);
+      vi.mocked(api.sshConnectionFolderList).mockResolvedValue([
+        { id: 'f1', name: 'Alpha', parentId: null },
+        { id: 'f2', name: 'Gamma', parentId: 'f1' },
+        { id: 'f3', name: 'Beta', parentId: null },
+      ]);
+      await getApp().SshPanel.refreshAll();
+      await flush();
+
+      const connEl = document.querySelector('.ssh-conn-item[data-conn-id="c1"]') as HTMLElement;
+      connEl.dispatchEvent(new MouseEvent('contextmenu', { bubbles: true, clientX: 100, clientY: 100 }));
+      await flush();
+
+      expect(submenuLabels()).toEqual([
+        '├─ Alpha',
+        '└─ Beta',
+      ]);
+    });
+
+    it('decorates user-folder targets for a user move', async () => {
+      const App = getApp();
+      const api = window.api;
+      vi.mocked(api.sshUserList).mockResolvedValue([
+        { id: 'u1', name: 'Admin', username: 'admin', authType: 'password', folderId: null },
+      ]);
+      vi.mocked(api.sshUserFolderList).mockResolvedValue([
+        { id: 'uf1', name: 'Team A', parentId: null },
+        { id: 'uf2', name: 'Sub', parentId: 'uf1' },
+      ]);
+      await App.SshPanel.refreshAll();
+      await flush();
+
+      const userEl = document.querySelector('.ssh-user-item[data-user-id="u1"]') as HTMLElement;
+      userEl.dispatchEvent(new MouseEvent('contextmenu', { bubbles: true, clientX: 100, clientY: 100 }));
+      await flush();
+
+      expect(submenuLabels()).toEqual([
+        '└─ Team A',
+        '\u00A0\u00A0\u00A0└─ Sub',
+      ]);
+    });
+  });
+
   describe('ssh config update dialog', () => {
     it('only shows hosts that have changes', async () => {
       const api = window.api;

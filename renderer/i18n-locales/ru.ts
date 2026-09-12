@@ -275,6 +275,8 @@
     optionsThemeLight: 'Светлая',
     optionsUiFontSize: 'Размер шрифта интерфейса',
     optionsTermFontSize: 'Размер шрифта терминала',
+    optionsMaxRetainedLines: 'Максимум сохраняемых строк',
+    confirmRetainedLinesHigh: 'Вы указали {lines} сохраняемых строк. Значения выше 100 000 могут потреблять много памяти.\nВсё равно продолжить?',
     optionsTitleDefaultShell: 'Оболочка по умолчанию',
     optionsTitleWarnings: 'Предупреждения',
     optionsTitleMouse: 'Мышь',
@@ -307,6 +309,23 @@
     pastePreviewDontShow: 'Больше не показывать',
     pastePreviewCancel: 'Отмена',
     pastePreviewPaste: 'Вставить',
+
+    // ── Terminal search ──────────────────────────────────────────────────────
+    findPlaceholder: 'Найти',
+    findNextTitle: 'Следующее совпадение (Enter)',
+    findPrevTitle: 'Предыдущее совпадение (Shift+Enter)',
+    findCaseTitle: 'Учитывать регистр',
+    findWordTitle: 'Слово целиком',
+    findRegexTitle: 'Использовать регулярное выражение',
+    findNoResults: 'Нет результатов',
+    searchPanelTitle: 'Поиск во всех терминалах',
+    searchPanelPlaceholder: 'Поиск в видимых терминалах…',
+    searchPanelRun: 'Поиск',
+    searchPanelHint: 'Ищет в терминалах на экране. Щёлкните результат, чтобы перейти к нему.',
+    searchPanelEmpty: 'Нет открытых вкладок',
+    searchPanelNoResults: 'Нет совпадений',
+    searchPanelTruncated: 'Показаны первые {count} совпадений',
+    searchPanelCloseTitle: 'Закрыть',
 
     // ── Error messages ───────────────────────────────────────────────────────
     errorUnknownShell: 'Неизвестная оболочка: {shell}',

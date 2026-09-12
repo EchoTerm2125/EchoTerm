@@ -202,6 +202,7 @@
       App.Echo.setEchoButtonLabel(false);
     }
     App.UI.updateStatusBar();
+    if (App.Search) App.Search.onActiveGroupChanged();
   }
 
   function deleteGroup(groupId) {
@@ -301,6 +302,10 @@
 
     updateGroupTabs();
     App.UI.updateStatusBar();
+    if (App.Search) {
+      App.Search.onGroupDeleted(groupId);
+      App.Search.onActiveGroupChanged();
+    }
   }
 
   function getGroupTerminalIds(groupId) {

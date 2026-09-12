@@ -275,6 +275,8 @@
     optionsThemeLight: 'Clair',
     optionsUiFontSize: 'Taille de police de l\'interface',
     optionsTermFontSize: 'Taille de police du terminal',
+    optionsMaxRetainedLines: 'Nombre maximal de lignes conservées',
+    confirmRetainedLinesHigh: 'Vous avez saisi {lines} lignes conservées. Les valeurs supérieures à 100 000 peuvent consommer beaucoup de mémoire.\nContinuer quand même ?',
     optionsTitleDefaultShell: 'Shell par défaut',
     optionsTitleWarnings: 'Avertissements',
     optionsTitleMouse: 'Souris',
@@ -307,6 +309,23 @@
     pastePreviewDontShow: 'Ne plus afficher',
     pastePreviewCancel: 'Annuler',
     pastePreviewPaste: 'Coller',
+
+    // ── Terminal search ──────────────────────────────────────────────────────
+    findPlaceholder: 'Rechercher',
+    findNextTitle: 'Correspondance suivante (Entrée)',
+    findPrevTitle: 'Correspondance précédente (Maj+Entrée)',
+    findCaseTitle: 'Respecter la casse',
+    findWordTitle: 'Mot entier',
+    findRegexTitle: 'Utiliser une expression régulière',
+    findNoResults: 'Aucun résultat',
+    searchPanelTitle: 'Rechercher dans tous les terminaux',
+    searchPanelPlaceholder: 'Rechercher dans les terminaux visibles…',
+    searchPanelRun: 'Rechercher',
+    searchPanelHint: 'Recherche dans les terminaux à l’écran. Cliquez sur un résultat pour y accéder.',
+    searchPanelEmpty: 'Aucun onglet ouvert',
+    searchPanelNoResults: 'Aucune correspondance',
+    searchPanelTruncated: 'Affichage des {count} premières correspondances',
+    searchPanelCloseTitle: 'Fermer',
 
     // ── Error messages ───────────────────────────────────────────────────────
     errorUnknownShell: 'Shell inconnu : {shell}',

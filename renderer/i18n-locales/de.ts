@@ -275,6 +275,8 @@
     optionsThemeLight: 'Hell',
     optionsUiFontSize: 'Schriftgröße der Oberfläche',
     optionsTermFontSize: 'Schriftgröße des Terminals',
+    optionsMaxRetainedLines: 'Maximal beibehaltene Zeilen',
+    confirmRetainedLinesHigh: 'Du hast {lines} beibehaltene Zeilen eingegeben. Werte über 100.000 können viel Arbeitsspeicher verbrauchen.\nTrotzdem fortfahren?',
     optionsTitleDefaultShell: 'Standard-Shell',
     optionsTitleWarnings: 'Warnungen',
     optionsTitleMouse: 'Maus',
@@ -307,6 +309,23 @@
     pastePreviewDontShow: 'Nicht erneut anzeigen',
     pastePreviewCancel: 'Abbrechen',
     pastePreviewPaste: 'Einfügen',
+
+    // ── Terminal search ──────────────────────────────────────────────────────
+    findPlaceholder: 'Suchen',
+    findNextTitle: 'Nächster Treffer (Eingabe)',
+    findPrevTitle: 'Vorheriger Treffer (Umschalt+Eingabe)',
+    findCaseTitle: 'Groß-/Kleinschreibung beachten',
+    findWordTitle: 'Nur ganze Wörter',
+    findRegexTitle: 'Regulären Ausdruck verwenden',
+    findNoResults: 'Keine Ergebnisse',
+    searchPanelTitle: 'Alle Terminals durchsuchen',
+    searchPanelPlaceholder: 'Sichtbare Terminals durchsuchen…',
+    searchPanelRun: 'Suchen',
+    searchPanelHint: 'Durchsucht die Terminals auf dem Bildschirm. Klicken Sie auf ein Ergebnis, um dorthin zu springen.',
+    searchPanelEmpty: 'Kein Tab geöffnet',
+    searchPanelNoResults: 'Keine Treffer',
+    searchPanelTruncated: 'Die ersten {count} Treffer werden angezeigt',
+    searchPanelCloseTitle: 'Schließen',
 
     // ── Error messages ───────────────────────────────────────────────────────
     errorUnknownShell: 'Unbekannte Shell: {shell}',

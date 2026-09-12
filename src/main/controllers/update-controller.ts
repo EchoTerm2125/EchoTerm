@@ -20,6 +20,16 @@ const RELEASES_PAGE_URL = 'https://github.com/EchoTerm2125/EchoTerm/releases';
 /** Marker written into portable/zip builds by scripts/after-pack.cjs. */
 const PORTABLE_MARKER = 'echoterm-portable';
 
+/** Launch check delay — the check never competes with terminal spawn at startup. */
+const LAUNCH_CHECK_DELAY_MS = 5000;
+
+/** Automatic check cadence — every 3 hours of wall-clock time anchored at launch. */
+const PERIODIC_CHECK_INTERVAL_MS = 3 * 60 * 60 * 1000;
+
+/** Stall watchdog for the background auto-download — if no progress event arrives
+ *  within this window, the in-flight gate is released so periodic checks resume. */
+const DOWNLOAD_STALL_TIMEOUT_MS = 30 * 60 * 1000;
+
 /**
  * Whether this copy is a portable/zip artifact rather than the NSIS install.
  * The electron-builder portable target sets PORTABLE_EXECUTABLE_DIR at runtime;
@@ -34,6 +44,12 @@ export class UpdateController {
   /** True once an installer is fully downloaded and ready for quitAndInstall. */
   private updateDownloaded = false;
 
+  /** True from the moment a check starts until a terminal event resolves it (an auto-download keeps it in flight). */
+  private updateInFlight = false;
+
+  /** Timer that releases the in-flight gate when the background download stalls. */
+  private downloadWatchdog: ReturnType<typeof setTimeout> | null = null;
+
   constructor(
     private readonly settingsStore: UpdateSettingsStore,
     private readonly send: SendToRenderer,
@@ -47,6 +63,25 @@ export class UpdateController {
   /** Whether a full installer has been downloaded and is ready for quitAndInstall. */
   isUpdateDownloaded(): boolean {
     return this.updateDownloaded;
+  }
+
+  /** (Re)arm the download stall watchdog; each progress event resets it. */
+  private armDownloadWatchdog(): void {
+    this.clearDownloadWatchdog();
+    this.downloadWatchdog = setTimeout(() => {
+      this.downloadWatchdog = null;
+      // A stalled download must not suppress automatic checks for the rest of
+      // the session. Release the gate; if the download later errors or
+      // completes, its events are still handled in init().
+      this.updateInFlight = false;
+    }, DOWNLOAD_STALL_TIMEOUT_MS);
+  }
+
+  private clearDownloadWatchdog(): void {
+    if (this.downloadWatchdog) {
+      clearTimeout(this.downloadWatchdog);
+      this.downloadWatchdog = null;
+    }
   }
 
   /** Wire electron-updater events and push them to the renderer. Call once at startup. */
@@ -70,12 +105,23 @@ export class UpdateController {
       // A fresh check supersedes any previously downloaded installer.
       this.updateDownloaded = false;
 
+      // Installed builds stay busy while the auto-download below runs (cleared
+      // on 'update-downloaded'/'error'). Portable/zip builds never download, so
+      // nothing further fires — clear the flag here or every later periodic
+      // check would be skipped forever.
+      if (detectPortableBuild()) {
+        this.updateInFlight = false;
+      }
+
       // Auto-download in the background — the user is never asked to start it.
       // Portable/zip builds have no installer, so they just show the
       // "Get update" button that opens the GitHub releases page instead.
       // electron-updater dedupes re-downloads itself (in-flight promise +
       // sha512-validated disk cache), so no version guard is needed here.
       if (!detectPortableBuild()) {
+        // Watch for a download that stalls without emitting a terminal event;
+        // without this it would keep the busy gate up for the whole session.
+        this.armDownloadWatchdog();
         autoUpdater.downloadUpdate().catch(() => {
           // electron-updater already emitted 'error' (handled in init()).
         });
@@ -85,10 +131,14 @@ export class UpdateController {
     autoUpdater.on('update-not-available', () => {
       // No newer version exists; any earlier downloaded installer is stale.
       this.updateDownloaded = false;
+      this.updateInFlight = false;
+      this.clearDownloadWatchdog();
       this.send('update:not-available', {});
     });
 
     autoUpdater.on('download-progress', (progress) => {
+      // Any progress means the download is alive — reset the stall watchdog.
+      this.armDownloadWatchdog();
       this.send('update:progress', { percent: Math.round(progress.percent ?? 0) });
     });
 
@@ -96,6 +146,8 @@ export class UpdateController {
       // Installing is an explicit user action (the title-bar button) — never
       // auto-install on quit. The renderer shows the button on this event.
       this.updateDownloaded = true;
+      this.updateInFlight = false;
+      this.clearDownloadWatchdog();
       this.send('update:downloaded', { version: info.version });
     });
 
@@ -103,29 +155,52 @@ export class UpdateController {
       // A failed check/download leaves the feed state unknown; refuse to install
       // a possibly-stale or incomplete download until the next successful check.
       this.updateDownloaded = false;
+      this.updateInFlight = false;
+      this.clearDownloadWatchdog();
       this.send('update:error', { message: err?.message ?? String(err) });
     });
   }
 
   /**
-   * Run an update check. Automatic checks honor the master toggle; manual
-   * checks always run.
+   * Schedule automatic checks: one shortly after launch, then every 3 hours
+   * while the app runs. Call once at startup, after init(). Each tick consults
+   * the update policy (master toggle + busy state) before starting a check.
+   */
+  startAutoUpdateSchedule(): void {
+    const run = () => this.checkForUpdates(false);
+    setTimeout(run, LAUNCH_CHECK_DELAY_MS);
+    setInterval(run, PERIODIC_CHECK_INTERVAL_MS);
+  }
+
+  /**
+   * Run an update check. Automatic checks honor the master toggle and are
+   * skipped while a check is busy (in flight, or a downloaded installer
+   * awaiting install); manual checks always run.
    */
   checkForUpdates(manual: boolean): { started: boolean } {
     const settings = this.settingsStore.load();
-    if (!shouldCheckForUpdate({ settings, manual })) {
+    const busy = this.updateInFlight || this.updateDownloaded;
+    if (!shouldCheckForUpdate({ settings, manual, busy })) {
       return { started: false };
     }
 
+    // A check is now in flight; periodic ticks skip until a terminal event
+    // (update-available / update-not-available / update-downloaded / error)
+    // clears the flag.
+    this.updateInFlight = true;
     autoUpdater.allowPrerelease = settings.includePrerelease;
     autoUpdater.checkForUpdates().then((result) => {
       // Inactive updater (dev run) resolves to null and emits no events —
-      // resolve the check so the UI never hangs on "Checking for updates…".
+      // resolve the check so the UI never hangs on "Checking for updates…"
+      // and the busy flag is not left set for the rest of the session.
       if (!result) {
+        this.updateInFlight = false;
         this.send('update:not-available', {});
       }
     }).catch(() => {
-      // electron-updater already emitted 'error' (handled in init()).
+      // electron-updater already emitted 'error' (handled in init()); clearing
+      // the flag here too is belt-and-braces so the gate never stays up.
+      this.updateInFlight = false;
     });
     return { started: true };
   }

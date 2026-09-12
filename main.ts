@@ -9,6 +9,7 @@ import { FileConnectionRepository } from './src/main/infrastructure/file-connect
 import { FileUserFolderRepository } from './src/main/infrastructure/file-user-folder-repository';
 import { FileUserRepository } from './src/main/infrastructure/file-user-repository';
 import { FileUpdateSettingsStore } from './src/main/infrastructure/file-update-settings';
+import { FileWindowBounds } from './src/main/infrastructure/file-window-bounds';
 import { NodePtyGateway } from './src/main/infrastructure/node-pty-gateway';
 import { WindowsShellDetector } from './src/main/infrastructure/windows-shell-detector';
 
@@ -51,6 +52,78 @@ let mainWindow = null;
 // Set when the user confirmed the update install: the window close interceptor
 // must let quitAndInstall() close the window without asking the renderer again.
 let installingUpdate = false;
+
+// ─── Search panel window (Ctrl+Shift+F) ─────────────────────────────────────
+// The panel owns no terminal: it relays "run search" and "jump" to the main
+// window's renderer, which is the only place the xterm buffers live.
+let searchWindow: Electron.BrowserWindow | null = null;
+let lastPanelTheme: unknown = null;
+let lastPanelGroupState: unknown = null;
+let panelRequestSeq = 0;
+const pendingPanelRuns = new Map<number, (results: unknown) => void>();
+const searchPanelBounds = new FileWindowBounds(path.join(app.getPath('userData'), 'search-panel.json'));
+
+const EMPTY_SEARCH_RESULTS = { empty: true, groups: [], total: 0, truncated: false, query: '' };
+
+function createSearchWindow(): Electron.BrowserWindow | null {
+  if (searchWindow && !searchWindow.isDestroyed()) return searchWindow;
+
+  const saved = searchPanelBounds.load() || {};
+  const width = typeof saved.width === 'number' ? saved.width : 420;
+  const height = typeof saved.height === 'number' ? saved.height : 460;
+  // Default to the main window's top-right corner when nothing was saved yet.
+  const fallbackX = mainWindow ? mainWindow.getBounds().x + mainWindow.getBounds().width - width - 24 : undefined;
+  const fallbackY = mainWindow ? mainWindow.getBounds().y + 80 : undefined;
+
+  searchWindow = new BrowserWindow({
+    width,
+    height,
+    x: typeof saved.x === 'number' ? saved.x : fallbackX,
+    y: typeof saved.y === 'number' ? saved.y : fallbackY,
+    minWidth: 320,
+    minHeight: 260,
+    frame: false,
+    show: false,
+    backgroundColor: '#11111b',
+    title: 'EchoTerm Search',
+    icon: path.join(__dirname, '..', 'build-assets', 'echoterm.ico'),
+    webPreferences: {
+      preload: path.join(__dirname, 'preload-search.js'),
+      contextIsolation: true,
+      nodeIntegration: false,
+    },
+  });
+
+  searchWindow.loadFile(path.join(__dirname, '..', 'renderer', 'search-window.html'));
+  searchWindow.once('ready-to-show', () => { if (searchWindow) searchWindow.show(); });
+
+  // 'move'/'resize' fire continuously during a drag and save() writes
+  // synchronously, so coalesce the writes and flush the last position on close.
+  let boundsTimer: ReturnType<typeof setTimeout> | null = null;
+  const persistBounds = () => {
+    if (boundsTimer) clearTimeout(boundsTimer);
+    boundsTimer = setTimeout(() => {
+      boundsTimer = null;
+      if (!searchWindow || searchWindow.isDestroyed()) return;
+      searchPanelBounds.save(searchWindow.getBounds());
+    }, 300);
+  };
+  searchWindow.on('resize', persistBounds);
+  searchWindow.on('move', persistBounds);
+  searchWindow.on('close', () => {
+    if (boundsTimer) { clearTimeout(boundsTimer); boundsTimer = null; }
+    if (searchWindow && !searchWindow.isDestroyed()) searchPanelBounds.save(searchWindow.getBounds());
+  });
+
+  searchWindow.on('closed', () => {
+    for (const resolve of pendingPanelRuns.values()) resolve(EMPTY_SEARCH_RESULTS);
+    pendingPanelRuns.clear();
+    searchWindow = null;
+    sendToRenderer('panel:closed');
+  });
+
+  return searchWindow;
+}
 
 // ─── Single instance: only one EchoTerm window may be open ──────────────────
 const gotTheLock = app.requestSingleInstanceLock();
@@ -159,6 +232,9 @@ function createWindow() {
 
   mainWindow.on('closed', () => {
     mainWindow = null;
+    // The panel is a companion of the main window: without it there is nothing
+    // to search, and leaving it open would keep the app from quitting.
+    if (searchWindow && !searchWindow.isDestroyed()) searchWindow.destroy();
   });
 }
 
@@ -227,12 +303,13 @@ if (gotTheLock) {
 
     createWindow();
 
-    // Auto-update: check for updates shortly after launch so the check never
-    // competes with terminal spawn at startup. Runs for both packaged and dev
-    // runs (dev consults dev-app-update.yml, see UpdateController.init()); the
-    // user's "check automatically" setting still governs via update policy.
+    // Auto-update: check shortly after launch, then every 3 hours while the
+    // app runs. Runs for both packaged and dev runs (dev consults
+    // dev-app-update.yml, see UpdateController.init()); the user's "check
+    // automatically" setting still governs via the update policy, and a tick
+    // is skipped while a previous check/download is busy.
     updateController.init();
-    setTimeout(() => updateController.checkForUpdates(false), 5000);
+    updateController.startAutoUpdateSchedule();
 
     app.on('activate', () => {
       if (BrowserWindow.getAllWindows().length === 0) createWindow();
@@ -277,6 +354,70 @@ ipcMain.handle('ssh:open-connection-folder', (event, folderId) => sshController.
 ipcMain.handle('ssh:import-config', (event, customPath) => sshController.importConfig(customPath));
 ipcMain.handle('ssh:import-apply', (event, request) => sshController.importApply(request));
 ipcMain.handle('ssh:export-config', () => sshController.exportConfig());
+
+// ─── Search panel IPC (Ctrl+Shift+F) ────────────────────────────────────────
+// The panel window runs its own page; every search it triggers is relayed to
+// the main window's renderer, where the xterm buffers live.
+ipcMain.handle('panel:open', () => {
+  const win = createSearchWindow();
+  if (!win) return { success: false, error: 'WINDOW_FAILED' };
+  if (win.isMinimized()) win.restore();
+  // A freshly created window is still loading; showing it here would flash an
+  // unrendered (background-only) window, so let 'ready-to-show' do the first
+  // show and only show/focus directly once the page has loaded.
+  if (!win.webContents.isLoading()) {
+    win.show();
+    win.focus();
+  }
+  return { success: true };
+});
+
+ipcMain.handle('panel:init', () => lastPanelTheme || { theme: 'dark', labels: {} });
+
+// The active group's last search, cached so a freshly opened panel can restore
+// it (the main window pushes it before opening the window).
+ipcMain.handle('panel:group-state', () => lastPanelGroupState);
+
+ipcMain.on('panel:show', (event, state) => {
+  lastPanelGroupState = state ?? null;
+  if (searchWindow && !searchWindow.isDestroyed()) searchWindow.webContents.send('panel:show', lastPanelGroupState);
+});
+
+ipcMain.on('panel:theme-push', (event, info) => {
+  lastPanelTheme = info;
+  if (searchWindow && !searchWindow.isDestroyed()) searchWindow.webContents.send('panel:theme', info);
+});
+
+ipcMain.handle('panel:run', (event, query, options) => {
+  if (!mainWindow || mainWindow.isDestroyed()) return EMPTY_SEARCH_RESULTS;
+  return new Promise((resolve) => {
+    const requestId = ++panelRequestSeq;
+    pendingPanelRuns.set(requestId, resolve);
+    mainWindow.webContents.send('panel:run', requestId, query, options);
+    // Never leave the panel hanging if the main window is busy or gone.
+    setTimeout(() => {
+      const pending = pendingPanelRuns.get(requestId);
+      if (pending) {
+        pendingPanelRuns.delete(requestId);
+        pending(EMPTY_SEARCH_RESULTS);
+      }
+    }, 5000);
+  });
+});
+
+ipcMain.on('panel:run-result', (event, requestId, results) => {
+  const resolve = pendingPanelRuns.get(requestId);
+  if (resolve) {
+    pendingPanelRuns.delete(requestId);
+    resolve(results);
+  }
+});
+
+ipcMain.on('panel:jump', (event, match) => sendToRenderer('panel:jump', match));
+
+ipcMain.on('panel:close', () => {
+  if (searchWindow && !searchWindow.isDestroyed()) searchWindow.close();
+});
 
 // ─── Auto-update IPC handlers ───────────────────────────────────────────────
 ipcMain.handle('update:check', () => updateController.checkForUpdates(true));

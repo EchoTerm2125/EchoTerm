@@ -169,6 +169,17 @@
 
   <!-- ═══Terminal container (split.js manages children)  ═══-->
   <main id="terminal-container">
+    <!-- ═══Find bar (Ctrl+F, active pane)  ═══-->
+    <div id="findBar" class="find-bar hidden" data-overlay>
+      <input type="text" id="findBarInput" class="find-bar-input" placeholder="Find" data-i18n-placeholder="findPlaceholder" autocomplete="off" spellcheck="false" />
+      <span id="findBarCount" class="find-bar-count"></span>
+      <button id="findBarPrev" class="find-bar-btn" data-i18n-title="findPrevTitle" title="Previous match (Shift+Enter)">↑</button>
+      <button id="findBarNext" class="find-bar-btn" data-i18n-title="findNextTitle" title="Next match (Enter)">↓</button>
+      <button id="findBarCase" class="find-bar-btn find-bar-toggle" data-i18n-title="findCaseTitle" title="Match case">Aa</button>
+      <button id="findBarWord" class="find-bar-btn find-bar-toggle" data-i18n-title="findWordTitle" title="Match whole word">ab</button>
+      <button id="findBarRegex" class="find-bar-btn find-bar-toggle" data-i18n-title="findRegexTitle" title="Use regular expression">.*</button>
+      <button id="findBarClose" class="find-bar-btn" data-i18n-title="searchPanelCloseTitle" title="Close">×</button>
+    </div>
     <!-- Terminals are added dynamically by app.js -->
   </main>
     </div><!-- /#mainContent -->
@@ -315,6 +326,11 @@
           <span class="options-slider-label" data-i18n="optionsTermFontSize">Terminal font size</span>
           <input type="range" id="optTermFontSize" min="8" max="24" step="1" />
           <input type="number" class="options-font-num" id="optTermFontSizeNum" min="8" max="24" step="1" value="13" />
+        </div>
+        <div class="options-slider-row">
+          <span class="options-slider-label" data-i18n="optionsMaxRetainedLines">Max retained lines</span>
+          <input type="range" id="optMaxRetainedLines" min="0" max="6" step="1" />
+          <input type="number" class="options-font-num options-font-num-wide" id="optMaxRetainedLinesNum" min="100" max="1000000" step="100" value="1000" />
         </div>
       </div>
     </div>
@@ -532,6 +548,7 @@
   <!-- ═══Scripts  ═══-->
   <script src="../node_modules/@xterm/xterm/lib/xterm.js"></script>
   <script src="../node_modules/@xterm/addon-fit/lib/addon-fit.js"></script>
+  <script src="../node_modules/@xterm/addon-search/lib/addon-search.js"></script>
   <script src="../node_modules/split.js/dist/split.js"></script>
   <!-- Compiled renderer bundle (built from renderer/*.ts via `npm run compile`) -->
   <script src="../build/renderer.js"></script>

@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self' 'unsafe-inline'; font-src 'self' data:;" />
+  <title id="panelTitle">Search</title>
+  <link rel="stylesheet" href="search-window.css" />
+</head>
+<body>
+  <header id="panelHeader" class="panel-header">
+    <span id="panelTitleLabel" class="panel-title">Search</span>
+    <button id="panelClose" class="panel-close" title="Close">×</button>
+  </header>
+
+  <div class="panel-search-row">
+    <input type="text" id="panelInput" class="panel-input" placeholder="Search…" autocomplete="off" spellcheck="false" />
+    <button id="panelRun" class="panel-run">Search</button>
+    <button id="panelCase" class="panel-opt" title="Match case">Aa</button>
+    <button id="panelWord" class="panel-opt" title="Match whole word">ab</button>
+    <button id="panelRegex" class="panel-opt" title="Use regular expression">.*</button>
+  </div>
+
+  <div id="panelHint" class="panel-hint"></div>
+  <div id="panelResults" class="panel-results"></div>
+
+  <script src="../build/search-window.js"></script>
+</body>
+</html>

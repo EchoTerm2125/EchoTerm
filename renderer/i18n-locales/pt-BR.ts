@@ -275,6 +275,8 @@
     optionsThemeLight: 'Claro',
     optionsUiFontSize: 'Tamanho da fonte da interface',
     optionsTermFontSize: 'Tamanho da fonte do terminal',
+    optionsMaxRetainedLines: 'Máximo de linhas retidas',
+    confirmRetainedLinesHigh: 'Você inseriu {lines} linhas retidas. Valores acima de 100.000 podem consumir muita memória.\nContinuar mesmo assim?',
     optionsTitleDefaultShell: 'Shell padrão',
     optionsTitleWarnings: 'Avisos',
     optionsTitleMouse: 'Mouse',
@@ -307,6 +309,23 @@
     pastePreviewDontShow: 'Não mostrar novamente',
     pastePreviewCancel: 'Cancelar',
     pastePreviewPaste: 'Colar',
+
+    // ── Terminal search ──────────────────────────────────────────────────────
+    findPlaceholder: 'Localizar',
+    findNextTitle: 'Próxima correspondência (Enter)',
+    findPrevTitle: 'Correspondência anterior (Shift+Enter)',
+    findCaseTitle: 'Diferenciar maiúsculas e minúsculas',
+    findWordTitle: 'Corresponder palavra inteira',
+    findRegexTitle: 'Usar expressão regular',
+    findNoResults: 'Sem resultados',
+    searchPanelTitle: 'Pesquisar em todos os terminais',
+    searchPanelPlaceholder: 'Pesquisar nos terminais visíveis…',
+    searchPanelRun: 'Pesquisar',
+    searchPanelHint: 'Pesquisa nos terminais da tela. Clique em um resultado para ir até ele.',
+    searchPanelEmpty: 'Nenhuma guia aberta',
+    searchPanelNoResults: 'Sem correspondências',
+    searchPanelTruncated: 'Mostrando as primeiras {count} correspondências',
+    searchPanelCloseTitle: 'Fechar',
 
     // ── Error messages ───────────────────────────────────────────────────────
     errorUnknownShell: 'Shell desconhecido: {shell}',

@@ -276,6 +276,8 @@
     optionsThemeLight: 'Light',
     optionsUiFontSize: 'UI font size',
     optionsTermFontSize: 'Terminal font size',
+    optionsMaxRetainedLines: 'Max retained lines',
+    confirmRetainedLinesHigh: 'You entered {lines} retained lines. Values above 100,000 can use a large amount of memory.\nContinue anyway?',
     optionsTitleDefaultShell: 'Default Shell',
     optionsTitleWarnings: 'Warnings',
     optionsTitleMouse: 'Mouse',
@@ -308,6 +310,23 @@
     pastePreviewDontShow: 'Don\'t show this again',
     pastePreviewCancel: 'Cancel',
     pastePreviewPaste: 'Paste',
+
+    // ── Terminal search ──────────────────────────────────────────────────────
+    findPlaceholder: 'Find',
+    findNextTitle: 'Next match (Enter)',
+    findPrevTitle: 'Previous match (Shift+Enter)',
+    findCaseTitle: 'Match case',
+    findWordTitle: 'Match whole word',
+    findRegexTitle: 'Use regular expression',
+    findNoResults: 'No results',
+    searchPanelTitle: 'Search All Terminals',
+    searchPanelPlaceholder: 'Search visible terminals…',
+    searchPanelRun: 'Search',
+    searchPanelHint: 'Searches the terminals on screen. Click a result to jump to it.',
+    searchPanelEmpty: 'No tab opened',
+    searchPanelNoResults: 'No matches',
+    searchPanelTruncated: 'Showing the first {count} matches',
+    searchPanelCloseTitle: 'Close',
 
     // ── Error messages ───────────────────────────────────────────────────────
     errorUnknownShell: 'Unknown shell: {shell}',

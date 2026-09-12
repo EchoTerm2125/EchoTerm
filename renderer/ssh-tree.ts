@@ -21,6 +21,34 @@ export function buildFolderChildrenMap(folders) {
 }
 
 /**
+ * Depth-first list of the folder tree (siblings sorted by name per level,
+ * cycle-guarded) with the display label used by folder <select>s and the
+ * "Move to folder" context submenu — tree guides plus a ├─ / └─ connector per
+ * level, e.g. `└─ Name`, `│   └─ Child`. Order and text mirror the dialog
+ * selects so the same folder reads identically in both places.
+ */
+export function folderTreeLabelEntries(folders) {
+  const children = buildFolderChildrenMap(folders);
+  const NBSP = '\u00A0';
+  const out = [];
+  const visited = new Set();
+  const walk = (parentId, prefix) => {
+    // Cycle guard: a corrupt payload (folder cycles) must not recurse forever.
+    if (visited.has(parentId)) return;
+    visited.add(parentId);
+    const list = children.get(parentId) || [];
+    list.forEach((f, i) => {
+      const last = i === list.length - 1;
+      const connector = last ? '└─ ' : '├─ ';
+      out.push({ id: f.id, label: prefix + connector + f.name });
+      walk(f.id, prefix + (last ? NBSP.repeat(3) : '│' + NBSP.repeat(2)));
+    });
+  };
+  walk('__root__', '');
+  return out;
+}
+
+/**
  * Union of the ids of several folders and all their transitive descendants.
  * Nested roots are counted once (visited set).
  */

@@ -205,6 +205,66 @@ export interface UpdateErrorInfo {
   message: string;
 }
 
+// ─── Terminal search (find bar + search panel) ───────────────────────────────
+export interface SearchMatch {
+  terminalId: number;
+  line: number;
+  col: number;
+  length: number;
+  text: string;
+}
+
+/** Matches of one pane, as shown under its title in the search panel. */
+export interface SearchPaneGroup {
+  terminalId: number;
+  label: string;
+  matches: SearchMatch[];
+}
+
+export interface SearchResults {
+  /** No pane was in scope (no tab opened). */
+  empty: boolean;
+  groups: SearchPaneGroup[];
+  total: number;
+  truncated: boolean;
+  query: string;
+  error?: string;
+}
+
+/** Matching options the search panel window sends with each query. */
+export interface PanelSearchOptions {
+  caseSensitive: boolean;
+  wholeWord: boolean;
+  regex: boolean;
+}
+
+/** Translatable strings the search panel window renders. */
+export interface SearchPanelLabels {
+  title: string;
+  placeholder: string;
+  run: string;
+  hint: string;
+  empty: string;
+  noResults: string;
+  truncated: string;
+  closeTitle: string;
+  caseTitle: string;
+  wordTitle: string;
+  regexTitle: string;
+}
+
+export interface SearchPanelTheme {
+  theme: 'dark' | 'light';
+  labels: SearchPanelLabels;
+}
+
+/** One group's last search, restored when the user switches back to that group. */
+export interface PanelGroupState {
+  query: string;
+  options: PanelSearchOptions;
+  results: SearchResults;
+}
+
 // ─── The typed bridge exposed by preload.ts as window.api ───────────────────
 export interface WindowApi {
   // Shell
@@ -291,4 +351,19 @@ export interface WindowApi {
   sshImportConfig(filePath?: string): Promise<ImportConfigResult>;
   sshImportApply(request: SshImportApplyRequest): Promise<SshImportApplyResult>;
   sshExportConfig(): Promise<ExportConfigResult>;
+
+  // Terminal search panel (Ctrl+Shift+F popup window)
+  /** Open (or focus) the search panel window. */
+  panelOpen(): Promise<IpcOutcome>;
+  /** The panel asked for a search; reply with panelRunResult(requestId, …). */
+  onPanelRun(callback: (requestId: number, query: string, options: PanelSearchOptions) => void): () => void;
+  panelRunResult(requestId: number, results: SearchResults): void;
+  /** The panel asked to jump to one of its results. */
+  onPanelJump(callback: (match: SearchMatch) => void): () => void;
+  /** The panel window closed; its highlights must be cleared. */
+  onPanelClosed(callback: () => void): () => void;
+  /** Push the current theme + UI strings to the panel window. */
+  panelPushTheme(info: SearchPanelTheme): void;
+  /** Push the active group's last search (null when it has none). */
+  panelShowResults(state: PanelGroupState | null): void;
 }

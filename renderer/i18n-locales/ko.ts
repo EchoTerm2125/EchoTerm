@@ -275,6 +275,8 @@
     optionsThemeLight: '라이트',
     optionsUiFontSize: 'UI 글꼴 크기',
     optionsTermFontSize: '터미널 글꼴 크기',
+    optionsMaxRetainedLines: '최대 보존 줄 수',
+    confirmRetainedLinesHigh: '{lines}개의 보존 줄을 입력했습니다. 100,000을 초과하면 메모리를 많이 사용할 수 있습니다.\n계속하시겠습니까?',
     optionsTitleDefaultShell: '기본 셸',
     optionsTitleWarnings: '경고',
     optionsTitleMouse: '마우스',
@@ -307,6 +309,23 @@
     pastePreviewDontShow: '다시 표시하지 않음',
     pastePreviewCancel: '취소',
     pastePreviewPaste: '붙여넣기',
+
+    // ── Terminal search ──────────────────────────────────────────────────────
+    findPlaceholder: '찾기',
+    findNextTitle: '다음 일치 (Enter)',
+    findPrevTitle: '이전 일치 (Shift+Enter)',
+    findCaseTitle: '대/소문자 구분',
+    findWordTitle: '단어 단위로 일치',
+    findRegexTitle: '정규식 사용',
+    findNoResults: '결과 없음',
+    searchPanelTitle: '모든 터미널 검색',
+    searchPanelPlaceholder: '표시된 터미널 검색…',
+    searchPanelRun: '검색',
+    searchPanelHint: '화면에 표시된 터미널을 검색합니다. 결과를 클릭하면 해당 터미널로 이동합니다.',
+    searchPanelEmpty: '열린 탭 없음',
+    searchPanelNoResults: '일치하는 항목 없음',
+    searchPanelTruncated: '처음 {count}개 일치 항목 표시',
+    searchPanelCloseTitle: '닫기',
 
     // ── Error messages ───────────────────────────────────────────────────────
     errorUnknownShell: '알 수 없는 셸: {shell}',

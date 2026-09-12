@@ -11,7 +11,12 @@
   const XTERM_THEMES = {
     dark: {
       background: '#11111b', foreground: '#cdd6f4', cursor: '#f5e0dc',
-      selectionBackground: '#585b7055',
+      // Selection highlight made obvious: opaque band, flattened high-contrast
+      // fg (otherwise #585b70 brightBlack chars vanish under the band), and a
+      // weaker band when the terminal is unfocused.
+      selectionBackground: '#585b70',
+      selectionForeground: '#cdd6f4',
+      selectionInactiveBackground: '#585b70a8',
       black: '#45475a', red: '#f38ba8', green: '#a6e3a1', yellow: '#f9e2af',
       blue: '#89b4fa', magenta: '#f5c2e7', cyan: '#94e2d5', white: '#bac2de',
       brightBlack: '#585b70', brightRed: '#f38ba8', brightGreen: '#a6e3a1',
@@ -20,7 +25,11 @@
     },
     light: {
       background: '#eff1f5', foreground: '#4c4f69', cursor: '#dc8a78',
-      selectionBackground: '#acb0be55',
+      // Selection highlight made obvious: opaque band, flattened high-contrast
+      // fg, and a weaker band when the terminal is unfocused.
+      selectionBackground: '#acb0be',
+      selectionForeground: '#4c4f69',
+      selectionInactiveBackground: '#acb0bea8',
       black: '#5c5f77', red: '#d20f39', green: '#40a02b', yellow: '#df8e1d',
       blue: '#1e66f5', magenta: '#ea76cb', cyan: '#179299', white: '#acb0be',
       brightBlack: '#6c6f85', brightRed: '#d20f39', brightGreen: '#40a02b',
@@ -31,6 +40,27 @@
 
   const UI_FONT_MIN = 8, UI_FONT_MAX = 24, UI_FONT_DEFAULT = 13;
   const TERM_FONT_MIN = 8, TERM_FONT_MAX = 24, TERM_FONT_DEFAULT = 13;
+  // Max retained lines (xterm scrollback): free 100..1000000, with preset stops
+  // the settings slider snaps to.
+  const RETAINED_MIN = 100, RETAINED_MAX = 1000000, RETAINED_DEFAULT = 1000;
+  const RETAINED_STOPS = [1000, 2000, 5000, 10000, 25000, 50000, 100000];
+
+  // ─── Search match colors per theme ────────────────────────────────────────
+  // xterm's search decorations require opaque #RRGGBB backgrounds and the band
+  // is painted behind the glyphs, so each tone is picked to keep terminal text
+  // readable. Deliberately distinct from the selection band (#585b70 dark /
+  // #acb0be light) and split per search surface so the find bar and the search
+  // panel can highlight the same buffer at once without looking alike.
+  const SEARCH_COLORS = {
+    dark: {
+      barMatch: '#6b5320', barActiveMatch: '#a8842f',
+      panelMatch: '#27406b', panelActiveMatch: '#3d69a8',
+    },
+    light: {
+      barMatch: '#fbe7b4', barActiveMatch: '#f2c85c',
+      panelMatch: '#cfe0ff', panelActiveMatch: '#9dc0ff',
+    },
+  };
 
   function clamp(n, min, max) {
     return Math.min(max, Math.max(min, n));
@@ -45,6 +75,10 @@
     return XTERM_THEMES[getTheme()];
   }
 
+  function getSearchColors() {
+    return SEARCH_COLORS[getTheme()];
+  }
+
   function getUiFontSize() {
     const v = parseInt(localStorage.getItem('uiFontSize') || '', 10);
     return Number.isFinite(v) ? clamp(v, UI_FONT_MIN, UI_FONT_MAX) : UI_FONT_DEFAULT;
@@ -53,6 +87,11 @@
   function getTermFontSize() {
     const v = parseInt(localStorage.getItem('termFontSize') || '', 10);
     return Number.isFinite(v) ? clamp(v, TERM_FONT_MIN, TERM_FONT_MAX) : TERM_FONT_DEFAULT;
+  }
+
+  function getMaxRetainedLines() {
+    const v = parseInt(localStorage.getItem('maxRetainedLines') || '', 10);
+    return Number.isFinite(v) ? clamp(v, RETAINED_MIN, RETAINED_MAX) : RETAINED_DEFAULT;
   }
 
   // ─── Apply current xterm theme to all live terminals ────────────────────────
@@ -65,11 +104,17 @@
   }
 
   // ─── Setters (persist + apply live) ─────────────────────────────────────────
+  const _themeChangeListeners = [];
+  function onThemeChange(fn) {
+    _themeChangeListeners.push(fn);
+  }
+
   function setTheme(name) {
     const theme = name === 'light' ? 'light' : 'dark';
     localStorage.setItem('appTheme', theme);
     applyThemeToDom();
     applyToTerminals();
+    for (const fn of _themeChangeListeners) fn(theme);
   }
 
   function applyThemeToDom() {
@@ -105,6 +150,19 @@
     });
   }
 
+  // Bounds how many lines a pane retains above the viewport. Lowering this on a
+  // live pane makes xterm discard the oldest buffered lines immediately.
+  function setMaxRetainedLines(lines) {
+    const n = Math.round(lines);
+    if (!Number.isFinite(n)) return;
+    const value = clamp(n, RETAINED_MIN, RETAINED_MAX);
+    localStorage.setItem('maxRetainedLines', String(value));
+    if (!window.App || !App.state || !App.state.terminals) return;
+    App.state.terminals.forEach((t) => {
+      try { t.term.options.scrollback = value; } catch { /* pane not ready */ }
+    });
+  }
+
   // ─── Apply saved appearance immediately at import time ──────────────────────
   // The bundle executes synchronously before first paint, so there is no
   // visible dark→light flash. (CSP forbids inline scripts, so the bundle is
@@ -116,14 +174,20 @@
   window.App = window.App || ({} as AppGlobal);
   App.Theme = {
     XTERM_THEMES,
+    SEARCH_COLORS,
     getTheme,
     getXtermTheme,
+    getSearchColors,
     getUiFontSize,
     getTermFontSize,
+    getMaxRetainedLines,
     setTheme,
     setUiFontSize,
     setTermFontSize,
+    setMaxRetainedLines,
+    RETAINED_STOPS,
     applyToTerminals,
+    onThemeChange,
   };
 })();
 

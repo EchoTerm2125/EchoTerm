@@ -5,7 +5,7 @@ describe('Integration: Keyboard Shortcuts', () => {
   let App;
 
   beforeEach(async () => {
-    App = await setupTest('terminal', 'tabs', 'groups', 'ui', 'echo', 'menus');
+    App = await setupTest('terminal', 'tabs', 'groups', 'ui', 'echo', 'menus', 'search');
 
     injectGroup('g1', 'Group 1');
     App.state.activeGroupId = 'g1';
@@ -111,6 +111,61 @@ describe('Integration: Keyboard Shortcuts', () => {
       expect(spy).toHaveBeenCalled();
       // First argument should mention closing terminal
       expect(spy.mock.calls[0][0]).toContain('Close');
+    });
+  });
+
+  describe('Ctrl+F → Find bar', () => {
+    it('opens the find bar for the active terminal', () => {
+      document.dispatchEvent(new KeyboardEvent('keydown', {
+        key: 'f',
+        code: 'KeyF',
+        ctrlKey: true,
+        bubbles: true,
+      }));
+
+      expect(document.getElementById('findBar').classList.contains('hidden')).toBe(false);
+    });
+
+    it('closes it again on a second press', () => {
+      const press = () => document.dispatchEvent(new KeyboardEvent('keydown', {
+        key: 'f',
+        code: 'KeyF',
+        ctrlKey: true,
+        bubbles: true,
+      }));
+
+      press();
+      press();
+
+      expect(document.getElementById('findBar').classList.contains('hidden')).toBe(true);
+    });
+  });
+
+  describe('Ctrl+Shift+F → Search panel', () => {
+    it('opens the search panel window', () => {
+      document.dispatchEvent(new KeyboardEvent('keydown', {
+        key: 'F',
+        code: 'KeyF',
+        ctrlKey: true,
+        shiftKey: true,
+        bubbles: true,
+      }));
+
+      expect(window.api.panelOpen).toHaveBeenCalled();
+      // The panel window needs the current theme + labels before it opens.
+      expect(window.api.panelPushTheme).toHaveBeenCalled();
+    });
+
+    it('does not open the find bar', () => {
+      document.dispatchEvent(new KeyboardEvent('keydown', {
+        key: 'F',
+        code: 'KeyF',
+        ctrlKey: true,
+        shiftKey: true,
+        bubbles: true,
+      }));
+
+      expect(document.getElementById('findBar').classList.contains('hidden')).toBe(true);
     });
   });
 });

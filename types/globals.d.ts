@@ -24,17 +24,31 @@ interface I18nEngine {
   locales: Record<string, Record<string, string>>;
 }
 
+/** Search match colors (renderer/theme.ts) — opaque #RRGGBB for xterm decorations */
+interface SearchColors {
+  barMatch: string;
+  barActiveMatch: string;
+  panelMatch: string;
+  panelActiveMatch: string;
+}
+
 /** Theme & appearance engine (renderer/theme.ts) */
 interface ThemeEngine {
   XTERM_THEMES: Record<string, Record<string, string>>;
+  SEARCH_COLORS: Record<string, SearchColors>;
   getTheme(): 'dark' | 'light';
   getXtermTheme(): Record<string, string>;
+  getSearchColors(): SearchColors;
+  RETAINED_STOPS: readonly number[];
   getUiFontSize(): number;
   getTermFontSize(): number;
+  getMaxRetainedLines(): number;
   setTheme(name: string): void;
   setUiFontSize(px: number): void;
   setTermFontSize(px: number): void;
+  setMaxRetainedLines(lines: number): void;
   applyToTerminals(): void;
+  onThemeChange(fn: (theme: 'dark' | 'light') => void): void;
 }
 
 /**
@@ -69,6 +83,8 @@ declare const App: AppGlobal;
 declare const Terminal: typeof import('@xterm/xterm').Terminal;
 // @xterm/addon-fit UMD global
 declare const FitAddon: typeof import('@xterm/addon-fit');
+// @xterm/addon-search UMD global
+declare const SearchAddon: typeof import('@xterm/addon-search');
 // split.js UMD global
 declare function Split(
   elements: Array<HTMLElement | string>,
