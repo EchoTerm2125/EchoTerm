@@ -224,6 +224,15 @@ import './theme';
       bar.addEventListener(type, (e) => e.stopPropagation());
     }
 
+    // A button takes focus on mouse-down, and a focused button is activated by
+    // Space — so without this, clicking a control would make the next Space
+    // re-run it instead of reaching the input. Keep the focus where it was;
+    // Tab + Space still activate a button reached by keyboard.
+    bar.addEventListener('mousedown', (e) => {
+      const target = e.target as HTMLElement | null;
+      if (target && target.closest('button')) e.preventDefault();
+    });
+
     input.addEventListener('input', () => {
       if (ts._findDebounce) clearTimeout(ts._findDebounce);
       ts._findDebounce = setTimeout(() => { ts._findDebounce = null; runFind(ts, 'first'); }, DEBOUNCE_MS);

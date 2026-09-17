@@ -191,6 +191,22 @@ describe('Unit: Terminal search', () => {
       expect(ts.term._addons[0].calls.findNext.at(-1).options.caseSensitive).toBe(true);
     });
 
+    it('does not let a button keep focus, so Space is not replayed on it', () => {
+      injectTerminal(1);
+      App.state.activeTerminalId = 1;
+      App.Search.openFindBar();
+
+      const bar = findBarFor(1);
+      const onButton = new MouseEvent('mousedown', { bubbles: true, cancelable: true });
+      (bar.querySelector('.find-bar-next') as HTMLElement).dispatchEvent(onButton);
+      expect(onButton.defaultPrevented).toBe(true);
+
+      // The input must still be clickable/focusable.
+      const onInput = new MouseEvent('mousedown', { bubbles: true, cancelable: true });
+      (bar.querySelector('.find-bar-input') as HTMLElement).dispatchEvent(onInput);
+      expect(onInput.defaultPrevented).toBe(false);
+    });
+
     it('closes on Escape, clears decorations and remembers the query', () => {
       const ts = injectTerminal(1, { term: fakeTerm(['hello']) });
       App.state.activeTerminalId = 1;
