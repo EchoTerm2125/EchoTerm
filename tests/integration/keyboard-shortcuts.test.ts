@@ -1,5 +1,5 @@
 // Integration tests — Keyboard shortcuts
-import { setupTest, injectTerminal, injectGroup } from '../setup.js';
+import { setupTest, injectTerminal, injectGroup, findBarFor } from '../setup.js';
 
 describe('Integration: Keyboard Shortcuts', () => {
   let App;
@@ -123,7 +123,7 @@ describe('Integration: Keyboard Shortcuts', () => {
         bubbles: true,
       }));
 
-      expect(document.getElementById('findBar').classList.contains('hidden')).toBe(false);
+      expect(findBarFor(1).classList.contains('hidden')).toBe(false);
     });
 
     it('closes it again on a second press', () => {
@@ -137,7 +137,7 @@ describe('Integration: Keyboard Shortcuts', () => {
       press();
       press();
 
-      expect(document.getElementById('findBar').classList.contains('hidden')).toBe(true);
+      expect(findBarFor(1).classList.contains('hidden')).toBe(true);
     });
   });
 
@@ -165,7 +165,8 @@ describe('Integration: Keyboard Shortcuts', () => {
         bubbles: true,
       }));
 
-      expect(document.getElementById('findBar').classList.contains('hidden')).toBe(true);
+      // The panel shortcut never builds a find bar.
+      expect(findBarFor(1)).toBeNull();
     });
   });
 });

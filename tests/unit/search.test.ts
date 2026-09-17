@@ -1,5 +1,5 @@
 // Unit tests — Terminal search (find bar + search panel)
-import { setupTest, injectTerminal, injectGroup } from '../setup.js';
+import { setupTest, injectTerminal, injectGroup, findBarFor } from '../setup.js';
 
 /** Minimal xterm stand-in that exposes just what the search scan reads. */
 function fakeTerm(lines) {
@@ -46,8 +46,35 @@ describe('Unit: Terminal search', () => {
 
       App.Search.handleShortcut(false);
 
-      expect(document.getElementById('findBar').classList.contains('hidden')).toBe(false);
-      expect(document.activeElement).toBe(document.getElementById('findBarInput'));
+      expect(findBarFor(1).classList.contains('hidden')).toBe(false);
+      expect(document.activeElement).toBe(findBarFor(1).querySelector('.find-bar-input'));
+    });
+
+    it('builds the bar inside the pane it searches', () => {
+      const ts = injectTerminal(1);
+      App.state.activeTerminalId = 1;
+
+      App.Search.openFindBar();
+
+      expect(ts.paneEl.querySelector('.xterm-screen').contains(findBarFor(1))).toBe(true);
+    });
+
+    it('gives every pane its own bar, closed on its own', () => {
+      injectTerminal(1);
+      injectTerminal(2);
+
+      App.state.activeTerminalId = 1;
+      App.Search.openFindBar();
+      App.state.activeTerminalId = 2;
+      App.Search.openFindBar();
+
+      expect(findBarFor(1).classList.contains('hidden')).toBe(false);
+      expect(findBarFor(2).classList.contains('hidden')).toBe(false);
+
+      App.Search.closeFindBar();
+
+      expect(findBarFor(2).classList.contains('hidden')).toBe(true);
+      expect(findBarFor(1).classList.contains('hidden')).toBe(false);
     });
 
     it('does nothing when an overlay is open', () => {
@@ -57,7 +84,8 @@ describe('Unit: Terminal search', () => {
 
       App.Search.handleShortcut(false);
 
-      expect(document.getElementById('findBar').classList.contains('hidden')).toBe(true);
+      // Blocked by the overlay, so no bar was built for the pane.
+      expect(findBarFor(1)).toBeNull();
     });
 
     it('toggles closed on a second Ctrl+F', () => {
@@ -67,7 +95,7 @@ describe('Unit: Terminal search', () => {
       App.Search.handleShortcut(false);
       App.Search.handleShortcut(false);
 
-      expect(document.getElementById('findBar').classList.contains('hidden')).toBe(true);
+      expect(findBarFor(1).classList.contains('hidden')).toBe(true);
     });
 
     it('searches forward on Enter and backward on Shift+Enter', () => {
@@ -75,7 +103,7 @@ describe('Unit: Terminal search', () => {
       App.state.activeTerminalId = 1;
       App.Search.openFindBar();
 
-      const input = document.getElementById('findBarInput');
+      const input = findBarFor(1).querySelector('.find-bar-input');
       input.value = 'world';
 
       dispatchKey(input, 'Enter');
@@ -90,7 +118,7 @@ describe('Unit: Terminal search', () => {
       App.state.activeTerminalId = 1;
       App.Search.openFindBar();
 
-      const input = document.getElementById('findBarInput');
+      const input = findBarFor(1).querySelector('.find-bar-input');
       input.value = 'hello';
       dispatchKey(input, 'Enter');
 
@@ -104,13 +132,13 @@ describe('Unit: Terminal search', () => {
       App.state.activeTerminalId = 1;
       App.Search.openFindBar();
 
-      const input = document.getElementById('findBarInput');
+      const input = findBarFor(1).querySelector('.find-bar-input');
       input.value = 'a';
       dispatchKey(input, 'Enter');
 
       ts.term._addons[0]._fireResults({ resultIndex: 1, resultCount: 2 });
 
-      expect(document.getElementById('findBarCount').textContent).toBe('2/2');
+      expect(findBarFor(1).querySelector('.find-bar-count').textContent).toBe('2/2');
     });
 
     it('debounces live search while typing', () => {
@@ -120,7 +148,7 @@ describe('Unit: Terminal search', () => {
         App.state.activeTerminalId = 1;
         App.Search.openFindBar();
 
-        const input = document.getElementById('findBarInput');
+        const input = findBarFor(1).querySelector('.find-bar-input');
         input.value = 'needle';
         dispatchKey(input, 'Enter'); // establishes the addon + first search
         const addon = ts.term._addons[0];
@@ -142,13 +170,13 @@ describe('Unit: Terminal search', () => {
       App.state.activeTerminalId = 1;
       App.Search.openFindBar();
 
-      const input = document.getElementById('findBarInput');
+      const input = findBarFor(1).querySelector('.find-bar-input');
       input.value = '\\d+';
-      document.getElementById('findBarRegex').click();
+      (findBarFor(1).querySelector('.find-bar-regex') as HTMLElement).click();
 
       const options = ts.term._addons[0].calls.findNext.at(-1).options;
       expect(options.regex).toBe(true);
-      expect(document.getElementById('findBarRegex').classList.contains('active')).toBe(true);
+      expect(findBarFor(1).querySelector('.find-bar-regex').classList.contains('active')).toBe(true);
     });
 
     it('passes case sensitivity from the toggle', () => {
@@ -156,9 +184,9 @@ describe('Unit: Terminal search', () => {
       App.state.activeTerminalId = 1;
       App.Search.openFindBar();
 
-      const input = document.getElementById('findBarInput');
+      const input = findBarFor(1).querySelector('.find-bar-input');
       input.value = 'Hello';
-      document.getElementById('findBarCase').click();
+      (findBarFor(1).querySelector('.find-bar-case') as HTMLElement).click();
 
       expect(ts.term._addons[0].calls.findNext.at(-1).options.caseSensitive).toBe(true);
     });
@@ -167,18 +195,18 @@ describe('Unit: Terminal search', () => {
       const ts = injectTerminal(1, { term: fakeTerm(['hello']) });
       App.state.activeTerminalId = 1;
       App.Search.openFindBar();
-      const input = document.getElementById('findBarInput');
+      const input = findBarFor(1).querySelector('.find-bar-input');
       input.value = 'hello';
       dispatchKey(input, 'Enter');
 
       dispatchKey(input, 'Escape');
 
-      expect(document.getElementById('findBar').classList.contains('hidden')).toBe(true);
+      expect(findBarFor(1).classList.contains('hidden')).toBe(true);
       expect(ts.term._addons[0].calls.clearDecorations).toBeGreaterThan(0);
 
       // Reopening restores the remembered query.
       App.Search.openFindBar();
-      expect(document.getElementById('findBarInput').value).toBe('hello');
+      expect(findBarFor(1).querySelector('.find-bar-input').value).toBe('hello');
     });
   });
 

@@ -641,12 +641,15 @@ html, body {
   min-height: 0;
 }
 
-/* ═══ Terminal find bar (Ctrl+F) ═══ */
+/* ═══ Terminal find bar (Ctrl+F) — lives inside the pane's xterm screen ═══ */
 .find-bar {
   position: absolute;
   top: calc(8px * var(--ui-scale));
   right: calc(8px * var(--ui-scale));
-  z-index: 120;
+  /* Never spill into a neighbouring pane */
+  max-width: calc(100% - 16px * var(--ui-scale));
+  /* Above the decoration layers (match highlights sit at 6/7) */
+  z-index: 10;
   display: flex;
   align-items: center;
   gap: calc(3px * var(--ui-scale));
@@ -658,7 +661,9 @@ html, body {
 }
 
 .find-bar-input {
+  flex: 1 1 auto;
   width: calc(180px * var(--ui-scale));
+  min-width: calc(40px * var(--ui-scale));
   padding: calc(3px * var(--ui-scale)) calc(6px * var(--ui-scale));
   font-size: calc(var(--app-font-size) * 0.923);
   color: var(--text-primary);
@@ -666,6 +671,9 @@ html, body {
   border: 1px solid var(--border);
   border-radius: 4px;
   outline: none;
+  /* .xterm sets user-select: none, which the bar inherits */
+  user-select: text;
+  -webkit-user-select: text;
 }
 
 .find-bar-input:focus {
@@ -683,6 +691,7 @@ html, body {
 
 .find-bar-btn {
   display: flex;
+  flex: 0 0 auto;
   align-items: center;
   justify-content: center;
   width: calc(22px * var(--ui-scale));

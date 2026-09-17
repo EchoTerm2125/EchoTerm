@@ -87,6 +87,7 @@ import './icons';
 
     // Intercept paste event for multi-line preview / echo paste-all
     xtermDiv.addEventListener('paste', (e) => {
+      if (fromFindBar(e)) return;
       // Normalize here, not just in pasteToTerminal(): the echo-mode branch below
       // writes this text straight to the pty and never passes through
       // pasteToTerminal(), so this is its only CRLF guard.
@@ -109,6 +110,7 @@ import './icons';
 
     // Right-click copy/paste
     xtermDiv.addEventListener('contextmenu', (e) => {
+      if (fromFindBar(e)) return;
       if (localStorage.getItem('skipRightClickPaste') !== 'false') return; // show normal menu
       e.preventDefault();
       e.stopImmediatePropagation();
@@ -475,6 +477,7 @@ import './icons';
 
     // Intercept paste event for multi-line preview / echo paste-all
     xtermDiv.addEventListener('paste', (e) => {
+      if (fromFindBar(e)) return;
       // Normalize here, not just in pasteToTerminal(): the echo-mode branch below
       // writes this text straight to the pty and never passes through
       // pasteToTerminal(), so this is its only CRLF guard.
@@ -497,6 +500,7 @@ import './icons';
 
     // Right-click copy/paste
     xtermDiv.addEventListener('contextmenu', (e) => {
+      if (fromFindBar(e)) return;
       if (localStorage.getItem('skipRightClickPaste') !== 'false') return;
       e.preventDefault();
       e.stopImmediatePropagation();
@@ -618,6 +622,13 @@ import './icons';
   function escHtml(str) {
     if (!str) return '';
     return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  }
+
+  // The find bar lives inside the pane (its terminal screen) but is not a
+  // terminal surface: the pane-level paste and context-menu interception below
+  // must not hijack events that originate in the bar.
+  function fromFindBar(e) {
+    return e.target instanceof Element && !!e.target.closest('.find-bar');
   }
 
   // ─── Bracketed paste helper ───────────────────────────────────────────────
