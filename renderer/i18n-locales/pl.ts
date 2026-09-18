@@ -293,6 +293,8 @@
     optionsMaxRetainedLines: 'Maksymalna liczba zachowanych wierszy',
     confirmRetainedLinesHigh: 'Wprowadzono {lines} zachowanych wierszy. Wartości powyżej 100 000 mogą zużywać dużo pamięci.\nKontynuować mimo to?',
     optionsTitleDefaultShell: 'Domyślna powłoka',
+    optionsTitleSsh: 'SSH',
+    optionsFolderAutoEcho: 'Otwieraj foldery połączeń w trybie Echo',
     optionsTitleWarnings: 'Ostrzeżenia',
     optionsTitleMouse: 'Mysz',
     optionsTabCloseConfirm: 'Potwierdź przed zamknięciem karty',

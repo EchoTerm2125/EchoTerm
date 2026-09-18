@@ -293,6 +293,8 @@
     optionsMaxRetainedLines: '最大保留行數',
     confirmRetainedLinesHigh: '你輸入了 {lines} 保留行數。超過 100,000 可能會佔用大量記憶體。\n是否繼續？',
     optionsTitleDefaultShell: '預設 Shell',
+    optionsTitleSsh: 'SSH',
+    optionsFolderAutoEcho: '以回顯模式開啟連線資料夾',
     optionsTitleWarnings: '警告',
     optionsTitleMouse: '滑鼠',
     optionsTabCloseConfirm: '關閉標籤前確認',

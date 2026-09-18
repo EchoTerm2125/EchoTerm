@@ -88,6 +88,7 @@ describe('UI (ui.js)', () => {
       localStorage.setItem('maxRetainedLines', '5000');
       localStorage.setItem('skipTabCloseConfirm', 'true');
       localStorage.setItem('skipRightClickPaste', 'true');
+      localStorage.setItem('skipAutoEchoFolderOpen', 'true');
       localStorage.setItem('i18nLocale', 'ja');
 
       App.UI.bindSettings();
@@ -103,6 +104,7 @@ describe('UI (ui.js)', () => {
       expect(localStorage.getItem('defaultShell')).toBeNull();
       expect(localStorage.getItem('skipTabCloseConfirm')).toBeNull();
       expect(localStorage.getItem('skipRightClickPaste')).toBeNull();
+      expect(localStorage.getItem('skipAutoEchoFolderOpen')).toBeNull();
       // Appearance settings are reset to their defaults and persisted as such
       expect(localStorage.getItem('appTheme')).toBe('dark');
       expect(localStorage.getItem('uiFontSize')).toBe('13');

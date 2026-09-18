@@ -293,6 +293,8 @@
     optionsMaxRetainedLines: 'Maximal beibehaltene Zeilen',
     confirmRetainedLinesHigh: 'Du hast {lines} beibehaltene Zeilen eingegeben. Werte über 100.000 können viel Arbeitsspeicher verbrauchen.\nTrotzdem fortfahren?',
     optionsTitleDefaultShell: 'Standard-Shell',
+    optionsTitleSsh: 'SSH',
+    optionsFolderAutoEcho: 'Verbindungsordner im Echo-Modus öffnen',
     optionsTitleWarnings: 'Warnungen',
     optionsTitleMouse: 'Maus',
     optionsTabCloseConfirm: 'Vor dem Schließen eines Tabs bestätigen',

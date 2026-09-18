@@ -293,6 +293,8 @@
     optionsMaxRetainedLines: '最大保持行数',
     confirmRetainedLinesHigh: '{lines} 行の保持を入力しました。100,000 を超えると大量のメモリを使用する可能性があります。\n続行しますか？',
     optionsTitleDefaultShell: 'デフォルトシェル',
+    optionsTitleSsh: 'SSH',
+    optionsFolderAutoEcho: '接続フォルダをエコーモードで開く',
     optionsTitleWarnings: '警告',
     optionsTitleMouse: 'マウス',
     optionsTabCloseConfirm: 'タブを閉じる前に確認',

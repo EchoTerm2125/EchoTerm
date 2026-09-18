@@ -62,6 +62,7 @@ import { getIpcClient } from './ipc-client';
   const optSshJumpWarn = $('#optSshJumpWarn');
   const optPastePreview = $('#optPastePreview');
   const optRightClickPaste = $('#optRightClickPaste');
+  const optFolderAutoEcho = $('#optFolderAutoEcho');
   const tabCtxMoveSep = $('#tabCtxMoveSep');
   const tabCtxMoveItem = $('#tabCtxMoveItem');
   const tabCtxGroupSubmenu = $('#tabCtxGroupSubmenu');
@@ -129,6 +130,7 @@ import { getIpcClient } from './ipc-client';
     optSshJumpWarn,
     optPastePreview,
     optRightClickPaste,
+    optFolderAutoEcho,
     tabCtxMoveSep,
     tabCtxMoveItem,
     tabCtxGroupSubmenu,

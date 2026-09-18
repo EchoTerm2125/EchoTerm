@@ -274,6 +274,10 @@
             <svg class="options-menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 17 10 11 4 5"/><line x1="12" x2="20" y1="19" y2="19"/></svg>
             <span data-i18n="optionsTitleDefaultShell">Default Shell</span>
           </button>
+          <button class="options-menu-item" data-options-target="ssh">
+            <svg class="options-menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="8" x="2" y="2" rx="2" ry="2"/><rect width="20" height="8" x="2" y="14" rx="2" ry="2"/><line x1="6" x2="6.01" y1="6" y2="6"/><line x1="6" x2="6.01" y1="18" y2="18"/></svg>
+            <span data-i18n="optionsTitleSsh">SSH</span>
+          </button>
           <button class="options-menu-item" data-options-target="warnings">
             <svg class="options-menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"/><line x1="12" x2="12" y1="9" y2="13"/><line x1="12" x2="12.01" y1="17" y2="17"/></svg>
             <span data-i18n="optionsTitleWarnings">Warnings</span>
@@ -343,6 +347,16 @@
             <span><span class="shell-icon"></span> <span data-i18n="shellGitBash">Git Bash</span></span>
           </label>
         </div>
+      </div>
+    </div>
+    <div class="options-section" data-options-section="ssh">
+      <div class="options-section-title" data-i18n="optionsTitleSsh">SSH</div>
+      <div class="options-card">
+        <label class="options-toggle">
+          <span class="options-toggle-label" data-i18n="optionsFolderAutoEcho">Open connection folders in Echo mode</span>
+          <input type="checkbox" id="optFolderAutoEcho" checked />
+          <span class="options-toggle-slider"></span>
+        </label>
       </div>
     </div>
     <div class="options-section" data-options-section="warnings">

@@ -294,6 +294,8 @@
     optionsMaxRetainedLines: 'Max retained lines',
     confirmRetainedLinesHigh: 'You entered {lines} retained lines. Values above 100,000 can use a large amount of memory.\nContinue anyway?',
     optionsTitleDefaultShell: 'Default Shell',
+    optionsTitleSsh: 'SSH',
+    optionsFolderAutoEcho: 'Open connection folders in Echo mode',
     optionsTitleWarnings: 'Warnings',
     optionsTitleMouse: 'Mouse',
     optionsTabCloseConfirm: 'Confirm before closing a tab',

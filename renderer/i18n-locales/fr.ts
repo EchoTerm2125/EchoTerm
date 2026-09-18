@@ -293,6 +293,8 @@
     optionsMaxRetainedLines: 'Nombre maximal de lignes conservées',
     confirmRetainedLinesHigh: 'Vous avez saisi {lines} lignes conservées. Les valeurs supérieures à 100 000 peuvent consommer beaucoup de mémoire.\nContinuer quand même ?',
     optionsTitleDefaultShell: 'Shell par défaut',
+    optionsTitleSsh: 'SSH',
+    optionsFolderAutoEcho: 'Ouvrir les dossiers de connexions en mode Écho',
     optionsTitleWarnings: 'Avertissements',
     optionsTitleMouse: 'Souris',
     optionsTabCloseConfirm: 'Confirmer avant de fermer un onglet',

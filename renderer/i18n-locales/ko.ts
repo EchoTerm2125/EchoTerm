@@ -293,6 +293,8 @@
     optionsMaxRetainedLines: '최대 보존 줄 수',
     confirmRetainedLinesHigh: '{lines}개의 보존 줄을 입력했습니다. 100,000을 초과하면 메모리를 많이 사용할 수 있습니다.\n계속하시겠습니까?',
     optionsTitleDefaultShell: '기본 셸',
+    optionsTitleSsh: 'SSH',
+    optionsFolderAutoEcho: '연결 폴더를 에코 모드로 열기',
     optionsTitleWarnings: '경고',
     optionsTitleMouse: '마우스',
     optionsTabCloseConfirm: '탭을 닫기 전에 확인',

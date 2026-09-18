@@ -1517,3 +1517,75 @@ describe('SshPanel (ssh-panel.ts)', () => {
     });
   });
 });
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Opening a Connection folder starts its new group in echo mode by default;
+// Settings → SSH turns that off (skipAutoEchoFolderOpen).
+// ─────────────────────────────────────────────────────────────────────────────
+describe('SshPanel folder auto-echo (ssh-panel.ts)', () => {
+  const FOLDER = { id: 'f1', name: 'Work', parentId: null };
+  const CONNECTIONS = [
+    { id: 'c1', name: 'One', host: 'a.example.com', port: 22, userId: null, folderId: 'f1' },
+    { id: 'c2', name: 'Two', host: 'b.example.com', port: 22, userId: null, folderId: 'f1' },
+  ];
+
+  // Opening a folder needs the full session stack — spawning SSH panes
+  // (terminal), collecting them into a new group (groups), and echo mode.
+  async function setupFolderOpen(connections) {
+    await resetTestEnv();
+    scaffoldSshDom();
+
+    const api = window.api;
+    vi.mocked(api.sshPasswordStatus).mockResolvedValue({ masterPasswordSet: false, unlocked: true });
+    vi.mocked(api.sshConnectionFolderList).mockResolvedValue([FOLDER]);
+    vi.mocked(api.sshConnectionList).mockResolvedValue(connections);
+    vi.mocked(api.sshUserFolderList).mockResolvedValue([]);
+    vi.mocked(api.sshUserList).mockResolvedValue([]);
+    vi.mocked(api.sshOpenConnectionFolder).mockResolvedValue({
+      name: FOLDER.name,
+      connections,
+    });
+
+    await loadModules('theme', 'icons', 'menus', 'tabs', 'groups', 'terminal', 'ui', 'echo', 'ssh-panel');
+    await getApp().SshPanel.init();
+  }
+
+  function clickOpenFolder() {
+    const btn = document.querySelector('#sshConnectionList [data-action="open-folder"]') as HTMLElement;
+    btn.click();
+  }
+
+  it('enters echo mode for a folder with two connections', async () => {
+    await setupFolderOpen(CONNECTIONS);
+
+    clickOpenFolder();
+    await flush();
+
+    const App = getApp();
+    expect(App.state.echoModeActive).toBe(true);
+    const groupIds = App.Groups.getGroupTerminalIds(App.state.activeGroupId);
+    expect(groupIds.length).toBe(2);
+    for (const id of groupIds) expect(App.state.echoSelection.has(id)).toBe(true);
+  });
+
+  it('stays out of echo mode for a folder with a single connection', async () => {
+    await setupFolderOpen([CONNECTIONS[0]]);
+    const toast = vi.spyOn(getApp().UI, 'showToast');
+
+    clickOpenFolder();
+    await flush();
+
+    expect(getApp().state.echoModeActive).toBe(false);
+    expect(toast).not.toHaveBeenCalled();
+  });
+
+  it('does not enter echo mode when the setting is turned off', async () => {
+    await setupFolderOpen(CONNECTIONS);
+    localStorage.setItem('skipAutoEchoFolderOpen', 'true');
+
+    clickOpenFolder();
+    await flush();
+
+    expect(getApp().state.echoModeActive).toBe(false);
+  });
+});

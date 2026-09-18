@@ -293,6 +293,8 @@
     optionsMaxRetainedLines: 'Số dòng lưu giữ tối đa',
     confirmRetainedLinesHigh: 'Bạn đã nhập {lines} dòng lưu giữ. Giá trị trên 100.000 có thể dùng nhiều bộ nhớ.\nVẫn tiếp tục?',
     optionsTitleDefaultShell: 'Shell mặc định',
+    optionsTitleSsh: 'SSH',
+    optionsFolderAutoEcho: 'Mở thư mục kết nối ở chế độ Tiếng vọng',
     optionsTitleWarnings: 'Cảnh báo',
     optionsTitleMouse: 'Chuột',
     optionsTabCloseConfirm: 'Xác nhận trước khi đóng tab',

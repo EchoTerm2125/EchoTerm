@@ -293,6 +293,8 @@
     optionsMaxRetainedLines: 'Máximo de líneas retenidas',
     confirmRetainedLinesHigh: 'Has introducido {lines} líneas retenidas. Los valores superiores a 100.000 pueden consumir mucha memoria.\n¿Continuar de todos modos?',
     optionsTitleDefaultShell: 'Shell predeterminado',
+    optionsTitleSsh: 'SSH',
+    optionsFolderAutoEcho: 'Abrir carpetas de conexiones en modo Eco',
     optionsTitleWarnings: 'Advertencias',
     optionsTitleMouse: 'Ratón',
     optionsTabCloseConfirm: 'Confirmar al cerrar una pestaña',

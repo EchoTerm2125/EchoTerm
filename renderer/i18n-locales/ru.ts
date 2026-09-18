@@ -293,6 +293,8 @@
     optionsMaxRetainedLines: 'Максимум сохраняемых строк',
     confirmRetainedLinesHigh: 'Вы указали {lines} сохраняемых строк. Значения выше 100 000 могут потреблять много памяти.\nВсё равно продолжить?',
     optionsTitleDefaultShell: 'Оболочка по умолчанию',
+    optionsTitleSsh: 'SSH',
+    optionsFolderAutoEcho: 'Открывать папки подключений в режиме эха',
     optionsTitleWarnings: 'Предупреждения',
     optionsTitleMouse: 'Мышь',
     optionsTabCloseConfirm: 'Подтверждать закрытие вкладки',

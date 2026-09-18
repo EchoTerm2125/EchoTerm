@@ -1874,6 +1874,10 @@ import {
       }
       await App.Terminal.spawnSshTerminal(spawnResult);
     }
+
+    // Opening a folder is how users set up a group of panes to type into at
+    // once, so start it in echo mode (Settings → SSH can turn this off).
+    App.Echo.autoEnterEchoModeIfPossible();
   }
 
   async function deleteConnection(connId) {

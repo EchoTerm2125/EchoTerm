@@ -293,6 +293,8 @@
     optionsMaxRetainedLines: 'Maksimum saklanan satır',
     confirmRetainedLinesHigh: '{lines} saklanan satır girdiniz. 100.000 üzerindeki değerler çok fazla bellek kullanabilir.\nYine de devam edilsin mi?',
     optionsTitleDefaultShell: 'Varsayılan Kabuk',
+    optionsTitleSsh: 'SSH',
+    optionsFolderAutoEcho: 'Bağlantı klasörlerini Yankı modunda aç',
     optionsTitleWarnings: 'Uyarılar',
     optionsTitleMouse: 'Fare',
     optionsTabCloseConfirm: 'Sekme kapatılmadan önce onayla',

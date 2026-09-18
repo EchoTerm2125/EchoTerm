@@ -206,6 +206,7 @@ const DOM_IDS = [
   'statusTerminalCount', 'statusEcho', 'statusShell',
   'btnSettings', 'optionsPanel', 'optTabCloseConfirm', 'optWindowCloseConfirm',
   'optGroupCloseConfirm', 'optSshJumpWarn', 'optPastePreview', 'optRightClickPaste',
+  'optFolderAutoEcho',
   'tabCtxMoveSep', 'tabCtxMoveItem', 'tabCtxGroupSubmenu',
   'btnResetSettings', 'btnClearSshData', 'btnClearCache', 'btnClearAllData',
   'contextMenu', 'tabContextMenu', 'groupContextMenu',
@@ -241,6 +242,7 @@ function scaffoldDom() {
                id === 'optWindowCloseConfirm' || id === 'optGroupCloseConfirm' ||
                id === 'optSshJumpWarn' || id === 'optPastePreview' ||
                id === 'optRightClickPaste' || id === 'pastePreviewDontShow' ||
+               id === 'optFolderAutoEcho' ||
                id === 'optCheckUpdates' || id === 'optIncludePrerelease') {
       el = document.createElement('input');
       el.type = 'checkbox';

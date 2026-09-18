@@ -121,6 +121,32 @@
     setTimeout(() => fitAllTerminals(), 100);
   }
 
+  // ─── Folder auto-echo ───────────────────────────────────────────────────────
+  // Opening a Connection folder starts its new Group in echo mode unless the
+  // user turned this off in Settings → SSH. Stored as a skip key so its absence
+  // means the default (on), like the other skip* settings.
+  const FOLDER_AUTO_ECHO_KEY = 'skipAutoEchoFolderOpen';
+
+  function isFolderAutoEchoEnabled() {
+    return localStorage.getItem(FOLDER_AUTO_ECHO_KEY) !== 'true';
+  }
+
+  function setFolderAutoEchoEnabled(enabled) {
+    if (enabled) localStorage.removeItem(FOLDER_AUTO_ECHO_KEY);
+    else localStorage.setItem(FOLDER_AUTO_ECHO_KEY, 'true');
+  }
+
+  // Enter echo mode for the active group when it can actually echo. A group of
+  // fewer than two panes is skipped silently: entering echo mode is a side
+  // effect of opening a folder, so "need two terminals" would be noise about
+  // something the user never asked for.
+  function autoEnterEchoModeIfPossible() {
+    if (!isFolderAutoEchoEnabled()) return;
+    if (App.Groups.getGroupTerminalIds(state.activeGroupId).length < 2) return;
+    state.echoModeActive = true;
+    enterEchoMode();
+  }
+
   function toggleEchoMode() {
     state.echoModeActive = !state.echoModeActive;
     state.groupEchoActive.set(state.activeGroupId, state.echoModeActive);
@@ -359,6 +385,7 @@
 
   App.Echo = {
     toggleEchoMode, enterEchoMode, exitEchoMode,
+    isFolderAutoEchoEnabled, setFolderAutoEchoEnabled, autoEnterEchoModeIfPossible,
     applyGridLayout, destroyGrid,
     fitAllTerminals,
     toggleEchoAll, toggleEachEcho, refocusEchoTerminal,
