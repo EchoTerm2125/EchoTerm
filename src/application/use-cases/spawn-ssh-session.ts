@@ -10,7 +10,7 @@ import { buildSshArgs } from '../../domain/services/ssh-args';
 import { isPasswordPrompt, isPassphrasePrompt } from '../../domain/services/password-prompt';
 
 export type SpawnSshSessionResult =
-  | { id: number; shell: string; label: string; host: string; handle: PtyProcessHandle }
+  | { id: number; shell: string; label: string; host: string; username: string | null; handle: PtyProcessHandle }
   | { error: string; errorCode?: string };
 
 export class SpawnSshSession {
@@ -54,7 +54,7 @@ export class SpawnSshSession {
       handle.onData(events.onData);
       handle.onExit(() => events.onExit());
 
-      return { id: sessionId, shell: 'ssh', label: target.name, host: target.host, handle };
+      return { id: sessionId, shell: 'ssh', label: target.name, host: target.host, username: target.username, handle };
     } catch (err) {
       return { error: err.message };
     }

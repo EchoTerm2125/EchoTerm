@@ -348,6 +348,7 @@
     errorUnknownShell: 'Shell desconhecido: {shell}',
     errorConnectionNotFound: 'Conexão não encontrada.',
     errorConnectionFolderNotFound: 'Pasta de conexão não encontrada.',
+    errorFieldBlank: 'Este campo não pode ficar em branco.',
     errorConfigNotFound: 'Arquivo de configuração não encontrado: {path}',
     errorNoMasterPassword: 'Nenhuma senha mestra definida.',
 

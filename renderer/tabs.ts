@@ -9,7 +9,7 @@
   const tabCache = new Map(); // id -> tab element
   let tabContextTargetId = null; // shared with menus
 
-  function addTab(id, shell, customLabel) {
+  function addTab(id, shell, customLabel, identity) {
     const tab = document.createElement('div');
     tab.className = 'tab-item';
     tab.dataset.termId = id;
@@ -17,10 +17,18 @@
     const label = customLabel || App.getShellName(shell);
     tab.innerHTML = `
       <span class="tab-icon">${App.TAB_ICONS[shell] || '⬚'}</span>
-      <span class="tab-label"></span>
+      <span class="tab-label"><span class="tab-name"></span></span>
       <button class="tab-close" data-i18n-title="tabCloseTitle" title="Close">×</button>
     `;
-    tab.querySelector('.tab-label').textContent = label;
+    const labelEl = tab.querySelector('.tab-label');
+    tab.querySelector('.tab-name').textContent = label;
+    if (identity) {
+      const identityEl = document.createElement('span');
+      identityEl.className = 'tab-identity';
+      identityEl.textContent = `(${identity})`;
+      labelEl.appendChild(identityEl);
+    }
+    refreshTabTooltip(tab);
 
     tab.addEventListener('click', (e) => {
       if (e.target.closest('.tab-close')) return;
@@ -68,7 +76,6 @@
     });
 
     // ── Double-click to rename ──
-    const labelEl = tab.querySelector('.tab-label');
     labelEl.addEventListener('dblclick', (e) => {
       e.preventDefault(); e.stopPropagation();
       startTabRename(id);
@@ -236,6 +243,16 @@
     }
   }
 
+  // The Tab shows the Pane name plus, on SSH panes, the Connection identity.
+  // Only the name is editable; the identity is fixed at spawn and survives
+  // renames, so a truncated Tooltip still recovers it. See CONTEXT.md.
+  function refreshTabTooltip(tab) {
+    const labelEl = tab.querySelector('.tab-label');
+    const name = labelEl.querySelector('.tab-name').textContent;
+    const identityEl = labelEl.querySelector('.tab-identity');
+    labelEl.title = identityEl ? `${name} ${identityEl.textContent}` : '';
+  }
+
   function startTabRename(id) {
     const tab = tabCache.get(id);
     if (!tab) return;
@@ -245,7 +262,7 @@
     const labelEl = tab.querySelector('.tab-label');
     if (!labelEl) return;
 
-    const currentName = termState.customName || App.getShellName(termState.shell);
+    const currentName = App.Terminal.paneName(termState);
     const input = document.createElement('input');
     input.type = 'text';
     input.className = 'inline-rename-input';
@@ -282,15 +299,11 @@
 
     const tab = tabCache.get(id);
     if (tab) {
-      const labelEl = tab.querySelector('.tab-label');
-      if (labelEl) labelEl.textContent = newName;
+      tab.querySelector('.tab-name').textContent = newName;
+      refreshTabTooltip(tab);
     }
 
-    // Update pane titlebar label
-    if (termState.titlebar) {
-      const paneLabel = termState.titlebar.querySelector('.pane-label');
-      if (paneLabel) paneLabel.textContent = newName;
-    }
+    App.Terminal.renderPaneTitle(termState);
   }
 
   App.Tabs = {

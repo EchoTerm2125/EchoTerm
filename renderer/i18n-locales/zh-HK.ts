@@ -374,6 +374,7 @@
     errorUnknownShell: '未知 Shell: {shell}',
     errorConnectionNotFound: '找不到連線。',
     errorConnectionFolderNotFound: '找不到連線資料夾。',
+    errorFieldBlank: '此欄位不能為空。',
     errorConfigNotFound: '找不到設定檔: {path}',
     errorNoMasterPassword: '未設定主密碼。',
 

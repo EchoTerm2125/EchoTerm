@@ -152,6 +152,48 @@ describe('SshPanel (ssh-panel.ts)', () => {
     });
   });
 
+  describe('mandatory dialog fields', () => {
+    function fillConnectionDialog(name, host) {
+      (document.querySelector('#sshDialogBody input[name="connName"]') as HTMLInputElement).value = name;
+      (document.querySelector('#sshDialogBody input[name="connHost"]') as HTMLInputElement).value = host;
+    }
+
+    it('saves a connection when every mandatory field is filled', async () => {
+      const api = window.api;
+      await getApp().SshPanel.showConnectionDialog();
+      fillConnectionDialog('VM1', 'vm1.com');
+
+      (document.getElementById('sshDialogSave') as HTMLElement).click();
+      await flush();
+
+      expect(api.sshConnectionSave).toHaveBeenCalledWith(
+        expect.objectContaining({ name: 'VM1', host: 'vm1.com' })
+      );
+    });
+
+    it('refuses a connection name that is only whitespace', async () => {
+      const api = window.api;
+      await getApp().SshPanel.showConnectionDialog();
+      fillConnectionDialog('   ', 'vm1.com');
+
+      (document.getElementById('sshDialogSave') as HTMLElement).click();
+      await flush();
+
+      expect(api.sshConnectionSave).not.toHaveBeenCalled();
+    });
+
+    it('refuses a connection with no host', async () => {
+      const api = window.api;
+      await getApp().SshPanel.showConnectionDialog();
+      fillConnectionDialog('VM1', '');
+
+      (document.getElementById('sshDialogSave') as HTMLElement).click();
+      await flush();
+
+      expect(api.sshConnectionSave).not.toHaveBeenCalled();
+    });
+  });
+
   describe('dialog folder preselect from context menu', () => {
     it('preselects the folder when adding a connection from a folder context menu', async () => {
       await getApp().SshPanel.showConnectionDialog(undefined, 'f1');

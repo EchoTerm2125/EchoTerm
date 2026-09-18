@@ -374,6 +374,7 @@
     errorUnknownShell: '未知 Shell: {shell}',
     errorConnectionNotFound: '未找到连接。',
     errorConnectionFolderNotFound: '未找到连接文件夹。',
+    errorFieldBlank: '此字段不能为空。',
     errorConfigNotFound: '未找到配置文件: {path}',
     errorNoMasterPassword: '未设置主密码。',
 

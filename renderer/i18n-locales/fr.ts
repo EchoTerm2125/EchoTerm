@@ -348,6 +348,7 @@
     errorUnknownShell: 'Shell inconnu : {shell}',
     errorConnectionNotFound: 'Connexion introuvable.',
     errorConnectionFolderNotFound: 'Dossier de connexion introuvable.',
+    errorFieldBlank: 'Ce champ ne peut pas être vide.',
     errorConfigNotFound: 'Fichier de configuration introuvable : {path}',
     errorNoMasterPassword: 'Aucun mot de passe maître défini.',
 

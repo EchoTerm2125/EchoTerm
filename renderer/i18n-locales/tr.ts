@@ -348,6 +348,7 @@
     errorUnknownShell: 'Bilinmeyen kabuk: {shell}',
     errorConnectionNotFound: 'Bağlantı bulunamadı.',
     errorConnectionFolderNotFound: 'Bağlantı klasörü bulunamadı.',
+    errorFieldBlank: 'Bu alan boş bırakılamaz.',
     errorConfigNotFound: 'Yapılandırma dosyası bulunamadı: {path}',
     errorNoMasterPassword: 'Ana parola ayarlanmamış.',
 

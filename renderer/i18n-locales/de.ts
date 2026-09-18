@@ -348,6 +348,7 @@
     errorUnknownShell: 'Unbekannte Shell: {shell}',
     errorConnectionNotFound: 'Verbindung nicht gefunden.',
     errorConnectionFolderNotFound: 'Verbindungsordner nicht gefunden.',
+    errorFieldBlank: 'Dieses Feld darf nicht leer sein.',
     errorConfigNotFound: 'Konfigurationsdatei nicht gefunden: {path}',
     errorNoMasterPassword: 'Kein Master-Passwort festgelegt.',
 

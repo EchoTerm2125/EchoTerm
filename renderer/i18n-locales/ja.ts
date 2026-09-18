@@ -348,6 +348,7 @@
     errorUnknownShell: '不明なシェル: {shell}',
     errorConnectionNotFound: '接続が見つかりません。',
     errorConnectionFolderNotFound: '接続フォルダが見つかりません。',
+    errorFieldBlank: 'この項目は空白にできません。',
     errorConfigNotFound: '設定ファイルが見つかりません: {path}',
     errorNoMasterPassword: 'マスターパスワードが設定されていません。',
 

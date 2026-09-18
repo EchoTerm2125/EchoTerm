@@ -348,6 +348,7 @@
     errorUnknownShell: 'Shell desconocido: {shell}',
     errorConnectionNotFound: 'Conexión no encontrada.',
     errorConnectionFolderNotFound: 'Carpeta de conexión no encontrada.',
+    errorFieldBlank: 'Este campo no puede estar vacío.',
     errorConfigNotFound: 'Archivo de configuración no encontrado: {path}',
     errorNoMasterPassword: 'No se ha establecido una contraseña maestra.',
 

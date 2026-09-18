@@ -348,6 +348,7 @@
     errorUnknownShell: 'Shell không xác định: {shell}',
     errorConnectionNotFound: 'Không tìm thấy kết nối.',
     errorConnectionFolderNotFound: 'Không tìm thấy thư mục kết nối.',
+    errorFieldBlank: 'Trường này không được để trống.',
     errorConfigNotFound: 'Không tìm thấy tệp cấu hình: {path}',
     errorNoMasterPassword: 'Chưa đặt mật khẩu chính.',
 

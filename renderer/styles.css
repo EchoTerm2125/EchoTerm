@@ -564,10 +564,33 @@ html, body {
   user-select: none;
 }
 
+/* A Tab shows the Pane name and, on SSH panes, the Connection identity.
+   The identity gives up width first but never shrinks past its floor; below
+   that the query further down drops it so the name stays legible. */
 .tab-item .tab-label {
+  display: flex;
+  gap: calc(4px * var(--ui-scale));
+  flex: 1 1 0;
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  container-type: inline-size;
+}
+
+.tab-item .tab-name,
+.tab-item .tab-identity {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+.tab-item .tab-name {
+  flex: 0 1 auto;
+}
+
+.tab-item .tab-identity {
+  flex: 1 999 auto;
+  min-width: 10ch;
 }
 
 .tab-item:hover {
@@ -754,9 +777,40 @@ html, body {
 }
 
 .pane .pane-titlebar .pane-label {
+  display: flex;
+  align-items: center;
+  gap: calc(4px * var(--ui-scale));
   font-size: calc(var(--app-font-size) * 0.846);
   color: var(--text-secondary);
   flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  container-type: inline-size;
+}
+
+.pane .pane-titlebar .pane-name,
+.pane .pane-titlebar .pane-identity {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.pane .pane-titlebar .pane-name {
+  flex: 0 1 auto;
+}
+
+.pane .pane-titlebar .pane-identity {
+  flex: 1 999 auto;
+  min-width: 10ch;
+}
+
+/* Too narrow to show both: the identity goes, the name and controls stay. */
+@container (max-width: 16ch) {
+  .tab-item .tab-identity,
+  .pane .pane-titlebar .pane-identity {
+    display: none;
+  }
 }
 
 .pane .pane-titlebar .pane-checkbox {

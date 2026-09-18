@@ -348,6 +348,7 @@
     errorUnknownShell: '알 수 없는 셸: {shell}',
     errorConnectionNotFound: '연결을 찾을 수 없습니다.',
     errorConnectionFolderNotFound: '연결 폴더를 찾을 수 없습니다.',
+    errorFieldBlank: '이 항목은 비워 둘 수 없습니다.',
     errorConfigNotFound: '설정 파일을 찾을 수 없습니다: {path}',
     errorNoMasterPassword: '마스터 암호가 설정되지 않았습니다.',
 

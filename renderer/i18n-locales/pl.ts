@@ -348,6 +348,7 @@
     errorUnknownShell: 'Nieznana powłoka: {shell}',
     errorConnectionNotFound: 'Nie znaleziono połączenia.',
     errorConnectionFolderNotFound: 'Nie znaleziono folderu połączeń.',
+    errorFieldBlank: 'To pole nie może być puste.',
     errorConfigNotFound: 'Nie znaleziono pliku konfiguracyjnego: {path}',
     errorNoMasterPassword: 'Nie ustawiono hasła głównego.',
 

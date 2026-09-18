@@ -355,7 +355,7 @@ export function injectTerminal(id, overrides = {}) {
   const titlebar = document.createElement('div');
   titlebar.className = 'pane-titlebar';
   titlebar.innerHTML = `
-    <span class="pane-label">Test</span>
+    <span class="pane-label"><span class="pane-name">Test</span></span>
     <button class="pane-paste">Paste</button>
     <label class="pane-checkbox" style="display:none">
       <input type="checkbox" /><span>Echo</span>

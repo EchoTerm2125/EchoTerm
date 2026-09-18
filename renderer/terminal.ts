@@ -47,7 +47,7 @@ import './icons';
     const titlebar = document.createElement('div');
     titlebar.className = 'pane-titlebar';
     titlebar.innerHTML = `
-      <span class="pane-label">${App.getShellName(shellKey)}</span>
+      <span class="pane-label"><span class="pane-name">${App.getShellName(shellKey)}</span></span>
       <button class="pane-paste" data-i18n-title="panePasteTitle" title="Paste">${App.Icons.clipboard}</button>
       <label class="pane-checkbox" data-i18n-title="paneEchoTitle" title="Echo input to this terminal" style="display:none">
         <input type="checkbox" />
@@ -311,8 +311,9 @@ import './icons';
     // SSH terminals: keep pane visible so user can see error output
     if (termState.shell === 'ssh') {
       const label = termState.titlebar.querySelector('.pane-label');
-      if (label) {
-        label.textContent = '⏹ ' + (label.textContent.replace(/^⏹ /, ''));
+      const nameEl = label && label.querySelector('.pane-name');
+      if (nameEl) {
+        nameEl.textContent = '⏹ ' + nameEl.textContent.replace(/^⏹ /, '');
         label.style.color = 'var(--text-muted)';
       }
       const closeBtn = termState.titlebar.querySelector('.pane-close');
@@ -422,9 +423,54 @@ import './icons';
     focusTerminal(groupIds[nextIdx]);
   }
 
+  // ─── Pane title ─────────────────────────────────────────────────────────────
+  // A Pane title is a Pane name plus, on SSH panes, the Connection identity.
+  // All three surfaces (Tab, Pane title bar, Search panel header) render it.
+
+  function paneName(termState) {
+    const named = termState.customName || termState.label;
+    if (named) return named;
+    // A connection stored before the name became mandatory falls back to its host.
+    return termState.host || App.getShellName(termState.shell);
+  }
+
+  function connectionIdentity(termState) {
+    if (termState.shell !== 'ssh' || !termState.host) return '';
+    // Nothing to qualify: the Pane name already is the host.
+    if (!termState.customName && !termState.label) return '';
+    return termState.username ? `${termState.username}@${termState.host}` : termState.host;
+  }
+
+  function paneTitle(termState) {
+    const identity = connectionIdentity(termState);
+    return identity ? `${paneName(termState)} (${identity})` : paneName(termState);
+  }
+
+  function renderPaneTitle(termState) {
+    const labelEl = termState.titlebar && termState.titlebar.querySelector('.pane-label');
+    if (!labelEl) return;
+    const nameEl = labelEl.querySelector('.pane-name');
+    if (nameEl) nameEl.textContent = (termState._exited ? '⏹ ' : '') + paneName(termState);
+
+    const identity = connectionIdentity(termState);
+    let identityEl = labelEl.querySelector('.pane-identity');
+    if (!identity) {
+      if (identityEl) identityEl.remove();
+      labelEl.title = '';
+      return;
+    }
+    if (!identityEl) {
+      identityEl = document.createElement('span');
+      identityEl.className = 'pane-identity';
+      labelEl.appendChild(identityEl);
+    }
+    identityEl.textContent = `(${identity})`;
+    labelEl.title = paneTitle(termState);
+  }
+
   // ─── SSH Terminal Spawning ─────────────────────────────────────────────────
   async function spawnSshTerminal(spawnResult) {
-    const { id, label, host } = spawnResult;
+    const { id, label, host, username } = spawnResult;
     const shellKey = 'ssh';
 
     // Create pane element
@@ -437,7 +483,7 @@ import './icons';
     titlebar.className = 'pane-titlebar';
     const displayName = label || `${host || App.__('shellSsh')}`;
     titlebar.innerHTML = `
-      <span class="pane-label">🖥️ ${escHtml(displayName)}</span>
+      <span class="pane-label">🖥️ <span class="pane-name">${escHtml(displayName)}</span></span>
       <button class="pane-paste" data-i18n-title="panePasteTitle" title="Paste">${App.Icons.clipboard}</button>
       <label class="pane-checkbox" data-i18n-title="paneEchoTitle" title="Echo input to this terminal" style="display:none">
         <input type="checkbox" />
@@ -516,10 +562,11 @@ import './icons';
 
     term.onResize(({ cols, rows }) => { api.resize(id, cols, rows); });
 
-    const termState = { id, shell: shellKey, term, fitAddon, paneEl, titlebar, customName: displayName, outBuf: '', pwPrompt: false };
+    const termState = { id, shell: shellKey, term, fitAddon, paneEl, titlebar, customName: label || null, label, host, username, outBuf: '', pwPrompt: false };
     state.terminals.set(id, termState);
     state.paneOrder.push(id);
     state.activeTerminalId = id;
+    renderPaneTitle(termState);
 
     const groupId = state.activeGroupId;
     state.terminalGroups.set(id, groupId);
@@ -598,7 +645,7 @@ import './icons';
     });
 
     App.Menus.bindContextMenu(paneEl, id);
-    App.Tabs.addTab(id, shellKey, displayName);
+    App.Tabs.addTab(id, shellKey, paneName(termState), connectionIdentity(termState));
 
     if (state.echoModeActive) {
       state.echoSelection.add(id);
@@ -775,6 +822,7 @@ import './icons';
     spawnTerminal, spawnSshTerminal, focusTerminal, closeTerminal, handleTerminalExit,
     setSinglePane, showOnlyPane, showAllPanes,
     setEchoCheckboxesVisible, cycleTerminal, pasteToTerminal, showPastePreview, noteOutput,
+    paneName, connectionIdentity, paneTitle, renderPaneTitle,
     refocus,
   };
 })();

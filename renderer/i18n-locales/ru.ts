@@ -348,6 +348,7 @@
     errorUnknownShell: 'Неизвестная оболочка: {shell}',
     errorConnectionNotFound: 'Подключение не найдено.',
     errorConnectionFolderNotFound: 'Папка подключений не найдена.',
+    errorFieldBlank: 'Это поле не может быть пустым.',
     errorConfigNotFound: 'Файл конфигурации не найден: {path}',
     errorNoMasterPassword: 'Мастер-пароль не задан.',
 

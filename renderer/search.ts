@@ -293,10 +293,6 @@ import './theme';
     return ids.map((id) => state.terminals.get(id)).filter(Boolean);
   }
 
-  function paneLabel(ts) {
-    return ts.customName || App.getShellName(ts.shell);
-  }
-
   function isWholeWord(text, idx, len) {
     const before = idx > 0 ? text[idx - 1] : '';
     const after = idx + len < text.length ? text[idx + len] : '';
@@ -392,7 +388,7 @@ import './theme';
         } catch { /* invalid pattern or pane not ready */ }
       }
       if (matches.length > 0 || panes.length === 1) {
-        groups.push({ terminalId: ts.id, label: paneLabel(ts), matches });
+        groups.push({ terminalId: ts.id, label: App.Terminal.paneTitle(ts), matches });
       }
     }
 

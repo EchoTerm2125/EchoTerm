@@ -53,6 +53,13 @@ import {
   let editingUserId = null;
   let editingUserFolderId = null;
 
+  // Fields the dialogs mark `required`. The save handler reads the form directly
+  // instead of submitting it, so it must validate these itself — `required`
+  // alone would not stop a save, and would still accept whitespace.
+  const REQUIRED_DIALOG_FIELDS = new Set([
+    'connName', 'connHost', 'userName', 'userUsername', 'groupName', 'userFolderName',
+  ]);
+
   // --- Multi-select state
   const sshSelected = new Set<string>();    // Set of "type:id" strings, e.g. "connection:c1"
   let sshLastClicked = null;      // "type:id" string
@@ -2418,8 +2425,14 @@ import {
     sshDialogSave.addEventListener('click', async () => {
       const form = sshDialogBody.querySelector('form');
       if (!form) return;
+      if (!form.reportValidity()) return;
       const formData = new FormData(form);
       const data: any = Object.fromEntries(formData.entries());
+      if (Object.entries(data).some(([name, value]) =>
+        REQUIRED_DIALOG_FIELDS.has(name) && !String(value).trim())) {
+        App.UI.showToast(App.__('toastError', { message: App.__('errorFieldBlank') }));
+        return;
+      }
 
       // Determine which save to call based on dialog type
       if (sshDialog.dataset.type === 'user') {

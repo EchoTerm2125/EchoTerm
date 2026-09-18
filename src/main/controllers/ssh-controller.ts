@@ -252,7 +252,7 @@ export class SshController {
     const result = this.spawnSshSessionUseCase.execute(connectionId, id, os.homedir(), events);
     if ('error' in result) return { error: result.error, errorCode: result.errorCode };
     this.registry.register(id, { handle: result.handle, shell: 'ssh' });
-    return { id: result.id, shell: 'ssh', label: result.label, host: result.host };
+    return { id: result.id, shell: 'ssh', label: result.label, host: result.host, username: result.username };
   }
 
   openConnectionFolder(folderId: string) {

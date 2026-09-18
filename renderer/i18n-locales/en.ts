@@ -349,6 +349,7 @@
     errorUnknownShell: 'Unknown shell: {shell}',
     errorConnectionNotFound: 'Connection not found.',
     errorConnectionFolderNotFound: 'Connection folder not found.',
+    errorFieldBlank: 'This field cannot be blank.',
     errorConfigNotFound: 'Config file not found: {path}',
     errorNoMasterPassword: 'No master password set.',
 
