@@ -121,6 +121,7 @@ const api: WindowApi = {
   sshConnect: (connectionId) => ipcRenderer.invoke('ssh:connect', connectionId),
   sshOpenConnectionFolder: (folderId) => ipcRenderer.invoke('ssh:open-connection-folder', folderId),
   sshImportConfig: (filePath) => ipcRenderer.invoke('ssh:import-config', filePath),
+  sshImportWinScp: (chooseFile) => ipcRenderer.invoke('ssh:import-winscp', chooseFile),
   sshImportApply: (request) => ipcRenderer.invoke('ssh:import-apply', request),
   sshExportConfig: () => ipcRenderer.invoke('ssh:export-config'),
 

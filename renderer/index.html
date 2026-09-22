@@ -68,9 +68,11 @@
             <button id="btnSshMenuToggle" class="ssh-sidebar-btn ssh-menu-toggle" data-i18n-title="sshMenuTitle" title="Actions">⋯</button>
             <div id="sshHeaderDropdown" class="ssh-header-dropdown hidden">
               <div class="ssh-dropdown-header" data-i18n="sshDropdownSshLabel">.SSH</div>
-              <button id="btnSshImport" class="ssh-sidebar-dd-btn" data-i18n="sshDropdownImportBtn" data-i18n-title="sshImportBtnTitle" title="Import new from ~/.ssh/config">Import</button>
-              <button id="btnSshUpdate" class="ssh-sidebar-dd-btn" data-i18n="sshDropdownUpdateBtn" data-i18n-title="sshUpdateBtnTitle" title="Update existing from ~/.ssh/config">Update</button>
-              <button id="btnSshExport" class="ssh-sidebar-dd-btn" data-i18n="sshDropdownExportBtn" data-i18n-title="sshExportBtnTitle" title="Export connections to SSH config">Export</button>
+              <button id="btnSshImport" class="ssh-sidebar-dd-btn" data-i18n="sshDropdownImportBtn" data-i18n-title="sshImportBtnTitle" title="Import new from ~/.ssh/config">Import from SSH config</button>
+              <button id="btnSshUpdate" class="ssh-sidebar-dd-btn" data-i18n="sshDropdownUpdateBtn" data-i18n-title="sshUpdateBtnTitle" title="Update existing from ~/.ssh/config">Update from SSH config</button>
+              <button id="btnSshImportWinScp" class="ssh-sidebar-dd-btn" data-i18n="sshDropdownImportWinScpBtn" data-i18n-title="sshImportWinScpBtnTitle" title="Import new from WinSCP saved sites">Import from WinSCP</button>
+              <button id="btnSshUpdateWinScp" class="ssh-sidebar-dd-btn" data-i18n="sshDropdownUpdateWinScpBtn" data-i18n-title="sshUpdateWinScpBtnTitle" title="Update existing from WinSCP saved sites">Update from WinSCP</button>
+              <button id="btnSshExport" class="ssh-sidebar-dd-btn" data-i18n="sshDropdownExportBtn" data-i18n-title="sshExportBtnTitle" title="Export connections to SSH config">Export to SSH config</button>
             </div>
           </div>
         </div>
@@ -522,6 +524,7 @@
       <div class="ssh-dialog-header ssh-dialog-header-buttons">
         <span data-i18n="sshImportTitle">Import from ~/.ssh/config</span>
         <div class="ssh-dialog-buttons">
+          <button id="sshImportChooseIni" class="ssh-dialog-btn ssh-dialog-btn-cancel hidden" data-i18n="sshImportWinScpChooseIni">Choose WinSCP .ini file…</button>
           <button id="sshImportCancel" class="ssh-dialog-btn ssh-dialog-btn-cancel" data-i18n="genericCancel">Cancel</button>
           <button id="sshImportConfirm" class="ssh-dialog-btn ssh-dialog-btn-save" data-i18n="sshImportBtnImport">Import Selected</button>
         </div>

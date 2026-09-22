@@ -140,6 +140,10 @@ export interface SshConfigHost {
   macs?: string | null;
   caSignatureAlgorithms?: string | null;
   compression?: string | null;
+  /** WinSCP source only: the site's stored password, when it could be read. */
+  password?: string | null;
+  /** WinSCP source only: the site's WinSCP folder path ("Prod/Web"), or null. */
+  folderPath?: string | null;
 }
 
 export interface ImportConfigResult {
@@ -148,6 +152,8 @@ export interface ImportConfigResult {
   path?: string;
   error?: string;
   errorCode?: string;
+  /** WinSCP source only: non-SSH protocols left out, with their site counts. */
+  skippedProtocols?: Array<{ protocol: string; count: number }>;
 }
 
 export interface ExportConfigResult {
@@ -172,6 +178,10 @@ export interface SshImportApplyHost {
   caSignatureAlgorithms: string | null;
   compression: string | null;
   existingConnId: string | null;
+  /** WinSCP source only: the password to store, when it could be read. */
+  password?: string | null;
+  /** WinSCP source only: Connection folder path to mirror, or null. */
+  folderPath?: string | null;
 }
 
 export interface SshImportApplyRequest {
@@ -364,6 +374,8 @@ export interface WindowApi {
   sshConnect(connectionId: string): Promise<SpawnResult>;
   sshOpenConnectionFolder(folderId: string): Promise<SshConnectionFolderOpen & { error?: string; errorCode?: string }>;
   sshImportConfig(filePath?: string): Promise<ImportConfigResult>;
+  /** Read WinSCP's saved sites; `chooseFile` opens a picker for a WinSCP.ini. */
+  sshImportWinScp(chooseFile?: boolean): Promise<ImportConfigResult>;
   sshImportApply(request: SshImportApplyRequest): Promise<SshImportApplyResult>;
   sshExportConfig(): Promise<ExportConfigResult>;
 

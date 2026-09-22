@@ -7,10 +7,14 @@
 import fs from 'fs';
 import os from 'os';
 import path from 'path';
+import { execFile } from 'child_process';
+import { promisify } from 'util';
 
 import type { Connection, ConnectionFolder, User, UserFolder } from '../../domain/entities/ssh';
 import type { DialogService } from '../../domain/ports/dialog-service';
 import { parseSshConfigText } from '../../domain/services/ssh-config';
+import { mapWinScpSessions, parseWinScpIni, parseWinScpRegistryOutput } from '../../domain/services/winscp';
+import type { WinScpRawSession } from '../../domain/services/winscp';
 import type {
   GetVaultStatus, SetMasterPassword, UseOsEncryption, UnlockWithPassword, UnlockWithOsCredentials,
   ClearSshData, ApplySshImport,
@@ -305,6 +309,69 @@ export class SshController {
     }
   }
 
+  // ── WinSCP import ──
+
+  /**
+   * Read WinSCP's saved sites. Without `chooseFile` the registry is read first
+   * (an installed WinSCP), then the roaming INI (a portable one); `chooseFile`
+   * lets the user point at any WinSCP.ini instead.
+   */
+  async importWinScp(chooseFile?: boolean) {
+    try {
+      if (chooseFile) {
+        const picked = await this.dialogs.pickExistingFile({
+          title: 'Select WinSCP INI File',
+          defaultPath: path.join(os.homedir(), 'AppData', 'Roaming', 'WinSCP.ini'),
+          filters: [
+            { name: 'WinSCP INI', extensions: ['ini'] },
+            { name: 'All Files', extensions: ['*'] },
+          ],
+        });
+        if (picked.canceled || !picked.filePath) return { canceled: true };
+        if (!fs.existsSync(picked.filePath)) {
+          return { error: `Config file not found: ${picked.filePath}`, errorCode: 'CONFIG_NOT_FOUND', path: picked.filePath };
+        }
+        return this.winScpResult(parseWinScpIni(fs.readFileSync(picked.filePath, 'utf8')), picked.filePath);
+      }
+
+      const registryOutput = await queryWinScpRegistry();
+      if (registryOutput === null) {
+        const iniPath = path.join(os.homedir(), 'AppData', 'Roaming', 'WinSCP.ini');
+        if (!fs.existsSync(iniPath)) {
+          return { error: 'WinSCP was not detected on this machine.', errorCode: 'WINSCP_NOT_FOUND' };
+        }
+        return this.winScpResult(parseWinScpIni(fs.readFileSync(iniPath, 'utf8')), iniPath);
+      }
+      return this.winScpResult(parseWinScpRegistryOutput(registryOutput));
+    } catch (err) {
+      return { error: err.message };
+    }
+  }
+
+  private winScpResult(sessions: WinScpRawSession[], configPath?: string) {
+    const { candidates, skippedProtocols } = mapWinScpSessions(sessions);
+    const where = configPath ? { path: configPath } : {};
+
+    if (candidates.length === 0) {
+      return { error: 'No WinSCP sites found.', errorCode: 'NO_SITES_FOUND', skippedProtocols, ...where };
+    }
+    return {
+      hosts: candidates.map(candidate => ({
+        name: candidate.name,
+        aliases: [candidate.name],
+        host: candidate.host,
+        port: candidate.port,
+        user: candidate.user,
+        identityFile: candidate.identityFile,
+        proxyJump: candidate.proxyJump,
+        password: candidate.password,
+        folderPath: candidate.folderPath,
+      })),
+      skippedProtocols,
+      ...where,
+    };
+  }
+
   async exportConfig() {
     try {
       const configText = this.exportSshConfigUseCase.execute();
@@ -385,5 +452,26 @@ export class SshController {
       userIds, childFolderIds,
       userCount: userIds.length, childCount: childFolderIds.length,
     };
+  }
+}
+
+const execFileAsync = promisify(execFile);
+
+/**
+ * WinSCP's site key as reported by `reg.exe`, or null when the key is absent
+ * (WinSCP not installed, or a portable install keeping its sites in an INI).
+ * WinSCP escapes everything non-ASCII in this key, so the output stays ASCII
+ * even on a non-English Windows codepage.
+ */
+async function queryWinScpRegistry(): Promise<string | null> {
+  try {
+    const { stdout } = await execFileAsync(
+      'reg.exe',
+      ['query', 'HKCU\\Software\\Martin Prikryl\\WinSCP 2\\Sessions', '/s'],
+      { maxBuffer: 8 * 1024 * 1024, windowsHide: true },
+    );
+    return stdout;
+  } catch {
+    return null;
   }
 }

@@ -189,7 +189,7 @@ const sshController = new SshController(
   new OpenConnectionFolder(connectionRepo, connectionFolderRepo),
   new ExportSshConfig(connectionRepo, userRepo),
   new SpawnSshSession(connectionRepo, ptyGateway),
-  new ApplySshImport(vault, userRepo, connectionRepo),
+  new ApplySshImport(vault, userRepo, connectionRepo, connectionFolderRepo),
   dialogs,
   sessionRegistry,
   sendToRenderer,
@@ -359,6 +359,7 @@ ipcMain.handle('ssh:connection-folder-duplicate', (event, folderId) => sshContro
 ipcMain.handle('ssh:connect', (event, connectionId) => sshController.connect(connectionId));
 ipcMain.handle('ssh:open-connection-folder', (event, folderId) => sshController.openConnectionFolder(folderId));
 ipcMain.handle('ssh:import-config', (event, customPath) => sshController.importConfig(customPath));
+ipcMain.handle('ssh:import-winscp', (event, chooseFile) => sshController.importWinScp(chooseFile));
 ipcMain.handle('ssh:import-apply', (event, request) => sshController.importApply(request));
 ipcMain.handle('ssh:export-config', () => sshController.exportConfig());
 

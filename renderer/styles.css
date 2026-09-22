@@ -2370,6 +2370,15 @@ html, body {
 }
 
 /* ═══ SSH Import Dialog ═══ */
+.ssh-import-notices {
+  padding: calc(2px * var(--ui-scale)) 0 calc(8px * var(--ui-scale));
+  margin-bottom: calc(6px * var(--ui-scale));
+  border-bottom: 1px solid var(--border);
+}
+.ssh-import-note {
+  font-size: calc(var(--app-font-size) * 0.769);
+  color: var(--text-muted);
+}
 .ssh-import-row {
   display: flex;
   align-items: flex-start;

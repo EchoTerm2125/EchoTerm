@@ -36,6 +36,7 @@ import {
   const sshImportBody = $('#sshImportBody');
   const sshImportCancel = $('#sshImportCancel');
   const sshImportConfirm = $('#sshImportConfirm');
+  const sshImportChooseIni = $('#sshImportChooseIni');
   const sshContextMenu = $('#sshContextMenu');
   const sshCtxMoveItem = $('#sshCtxMoveItem');
   const sshCtxFolderSubmenu = $('#sshCtxFolderSubmenu');
@@ -133,9 +134,13 @@ import {
 
     // --- Import / Update / Export buttons
     const btnImport = $('#btnSshImport');
-    if (btnImport) btnImport.addEventListener('click', () => { closeSshHeaderDropdown(); showImportDialog('import'); });
+    if (btnImport) btnImport.addEventListener('click', () => { closeSshHeaderDropdown(); showImportDialog('import', 'sshconfig'); });
     const btnUpdate = $('#btnSshUpdate');
-    if (btnUpdate) btnUpdate.addEventListener('click', () => { closeSshHeaderDropdown(); showImportDialog('update'); });
+    if (btnUpdate) btnUpdate.addEventListener('click', () => { closeSshHeaderDropdown(); showImportDialog('update', 'sshconfig'); });
+    const btnImportWinScp = $('#btnSshImportWinScp');
+    if (btnImportWinScp) btnImportWinScp.addEventListener('click', () => { closeSshHeaderDropdown(); showImportDialog('import', 'winscp'); });
+    const btnUpdateWinScp = $('#btnSshUpdateWinScp');
+    if (btnUpdateWinScp) btnUpdateWinScp.addEventListener('click', () => { closeSshHeaderDropdown(); showImportDialog('update', 'winscp'); });
     const btnExport = $('#btnSshExport');
     if (btnExport) btnExport.addEventListener('click', async () => {
       closeSshHeaderDropdown();
@@ -177,6 +182,7 @@ import {
   }
 
   let importMode: 'import' | 'update' = 'import';
+  let importSource: 'sshconfig' | 'winscp' = 'sshconfig';
 
   async function updatePasswordIcon() {
     const btn = $('#btnSshPassword');
@@ -2112,12 +2118,14 @@ import {
     );
   }
 
-  // --- SSH Config Import
-  async function showImportDialog(mode) {
+  // --- SSH Import (SSH config file, or WinSCP's saved sites)
+  async function showImportDialog(mode, source, chooseFile = false) {
     importMode = mode || 'import';
-    const result = await api.sshImportConfig();
+    importSource = source || 'sshconfig';
+    const isWinScp = importSource === 'winscp';
+    const result = isWinScp ? await api.sshImportWinScp(!!chooseFile) : await api.sshImportConfig();
 
-    // --- User canceled the file selection
+    // --- User canceled the file selection (an already open dialog keeps its rows)
     if (result.canceled) return;
 
     sshImportBody.innerHTML = '';
@@ -2125,17 +2133,22 @@ import {
     // --- Update dialog header and button
     const headerSpan = sshImportDialog.querySelector('.ssh-dialog-header span');
     if (headerSpan) {
-      headerSpan.textContent = importMode === 'update'
-        ? App.__('sshImportUpdateTitle')
-        : App.__('sshImportTitle');
+      headerSpan.textContent = isWinScp
+        ? (importMode === 'update' ? App.__('sshImportWinScpUpdateTitle') : App.__('sshImportWinScpTitle'))
+        : (importMode === 'update' ? App.__('sshImportUpdateTitle') : App.__('sshImportTitle'));
     }
     sshImportConfirm.textContent = importMode === 'update' ? App.__('sshImportBtnUpdate') : App.__('sshImportBtnImport');
+    if (sshImportChooseIni) sshImportChooseIni.classList.toggle('hidden', !isWinScp);
 
     if (result.error) {
       const msg = result.errorCode === 'CONFIG_NOT_FOUND'
         ? App.__('errorConfigNotFound', { path: result.path || '' })
         : result.errorCode === 'NO_HOSTS_FOUND'
         ? App.__('sshImportNoHosts')
+        : result.errorCode === 'WINSCP_NOT_FOUND'
+        ? App.__('sshImportWinScpNotDetected')
+        : result.errorCode === 'NO_SITES_FOUND'
+        ? App.__('sshImportWinScpNoSites')
         : result.error;
       sshImportBody.innerHTML = `<div class="ssh-empty-hint">${escHtml(msg)}</div>`;
       sshImportDialog.classList.remove('hidden');
@@ -2148,17 +2161,39 @@ import {
       api.sshUserList(),
     ]);
 
+    // --- WinSCP notices: which protocols we import, and what was left out
+    let notices = null;
+    if (isWinScp) {
+      notices = document.createElement('div');
+      notices.className = 'ssh-import-notices';
+      const skipped = result.skippedProtocols || [];
+      const skippedLine = skipped.length > 0
+        ? `<div class="ssh-import-note">${escHtml(App.__('sshImportWinScpSkipped', {
+            list: skipped.map(s => `${s.count} × ${s.protocol}`).join(', '),
+          }))}</div>`
+        : '';
+      notices.innerHTML = `
+        <div class="ssh-import-note">${escHtml(App.__('sshImportWinScpSupported'))}</div>
+        ${skippedLine}
+      `;
+      sshImportBody.appendChild(notices);
+    }
+
     // --- Global update options (update mode only)
     let globalOpts = null;
     if (importMode === 'update') {
       globalOpts = document.createElement('div');
       globalOpts.className = 'ssh-update-global';
+      // WinSCP sites carry no algorithm overrides, so that group is not offered.
+      const optionsField = isWinScp
+        ? ''
+        : `<label class="ssh-update-field"><input type="checkbox" id="updGlobalOptions" checked /> ${App.__('sshImportFieldOptions')}</label>`;
       globalOpts.innerHTML = `
         <span class="ssh-update-global-title">${App.__('sshImportUpdateFieldsTitle')}</span>
         <label class="ssh-update-field"><input type="checkbox" id="updGlobalHost" checked /> ${App.__('sshImportFieldHost')}</label>
         <label class="ssh-update-field"><input type="checkbox" id="updGlobalUser" checked /> ${App.__('sshImportFieldUser')}</label>
         <label class="ssh-update-field"><input type="checkbox" id="updGlobalJump" checked /> ${App.__('sshImportFieldJump')}</label>
-        <label class="ssh-update-field"><input type="checkbox" id="updGlobalOptions" checked /> ${App.__('sshImportFieldOptions')}</label>
+        ${optionsField}
       `;
       sshImportBody.appendChild(globalOpts);
     }
@@ -2174,8 +2209,9 @@ import {
 
     // --- Build / refresh the list based on the currently checked update fields
     function renderImportRows() {
-      // Preserve the global options section (keeps its change listeners)
+      // Preserve the notices and global options (keeps their change listeners)
       while (sshImportBody.lastChild) sshImportBody.removeChild(sshImportBody.lastChild);
+      if (notices) sshImportBody.appendChild(notices);
       if (globalOpts) sshImportBody.appendChild(globalOpts);
 
       const doHost = isUpdateFieldOn('updGlobalHost');
@@ -2234,9 +2270,14 @@ import {
           jumpInfo = `<span class="ssh-import-jump">${App.__('sshImportJumpVia', { host: escHtml(host.proxyJump) })}${jhExists ? '' : App.__('sshImportJumpNotInConfig')}</span>`;
         }
 
-        const detailDisplay = existing
-          ? `<span class="ssh-import-detail">${escHtml(host.user || existing.userName || '')}@${escHtml(host.host)}:${host.port}</span>`
-          : `<span class="ssh-import-detail">${escHtml(host.user || '')}@${escHtml(host.host)}:${host.port}</span>`;
+        // WinSCP sites also show the folder they live in, so mirroring is visible
+        const target = existing
+          ? `${host.user || existing.userName || ''}@${host.host}:${host.port}`
+          : `${host.user || ''}@${host.host}:${host.port}`;
+        const folderInfo = host.folderPath
+          ? ` · ${App.__('sshImportFolder', { path: host.folderPath })}`
+          : '';
+        const detailDisplay = `<span class="ssh-import-detail">${escHtml(target + folderInfo)}</span>`;
 
         row.innerHTML = `
           <input type="checkbox" name="importHost" value="${escHtml(host.name)}" checked />
@@ -2307,6 +2348,13 @@ import {
       sshImportDialog.classList.add('hidden');
     });
 
+    // WinSCP sites can also come from a WinSCP.ini the user points us at
+    if (sshImportChooseIni) {
+      sshImportChooseIni.addEventListener('click', () => {
+        showImportDialog(importMode, 'winscp', true);
+      });
+    }
+
     sshImportConfirm.addEventListener('click', async () => {
       const checkboxes = sshImportBody.querySelectorAll('input[name="importHost"]:checked');
       const allRows = [...sshImportBody.querySelectorAll('.ssh-import-row')];
@@ -2353,7 +2401,8 @@ import {
       const doHost = !updGlobalHost || updGlobalHost.checked;
       const doUser = !updGlobalUser || updGlobalUser.checked;
       const doJump = !updGlobalJump || updGlobalJump.checked;
-      const doOptions = !updGlobalOptions || updGlobalOptions.checked;
+      // WinSCP sites have no algorithm overrides, so that group is never applied
+      const doOptions = importSource === 'winscp' ? false : (!updGlobalOptions || updGlobalOptions.checked);
 
       // Build the checked-host payload for a single bulk IPC call.
       const hosts = [];
@@ -2376,6 +2425,8 @@ import {
           caSignatureAlgorithms: host.caSignatureAlgorithms || null,
           compression: host.compression || null,
           existingConnId: row._existingConn ? row._existingConn.id : null,
+          password: host.password || null,
+          folderPath: host.folderPath || null,
         });
       }
 
