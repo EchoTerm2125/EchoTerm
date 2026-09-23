@@ -394,6 +394,7 @@
 
     // ── SSH Header Dropdown ─────────────────────────────────────────────────
     sshDropdownSshLabel: '.SSH',
+    sshDropdownWinScpLabel: 'WinSCP',
     sshDropdownCreate: 'Crear',
     sshDropdownImportBtn: 'Importar desde configuración SSH',
     sshDropdownUpdateBtn: 'Actualizar desde configuración SSH',

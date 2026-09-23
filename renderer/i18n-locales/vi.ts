@@ -394,6 +394,7 @@
 
     // ── SSH Header Dropdown ─────────────────────────────────────────────────
     sshDropdownSshLabel: '.SSH',
+    sshDropdownWinScpLabel: 'WinSCP',
     sshDropdownCreate: 'Tạo',
     sshDropdownImportBtn: 'Nhập từ cấu hình SSH',
     sshDropdownUpdateBtn: 'Cập nhật từ cấu hình SSH',

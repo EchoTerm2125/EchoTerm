@@ -394,6 +394,7 @@
 
     // ── SSH Header Dropdown ─────────────────────────────────────────────────
     sshDropdownSshLabel: '.SSH',
+    sshDropdownWinScpLabel: 'WinSCP',
     sshDropdownCreate: '만들기',
     sshDropdownImportBtn: 'SSH 설정에서 가져오기',
     sshDropdownUpdateBtn: 'SSH 설정에서 업데이트',

@@ -2002,6 +2002,12 @@ html, body {
   animation: menuPop 0.12s ease;
 }
 
+.ssh-dropdown-divider {
+  height: 1px;
+  background: var(--border);
+  margin: calc(4px * var(--ui-scale)) calc(2px * var(--ui-scale));
+}
+
 .ssh-sidebar-dd-btn {
   display: flex;
   align-items: center;
