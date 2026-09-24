@@ -56,7 +56,8 @@ test.describe('EchoTerm search E2E', () => {
     await page.locator('.xterm-container').first().click();
     await page.keyboard.press('Control+f');
 
-    const findBar = page.locator('#findBar');
+    // The bar belongs to the pane: it lives inside that pane's terminal screen.
+    const findBar = page.locator('.pane .xterm-screen .find-bar').first();
     await expect(findBar).toBeVisible();
 
     // Escape closes it again.

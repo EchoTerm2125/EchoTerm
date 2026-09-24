@@ -15,6 +15,7 @@
     'appTheme', 'uiFontSize', 'termFontSize', 'maxRetainedLines', 'defaultShell',
     'skipTabCloseConfirm', 'skipCloseConfirm', 'skipGroupCloseConfirm',
     'skipSshJumpWarn', 'skipPastePreview', 'skipRightClickPaste',
+    'skipAutoEchoFolderOpen',
     'i18nLocale', 'sshSidebarWidth',
   ];
 
@@ -197,6 +198,11 @@
     App.optRightClickPaste.checked =
       localStorage.getItem('skipRightClickPaste') === 'false';
 
+    // Open connection folders in echo mode (default: on)
+    App.optFolderAutoEcho.checked = App.Echo
+      ? App.Echo.isFolderAutoEchoEnabled()
+      : localStorage.getItem('skipAutoEchoFolderOpen') !== 'true';
+
     // Language page — rebuild list and reflect current locale
     const langSearch = document.getElementById('langSearchInput');
     if (langSearch) langSearch.value = '';
@@ -376,6 +382,13 @@
     App.optRightClickPaste.addEventListener('change', () => {
       localStorage.setItem('skipRightClickPaste',
         App.optRightClickPaste.checked ? 'false' : 'true');
+    });
+
+    // Open connection folders in echo mode toggle
+    App.optFolderAutoEcho.addEventListener('change', () => {
+      if (App.Echo) App.Echo.setFolderAutoEchoEnabled(App.optFolderAutoEcho.checked);
+      else if (App.optFolderAutoEcho.checked) localStorage.removeItem('skipAutoEchoFolderOpen');
+      else localStorage.setItem('skipAutoEchoFolderOpen', 'true');
     });
 
     // ── Danger Zone: reset all settings ──

@@ -196,6 +196,14 @@ interface SearchApi {
         else if (e.key === 'Escape') { e.preventDefault(); api.close(); }
       });
     }
+    // A button takes focus on mouse-down, and a focused button is activated by
+    // Space — so without this, clicking a control would make the next Space
+    // re-run it instead of reaching the input. Keep the focus where it was;
+    // Tab + Space still activate a button reached by keyboard.
+    document.addEventListener('mousedown', (e) => {
+      const target = e.target as HTMLElement | null;
+      if (target && target.closest('button')) e.preventDefault();
+    });
     bindToggle('panelCase', 'caseSensitive');
     bindToggle('panelWord', 'wholeWord');
     bindToggle('panelRegex', 'regex');

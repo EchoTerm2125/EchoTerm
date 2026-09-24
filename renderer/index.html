@@ -68,9 +68,13 @@
             <button id="btnSshMenuToggle" class="ssh-sidebar-btn ssh-menu-toggle" data-i18n-title="sshMenuTitle" title="Actions">⋯</button>
             <div id="sshHeaderDropdown" class="ssh-header-dropdown hidden">
               <div class="ssh-dropdown-header" data-i18n="sshDropdownSshLabel">.SSH</div>
-              <button id="btnSshImport" class="ssh-sidebar-dd-btn" data-i18n="sshDropdownImportBtn" data-i18n-title="sshImportBtnTitle" title="Import new from ~/.ssh/config">Import</button>
-              <button id="btnSshUpdate" class="ssh-sidebar-dd-btn" data-i18n="sshDropdownUpdateBtn" data-i18n-title="sshUpdateBtnTitle" title="Update existing from ~/.ssh/config">Update</button>
-              <button id="btnSshExport" class="ssh-sidebar-dd-btn" data-i18n="sshDropdownExportBtn" data-i18n-title="sshExportBtnTitle" title="Export connections to SSH config">Export</button>
+              <button id="btnSshImport" class="ssh-sidebar-dd-btn" data-i18n="sshDropdownImportBtn" data-i18n-title="sshImportBtnTitle" title="Import new from ~/.ssh/config">Import from SSH config</button>
+              <button id="btnSshUpdate" class="ssh-sidebar-dd-btn" data-i18n="sshDropdownUpdateBtn" data-i18n-title="sshUpdateBtnTitle" title="Update existing from ~/.ssh/config">Update from SSH config</button>
+              <button id="btnSshExport" class="ssh-sidebar-dd-btn" data-i18n="sshDropdownExportBtn" data-i18n-title="sshExportBtnTitle" title="Export connections to SSH config">Export to SSH config</button>
+              <div class="ssh-dropdown-divider"></div>
+              <div class="ssh-dropdown-header" data-i18n="sshDropdownWinScpLabel">WinSCP</div>
+              <button id="btnSshImportWinScp" class="ssh-sidebar-dd-btn" data-i18n="sshDropdownImportWinScpBtn" data-i18n-title="sshImportWinScpBtnTitle" title="Import new from WinSCP saved sites">Import from WinSCP</button>
+              <button id="btnSshUpdateWinScp" class="ssh-sidebar-dd-btn" data-i18n="sshDropdownUpdateWinScpBtn" data-i18n-title="sshUpdateWinScpBtnTitle" title="Update existing from WinSCP saved sites">Update from WinSCP</button>
             </div>
           </div>
         </div>
@@ -169,18 +173,8 @@
 
   <!-- ═══Terminal container (split.js manages children)  ═══-->
   <main id="terminal-container">
-    <!-- ═══Find bar (Ctrl+F, active pane)  ═══-->
-    <div id="findBar" class="find-bar hidden" data-overlay>
-      <input type="text" id="findBarInput" class="find-bar-input" placeholder="Find" data-i18n-placeholder="findPlaceholder" autocomplete="off" spellcheck="false" />
-      <span id="findBarCount" class="find-bar-count"></span>
-      <button id="findBarPrev" class="find-bar-btn" data-i18n-title="findPrevTitle" title="Previous match (Shift+Enter)">↑</button>
-      <button id="findBarNext" class="find-bar-btn" data-i18n-title="findNextTitle" title="Next match (Enter)">↓</button>
-      <button id="findBarCase" class="find-bar-btn find-bar-toggle" data-i18n-title="findCaseTitle" title="Match case">Aa</button>
-      <button id="findBarWord" class="find-bar-btn find-bar-toggle" data-i18n-title="findWordTitle" title="Match whole word">ab</button>
-      <button id="findBarRegex" class="find-bar-btn find-bar-toggle" data-i18n-title="findRegexTitle" title="Use regular expression">.*</button>
-      <button id="findBarClose" class="find-bar-btn" data-i18n-title="searchPanelCloseTitle" title="Close">×</button>
-    </div>
-    <!-- Terminals are added dynamically by app.js -->
+    <!-- Terminals are added dynamically by app.ts; each pane builds its own
+         find bar (Ctrl+F) inside its own terminal screen. -->
   </main>
     </div><!-- /#mainContent -->
   </div><!-- /#mainBody -->
@@ -284,6 +278,10 @@
             <svg class="options-menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 17 10 11 4 5"/><line x1="12" x2="20" y1="19" y2="19"/></svg>
             <span data-i18n="optionsTitleDefaultShell">Default Shell</span>
           </button>
+          <button class="options-menu-item" data-options-target="ssh">
+            <svg class="options-menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="8" x="2" y="2" rx="2" ry="2"/><rect width="20" height="8" x="2" y="14" rx="2" ry="2"/><line x1="6" x2="6.01" y1="6" y2="6"/><line x1="6" x2="6.01" y1="18" y2="18"/></svg>
+            <span data-i18n="optionsTitleSsh">SSH</span>
+          </button>
           <button class="options-menu-item" data-options-target="warnings">
             <svg class="options-menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"/><line x1="12" x2="12" y1="9" y2="13"/><line x1="12" x2="12.01" y1="17" y2="17"/></svg>
             <span data-i18n="optionsTitleWarnings">Warnings</span>
@@ -353,6 +351,16 @@
             <span><span class="shell-icon"></span> <span data-i18n="shellGitBash">Git Bash</span></span>
           </label>
         </div>
+      </div>
+    </div>
+    <div class="options-section" data-options-section="ssh">
+      <div class="options-section-title" data-i18n="optionsTitleSsh">SSH</div>
+      <div class="options-card">
+        <label class="options-toggle">
+          <span class="options-toggle-label" data-i18n="optionsFolderAutoEcho">Open connection folders in Echo mode</span>
+          <input type="checkbox" id="optFolderAutoEcho" checked />
+          <span class="options-toggle-slider"></span>
+        </label>
       </div>
     </div>
     <div class="options-section" data-options-section="warnings">
@@ -518,6 +526,7 @@
       <div class="ssh-dialog-header ssh-dialog-header-buttons">
         <span data-i18n="sshImportTitle">Import from ~/.ssh/config</span>
         <div class="ssh-dialog-buttons">
+          <button id="sshImportChooseIni" class="ssh-dialog-btn ssh-dialog-btn-cancel hidden" data-i18n="sshImportWinScpChooseIni">Choose WinSCP .ini file…</button>
           <button id="sshImportCancel" class="ssh-dialog-btn ssh-dialog-btn-cancel" data-i18n="genericCancel">Cancel</button>
           <button id="sshImportConfirm" class="ssh-dialog-btn ssh-dialog-btn-save" data-i18n="sshImportBtnImport">Import Selected</button>
         </div>

@@ -125,6 +125,52 @@ describe('Integration: Terminal Lifecycle', () => {
     });
   });
 
+  describe('spawnSshTerminal pane title', () => {
+    it('shows the Connection identity on the pane title bar and the tab', async () => {
+      await App.Terminal.spawnSshTerminal({ id: 7, shell: 'ssh', label: 'VM1', host: 'vm1.com', username: 'admin' });
+
+      const label = App.state.terminals.get(7).titlebar.querySelector('.pane-label');
+      expect(label.querySelector('.pane-name').textContent).toBe('VM1');
+      expect(label.querySelector('.pane-identity').textContent).toBe('(admin@vm1.com)');
+      expect(label.title).toBe('VM1 (admin@vm1.com)');
+
+      const tab = App.tabList.querySelector('.tab-item[data-term-id="7"]');
+      expect(tab.querySelector('.tab-name').textContent).toBe('VM1');
+      expect(tab.querySelector('.tab-identity').textContent).toBe('(admin@vm1.com)');
+    });
+
+    it('shows the host alone when the connection has no user', async () => {
+      await App.Terminal.spawnSshTerminal({ id: 8, shell: 'ssh', label: 'VM2', host: 'vm2.com', username: null });
+      const label = App.state.terminals.get(8).titlebar.querySelector('.pane-label');
+      expect(label.querySelector('.pane-identity').textContent).toBe('(vm2.com)');
+    });
+
+    it('shows the host as the name when a stored connection has a blank name', async () => {
+      await App.Terminal.spawnSshTerminal({ id: 9, shell: 'ssh', label: '', host: 'vm3.com', username: 'admin' });
+      const label = App.state.terminals.get(9).titlebar.querySelector('.pane-label');
+      expect(label.querySelector('.pane-name').textContent).toBe('vm3.com');
+      expect(label.querySelector('.pane-identity')).toBeNull();
+    });
+
+    it('keeps the identity when the pane is renamed', async () => {
+      await App.Terminal.spawnSshTerminal({ id: 10, shell: 'ssh', label: 'VM1', host: 'vm1.com', username: 'admin' });
+      App.Tabs.renameTab(10, 'prod');
+
+      const label = App.state.terminals.get(10).titlebar.querySelector('.pane-label');
+      expect(label.querySelector('.pane-name').textContent).toBe('prod');
+      expect(label.querySelector('.pane-identity').textContent).toBe('(admin@vm1.com)');
+    });
+
+    it('keeps the identity when a session exits', async () => {
+      await App.Terminal.spawnSshTerminal({ id: 11, shell: 'ssh', label: 'VM1', host: 'vm1.com', username: 'admin' });
+      App.Terminal.handleTerminalExit(11);
+
+      const label = App.state.terminals.get(11).titlebar.querySelector('.pane-label');
+      expect(label.querySelector('.pane-name').textContent).toBe('⏹ VM1');
+      expect(label.querySelector('.pane-identity').textContent).toBe('(admin@vm1.com)');
+    });
+  });
+
   describe('closeTerminal', () => {
     it('removes terminal from state', async () => {
       const id = await App.Terminal.spawnTerminal('powershell');

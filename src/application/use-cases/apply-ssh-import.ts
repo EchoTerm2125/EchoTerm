@@ -1,9 +1,10 @@
 /* ═══════════════════════════════════════════════════════════════════════════
-   EchoTerm — Use case: apply a checked SSH config import in a single batch
+   EchoTerm — Use case: apply a checked import (SSH config or WinSCP) in one batch
    Runs the user/connection saves in-memory and persists the vault exactly once.
    ═══════════════════════════════════════════════════════════════════════════ */
 
-import type { Connection, User } from '../../domain/entities/ssh';
+import type { Connection, ConnectionFolder, User } from '../../domain/entities/ssh';
+import type { ConnectionFolderRepository } from '../../domain/ports/connection-folder-repository';
 import type { ConnectionRepository } from '../../domain/ports/connection-repository';
 import type { UserRepository } from '../../domain/ports/user-repository';
 import type { Vault } from '../../domain/ports/vault';
@@ -29,6 +30,7 @@ export class ApplySshImport {
     private readonly vault: Vault,
     private readonly users: UserRepository,
     private readonly connections: ConnectionRepository,
+    private readonly folders: ConnectionFolderRepository,
   ) {}
 
   execute(hosts: SshImportApplyHost[], opts: ApplySshImportOptions): SshImportApplyResult {
@@ -45,15 +47,22 @@ export class ApplySshImport {
       connById.set(c.id, c);
     }
 
+    // WinSCP sites carry a folder path; the ssh-config source never does, so the
+    // existing folder tree is only walked when there is something to mirror.
+    const folderIdByPath = hosts.some(h => h.folderPath) ? this.buildFolderIndex() : new Map<string, string>();
+
     const jumpLinks: Array<{ proxyJump: string; connId: string }> = [];
 
     this.vault.beginBatch();
     try {
       for (const host of hosts) {
         try {
-          const userId = this.resolveUserId(host, userByKey);
+          const userId = this.resolveUserId(host, userByKey, opts);
           const existing = host.existingConnId ? (connById.get(host.existingConnId) ?? null) : null;
-          const conn = this.buildConnection(host, userId, existing, opts);
+          // Folders are mirrored for new connections only: an update keeps the
+          // connection where the user already put it.
+          const folderId = existing ? existing.folderId : this.resolveFolderId(host.folderPath, folderIdByPath);
+          const conn = this.buildConnection(host, userId, existing, folderId, opts);
           const saved = this.connections.save(conn);
 
           if (existing) result.updated++;
@@ -87,18 +96,31 @@ export class ApplySshImport {
     return result;
   }
 
-  private resolveUserId(host: SshImportApplyHost, userByKey: Map<string, User>): string {
+  private resolveUserId(
+    host: SshImportApplyHost,
+    userByKey: Map<string, User>,
+    opts: ApplySshImportOptions,
+  ): string {
     const username = host.user || '';
     const key = userKeyFor(username, host.identityFile ? 'keyfile' : 'password', host.identityFile);
 
     const existing = userByKey.get(key);
-    if (existing) return existing.id;
+    if (existing) {
+      // Only WinSCP imports carry a password, and only the user group may
+      // replace one: an import with no password leaves the stored one alone.
+      if (host.password && opts.doUser && existing.password !== host.password) {
+        const saved = this.users.save({ ...existing, password: host.password });
+        userByKey.set(key, saved);
+        return saved.id;
+      }
+      return existing.id;
+    }
 
     const saved = this.users.save({
       name: username || 'User',
       username,
       authType: host.identityFile ? 'keyfile' : 'password',
-      password: '',
+      password: host.password || '',
       keyFilePath: host.identityFile || null,
       keyPassword: null,
     } as User);
@@ -106,10 +128,52 @@ export class ApplySshImport {
     return saved.id;
   }
 
+  /** Every existing folder as "lowercased/path" → id, so mirroring can reuse it. */
+  private buildFolderIndex(): Map<string, string> {
+    const folders = this.folders.list();
+    const byId = new Map(folders.map(folder => [folder.id, folder]));
+    const index = new Map<string, string>();
+
+    for (const folder of folders) {
+      const segments: string[] = [];
+      const seen = new Set<string>();
+      let current: ConnectionFolder | undefined = folder;
+      while (current && !seen.has(current.id)) {
+        seen.add(current.id);
+        segments.unshift(current.name);
+        current = current.parentId ? byId.get(current.parentId) : undefined;
+      }
+      index.set(segments.join('/').toLowerCase(), folder.id);
+    }
+    return index;
+  }
+
+  /** Mirror a WinSCP folder path, creating only the levels that are missing. */
+  private resolveFolderId(folderPath: string | null | undefined, index: Map<string, string>): string | null {
+    const segments = (folderPath || '').split('/').filter(segment => segment.length > 0);
+    if (segments.length === 0) return null;
+
+    let parentId: string | null = null;
+    for (let i = 1; i <= segments.length; i++) {
+      const path = segments.slice(0, i).join('/');
+      const key = path.toLowerCase();
+      const known = index.get(key);
+      if (known) {
+        parentId = known;
+        continue;
+      }
+      const created: ConnectionFolder = this.folders.save({ name: segments[i - 1], parentId } as ConnectionFolder);
+      index.set(key, created.id);
+      parentId = created.id;
+    }
+    return parentId;
+  }
+
   private buildConnection(
     host: SshImportApplyHost,
     userId: string,
     existing: Connection | null,
+    folderId: string | null,
     opts: ApplySshImportOptions,
   ): Connection {
     const conn = {
@@ -117,7 +181,7 @@ export class ApplySshImport {
       host: host.host,
       port: host.port,
       userId,
-      folderId: existing ? existing.folderId : null,
+      folderId,
     } as Connection;
 
     if (existing) {

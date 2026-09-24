@@ -124,4 +124,45 @@ describe('Tabs (tabs.js)', () => {
       expect(label.textContent).toBe('Dev Server');
     });
   });
+
+  describe('Pane title with a Connection identity', () => {
+    // An SSH pane carries the connection's user@host alongside its name.
+    function addSshTab() {
+      const entry = injectTerminal(9, {
+        shell: 'ssh', label: 'VM1', host: 'vm1.com', username: 'admin', customName: 'VM1',
+      });
+      const identity = App.Terminal.connectionIdentity(entry);
+      App.Tabs.addTab(9, 'ssh', App.Terminal.paneName(entry), identity);
+      return App.Tabs.getTabCache().get(9);
+    }
+
+    it('renders the name and the identity as separate elements', () => {
+      const tab = addSshTab();
+      expect(tab.querySelector('.tab-name').textContent).toBe('VM1');
+      expect(tab.querySelector('.tab-identity').textContent).toBe('(admin@vm1.com)');
+    });
+
+    it('tooltips the full Pane title', () => {
+      const tab = addSshTab();
+      expect(tab.querySelector('.tab-label').title).toBe('VM1 (admin@vm1.com)');
+    });
+
+    it('leaves a local pane without an identity or a tooltip', () => {
+      App.Tabs.addTab(10, 'powershell');
+      const tab = App.Tabs.getTabCache().get(10);
+      expect(tab.querySelector('.tab-name').textContent).toBe('PowerShell');
+      expect(tab.querySelector('.tab-identity')).toBeNull();
+      expect(tab.querySelector('.tab-label').title).toBe('');
+    });
+
+    it('renames the name only, keeping the identity', () => {
+      const tab = addSshTab();
+      App.Tabs.renameTab(9, 'prod');
+
+      expect(App.state.terminals.get(9).customName).toBe('prod');
+      expect(tab.querySelector('.tab-name').textContent).toBe('prod');
+      expect(tab.querySelector('.tab-identity').textContent).toBe('(admin@vm1.com)');
+      expect(tab.querySelector('.tab-label').title).toBe('prod (admin@vm1.com)');
+    });
+  });
 });

@@ -167,6 +167,7 @@ window.api = {
   sshConnect: vi.fn((connectionId) => Promise.resolve({ id: _nextApiId++, shell: 'ssh', label: connectionId })),
   sshOpenConnectionFolder: vi.fn(() => Promise.resolve({ name: '', connections: [] })),
   sshImportConfig: vi.fn(() => Promise.resolve({ canceled: true })),
+  sshImportWinScp: vi.fn(() => Promise.resolve({ error: 'No WinSCP sites found.', errorCode: 'NO_SITES_FOUND' })),
   sshImportApply: vi.fn(() => Promise.resolve({ success: true, imported: 0, updated: 0, skipped: [] })),
   sshExportConfig: vi.fn(() => Promise.resolve({ canceled: true })),
   // Terminal search panel (Ctrl+Shift+F popup window)
@@ -206,6 +207,7 @@ const DOM_IDS = [
   'statusTerminalCount', 'statusEcho', 'statusShell',
   'btnSettings', 'optionsPanel', 'optTabCloseConfirm', 'optWindowCloseConfirm',
   'optGroupCloseConfirm', 'optSshJumpWarn', 'optPastePreview', 'optRightClickPaste',
+  'optFolderAutoEcho',
   'tabCtxMoveSep', 'tabCtxMoveItem', 'tabCtxGroupSubmenu',
   'btnResetSettings', 'btnClearSshData', 'btnClearCache', 'btnClearAllData',
   'contextMenu', 'tabContextMenu', 'groupContextMenu',
@@ -223,9 +225,6 @@ const DOM_IDS = [
   'langSelectDropdown', 'langSearchInput', 'langOptionsList',
   // Tab bar wrapper (children are nested into it below)
   'tabBar',
-  // Terminal find bar (Ctrl+F)
-  'findBar', 'findBarInput', 'findBarCount',
-  'findBarPrev', 'findBarNext', 'findBarCase', 'findBarWord', 'findBarRegex', 'findBarClose',
 ];
 
 function scaffoldDom() {
@@ -240,16 +239,11 @@ function scaffoldDom() {
       el = document.createElement('button');
     } else if (id === 'pastePreviewCancel' || id === 'pastePreviewConfirm') {
       el = document.createElement('button');
-    } else if (id === 'findBarPrev' || id === 'findBarNext' || id === 'findBarCase' ||
-               id === 'findBarWord' || id === 'findBarRegex' || id === 'findBarClose') {
-      el = document.createElement('button');
-    } else if (id === 'findBarInput') {
-      el = document.createElement('input');
-      el.type = 'text';
     } else if (id === 'confirmDontShowAgain' || id === 'optTabCloseConfirm' ||
                id === 'optWindowCloseConfirm' || id === 'optGroupCloseConfirm' ||
                id === 'optSshJumpWarn' || id === 'optPastePreview' ||
                id === 'optRightClickPaste' || id === 'pastePreviewDontShow' ||
+               id === 'optFolderAutoEcho' ||
                id === 'optCheckUpdates' || id === 'optIncludePrerelease') {
       el = document.createElement('input');
       el.type = 'checkbox';
@@ -267,7 +261,7 @@ function scaffoldDom() {
     }
     // Mirror the real index.html: every overlay carries data-overlay and starts
     // hidden, so ui.ts/_anyOverlayOpen and App.Search's shortcut guard see them.
-    if (['optionsPanel', 'confirmDialog', 'pastePreviewDialog', 'findBar',
+    if (['optionsPanel', 'confirmDialog', 'pastePreviewDialog',
          'contextMenu', 'tabContextMenu', 'groupContextMenu', 'sshContextMenu'].includes(id)) {
       el.setAttribute('data-overlay', '');
       el.classList.add('hidden');
@@ -362,7 +356,7 @@ export function injectTerminal(id, overrides = {}) {
   const titlebar = document.createElement('div');
   titlebar.className = 'pane-titlebar';
   titlebar.innerHTML = `
-    <span class="pane-label">Test</span>
+    <span class="pane-label"><span class="pane-name">Test</span></span>
     <button class="pane-paste">Paste</button>
     <label class="pane-checkbox" style="display:none">
       <input type="checkbox" /><span>Echo</span>
@@ -375,6 +369,14 @@ export function injectTerminal(id, overrides = {}) {
   xtermDiv.className = 'xterm-container';
   paneEl.appendChild(xtermDiv);
 
+  // Mirror xterm's own DOM — the pane's find bar is created into `.xterm-screen`.
+  const xtermEl = document.createElement('div');
+  xtermEl.className = 'xterm';
+  const screenEl = document.createElement('div');
+  screenEl.className = 'xterm-screen';
+  xtermEl.appendChild(screenEl);
+  xtermDiv.appendChild(xtermEl);
+
   const term = new MockTerminal();
   const fitAddon = new MockFitAddon();
 
@@ -383,6 +385,14 @@ export function injectTerminal(id, overrides = {}) {
   App.state.paneOrder.push(id);
   App.container.appendChild(paneEl);
   return entry;
+}
+
+/**
+ * The find bar a pane owns. It is built lazily, inside the pane's xterm screen.
+ */
+export function findBarFor(id) {
+  const pane = document.querySelector(`.pane[data-term-id="${id}"]`);
+  return pane ? pane.querySelector('.find-bar') : null;
 }
 
 /**

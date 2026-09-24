@@ -564,10 +564,33 @@ html, body {
   user-select: none;
 }
 
+/* A Tab shows the Pane name and, on SSH panes, the Connection identity.
+   The identity gives up width first but never shrinks past its floor; below
+   that the query further down drops it so the name stays legible. */
 .tab-item .tab-label {
+  display: flex;
+  gap: calc(4px * var(--ui-scale));
+  flex: 1 1 0;
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  container-type: inline-size;
+}
+
+.tab-item .tab-name,
+.tab-item .tab-identity {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+.tab-item .tab-name {
+  flex: 0 1 auto;
+}
+
+.tab-item .tab-identity {
+  flex: 1 999 auto;
+  min-width: 10ch;
 }
 
 .tab-item:hover {
@@ -641,12 +664,15 @@ html, body {
   min-height: 0;
 }
 
-/* ═══ Terminal find bar (Ctrl+F) ═══ */
+/* ═══ Terminal find bar (Ctrl+F) — lives inside the pane's xterm screen ═══ */
 .find-bar {
   position: absolute;
   top: calc(8px * var(--ui-scale));
   right: calc(8px * var(--ui-scale));
-  z-index: 120;
+  /* Never spill into a neighbouring pane */
+  max-width: calc(100% - 16px * var(--ui-scale));
+  /* Above the decoration layers (match highlights sit at 6/7) */
+  z-index: 10;
   display: flex;
   align-items: center;
   gap: calc(3px * var(--ui-scale));
@@ -658,7 +684,9 @@ html, body {
 }
 
 .find-bar-input {
+  flex: 1 1 auto;
   width: calc(180px * var(--ui-scale));
+  min-width: calc(40px * var(--ui-scale));
   padding: calc(3px * var(--ui-scale)) calc(6px * var(--ui-scale));
   font-size: calc(var(--app-font-size) * 0.923);
   color: var(--text-primary);
@@ -666,6 +694,9 @@ html, body {
   border: 1px solid var(--border);
   border-radius: 4px;
   outline: none;
+  /* .xterm sets user-select: none, which the bar inherits */
+  user-select: text;
+  -webkit-user-select: text;
 }
 
 .find-bar-input:focus {
@@ -683,6 +714,7 @@ html, body {
 
 .find-bar-btn {
   display: flex;
+  flex: 0 0 auto;
   align-items: center;
   justify-content: center;
   width: calc(22px * var(--ui-scale));
@@ -745,9 +777,40 @@ html, body {
 }
 
 .pane .pane-titlebar .pane-label {
+  display: flex;
+  align-items: center;
+  gap: calc(4px * var(--ui-scale));
   font-size: calc(var(--app-font-size) * 0.846);
   color: var(--text-secondary);
   flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  container-type: inline-size;
+}
+
+.pane .pane-titlebar .pane-name,
+.pane .pane-titlebar .pane-identity {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.pane .pane-titlebar .pane-name {
+  flex: 0 1 auto;
+}
+
+.pane .pane-titlebar .pane-identity {
+  flex: 1 999 auto;
+  min-width: 10ch;
+}
+
+/* Too narrow to show both: the identity goes, the name and controls stay. */
+@container (max-width: 16ch) {
+  .tab-item .tab-identity,
+  .pane .pane-titlebar .pane-identity {
+    display: none;
+  }
 }
 
 .pane .pane-titlebar .pane-checkbox {
@@ -1939,6 +2002,12 @@ html, body {
   animation: menuPop 0.12s ease;
 }
 
+.ssh-dropdown-divider {
+  height: 1px;
+  background: var(--border);
+  margin: calc(4px * var(--ui-scale)) calc(2px * var(--ui-scale));
+}
+
 .ssh-sidebar-dd-btn {
   display: flex;
   align-items: center;
@@ -2307,6 +2376,15 @@ html, body {
 }
 
 /* ═══ SSH Import Dialog ═══ */
+.ssh-import-notices {
+  padding: calc(2px * var(--ui-scale)) 0 calc(8px * var(--ui-scale));
+  margin-bottom: calc(6px * var(--ui-scale));
+  border-bottom: 1px solid var(--border);
+}
+.ssh-import-note {
+  font-size: calc(var(--app-font-size) * 0.769);
+  color: var(--text-muted);
+}
 .ssh-import-row {
   display: flex;
   align-items: flex-start;

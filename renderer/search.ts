@@ -18,12 +18,10 @@ import './theme';
 
   const WORD_CHAR = /[A-Za-z0-9_]/;
 
-  // Remembered find-bar query per pane, so reopening restores what was searched.
-  const findMemory = new Map(); // terminalId -> { query, caseSensitive, wholeWord }
-
-  let activePaneId = null;
-  let findOpen = false;
-  let debounceTimer = null;
+  // The find bar belongs to the pane it searches: it is created on first use
+  // and lives inside that pane's xterm screen element, so the pane positions
+  // and clips it. Query, toggles, open state and the pending debounce all hang
+  // off the pane entry, so they are dropped with the pane.
 
   // ─── SearchAddon plumbing ──────────────────────────────────────────────────
   // Two addon instances per pane: the find bar and the search panel each own
@@ -46,9 +44,7 @@ import './theme';
     }
     ts[key] = addon;
     if (which === 'bar' && typeof addon.onDidChangeResults === 'function') {
-      addon.onDidChangeResults((e) => {
-        if (findOpen && ts.id === activePaneId) updateCount(e);
-      });
+      addon.onDidChangeResults((e) => { if (ts._findOpen) updateCount(ts, e); });
     }
     return addon;
   }
@@ -67,21 +63,62 @@ import './theme';
     };
   }
 
-  // ─── Find bar ──────────────────────────────────────────────────────────────
-  function findBarEl() { return document.getElementById('findBar'); }
-  function findInput() { return document.getElementById('findBarInput') as HTMLInputElement | null; }
+  // ─── Find bar (one per pane, inside that pane's terminal screen) ───────────
+  // Built lazily on first use and appended to the pane's `.xterm-screen`, which
+  // xterm sizes to the terminal grid: the bar therefore aligns with the pane's
+  // own text area and is clipped by the pane. Several panes can each own a bar
+  // and search at the same time; Ctrl+F only touches the active pane's.
+  const BAR_HTML = `
+    <input type="text" class="find-bar-input" placeholder="Find" data-i18n-placeholder="findPlaceholder" autocomplete="off" spellcheck="false" />
+    <span class="find-bar-count"></span>
+    <button class="find-bar-btn find-bar-prev" data-i18n-title="findPrevTitle" title="Previous match (Shift+Enter)">↑</button>
+    <button class="find-bar-btn find-bar-next" data-i18n-title="findNextTitle" title="Next match (Enter)">↓</button>
+    <button class="find-bar-btn find-bar-toggle find-bar-case" data-i18n-title="findCaseTitle" title="Match case">Aa</button>
+    <button class="find-bar-btn find-bar-toggle find-bar-word" data-i18n-title="findWordTitle" title="Match whole word">ab</button>
+    <button class="find-bar-btn find-bar-toggle find-bar-regex" data-i18n-title="findRegexTitle" title="Use regular expression">.*</button>
+    <button class="find-bar-btn find-bar-close" data-i18n-title="searchPanelCloseTitle" title="Close">×</button>
+  `;
 
-  function currentFindTarget() {
-    if (state.terminals.has(state.activeTerminalId)) return state.activeTerminalId;
-    const ids = App.Groups.getGroupTerminalIds(state.activeGroupId);
-    return ids.find((id) => state.terminals.has(id)) || null;
+  const TOGGLES = [
+    { selector: '.find-bar-case', key: 'caseSensitive' },
+    { selector: '.find-bar-word', key: 'wholeWord' },
+    { selector: '.find-bar-regex', key: 'regex' },
+  ];
+
+  function q(ts, selector) {
+    return ts && ts._findBar ? ts._findBar.querySelector(selector) : null;
   }
 
-  function memoryFor(id) {
-    if (!findMemory.has(id)) {
-      findMemory.set(id, { query: '', caseSensitive: false, wholeWord: false, regex: false });
+  function findInput(ts) { return q(ts, '.find-bar-input') as HTMLInputElement | null; }
+
+  function ensureBar(ts) {
+    if (ts._findBar) return ts._findBar;
+    const host = ts.paneEl ? ts.paneEl.querySelector('.xterm-screen') : null;
+    if (!host) return null;
+    const bar = document.createElement('div');
+    bar.className = 'find-bar hidden';
+    bar.setAttribute('data-overlay', '');
+    bar.innerHTML = BAR_HTML;
+    host.appendChild(bar);
+    ts._findBar = bar;
+    // Lazy DOM: the one-shot init scan has already run, so localize it here.
+    if (App.i18n && App.i18n.localizeDom) App.i18n.localizeDom(bar);
+    bindBarEvents(ts, bar);
+    return bar;
+  }
+
+  function currentFindTarget() {
+    if (state.terminals.has(state.activeTerminalId)) return state.terminals.get(state.activeTerminalId);
+    const ids = App.Groups.getGroupTerminalIds(state.activeGroupId);
+    const id = ids.find((tid) => state.terminals.has(tid));
+    return id ? state.terminals.get(id) : null;
+  }
+
+  function memoryFor(ts) {
+    if (!ts._findMemory) {
+      ts._findMemory = { query: '', caseSensitive: false, wholeWord: false, regex: false };
     }
-    return findMemory.get(id);
+    return ts._findMemory;
   }
 
   function findOptions(mem) {
@@ -94,70 +131,65 @@ import './theme';
     };
   }
 
+  function isFindOpen(ts) { return !!(ts && ts._findOpen); }
+
   function toggleFindBar() {
-    if (findOpen) closeFindBar();
-    else openFindBar();
+    const ts = currentFindTarget();
+    if (!ts) return;
+    if (isFindOpen(ts)) closeFindBar(ts);
+    else openFindBar(ts);
   }
 
-  function openFindBar() {
-    const id = currentFindTarget();
-    if (!id) return;
-    activePaneId = id;
-    const bar = findBarEl();
-    const input = findInput();
+  function openFindBar(target) {
+    const ts = target || currentFindTarget();
+    const bar = ts ? ensureBar(ts) : null;
+    const input = findInput(ts);
     if (!bar || !input) return;
 
-    const mem = memoryFor(id);
+    const mem = memoryFor(ts);
     bar.classList.remove('hidden');
-    findOpen = true;
+    ts._findOpen = true;
     input.value = mem.query;
     input.focus();
     input.select();
-    syncToggles(mem);
-    if (mem.query) runFind('first');
-    else updateCount(null);
+    syncToggles(ts, mem);
+    if (mem.query) runFind(ts, 'first');
+    else updateCount(ts, null);
   }
 
-  function closeFindBar() {
-    if (!findOpen) return;
-    if (debounceTimer) { clearTimeout(debounceTimer); debounceTimer = null; }
-    const bar = findBarEl();
-    if (bar) bar.classList.add('hidden');
-    clearBarDecorations();
-    findOpen = false;
-    const id = activePaneId;
-    activePaneId = null;
-    if (id && state.terminals.has(id)) App.Terminal.refocus(id);
+  function closeFindBar(target) {
+    const ts = target || currentFindTarget();
+    if (!ts || !ts._findOpen) return;
+    if (ts._findDebounce) { clearTimeout(ts._findDebounce); ts._findDebounce = null; }
+    ts._findOpen = false;
+    if (ts._findBar) ts._findBar.classList.add('hidden');
+    clearBarDecorations(ts);
+    if (state.terminals.has(ts.id)) App.Terminal.refocus(ts.id);
   }
 
-  function clearBarDecorations() {
-    for (const [, ts] of state.terminals) {
-      const addon = ts._searchBar;
-      if (!addon) continue;
-      try { addon.clearDecorations(); } catch { /* pane not ready */ }
+  function clearBarDecorations(ts) {
+    const addon = ts._searchBar;
+    if (!addon) return;
+    try { addon.clearDecorations(); } catch { /* pane not ready */ }
+  }
+
+  function syncToggles(ts, mem) {
+    for (const toggle of TOGGLES) {
+      const btn = q(ts, toggle.selector);
+      if (btn) btn.classList.toggle('active', !!mem[toggle.key]);
     }
-  }
-
-  function syncToggles(mem) {
-    const caseBtn = document.getElementById('findBarCase');
-    const wordBtn = document.getElementById('findBarWord');
-    const regexBtn = document.getElementById('findBarRegex');
-    if (caseBtn) caseBtn.classList.toggle('active', mem.caseSensitive);
-    if (wordBtn) wordBtn.classList.toggle('active', mem.wholeWord);
-    if (regexBtn) regexBtn.classList.toggle('active', mem.regex);
   }
 
   // direction: 'first' re-runs from the top of the buffer, otherwise it walks
   // from the current match.
-  function runFind(direction) {
-    if (!findOpen || !activePaneId) return;
-    const ts = state.terminals.get(activePaneId);
-    const input = findInput();
-    if (!ts || !input) { closeFindBar(); return; }
+  function runFind(ts, direction) {
+    const input = findInput(ts);
+    // A closed bar, or one whose pane was torn down while a debounce was
+    // pending, must not search.
+    if (!ts._findOpen || !input || !ts._findBar.isConnected) return;
 
-    const mem = memoryFor(activePaneId);
+    const mem = memoryFor(ts);
     mem.query = input.value;
-    findMemory.set(activePaneId, mem);
 
     const addon = getAddon(ts, 'bar');
     if (!addon) return;
@@ -165,64 +197,68 @@ import './theme';
 
     try {
       if (direction === 'first') addon.clearDecorations();
-      if (!mem.query) { addon.clearDecorations(); updateCount(null); return; }
+      if (!mem.query) { addon.clearDecorations(); updateCount(ts, null); return; }
       if (direction === 'prev') addon.findPrevious(mem.query, opts);
       else addon.findNext(mem.query, opts);
     } catch { /* pane not ready */ }
   }
 
-  function updateCount(e) {
-    const el = document.getElementById('findBarCount');
+  function updateCount(ts, e) {
+    const el = q(ts, '.find-bar-count');
     if (!el) return;
-    if (!e || !e.resultCount) { el.textContent = findInput() && findInput()!.value ? App.__('findNoResults') : ''; return; }
+    const input = findInput(ts);
+    if (!e || !e.resultCount) { el.textContent = input && input.value ? App.__('findNoResults') : ''; return; }
     const idx = e.resultIndex >= 0 ? e.resultIndex + 1 : '?';
     el.textContent = `${idx}/${e.resultCount}`;
   }
 
-  function bindFindBarEvents() {
-    const input = findInput();
-    const prev = document.getElementById('findBarPrev');
-    const next = document.getElementById('findBarNext');
-    const caseBtn = document.getElementById('findBarCase');
-    const wordBtn = document.getElementById('findBarWord');
-    const regexBtn = document.getElementById('findBarRegex');
-    const closeBtn = document.getElementById('findBarClose');
+  function bindBarEvents(ts, bar) {
+    const input = findInput(ts);
     if (!input) return;
 
+    // The bar sits inside xterm's screen element, so its mouse events would
+    // otherwise reach xterm's mousedown handler on `.xterm` (which preventDefaults
+    // a primary press and starts a terminal selection) and the pane's click
+    // handler (which pulls focus back to the terminal). Keep them on the bar.
+    for (const type of ['mousedown', 'click', 'dblclick', 'contextmenu', 'wheel']) {
+      bar.addEventListener(type, (e) => e.stopPropagation());
+    }
+
+    // A button takes focus on mouse-down, and a focused button is activated by
+    // Space — so without this, clicking a control would make the next Space
+    // re-run it instead of reaching the input. Keep the focus where it was;
+    // Tab + Space still activate a button reached by keyboard.
+    bar.addEventListener('mousedown', (e) => {
+      const target = e.target as HTMLElement | null;
+      if (target && target.closest('button')) e.preventDefault();
+    });
+
     input.addEventListener('input', () => {
-      if (debounceTimer) clearTimeout(debounceTimer);
-      debounceTimer = setTimeout(() => { debounceTimer = null; runFind('first'); }, DEBOUNCE_MS);
+      if (ts._findDebounce) clearTimeout(ts._findDebounce);
+      ts._findDebounce = setTimeout(() => { ts._findDebounce = null; runFind(ts, 'first'); }, DEBOUNCE_MS);
     });
 
     input.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter') { e.preventDefault(); e.stopPropagation(); runFind(e.shiftKey ? 'prev' : 'next'); return; }
-      if (e.key === 'Escape') { e.preventDefault(); e.stopPropagation(); closeFindBar(); }
+      if (e.key === 'Enter') { e.preventDefault(); e.stopPropagation(); runFind(ts, e.shiftKey ? 'prev' : 'next'); return; }
+      if (e.key === 'Escape') { e.preventDefault(); e.stopPropagation(); closeFindBar(ts); }
     });
 
-    if (prev) prev.addEventListener('click', () => runFind('prev'));
-    if (next) next.addEventListener('click', () => runFind('next'));
-    if (caseBtn) caseBtn.addEventListener('click', () => {
-      if (!activePaneId) return;
-      const mem = memoryFor(activePaneId);
-      mem.caseSensitive = !mem.caseSensitive;
-      syncToggles(mem);
-      runFind('first');
-    });
-    if (wordBtn) wordBtn.addEventListener('click', () => {
-      if (!activePaneId) return;
-      const mem = memoryFor(activePaneId);
-      mem.wholeWord = !mem.wholeWord;
-      syncToggles(mem);
-      runFind('first');
-    });
-    if (regexBtn) regexBtn.addEventListener('click', () => {
-      if (!activePaneId) return;
-      const mem = memoryFor(activePaneId);
-      mem.regex = !mem.regex;
-      syncToggles(mem);
-      runFind('first');
-    });
-    if (closeBtn) closeBtn.addEventListener('click', () => closeFindBar());
+    const prev = q(ts, '.find-bar-prev');
+    const next = q(ts, '.find-bar-next');
+    if (prev) prev.addEventListener('click', () => runFind(ts, 'prev'));
+    if (next) next.addEventListener('click', () => runFind(ts, 'next'));
+    for (const toggle of TOGGLES) {
+      const btn = q(ts, toggle.selector);
+      if (!btn) continue;
+      btn.addEventListener('click', () => {
+        const mem = memoryFor(ts);
+        mem[toggle.key] = !mem[toggle.key];
+        syncToggles(ts, mem);
+        runFind(ts, 'first');
+      });
+    }
+    const closeBtn = q(ts, '.find-bar-close');
+    if (closeBtn) closeBtn.addEventListener('click', () => closeFindBar(ts));
   }
 
   // ─── Search panel ──────────────────────────────────────────────────────────
@@ -255,10 +291,6 @@ import './theme';
       ? App.Groups.getGroupTerminalIds(state.activeGroupId)
       : [state.activeTerminalId];
     return ids.map((id) => state.terminals.get(id)).filter(Boolean);
-  }
-
-  function paneLabel(ts) {
-    return ts.customName || App.getShellName(ts.shell);
   }
 
   function isWholeWord(text, idx, len) {
@@ -356,7 +388,7 @@ import './theme';
         } catch { /* invalid pattern or pane not ready */ }
       }
       if (matches.length > 0 || panes.length === 1) {
-        groups.push({ terminalId: ts.id, label: paneLabel(ts), matches });
+        groups.push({ terminalId: ts.id, label: App.Terminal.paneTitle(ts), matches });
       }
     }
 
@@ -434,7 +466,7 @@ import './theme';
   function anyOverlayOpen() {
     const open = document.querySelectorAll('[data-overlay]:not(.hidden)');
     for (const el of open) {
-      if (el.id !== 'findBar') return true;
+      if (!el.classList.contains('find-bar')) return true;
     }
     return false;
   }
@@ -444,15 +476,19 @@ import './theme';
       if (!anyOverlayOpen()) openSearchPanel();
       return;
     }
-    // The find bar itself is not an obstacle to Ctrl+F.
-    if (!findOpen && anyOverlayOpen()) return;
+    const ts = currentFindTarget();
+    if (!ts) return;
+    // Open find bars are not an obstacle to Ctrl+F.
+    if (!isFindOpen(ts) && anyOverlayOpen()) return;
     toggleFindBar();
   }
 
   // Decoration colors are baked in when the addons run, so a theme change must
   // re-apply them or the existing highlights keep the old theme's tones.
   function refreshDecorations() {
-    if (findOpen) runFind('first');
+    for (const [, ts] of state.terminals) {
+      if (ts._findOpen) runFind(ts, 'first');
+    }
     const entry = state.activeGroupId ? groupResults.get(state.activeGroupId) : null;
     if (!entry || !entry.query) return;
     for (const group of entry.results.groups) {
@@ -467,7 +503,6 @@ import './theme';
   }
 
   function init() {
-    bindFindBarEvents();
     bindPanelEvents();
     if (App.Theme && App.Theme.onThemeChange) {
       App.Theme.onThemeChange(() => {
@@ -478,10 +513,9 @@ import './theme';
     if (App.i18n && App.i18n.onLocaleChange) App.i18n.onLocaleChange(() => pushThemeToPanel());
   }
 
-  // Called by the terminal lifecycle when a pane disappears so the find bar
-  // never stays open over a dead pane and no remembered result points at it.
+  // Called by the terminal lifecycle when a pane disappears. The pane's own bar
+  // went with it; only the panel's remembered results need pruning.
   function notifyTerminalClosed(id) {
-    if (activePaneId === id) closeFindBar();
     pruneClosedPane(id);
   }
 

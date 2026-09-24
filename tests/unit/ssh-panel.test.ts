@@ -13,7 +13,7 @@ const SSH_DIV_IDS = [
 const SSH_BUTTON_IDS = [
   'sshPasswordBtn', 'sshPasswordSkip', 'sshPasswordCancel',
   'sshImportCancel', 'sshImportConfirm', 'sshDialogSave', 'sshDialogCancel',
-  'btnSshImport', 'btnSshUpdate',
+  'btnSshImport', 'btnSshUpdate', 'btnSshImportWinScp', 'btnSshUpdateWinScp',
 ];
 const SSH_INPUT_IDS = ['sshPasswordInput', 'sshPasswordConfirm'];
 
@@ -149,6 +149,48 @@ describe('SshPanel (ssh-panel.ts)', () => {
 
       const userList = document.getElementById('sshUserList');
       expect(userList.querySelector('.ssh-user-item[data-user-id="u1"]')).not.toBeNull();
+    });
+  });
+
+  describe('mandatory dialog fields', () => {
+    function fillConnectionDialog(name, host) {
+      (document.querySelector('#sshDialogBody input[name="connName"]') as HTMLInputElement).value = name;
+      (document.querySelector('#sshDialogBody input[name="connHost"]') as HTMLInputElement).value = host;
+    }
+
+    it('saves a connection when every mandatory field is filled', async () => {
+      const api = window.api;
+      await getApp().SshPanel.showConnectionDialog();
+      fillConnectionDialog('VM1', 'vm1.com');
+
+      (document.getElementById('sshDialogSave') as HTMLElement).click();
+      await flush();
+
+      expect(api.sshConnectionSave).toHaveBeenCalledWith(
+        expect.objectContaining({ name: 'VM1', host: 'vm1.com' })
+      );
+    });
+
+    it('refuses a connection name that is only whitespace', async () => {
+      const api = window.api;
+      await getApp().SshPanel.showConnectionDialog();
+      fillConnectionDialog('   ', 'vm1.com');
+
+      (document.getElementById('sshDialogSave') as HTMLElement).click();
+      await flush();
+
+      expect(api.sshConnectionSave).not.toHaveBeenCalled();
+    });
+
+    it('refuses a connection with no host', async () => {
+      const api = window.api;
+      await getApp().SshPanel.showConnectionDialog();
+      fillConnectionDialog('VM1', '');
+
+      (document.getElementById('sshDialogSave') as HTMLElement).click();
+      await flush();
+
+      expect(api.sshConnectionSave).not.toHaveBeenCalled();
     });
   });
 
@@ -1515,5 +1557,140 @@ describe('SshPanel (ssh-panel.ts)', () => {
       expect(changes).toContain('Ciphers=+aes128-cbc');
       expect(changes).toContain('Compression=yes');
     });
+  });
+
+  describe('winscp update dialog', () => {
+    it('lists a matched site that shows no visible change, so a new stored password can be applied', async () => {
+      const api = window.api;
+      vi.mocked(api.sshConnectionList).mockResolvedValue([
+        { id: 'c1', name: 'web', host: 'example.com', port: 22, userId: 'u1', folderId: null },
+      ]);
+      vi.mocked(api.sshUserList).mockResolvedValue([
+        { id: 'u1', name: 'web', username: 'web', authType: 'password' },
+      ]);
+      vi.mocked(api.sshImportWinScp).mockResolvedValue({
+        hosts: [
+          { name: 'web', aliases: ['web'], host: 'example.com', port: 22, user: 'web', identityFile: null, proxyJump: null, importToken: 'tok-1', folderPath: null },
+        ],
+        skippedProtocols: [],
+        unsupportedKeySites: [],
+      });
+
+      (document.getElementById('btnSshUpdateWinScp') as HTMLElement).click();
+      await flush();
+
+      const rows = document.querySelectorAll('#sshImportBody .ssh-import-row');
+      expect(rows.length).toBe(1);
+    });
+
+    it('sends the import token back on apply, never the password itself', async () => {
+      const api = window.api;
+      vi.mocked(api.sshImportWinScp).mockResolvedValue({
+        hosts: [
+          { name: 'web', aliases: ['web'], host: 'example.com', port: 22, user: 'web', identityFile: null, proxyJump: null, importToken: 'tok-1', folderPath: null },
+        ],
+        skippedProtocols: [],
+        unsupportedKeySites: [],
+      });
+
+      (document.getElementById('btnSshImportWinScp') as HTMLElement).click();
+      await flush();
+      (document.getElementById('sshImportConfirm') as HTMLElement).click();
+      await flush();
+
+      const req = vi.mocked(api.sshImportApply).mock.calls[0][0];
+      expect(req.hosts[0].importToken).toBe('tok-1');
+      expect(req.hosts[0].password).toBeUndefined();
+    });
+
+    it('tells the user a PuTTY key file was left out, to be set by hand after the import', async () => {
+      const api = window.api;
+      vi.mocked(api.sshImportWinScp).mockResolvedValue({
+        hosts: [
+          { name: 'legacy', aliases: ['legacy'], host: 'legacy.example.com', port: 22, user: 'ops', identityFile: null, proxyJump: null, folderPath: null },
+        ],
+        skippedProtocols: [],
+        unsupportedKeySites: ['legacy'],
+      });
+
+      (document.getElementById('btnSshImportWinScp') as HTMLElement).click();
+      await flush();
+
+      const notes = [...document.querySelectorAll('#sshImportBody .ssh-import-note')]
+        .map(note => note.textContent || '');
+      expect(notes.some(text => text.includes('key path') && text.includes('legacy'))).toBe(true);
+    });
+  });
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Opening a Connection folder starts its new group in echo mode by default;
+// Settings → SSH turns that off (skipAutoEchoFolderOpen).
+// ─────────────────────────────────────────────────────────────────────────────
+describe('SshPanel folder auto-echo (ssh-panel.ts)', () => {
+  const FOLDER = { id: 'f1', name: 'Work', parentId: null };
+  const CONNECTIONS = [
+    { id: 'c1', name: 'One', host: 'a.example.com', port: 22, userId: null, folderId: 'f1' },
+    { id: 'c2', name: 'Two', host: 'b.example.com', port: 22, userId: null, folderId: 'f1' },
+  ];
+
+  // Opening a folder needs the full session stack — spawning SSH panes
+  // (terminal), collecting them into a new group (groups), and echo mode.
+  async function setupFolderOpen(connections) {
+    await resetTestEnv();
+    scaffoldSshDom();
+
+    const api = window.api;
+    vi.mocked(api.sshPasswordStatus).mockResolvedValue({ masterPasswordSet: false, unlocked: true });
+    vi.mocked(api.sshConnectionFolderList).mockResolvedValue([FOLDER]);
+    vi.mocked(api.sshConnectionList).mockResolvedValue(connections);
+    vi.mocked(api.sshUserFolderList).mockResolvedValue([]);
+    vi.mocked(api.sshUserList).mockResolvedValue([]);
+    vi.mocked(api.sshOpenConnectionFolder).mockResolvedValue({
+      name: FOLDER.name,
+      connections,
+    });
+
+    await loadModules('theme', 'icons', 'menus', 'tabs', 'groups', 'terminal', 'ui', 'echo', 'ssh-panel');
+    await getApp().SshPanel.init();
+  }
+
+  function clickOpenFolder() {
+    const btn = document.querySelector('#sshConnectionList [data-action="open-folder"]') as HTMLElement;
+    btn.click();
+  }
+
+  it('enters echo mode for a folder with two connections', async () => {
+    await setupFolderOpen(CONNECTIONS);
+
+    clickOpenFolder();
+    await flush();
+
+    const App = getApp();
+    expect(App.state.echoModeActive).toBe(true);
+    const groupIds = App.Groups.getGroupTerminalIds(App.state.activeGroupId);
+    expect(groupIds.length).toBe(2);
+    for (const id of groupIds) expect(App.state.echoSelection.has(id)).toBe(true);
+  });
+
+  it('stays out of echo mode for a folder with a single connection', async () => {
+    await setupFolderOpen([CONNECTIONS[0]]);
+    const toast = vi.spyOn(getApp().UI, 'showToast');
+
+    clickOpenFolder();
+    await flush();
+
+    expect(getApp().state.echoModeActive).toBe(false);
+    expect(toast).not.toHaveBeenCalled();
+  });
+
+  it('does not enter echo mode when the setting is turned off', async () => {
+    await setupFolderOpen(CONNECTIONS);
+    localStorage.setItem('skipAutoEchoFolderOpen', 'true');
+
+    clickOpenFolder();
+    await flush();
+
+    expect(getApp().state.echoModeActive).toBe(false);
   });
 });
