@@ -270,6 +270,7 @@
     sshImportWinScpUpdateTitle: '從 WinSCP 更新',
     sshImportWinScpSupported: '僅匯入 SFTP 與 SCP 站點。',
     sshImportWinScpSkipped: '已略過（不支援的協定）：{list}',
+    sshImportWinScpKeysUnsupported: 'PuTTY .ppk 金鑰無法用於連線（OpenSSH 無法讀取），因此未匯入金鑰檔。請於匯入後手動設定可用的金鑰路徑：{list}',
     sshImportWinScpNoSites: '未找到 WinSCP 站點。',
     sshImportWinScpNotDetected: '本機未偵測到 WinSCP。',
     sshImportWinScpChooseIni: '選擇 WinSCP .ini 檔案…',

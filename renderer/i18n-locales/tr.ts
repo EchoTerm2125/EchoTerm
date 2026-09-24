@@ -270,6 +270,7 @@
     sshImportWinScpUpdateTitle: 'WinSCP konumundan güncelle',
     sshImportWinScpSupported: 'Yalnızca SFTP ve SCP siteleri içe aktarılır.',
     sshImportWinScpSkipped: 'Atlandı (desteklenmeyen protokol): {list}',
+    sshImportWinScpKeysUnsupported: 'PuTTY .ppk anahtarları bağlantı için kullanılamaz (OpenSSH okuyamaz), bu nedenle anahtar dosyası içe aktarılmadı. İçe aktarma sonrası kabul edilen anahtar yolunu ayarlayın: {list}',
     sshImportWinScpNoSites: 'WinSCP sitesi bulunamadı.',
     sshImportWinScpNotDetected: 'Bu makinede WinSCP bulunamadı.',
     sshImportWinScpChooseIni: 'WinSCP .ini dosyasını seç…',

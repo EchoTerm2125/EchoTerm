@@ -167,6 +167,7 @@ window.api = {
   sshConnect: vi.fn((connectionId) => Promise.resolve({ id: _nextApiId++, shell: 'ssh', label: connectionId })),
   sshOpenConnectionFolder: vi.fn(() => Promise.resolve({ name: '', connections: [] })),
   sshImportConfig: vi.fn(() => Promise.resolve({ canceled: true })),
+  sshImportWinScp: vi.fn(() => Promise.resolve({ error: 'No WinSCP sites found.', errorCode: 'NO_SITES_FOUND' })),
   sshImportApply: vi.fn(() => Promise.resolve({ success: true, imported: 0, updated: 0, skipped: [] })),
   sshExportConfig: vi.fn(() => Promise.resolve({ canceled: true })),
   // Terminal search panel (Ctrl+Shift+F popup window)

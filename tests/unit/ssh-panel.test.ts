@@ -13,7 +13,7 @@ const SSH_DIV_IDS = [
 const SSH_BUTTON_IDS = [
   'sshPasswordBtn', 'sshPasswordSkip', 'sshPasswordCancel',
   'sshImportCancel', 'sshImportConfirm', 'sshDialogSave', 'sshDialogCancel',
-  'btnSshImport', 'btnSshUpdate',
+  'btnSshImport', 'btnSshUpdate', 'btnSshImportWinScp', 'btnSshUpdateWinScp',
 ];
 const SSH_INPUT_IDS = ['sshPasswordInput', 'sshPasswordConfirm'];
 
@@ -1556,6 +1556,69 @@ describe('SshPanel (ssh-panel.ts)', () => {
       const changes = rows[0].querySelector('.ssh-import-changes').textContent;
       expect(changes).toContain('Ciphers=+aes128-cbc');
       expect(changes).toContain('Compression=yes');
+    });
+  });
+
+  describe('winscp update dialog', () => {
+    it('lists a matched site that shows no visible change, so a new stored password can be applied', async () => {
+      const api = window.api;
+      vi.mocked(api.sshConnectionList).mockResolvedValue([
+        { id: 'c1', name: 'web', host: 'example.com', port: 22, userId: 'u1', folderId: null },
+      ]);
+      vi.mocked(api.sshUserList).mockResolvedValue([
+        { id: 'u1', name: 'web', username: 'web', authType: 'password' },
+      ]);
+      vi.mocked(api.sshImportWinScp).mockResolvedValue({
+        hosts: [
+          { name: 'web', aliases: ['web'], host: 'example.com', port: 22, user: 'web', identityFile: null, proxyJump: null, importToken: 'tok-1', folderPath: null },
+        ],
+        skippedProtocols: [],
+        unsupportedKeySites: [],
+      });
+
+      (document.getElementById('btnSshUpdateWinScp') as HTMLElement).click();
+      await flush();
+
+      const rows = document.querySelectorAll('#sshImportBody .ssh-import-row');
+      expect(rows.length).toBe(1);
+    });
+
+    it('sends the import token back on apply, never the password itself', async () => {
+      const api = window.api;
+      vi.mocked(api.sshImportWinScp).mockResolvedValue({
+        hosts: [
+          { name: 'web', aliases: ['web'], host: 'example.com', port: 22, user: 'web', identityFile: null, proxyJump: null, importToken: 'tok-1', folderPath: null },
+        ],
+        skippedProtocols: [],
+        unsupportedKeySites: [],
+      });
+
+      (document.getElementById('btnSshImportWinScp') as HTMLElement).click();
+      await flush();
+      (document.getElementById('sshImportConfirm') as HTMLElement).click();
+      await flush();
+
+      const req = vi.mocked(api.sshImportApply).mock.calls[0][0];
+      expect(req.hosts[0].importToken).toBe('tok-1');
+      expect(req.hosts[0].password).toBeUndefined();
+    });
+
+    it('tells the user a PuTTY key file was left out, to be set by hand after the import', async () => {
+      const api = window.api;
+      vi.mocked(api.sshImportWinScp).mockResolvedValue({
+        hosts: [
+          { name: 'legacy', aliases: ['legacy'], host: 'legacy.example.com', port: 22, user: 'ops', identityFile: null, proxyJump: null, folderPath: null },
+        ],
+        skippedProtocols: [],
+        unsupportedKeySites: ['legacy'],
+      });
+
+      (document.getElementById('btnSshImportWinScp') as HTMLElement).click();
+      await flush();
+
+      const notes = [...document.querySelectorAll('#sshImportBody .ssh-import-note')]
+        .map(note => note.textContent || '');
+      expect(notes.some(text => text.includes('key path') && text.includes('legacy'))).toBe(true);
     });
   });
 });

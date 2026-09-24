@@ -119,8 +119,8 @@ describe('parseWinScpIni', () => {
 });
 
 describe('mapWinScpSessions', () => {
-  it('maps a key-file site, defaulting the port and dropping the escaping', () => {
-    const { candidates, skippedProtocols } = mapWinScpSessions([
+  it('drops a PuTTY key file, reports the site, and defaults the port', () => {
+    const { candidates, skippedProtocols, unsupportedKeySites } = mapWinScpSessions([
       session('thinkdbadmin@thinkdb.link', {
         HostName: 'thinkdb.eastus2.cloudapp.azure.com',
         UserName: 'thinkdbadmin',
@@ -129,18 +129,48 @@ describe('mapWinScpSessions', () => {
     ]);
 
     expect(skippedProtocols).toEqual([]);
+    // OpenSSH cannot read the .ppk, so the site is imported without a key file.
+    expect(unsupportedKeySites).toEqual(['thinkdbadmin@thinkdb.link']);
     expect(candidates).toEqual([
       {
         name: 'thinkdbadmin@thinkdb.link',
         host: 'thinkdb.eastus2.cloudapp.azure.com',
         port: 22,
         user: 'thinkdbadmin',
-        identityFile: 'C:\\Users\\brianC\\.ssh\\keys\\vmthinkdb_key.ppk',
+        identityFile: null,
         password: null,
         proxyJump: null,
         folderPath: null,
       },
     ]);
+  });
+
+  it('keeps a key file OpenSSH can read, dropping the escaping', () => {
+    const { candidates, unsupportedKeySites } = mapWinScpSessions([
+      session('web01', {
+        HostName: 'web01.internal',
+        UserName: 'deploy',
+        PublicKeyFile: 'C:%5CUsers%5Cme%5C.ssh%5Cid_ed25519',
+      }),
+    ]);
+
+    expect(unsupportedKeySites).toEqual([]);
+    expect(candidates[0].identityFile).toBe('C:\\Users\\me\\.ssh\\id_ed25519');
+  });
+
+  it('reports a tunnel host whose key file is a PuTTY key', () => {
+    const { candidates, unsupportedKeySites } = mapWinScpSessions([
+      session('web01', {
+        HostName: 'web01.internal',
+        Tunnel: '0x1',
+        TunnelHostName: 'bastion.example.com',
+        TunnelUserName: 'ops',
+        TunnelPublicKeyFile: 'C:%5Ckeys%5Cbastion.ppk',
+      }),
+    ]);
+
+    expect(unsupportedKeySites).toEqual(['ops@bastion.example.com']);
+    expect(candidates.find(c => c.name === 'ops@bastion.example.com').identityFile).toBeNull();
   });
 
   it('splits the WinSCP folder out of the site name', () => {

@@ -7,6 +7,7 @@
 import fs from 'fs';
 import os from 'os';
 import path from 'path';
+import { randomUUID } from 'crypto';
 import { execFile } from 'child_process';
 import { promisify } from 'util';
 
@@ -59,6 +60,12 @@ export class SshController {
     private readonly registry: SessionRegistry,
     private readonly send: SendToRenderer,
   ) {}
+
+  // Decoded WinSCP passwords for the listing currently open in the renderer,
+  // keyed by the opaque token each row got. They never cross the IPC boundary:
+  // the renderer echoes the token back and importApply resolves it here, then
+  // the map is dropped with the batch.
+  private readonly pendingImportPasswords = new Map<string, string>();
 
   // ── Vault ──
 
@@ -303,9 +310,16 @@ export class SshController {
 
   importApply(request: SshImportApplyRequest) {
     try {
-      return this.applySshImportUseCase.execute(request.hosts, request);
+      // Resolve each row's token back to its stored password inside main.
+      const hosts = request.hosts.map(host => ({
+        ...host,
+        password: (host.importToken && this.pendingImportPasswords.get(host.importToken)) || null,
+      }));
+      return this.applySshImportUseCase.execute(hosts, request);
     } catch (err) {
       return { success: false, imported: 0, updated: 0, skipped: [], error: err.message };
+    } finally {
+      this.pendingImportPasswords.clear();
     }
   }
 
@@ -349,25 +363,39 @@ export class SshController {
   }
 
   private winScpResult(sessions: WinScpRawSession[], configPath?: string) {
-    const { candidates, skippedProtocols } = mapWinScpSessions(sessions);
+    const { candidates, skippedProtocols, unsupportedKeySites } = mapWinScpSessions(sessions);
     const where = configPath ? { path: configPath } : {};
 
+    // A fresh batch replaces whatever the previous dialog held.
+    this.pendingImportPasswords.clear();
+
     if (candidates.length === 0) {
-      return { error: 'No WinSCP sites found.', errorCode: 'NO_SITES_FOUND', skippedProtocols, ...where };
+      return {
+        error: 'No WinSCP sites found.', errorCode: 'NO_SITES_FOUND',
+        skippedProtocols, unsupportedKeySites, ...where,
+      };
     }
     return {
-      hosts: candidates.map(candidate => ({
-        name: candidate.name,
-        aliases: [candidate.name],
-        host: candidate.host,
-        port: candidate.port,
-        user: candidate.user,
-        identityFile: candidate.identityFile,
-        proxyJump: candidate.proxyJump,
-        password: candidate.password,
-        folderPath: candidate.folderPath,
-      })),
+      hosts: candidates.map(candidate => {
+        let importToken: string | null = null;
+        if (candidate.password) {
+          importToken = randomUUID();
+          this.pendingImportPasswords.set(importToken, candidate.password);
+        }
+        return {
+          name: candidate.name,
+          aliases: [candidate.name],
+          host: candidate.host,
+          port: candidate.port,
+          user: candidate.user,
+          identityFile: candidate.identityFile,
+          proxyJump: candidate.proxyJump,
+          importToken,
+          folderPath: candidate.folderPath,
+        };
+      }),
       skippedProtocols,
+      unsupportedKeySites,
       ...where,
     };
   }

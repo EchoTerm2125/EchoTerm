@@ -19,6 +19,7 @@ export interface WinScpCandidate {
   host: string;
   port: number;
   user: string;
+  /** A key file OpenSSH can read, or null when the site has none to import. */
   identityFile: string | null;
   password: string | null;
   /** Name of the candidate that serves as this site's tunnel host, or null. */
@@ -31,6 +32,8 @@ export interface WinScpParseResult {
   candidates: WinScpCandidate[];
   /** Non-SSH protocols left out of the import, with how many sites used each. */
   skippedProtocols: Array<{ protocol: string; count: number }>;
+  /** Sites whose key file is unusable: imported without one, to be set by hand. */
+  unsupportedKeySites: string[];
 }
 
 // ─── Escaping ────────────────────────────────────────────────────────────────
@@ -143,6 +146,21 @@ const DEFAULT_SETTINGS_NAME = 'Default Settings';
 /** Default FSProtocol and PortNumber: WinSCP omits values equal to its defaults. */
 const DEFAULT_PROTOCOL = 1;
 const DEFAULT_PORT = 22;
+/** WinSCP's PuTTY key format, which the ssh.exe we spawn cannot read. */
+const PUTTY_KEY_EXTENSION = '.ppk';
+
+/**
+ * The site's key file when OpenSSH can use it. A PuTTY `.ppk` is dropped
+ * instead of imported: it would only fail at connect time, so the site is
+ * imported without a key file and reported for the user to set by hand.
+ */
+function usableKeyFile(raw: string | undefined): { path: string | null; dropped: boolean } {
+  if (!raw) return { path: null, dropped: false };
+  const keyPath = decodeWinScpValue(raw);
+  return keyPath.toLowerCase().endsWith(PUTTY_KEY_EXTENSION)
+    ? { path: null, dropped: true }
+    : { path: keyPath, dropped: false };
+}
 
 function intValue(raw: string | undefined, fallback: number): number {
   if (!raw) return fallback;
@@ -165,6 +183,7 @@ export function mapWinScpSessions(sessions: WinScpRawSession[]): WinScpParseResu
   const skipped = new Map<string, number>();
   const siteNames = new Set<string>();
   const tunnels = new Map<string, WinScpCandidate>();
+  const unsupportedKeySites = new Set<string>();
 
   for (const session of sessions) {
     const values = session.values;
@@ -196,8 +215,11 @@ export function mapWinScpSessions(sessions: WinScpRawSession[]): WinScpParseResu
     const user = decodeWinScpValue(values.UserName || '');
     let proxyJump: string | null = null;
     if (isFlagOn(values.Tunnel) && values.TunnelHostName) {
-      proxyJump = mapTunnel(values, folderPath, tunnels);
+      proxyJump = mapTunnel(values, folderPath, tunnels, unsupportedKeySites);
     }
+
+    const keyFile = usableKeyFile(values.PublicKeyFile);
+    if (keyFile.dropped) unsupportedKeySites.add(name);
 
     siteNames.add(name);
     candidates.push({
@@ -205,7 +227,7 @@ export function mapWinScpSessions(sessions: WinScpRawSession[]): WinScpParseResu
       host,
       port: intValue(values.PortNumber, DEFAULT_PORT),
       user,
-      identityFile: values.PublicKeyFile ? decodeWinScpValue(values.PublicKeyFile) : null,
+      identityFile: keyFile.path,
       password: storedPassword(values, user, host),
       proxyJump,
       folderPath,
@@ -221,6 +243,7 @@ export function mapWinScpSessions(sessions: WinScpRawSession[]): WinScpParseResu
   return {
     candidates,
     skippedProtocols: [...skipped].map(([protocol, count]) => ({ protocol, count })),
+    unsupportedKeySites: [...unsupportedKeySites],
   };
 }
 
@@ -229,6 +252,7 @@ function mapTunnel(
   values: Record<string, string>,
   folderPath: string | null,
   tunnels: Map<string, WinScpCandidate>,
+  unsupportedKeySites: Set<string>,
 ): string {
   const tunnelHost = decodeWinScpValue(values.TunnelHostName || '');
   const tunnelUser = decodeWinScpValue(values.TunnelUserName || '');
@@ -236,12 +260,14 @@ function mapTunnel(
   const name = tunnelUser ? `${tunnelUser}@${tunnelHost}` : tunnelHost;
 
   if (!tunnels.has(name)) {
+    const keyFile = usableKeyFile(values.TunnelPublicKeyFile);
+    if (keyFile.dropped) unsupportedKeySites.add(name);
     tunnels.set(name, {
       name,
       host: tunnelHost,
       port: intValue(values.TunnelPortNumber, DEFAULT_PORT),
       user: tunnelUser,
-      identityFile: values.TunnelPublicKeyFile ? decodeWinScpValue(values.TunnelPublicKeyFile) : null,
+      identityFile: keyFile.path,
       password: storedPassword(
         { Password: values.TunnelPassword, PasswordPlain: values.TunnelPasswordPlain },
         tunnelUser,

@@ -271,6 +271,7 @@
     sshImportWinScpUpdateTitle: 'Update from WinSCP',
     sshImportWinScpSupported: 'Only SFTP and SCP sites are imported.',
     sshImportWinScpSkipped: 'Skipped (unsupported protocol): {list}',
+    sshImportWinScpKeysUnsupported: 'PuTTY .ppk keys cannot be used for connecting (OpenSSH cannot read them), so no key file was imported. Set the accepted key path after import: {list}',
     sshImportWinScpNoSites: 'No WinSCP sites found.',
     sshImportWinScpNotDetected: 'WinSCP was not detected on this machine.',
     sshImportWinScpChooseIni: 'Choose WinSCP .ini file…',

@@ -270,6 +270,7 @@
     sshImportWinScpUpdateTitle: 'Mettre à jour depuis WinSCP',
     sshImportWinScpSupported: 'Seuls les sites SFTP et SCP sont importés.',
     sshImportWinScpSkipped: 'Ignorés (protocole non pris en charge) : {list}',
+    sshImportWinScpKeysUnsupported: 'Les clés PuTTY .ppk ne peuvent pas servir à se connecter (OpenSSH ne les lit pas), aucun fichier de clé n’a donc été importé. Définissez le chemin de clé accepté après import : {list}',
     sshImportWinScpNoSites: 'Aucun site WinSCP trouvé.',
     sshImportWinScpNotDetected: 'WinSCP est introuvable sur cette machine.',
     sshImportWinScpChooseIni: 'Choisir un fichier .ini WinSCP…',

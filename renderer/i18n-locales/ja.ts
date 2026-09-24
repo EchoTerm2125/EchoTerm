@@ -270,6 +270,7 @@
     sshImportWinScpUpdateTitle: 'WinSCP から更新',
     sshImportWinScpSupported: 'インポートできるのは SFTP と SCP のサイトのみです。',
     sshImportWinScpSkipped: 'スキップ（未対応のプロトコル）: {list}',
+    sshImportWinScpKeysUnsupported: 'PuTTY の .ppk 鍵は接続に使用できません（OpenSSH は読み取れないため）、鍵ファイルは取り込まれていません。取り込み後に使用する鍵のパスを手動で設定してください: {list}',
     sshImportWinScpNoSites: 'WinSCP のサイトが見つかりません。',
     sshImportWinScpNotDetected: 'このマシンに WinSCP が見つかりません。',
     sshImportWinScpChooseIni: 'WinSCP の .ini ファイルを選択…',

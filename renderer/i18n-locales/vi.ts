@@ -270,6 +270,7 @@
     sshImportWinScpUpdateTitle: 'Cập nhật từ WinSCP',
     sshImportWinScpSupported: 'Chỉ nhập các site SFTP và SCP.',
     sshImportWinScpSkipped: 'Đã bỏ qua (giao thức không được hỗ trợ): {list}',
+    sshImportWinScpKeysUnsupported: 'Không thể dùng khóa .ppk của PuTTY để kết nối (OpenSSH không đọc được), nên không nhập tệp khóa nào. Hãy đặt đường dẫn khóa hợp lệ sau khi nhập: {list}',
     sshImportWinScpNoSites: 'Không tìm thấy site WinSCP nào.',
     sshImportWinScpNotDetected: 'Không phát hiện WinSCP trên máy này.',
     sshImportWinScpChooseIni: 'Chọn tệp .ini của WinSCP…',

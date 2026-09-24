@@ -16,6 +16,8 @@ export interface SpawnResult {
   shell?: string;
   label?: string;
   host?: string;
+  /** SSH spawns only: the connection's username, shown as the pane identity. */
+  username?: string | null;
   error?: string;
   errorCode?: 'GIT_BASH_NOT_FOUND' | 'UNKNOWN_SHELL' | 'CONNECTION_NOT_FOUND' | string;
 }
@@ -140,8 +142,10 @@ export interface SshConfigHost {
   macs?: string | null;
   caSignatureAlgorithms?: string | null;
   compression?: string | null;
-  /** WinSCP source only: the site's stored password, when it could be read. */
-  password?: string | null;
+  /** WinSCP source only: opaque token for the site's stored password. The
+      password itself never leaves the main process; `sshImportApply` resolves
+      this token back to it. */
+  importToken?: string | null;
   /** WinSCP source only: the site's WinSCP folder path ("Prod/Web"), or null. */
   folderPath?: string | null;
 }
@@ -154,6 +158,8 @@ export interface ImportConfigResult {
   errorCode?: string;
   /** WinSCP source only: non-SSH protocols left out, with their site counts. */
   skippedProtocols?: Array<{ protocol: string; count: number }>;
+  /** WinSCP source only: sites imported without a key file (PuTTY .ppk). */
+  unsupportedKeySites?: string[];
 }
 
 export interface ExportConfigResult {
@@ -178,7 +184,11 @@ export interface SshImportApplyHost {
   caSignatureAlgorithms: string | null;
   compression: string | null;
   existingConnId: string | null;
-  /** WinSCP source only: the password to store, when it could be read. */
+  /** WinSCP source only: the token from the import listing, resolved to the
+      stored password by main. The renderer sends the token, never a password. */
+  importToken?: string | null;
+  /** Filled by main from the pending import before the use case runs; the
+      renderer never sends this field. */
   password?: string | null;
   /** WinSCP source only: Connection folder path to mirror, or null. */
   folderPath?: string | null;

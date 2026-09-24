@@ -270,6 +270,7 @@
     sshImportWinScpUpdateTitle: 'WinSCP에서 업데이트',
     sshImportWinScpSupported: 'SFTP 및 SCP 사이트만 가져옵니다.',
     sshImportWinScpSkipped: '건너뜀(지원되지 않는 프로토콜): {list}',
+    sshImportWinScpKeysUnsupported: 'PuTTY .ppk 키는 연결에 사용할 수 없습니다(OpenSSH가 읽을 수 없음). 키 파일을 가져오지 않았습니다. 가져온 후 사용할 키 경로를 직접 설정하세요: {list}',
     sshImportWinScpNoSites: 'WinSCP 사이트를 찾을 수 없습니다.',
     sshImportWinScpNotDetected: '이 컴퓨터에서 WinSCP를 찾을 수 없습니다.',
     sshImportWinScpChooseIni: 'WinSCP .ini 파일 선택…',

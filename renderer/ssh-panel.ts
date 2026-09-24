@@ -2161,7 +2161,8 @@ import {
       api.sshUserList(),
     ]);
 
-    // --- WinSCP notices: which protocols we import, and what was left out
+    // --- WinSCP notices: which protocols we import, what was left out, and the
+    // sites whose key file cannot be used as stored (they need it set by hand).
     let notices = null;
     if (isWinScp) {
       notices = document.createElement('div');
@@ -2172,9 +2173,16 @@ import {
             list: skipped.map(s => `${s.count} × ${s.protocol}`).join(', '),
           }))}</div>`
         : '';
+      const unsupportedKeys = result.unsupportedKeySites || [];
+      const keysLine = unsupportedKeys.length > 0
+        ? `<div class="ssh-import-note">${escHtml(App.__('sshImportWinScpKeysUnsupported', {
+            list: unsupportedKeys.join(', '),
+          }))}</div>`
+        : '';
       notices.innerHTML = `
         <div class="ssh-import-note">${escHtml(App.__('sshImportWinScpSupported'))}</div>
         ${skippedLine}
+        ${keysLine}
       `;
       sshImportBody.appendChild(notices);
     }
@@ -2260,8 +2268,11 @@ import {
         }
         const diffsHtml = diffs.length > 0 ? `<span class="ssh-import-changes">${diffs.join(' · ')}</span>` : '';
 
-        // --- Only show items that actually have changes
-        if (importMode === 'update' && diffs.length === 0) continue;
+        // --- Only show items that actually have changes. WinSCP sites are the
+        // exception: a site's stored password can also have changed, and stored
+        // passwords never leave the main process, so this side cannot tell — the
+        // apply step re-imports the password and the user sees every match.
+        if (importMode === 'update' && diffs.length === 0 && importSource !== 'winscp') continue;
 
         // Jump host indicator
         let jumpInfo = '';
@@ -2425,7 +2436,7 @@ import {
           caSignatureAlgorithms: host.caSignatureAlgorithms || null,
           compression: host.compression || null,
           existingConnId: row._existingConn ? row._existingConn.id : null,
-          password: host.password || null,
+          importToken: host.importToken || null,
           folderPath: host.folderPath || null,
         });
       }
