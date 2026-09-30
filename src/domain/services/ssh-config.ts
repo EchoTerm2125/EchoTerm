@@ -3,7 +3,7 @@
    Pure logic — no Node/Electron imports allowed (see .dependency-cruiser.cjs).
    ═══════════════════════════════════════════════════════════════════════════ */
 
-import type { Connection, User } from '../entities/ssh';
+import type { Connection, ResolvedConnection, User } from '../entities/ssh';
 
 // ─── Parsing ─────────────────────────────────────────────────────────────────
 
@@ -87,6 +87,40 @@ export function parseSshConfigText(content: string, homePrefix: string): SshConf
 
 // ─── Rendering ───────────────────────────────────────────────────────────────
 
+/** The seven optional algorithm/compression override directives. */
+interface AlgorithmOverrides {
+  hostKeyAlgorithms: string | null;
+  kexAlgorithms: string | null;
+  pubkeyAcceptedAlgorithms: string | null;
+  ciphers: string | null;
+  macs: string | null;
+  caSignatureAlgorithms: string | null;
+  compression: string | null;
+}
+
+/**
+ * Validate and format a directive value: newlines would inject extra config
+ * lines (e.g. a smuggled ProxyCommand), values containing whitespace need
+ * double quotes so ssh does not split them.
+ */
+function configValue(value: string): string {
+  if (/[\r\n]/.test(value)) throw new Error('SSH config values must not contain newlines.');
+  return /\s/.test(value) ? `"${value}"` : value;
+}
+
+/** Render the algorithm override directives shared by export and session rendering. */
+function renderAlgorithmDirectives(o: AlgorithmOverrides): string {
+  let text = '';
+  if (o.hostKeyAlgorithms) text += `  HostKeyAlgorithms ${configValue(o.hostKeyAlgorithms)}\n`;
+  if (o.kexAlgorithms) text += `  KexAlgorithms ${configValue(o.kexAlgorithms)}\n`;
+  if (o.pubkeyAcceptedAlgorithms) text += `  PubkeyAcceptedAlgorithms ${configValue(o.pubkeyAcceptedAlgorithms)}\n`;
+  if (o.ciphers) text += `  Ciphers ${configValue(o.ciphers)}\n`;
+  if (o.macs) text += `  MACs ${configValue(o.macs)}\n`;
+  if (o.caSignatureAlgorithms) text += `  CASignatureAlgorithms ${configValue(o.caSignatureAlgorithms)}\n`;
+  if (o.compression) text += `  Compression ${configValue(o.compression)}\n`;
+  return text;
+}
+
 /** Render connections (with their stored users) as SSH config text. */
 export function renderSshConfig(connections: Connection[], users: User[]): string {
   let configText = '';
@@ -113,14 +147,53 @@ export function renderSshConfig(connections: Connection[], users: User[]): strin
       }
     }
     // Algorithm overrides for legacy servers
-    if (conn.hostKeyAlgorithms) configText += `  HostKeyAlgorithms ${conn.hostKeyAlgorithms}\n`;
-    if (conn.kexAlgorithms) configText += `  KexAlgorithms ${conn.kexAlgorithms}\n`;
-    if (conn.pubkeyAcceptedAlgorithms) configText += `  PubkeyAcceptedAlgorithms ${conn.pubkeyAcceptedAlgorithms}\n`;
-    if (conn.ciphers) configText += `  Ciphers ${conn.ciphers}\n`;
-    if (conn.macs) configText += `  MACs ${conn.macs}\n`;
-    if (conn.caSignatureAlgorithms) configText += `  CASignatureAlgorithms ${conn.caSignatureAlgorithms}\n`;
-    if (conn.compression) configText += `  Compression ${conn.compression}\n`;
+    configText += renderAlgorithmDirectives(conn);
     configText += '\n';
   }
   return configText;
+}
+
+/**
+ * Render the per-session ssh config used with `ssh -F`.
+ *
+ * EchoTerm's Host blocks come first, then an Include of the user's own
+ * ~/.ssh/config (top-level, not inside a Host block). ssh takes the first
+ * obtained value per option, so our explicit values win while the user's
+ * globals still apply.
+ *
+ * @param target      connection with user credentials and jump chain resolved
+ * @param alias       unique Host alias for this session
+ * @param includePath absolute path of the user's ~/.ssh/config, or null if absent
+ */
+export function renderSessionSshConfig(
+  target: ResolvedConnection,
+  alias: string,
+  includePath: string | null,
+): string {
+  const chain = target.resolvedJumpChain;
+  const jumpAlias = (i: number) => chain.length === 1 ? `${alias}-jump` : `${alias}-jump${i + 1}`;
+
+  let text = `Host ${alias}\n`;
+  if (target.host) text += `  HostName ${configValue(target.host)}\n`;
+  if (target.port && target.port !== 22) text += `  Port ${target.port}\n`;
+  if (target.username) text += `  User ${configValue(target.username)}\n`;
+  if (target.authType === 'keyfile' && target.keyFilePath) {
+    text += `  IdentityFile ${configValue(target.keyFilePath)}\n`;
+  }
+  if (chain.length) text += `  ProxyJump ${jumpAlias(0)}\n`;
+  text += renderAlgorithmDirectives(target);
+
+  chain.forEach((hop, i) => {
+    text += `\nHost ${jumpAlias(i)}\n`;
+    text += `  HostName ${configValue(hop.host)}\n`;
+    if (hop.port && hop.port !== 22) text += `  Port ${hop.port}\n`;
+    if (hop.username) text += `  User ${configValue(hop.username)}\n`;
+    if (hop.authType === 'keyfile' && hop.keyFilePath) {
+      text += `  IdentityFile ${configValue(hop.keyFilePath)}\n`;
+    }
+    if (chain[i + 1]) text += `  ProxyJump ${jumpAlias(i + 1)}\n`;
+  });
+
+  if (includePath) text += `\nInclude ${configValue(includePath)}\n`;
+  return text;
 }

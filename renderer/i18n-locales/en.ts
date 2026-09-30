@@ -359,6 +359,8 @@
     // ── Error messages ───────────────────────────────────────────────────────
     errorUnknownShell: 'Unknown shell: {shell}',
     errorConnectionNotFound: 'Connection not found.',
+    errorSessionConfig: 'Could not prepare the SSH session configuration.',
+    errorJumpChainInvalid: 'Jump host chain is invalid: it loops or references a deleted connection.',
     errorConnectionFolderNotFound: 'Connection folder not found.',
     errorFieldBlank: 'This field cannot be blank.',
     errorConfigNotFound: 'Config file not found: {path}',

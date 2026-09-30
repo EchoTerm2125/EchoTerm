@@ -1,147 +1,16 @@
 // Unit tests for src/domain/services/ssh-args.ts
 import { buildSshArgs } from '../../src/domain/services/ssh-args';
-import type { ResolvedConnection } from '../../src/domain/entities/ssh';
-
-function makeTarget(overrides: Partial<ResolvedConnection> = {}): ResolvedConnection {
-  const base: ResolvedConnection = {
-    id: 'c1',
-    name: 'Test',
-    host: 'example.com',
-    port: 22,
-    username: 'alice',
-    authType: 'password',
-    password: null,
-    keyFilePath: null,
-    keyPassword: null,
-    resolvedJumpHost: null,
-    hostKeyAlgorithms: null,
-    kexAlgorithms: null,
-    pubkeyAcceptedAlgorithms: null,
-    ciphers: null,
-    macs: null,
-    caSignatureAlgorithms: null,
-    compression: null,
-  };
-  return { ...base, ...overrides };
-}
 
 describe('buildSshArgs', () => {
-  it('basic connection, default port, password auth', () => {
-    const args = buildSshArgs(makeTarget());
-    expect(args).toEqual(['alice@example.com']);
+  it('points ssh at the per-session config file and the session alias', () => {
+    const args = buildSshArgs('C:\\Temp\\echoterm-ab12\\echoterm-session-7.conf', 'echoterm-session-7');
+    expect(args).toEqual(['-F', 'C:\\Temp\\echoterm-ab12\\echoterm-session-7.conf', 'echoterm-session-7']);
   });
 
-  it('custom port and keyfile auth add -p and -i', () => {
-    const args = buildSshArgs(makeTarget({
-      port: 2222,
-      authType: 'keyfile',
-      keyFilePath: 'C:\\keys\\id_rsa',
-    }));
-    expect(args).toEqual(['-p', '2222', '-i', 'C:\\keys\\id_rsa', 'alice@example.com']);
-  });
-
-  it('password jump host uses -J ProxyJump', () => {
-    const args = buildSshArgs(makeTarget({
-      resolvedJumpHost: { host: 'bastion', username: 'bob', port: 22, authType: 'password', keyFilePath: null },
-    }));
-    expect(args).toEqual(['-J', 'bob@bastion', 'alice@example.com']);
-  });
-
-  it('jump host with custom port appends port to -J', () => {
-    const args = buildSshArgs(makeTarget({
-      resolvedJumpHost: { host: 'bastion', username: 'bob', port: 2200, authType: 'password', keyFilePath: null },
-    }));
-    expect(args).toEqual(['-J', 'bob@bastion:2200', 'alice@example.com']);
-  });
-
-  it('keyfile jump host uses ProxyCommand', () => {
-    const args = buildSshArgs(makeTarget({
-      resolvedJumpHost: {
-        host: 'bastion', username: 'bob', port: 22,
-        authType: 'keyfile', keyFilePath: 'C:\\keys\\jh_rsa',
-      },
-    }));
+  it('handles a path with spaces without any quoting', () => {
+    const args = buildSshArgs('C:\\Users\\John Doe\\AppData\\Local\\Temp\\echoterm-x\\s.conf', 'echoterm-session-1');
     expect(args).toEqual([
-      '-o', "ProxyCommand=ssh -i 'C:\\keys\\jh_rsa' -W %h:%p 'bob@bastion'",
-      'alice@example.com',
-    ]);
-  });
-
-  it('keyfile jump host with custom port appends port in ProxyCommand', () => {
-    const args = buildSshArgs(makeTarget({
-      port: 2022,
-      resolvedJumpHost: {
-        host: 'bastion', username: 'bob', port: 2200,
-        authType: 'keyfile', keyFilePath: 'C:\\keys\\jh_rsa',
-      },
-    }));
-    expect(args).toEqual([
-      '-o', "ProxyCommand=ssh -i 'C:\\keys\\jh_rsa' -W %h:%p 'bob@bastion:2200'",
-      '-p', '2022',
-      'alice@example.com',
-    ]);
-  });
-
-  it('escapes shell metacharacters in keyfile jump host ProxyCommand', () => {
-    const args = buildSshArgs(makeTarget({
-      resolvedJumpHost: {
-        host: 'bastion', username: 'bob', port: 22,
-        authType: 'keyfile', keyFilePath: 'id_rsa; rm -rf /',
-      },
-    }));
-    expect(args).toEqual([
-      '-o', "ProxyCommand=ssh -i 'id_rsa; rm -rf /' -W %h:%p 'bob@bastion'",
-      'alice@example.com',
-    ]);
-  });
-
-  it('no jump host field at all', () => {
-    const args = buildSshArgs(makeTarget({ host: 'db.internal', username: 'root' }));
-    expect(args).toEqual(['root@db.internal']);
-  });
-
-  it('algorithm overrides add -o options for legacy servers', () => {
-    const args = buildSshArgs(makeTarget({
-      hostKeyAlgorithms: '+ssh-rsa,ssh-dss',
-      kexAlgorithms: '+diffie-hellman-group1-sha1',
-      pubkeyAcceptedAlgorithms: '+ssh-rsa',
-    }));
-    expect(args).toEqual([
-      '-o', 'HostKeyAlgorithms=+ssh-rsa,ssh-dss',
-      '-o', 'KexAlgorithms=+diffie-hellman-group1-sha1',
-      '-o', 'PubkeyAcceptedAlgorithms=+ssh-rsa',
-      'alice@example.com',
-    ]);
-  });
-
-  it('cipher, MAC, CA signature and compression overrides add -o options', () => {
-    const args = buildSshArgs(makeTarget({
-      ciphers: '+aes128-cbc',
-      macs: '+hmac-sha1',
-      caSignatureAlgorithms: 'ssh-rsa',
-      compression: 'yes',
-    }));
-    expect(args).toEqual([
-      '-o', 'Ciphers=+aes128-cbc',
-      '-o', 'MACs=+hmac-sha1',
-      '-o', 'CASignatureAlgorithms=ssh-rsa',
-      '-o', 'Compression=yes',
-      'alice@example.com',
-    ]);
-  });
-
-  it('algorithm overrides combine with port and keyfile options', () => {
-    const args = buildSshArgs(makeTarget({
-      port: 2222,
-      authType: 'keyfile',
-      keyFilePath: 'C:\\keys\\id_rsa',
-      hostKeyAlgorithms: '+ssh-rsa',
-    }));
-    expect(args).toEqual([
-      '-o', 'HostKeyAlgorithms=+ssh-rsa',
-      '-p', '2222',
-      '-i', 'C:\\keys\\id_rsa',
-      'alice@example.com',
+      '-F', 'C:\\Users\\John Doe\\AppData\\Local\\Temp\\echoterm-x\\s.conf', 'echoterm-session-1',
     ]);
   });
 });

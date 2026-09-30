@@ -358,6 +358,8 @@
     // ── Error messages ───────────────────────────────────────────────────────
     errorUnknownShell: 'Shell desconocido: {shell}',
     errorConnectionNotFound: 'Conexión no encontrada.',
+    errorSessionConfig: 'No se pudo preparar la configuración de la sesión SSH.',
+    errorJumpChainInvalid: 'La cadena de servidores de salto no es válida: tiene un bucle o hace referencia a una conexión eliminada.',
     errorConnectionFolderNotFound: 'Carpeta de conexión no encontrada.',
     errorFieldBlank: 'Este campo no puede estar vacío.',
     errorConfigNotFound: 'Archivo de configuración no encontrado: {path}',

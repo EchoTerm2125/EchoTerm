@@ -79,6 +79,9 @@ export interface ResolvedJumpHost {
   keyFilePath: string | null;
 }
 
+/** Why a jump chain could not be resolved: a reference loop or a missing reference. */
+export type JumpChainError = 'cycle' | 'dangling';
+
 /** Connection with user credentials inlined and jump host resolved — ready to connect. */
 export interface ResolvedConnection {
   id: string;
@@ -90,7 +93,13 @@ export interface ResolvedConnection {
   password: string | null;
   keyFilePath: string | null;
   keyPassword: string | null;
-  resolvedJumpHost: ResolvedJumpHost | null;
+  /**
+   * Ordered jump chain, nearest hop first — each entry may itself be a stored
+   * connection that carries further hops. Empty = direct connection.
+   */
+  resolvedJumpChain: ResolvedJumpHost[];
+  /** Set when the chain is unusable (cycle/dangling); connecting must be refused. */
+  jumpChainError?: JumpChainError;
   /** Optional ssh_config style algorithm overrides (for legacy servers). */
   hostKeyAlgorithms: string | null;
   kexAlgorithms: string | null;

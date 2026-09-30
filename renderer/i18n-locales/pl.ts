@@ -358,6 +358,8 @@
     // ── Error messages ───────────────────────────────────────────────────────
     errorUnknownShell: 'Nieznana powłoka: {shell}',
     errorConnectionNotFound: 'Nie znaleziono połączenia.',
+    errorSessionConfig: 'Nie udało się przygotować konfiguracji sesji SSH.',
+    errorJumpChainInvalid: 'Łańcuch hostów przeskoku jest nieprawidłowy: zawiera pętlę lub odwołuje się do usuniętego połączenia.',
     errorConnectionFolderNotFound: 'Nie znaleziono folderu połączeń.',
     errorFieldBlank: 'To pole nie może być puste.',
     errorConfigNotFound: 'Nie znaleziono pliku konfiguracyjnego: {path}',

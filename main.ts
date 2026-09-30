@@ -11,6 +11,7 @@ import { FileUserRepository } from './src/main/infrastructure/file-user-reposito
 import { FileUpdateSettingsStore } from './src/main/infrastructure/file-update-settings';
 import { FileWindowBounds } from './src/main/infrastructure/file-window-bounds';
 import { NodePtyGateway } from './src/main/infrastructure/node-pty-gateway';
+import { TempSessionConfigStore } from './src/main/infrastructure/temp-session-config';
 import { WindowsShellDetector } from './src/main/infrastructure/windows-shell-detector';
 
 // Application use cases
@@ -45,6 +46,9 @@ const connectionRepo = new FileConnectionRepository(vault);
 const userFolderRepo = new FileUserFolderRepository(vault);
 const connectionFolderRepo = new FileConnectionFolderRepository(vault);
 const ptyGateway = new NodePtyGateway();
+const sessionConfigStore = new TempSessionConfigStore();
+// Remove session configs left behind by a crash/kill (onExit never fired)
+sessionConfigStore.sweep();
 const shellDetector = new WindowsShellDetector();
 const sessionRegistry = new SessionRegistry();
 
@@ -188,7 +192,7 @@ const sshController = new SshController(
   new DuplicateConnectionFolder(connectionFolderRepo),
   new OpenConnectionFolder(connectionRepo, connectionFolderRepo),
   new ExportSshConfig(connectionRepo, userRepo),
-  new SpawnSshSession(connectionRepo, ptyGateway),
+  new SpawnSshSession(connectionRepo, ptyGateway, sessionConfigStore),
   new ApplySshImport(vault, userRepo, connectionRepo, connectionFolderRepo),
   dialogs,
   sessionRegistry,

@@ -358,6 +358,8 @@
     // ── Error messages ───────────────────────────────────────────────────────
     errorUnknownShell: '不明なシェル: {shell}',
     errorConnectionNotFound: '接続が見つかりません。',
+    errorSessionConfig: 'SSH セッション設定の準備に失敗しました。',
+    errorJumpChainInvalid: 'ジャンプホストのチェーンが無効です（ループまたは削除された接続への参照があります）。',
     errorConnectionFolderNotFound: '接続フォルダが見つかりません。',
     errorFieldBlank: 'この項目は空白にできません。',
     errorConfigNotFound: '設定ファイルが見つかりません: {path}',

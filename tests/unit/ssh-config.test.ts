@@ -1,6 +1,6 @@
 // Unit tests for src/domain/services/ssh-config.ts
-import { parseSshConfigText, renderSshConfig } from '../../src/domain/services/ssh-config';
-import type { Connection, User } from '../../src/domain/entities/ssh';
+import { parseSshConfigText, renderSessionSshConfig, renderSshConfig } from '../../src/domain/services/ssh-config';
+import type { Connection, ResolvedConnection, User } from '../../src/domain/entities/ssh';
 
 const HOME_PREFIX = 'C:\\Users\\me\\';
 
@@ -241,5 +241,121 @@ describe('renderSshConfig', () => {
       '  Compression yes\n' +
       '\n',
     );
+  });
+});
+
+function makeResolved(overrides: Partial<ResolvedConnection> = {}): ResolvedConnection {
+  return {
+    id: 'c1', name: 'Test', host: 'example.com', port: 22, username: 'alice',
+    authType: 'password', password: null, keyFilePath: null, keyPassword: null,
+    resolvedJumpChain: [],
+    hostKeyAlgorithms: null, kexAlgorithms: null, pubkeyAcceptedAlgorithms: null,
+    ciphers: null, macs: null, caSignatureAlgorithms: null, compression: null,
+    ...overrides,
+  };
+}
+
+describe('renderSessionSshConfig', () => {
+  it('renders a direct connection with no jump host', () => {
+    const text = renderSessionSshConfig(makeResolved(), 'echoterm-session-1', null);
+    expect(text).toBe('Host echoterm-session-1\n  HostName example.com\n  User alice\n');
+  });
+
+  it('omits default port, unknown user and IdentityFile for password auth', () => {
+    const text = renderSessionSshConfig(
+      makeResolved({ port: 22, username: '', authType: 'password' }),
+      'echoterm-session-2', null,
+    );
+    expect(text).toBe('Host echoterm-session-2\n  HostName example.com\n');
+  });
+
+  it('emits Port and IdentityFile when set', () => {
+    const text = renderSessionSshConfig(
+      makeResolved({ port: 2222, authType: 'keyfile', keyFilePath: 'C:\\keys\\id_rsa' }),
+      'echoterm-session-3', null,
+    );
+    expect(text).toContain('  Port 2222\n');
+    expect(text).toContain('  IdentityFile C:\\keys\\id_rsa\n');
+  });
+
+  it('renders a jump host as its own Host block chained via ProxyJump', () => {
+    const text = renderSessionSshConfig(makeResolved({
+      resolvedJumpChain: [{
+        host: 'bastion.example.com', username: 'jump', port: 2200,
+        authType: 'keyfile', keyFilePath: 'C:\\keys\\jh_rsa',
+      }],
+    }), 'echoterm-session-4', null);
+    expect(text).toBe(
+      'Host echoterm-session-4\n' +
+      '  HostName example.com\n' +
+      '  User alice\n' +
+      '  ProxyJump echoterm-session-4-jump\n' +
+      '\n' +
+      'Host echoterm-session-4-jump\n' +
+      '  HostName bastion.example.com\n' +
+      '  Port 2200\n' +
+      '  User jump\n' +
+      '  IdentityFile C:\\keys\\jh_rsa\n',
+    );
+  });
+
+  it('renders a multi-hop chain as numbered Host blocks, nearest hop first', () => {
+    const text = renderSessionSshConfig(makeResolved({
+      resolvedJumpChain: [
+        { host: 'hop1.example.com', username: 'u1', port: 22, authType: 'password', keyFilePath: null },
+        { host: 'hop2.example.com', username: 'u2', port: 22, authType: 'keyfile', keyFilePath: 'C:\\keys\\k2' },
+      ],
+    }), 'echoterm-session-9', null);
+    expect(text).toBe(
+      'Host echoterm-session-9\n' +
+      '  HostName example.com\n' +
+      '  User alice\n' +
+      '  ProxyJump echoterm-session-9-jump1\n' +
+      '\n' +
+      'Host echoterm-session-9-jump1\n' +
+      '  HostName hop1.example.com\n' +
+      '  User u1\n' +
+      '  ProxyJump echoterm-session-9-jump2\n' +
+      '\n' +
+      'Host echoterm-session-9-jump2\n' +
+      '  HostName hop2.example.com\n' +
+      '  User u2\n' +
+      '  IdentityFile C:\\keys\\k2\n',
+    );
+  });
+
+  it('appends the user Include last, outside any Host block', () => {
+    const text = renderSessionSshConfig(
+      makeResolved(), 'echoterm-session-5', 'C:\\Users\\me\\.ssh\\config',
+    );
+    expect(text).toBe(
+      'Host echoterm-session-5\n' +
+      '  HostName example.com\n' +
+      '  User alice\n' +
+      '\n' +
+      'Include C:\\Users\\me\\.ssh\\config\n',
+    );
+  });
+
+  it('renders algorithm overrides for legacy servers', () => {
+    const text = renderSessionSshConfig(
+      makeResolved({ hostKeyAlgorithms: '+ssh-rsa,ssh-dss', compression: 'yes' }),
+      'echoterm-session-6', null,
+    );
+    expect(text).toContain('  HostKeyAlgorithms +ssh-rsa,ssh-dss\n');
+    expect(text).toContain('  Compression yes\n');
+  });
+
+  it('rejects values containing newlines (directive injection)', () => {
+    const evil = makeResolved({ host: 'evil.example.com\n  ProxyCommand calc.exe' });
+    expect(() => renderSessionSshConfig(evil, 'echoterm-session-7', null)).toThrow(/newlines/);
+  });
+
+  it('quotes values containing spaces', () => {
+    const text = renderSessionSshConfig(
+      makeResolved({ authType: 'keyfile', keyFilePath: 'C:\\keys\\my key id_rsa' }),
+      'echoterm-session-8', null,
+    );
+    expect(text).toContain('  IdentityFile "C:\\keys\\my key id_rsa"\n');
   });
 });

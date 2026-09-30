@@ -1856,6 +1856,10 @@ import {
     if (result.error) {
       const msg = result.errorCode === 'CONNECTION_NOT_FOUND'
         ? App.__('errorConnectionNotFound')
+        : result.errorCode === 'SESSION_CONFIG_FAILED'
+        ? App.__('errorSessionConfig')
+        : result.errorCode === 'JUMP_CHAIN_INVALID'
+        ? App.__('errorJumpChainInvalid')
         : result.error;
       App.UI.showToast(App.__('toastSshError', { message: msg }));
       return;
@@ -1882,7 +1886,12 @@ import {
     for (const conn of result.connections) {
       const spawnResult = await api.sshConnect(conn.id);
       if (spawnResult.error) {
-        App.UI.showToast(App.__('toastSshErrorNamed', { name: conn.name, message: spawnResult.error }));
+        const message = spawnResult.errorCode === 'SESSION_CONFIG_FAILED'
+          ? App.__('errorSessionConfig')
+          : spawnResult.errorCode === 'JUMP_CHAIN_INVALID'
+          ? App.__('errorJumpChainInvalid')
+          : spawnResult.error;
+        App.UI.showToast(App.__('toastSshErrorNamed', { name: conn.name, message }));
         continue;
       }
       await App.Terminal.spawnSshTerminal(spawnResult);

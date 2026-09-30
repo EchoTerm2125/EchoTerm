@@ -358,6 +358,8 @@
     // ── Error messages ───────────────────────────────────────────────────────
     errorUnknownShell: 'Shell không xác định: {shell}',
     errorConnectionNotFound: 'Không tìm thấy kết nối.',
+    errorSessionConfig: 'Không thể chuẩn bị cấu hình phiên SSH.',
+    errorJumpChainInvalid: 'Chuỗi máy nhảy không hợp lệ: có vòng lặp hoặc tham chiếu đến kết nối đã xóa.',
     errorConnectionFolderNotFound: 'Không tìm thấy thư mục kết nối.',
     errorFieldBlank: 'Trường này không được để trống.',
     errorConfigNotFound: 'Không tìm thấy tệp cấu hình: {path}',

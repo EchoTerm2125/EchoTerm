@@ -3,7 +3,7 @@
    Implements the domain ConnectionRepository port on the vault's JSON payload.
    ═══════════════════════════════════════════════════════════════════════════ */
 
-import type { Connection, ResolvedConnection, ResolvedJumpHost } from '../../domain/entities/ssh';
+import type { Connection, JumpChainError, ResolvedConnection, ResolvedJumpHost } from '../../domain/entities/ssh';
 import type { ConnectionRepository } from '../../domain/ports/connection-repository';
 import type { CryptoVault } from './crypto-vault';
 import { nextId } from './ssh-data';
@@ -32,31 +32,44 @@ export class FileConnectionRepository implements ConnectionRepository {
     if (!conn) return null;
     const user = data.users.find(u => u.id === conn.userId);
 
-    // Resolve jump host auth info (for referenced connections)
-    let resolvedJumpHost: ResolvedJumpHost | null = null;
-    if (conn.jumpHost) {
-      if (conn.jumpHost.type === 'manual') {
-        resolvedJumpHost = {
-          host: conn.jumpHost.host,
-          username: conn.jumpHost.username,
-          port: conn.jumpHost.port,
-          authType: conn.jumpHost.authType ?? null,
-          keyFilePath: conn.jumpHost.keyFilePath ?? null,
-        };
-      } else if (conn.jumpHost.type === 'reference') {
-        const refId = conn.jumpHost.connectionId;
-        const jConn = data.connections.find(c => c.id === refId);
-        if (jConn) {
-          const jUser = data.users.find(u => u.id === jConn.userId);
-          resolvedJumpHost = {
-            host: jConn.host,
-            username: jUser ? jUser.username : '',
-            port: jConn.port || 22,
-            authType: jUser ? jUser.authType : null,
-            keyFilePath: jUser ? jUser.keyFilePath : null,
-          };
-        }
+    // Walk the jump chain: a reference hop may itself carry a jumpHost.
+    // A visited set turns reference loops into a cycle error instead of an
+    // infinite walk; a missing reference (dangling) stops the chain too.
+    const resolvedJumpChain: ResolvedJumpHost[] = [];
+    let jumpChainError: JumpChainError | undefined;
+    let current = conn;
+    const visited = new Set<string>([conn.id]);
+    while (current.jumpHost) {
+      const jh = current.jumpHost;
+      if (jh.type === 'manual') {
+        resolvedJumpChain.push({
+          host: jh.host,
+          username: jh.username,
+          port: jh.port,
+          authType: jh.authType ?? null,
+          keyFilePath: jh.keyFilePath ?? null,
+        });
+        break;
       }
+      const hop = data.connections.find(c => c.id === jh.connectionId);
+      if (!hop) {
+        jumpChainError = 'dangling';
+        break;
+      }
+      if (visited.has(hop.id)) {
+        jumpChainError = 'cycle';
+        break;
+      }
+      visited.add(hop.id);
+      const hopUser = data.users.find(u => u.id === hop.userId);
+      resolvedJumpChain.push({
+        host: hop.host,
+        username: hopUser ? hopUser.username : '',
+        port: hop.port || 22,
+        authType: hopUser ? hopUser.authType : null,
+        keyFilePath: hopUser ? hopUser.keyFilePath : null,
+      });
+      current = hop;
     }
 
     return {
@@ -69,7 +82,8 @@ export class FileConnectionRepository implements ConnectionRepository {
       password: user ? user.password : null,
       keyFilePath: user ? user.keyFilePath : null,
       keyPassword: user ? user.keyPassword : null,
-      resolvedJumpHost,
+      resolvedJumpChain,
+      jumpChainError,
       hostKeyAlgorithms: conn.hostKeyAlgorithms || null,
       kexAlgorithms: conn.kexAlgorithms || null,
       pubkeyAcceptedAlgorithms: conn.pubkeyAcceptedAlgorithms || null,

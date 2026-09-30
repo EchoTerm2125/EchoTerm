@@ -358,6 +358,8 @@
     // ── Error messages ───────────────────────────────────────────────────────
     errorUnknownShell: 'Bilinmeyen kabuk: {shell}',
     errorConnectionNotFound: 'Bağlantı bulunamadı.',
+    errorSessionConfig: 'SSH oturum yapılandırması hazırlanamadı.',
+    errorJumpChainInvalid: 'Atlama ana bilgisayar zinciri geçersiz: döngü var veya silinmiş bir bağlantıya referans veriyor.',
     errorConnectionFolderNotFound: 'Bağlantı klasörü bulunamadı.',
     errorFieldBlank: 'Bu alan boş bırakılamaz.',
     errorConfigNotFound: 'Yapılandırma dosyası bulunamadı: {path}',

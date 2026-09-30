@@ -384,6 +384,8 @@
     // ── Error messages ───────────────────────────────────────────────────────
     errorUnknownShell: '未知 Shell: {shell}',
     errorConnectionNotFound: '找不到連線。',
+    errorSessionConfig: '無法準備 SSH 會話設定。',
+    errorJumpChainInvalid: '跳板主機鏈無效：存在循環或引用了已刪除的連線。',
     errorConnectionFolderNotFound: '找不到連線資料夾。',
     errorFieldBlank: '此欄位不能為空。',
     errorConfigNotFound: '找不到設定檔: {path}',

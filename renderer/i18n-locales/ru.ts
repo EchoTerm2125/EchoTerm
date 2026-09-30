@@ -358,6 +358,8 @@
     // ── Error messages ───────────────────────────────────────────────────────
     errorUnknownShell: 'Неизвестная оболочка: {shell}',
     errorConnectionNotFound: 'Подключение не найдено.',
+    errorSessionConfig: 'Не удалось подготовить конфигурацию сеанса SSH.',
+    errorJumpChainInvalid: 'Цепочка прыжковых узлов недействительна: обнаружена петля или ссылка на удалённое подключение.',
     errorConnectionFolderNotFound: 'Папка подключений не найдена.',
     errorFieldBlank: 'Это поле не может быть пустым.',
     errorConfigNotFound: 'Файл конфигурации не найден: {path}',

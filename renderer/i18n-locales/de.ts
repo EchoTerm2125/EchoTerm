@@ -358,6 +358,8 @@
     // ── Error messages ───────────────────────────────────────────────────────
     errorUnknownShell: 'Unbekannte Shell: {shell}',
     errorConnectionNotFound: 'Verbindung nicht gefunden.',
+    errorSessionConfig: 'Die SSH-Sitzungskonfiguration konnte nicht vorbereitet werden.',
+    errorJumpChainInvalid: 'Die Jump-Host-Kette ist ungültig: Sie enthält eine Schleife oder verweist auf eine gelöschte Verbindung.',
     errorConnectionFolderNotFound: 'Verbindungsordner nicht gefunden.',
     errorFieldBlank: 'Dieses Feld darf nicht leer sein.',
     errorConfigNotFound: 'Konfigurationsdatei nicht gefunden: {path}',

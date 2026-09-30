@@ -358,6 +358,8 @@
     // ── Error messages ───────────────────────────────────────────────────────
     errorUnknownShell: 'Shell inconnu : {shell}',
     errorConnectionNotFound: 'Connexion introuvable.',
+    errorSessionConfig: "Impossible de préparer la configuration de la session SSH.",
+    errorJumpChainInvalid: "La chaîne de hôtes de saut est invalide : elle boucle ou référence une connexion supprimée.",
     errorConnectionFolderNotFound: 'Dossier de connexion introuvable.',
     errorFieldBlank: 'Ce champ ne peut pas être vide.',
     errorConfigNotFound: 'Fichier de configuration introuvable : {path}',

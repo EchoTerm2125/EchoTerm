@@ -358,6 +358,8 @@
     // ── Error messages ───────────────────────────────────────────────────────
     errorUnknownShell: '알 수 없는 셸: {shell}',
     errorConnectionNotFound: '연결을 찾을 수 없습니다.',
+    errorSessionConfig: 'SSH 세션 설정을 준비하지 못했습니다.',
+    errorJumpChainInvalid: '점프 호스트 체인이 잘못되었습니다. 루프가 있거나 삭제된 연결을 참조합니다.',
     errorConnectionFolderNotFound: '연결 폴더를 찾을 수 없습니다.',
     errorFieldBlank: '이 항목은 비워 둘 수 없습니다.',
     errorConfigNotFound: '설정 파일을 찾을 수 없습니다: {path}',
