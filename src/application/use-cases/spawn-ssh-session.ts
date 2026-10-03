@@ -38,14 +38,16 @@ export class SpawnSshSession {
     const alias = `echoterm-session-${sessionId}`;
     let configPath: string;
     try {
-      const text = renderSessionSshConfig(target, alias, this.configStore.userConfigPath());
+      const text = renderSessionSshConfig(target, this.configStore.userConfigPath());
       configPath = this.configStore.write(alias, text);
     } catch (err) {
       return { error: err.message, errorCode: 'SESSION_CONFIG_FAILED' };
     }
 
     try {
-      const args = buildSshArgs(configPath, alias);
+      // Spawn with the real host name (not the alias) so Host patterns in the
+      // user's own ssh config keep matching this connection
+      const args = buildSshArgs(configPath, target.host);
       const handle = this.pty.spawn('ssh.exe', args, { cols: 80, rows: 24, cwd });
 
       // Auto-inject password if using password auth (for the TARGET host)

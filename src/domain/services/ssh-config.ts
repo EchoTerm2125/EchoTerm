@@ -3,7 +3,7 @@
    Pure logic — no Node/Electron imports allowed (see .dependency-cruiser.cjs).
    ═══════════════════════════════════════════════════════════════════════════ */
 
-import type { Connection, ResolvedConnection, User } from '../entities/ssh';
+import type { Connection, ResolvedConnection, ResolvedJumpHost, User } from '../entities/ssh';
 
 // ─── Parsing ─────────────────────────────────────────────────────────────────
 
@@ -100,11 +100,12 @@ interface AlgorithmOverrides {
 
 /**
  * Validate and format a directive value: newlines would inject extra config
- * lines (e.g. a smuggled ProxyCommand), values containing whitespace need
- * double quotes so ssh does not split them.
+ * lines (e.g. a smuggled ProxyCommand) and stray double quotes make ssh reject
+ * the whole file ("invalid quotes"); values containing whitespace need double
+ * quotes so ssh does not split them.
  */
 function configValue(value: string): string {
-  if (/[\r\n]/.test(value)) throw new Error('SSH config values must not contain newlines.');
+  if (/[\r\n"]/.test(value)) throw new Error('SSH config values must not contain newlines or double quotes.');
   return /\s/.test(value) ? `"${value}"` : value;
 }
 
@@ -156,44 +157,53 @@ export function renderSshConfig(connections: Connection[], users: User[]): strin
 /**
  * Render the per-session ssh config used with `ssh -F`.
  *
- * EchoTerm's Host blocks come first, then an Include of the user's own
- * ~/.ssh/config (top-level, not inside a Host block). ssh takes the first
- * obtained value per option, so our explicit values win while the user's
- * globals still apply.
+ * EchoTerm's Host blocks come first and are keyed on the real host names: the
+ * session is spawned with the target's host name and every ProxyJump hop with
+ * its own, so both our blocks and the user's own host-specific blocks match.
+ * We deliberately omit HostName so a `Host <name>` entry in the user's config
+ * can still remap it (a stored ssh alias keeps resolving). An Include of the
+ * user's own ~/.ssh/config follows behind a `Host *` reset (an Include inside
+ * a non-matching Host block is ignored entirely). ssh takes the first obtained
+ * value per option, so our explicit values win while the user's config still
+ * applies to everything else.
  *
  * @param target      connection with user credentials and jump chain resolved
- * @param alias       unique Host alias for this session
  * @param includePath absolute path of the user's ~/.ssh/config, or null if absent
  */
 export function renderSessionSshConfig(
   target: ResolvedConnection,
-  alias: string,
   includePath: string | null,
 ): string {
   const chain = target.resolvedJumpChain;
-  const jumpAlias = (i: number) => chain.length === 1 ? `${alias}-jump` : `${alias}-jump${i + 1}`;
+  // ProxyJump carries the hop's real host name (plus user/port like the old -J
+  // argument) so each hop's own ssh process matches the user's host config too.
+  const jumpSpec = (hop: ResolvedJumpHost): string => {
+    const port = hop.port && hop.port !== 22 ? `:${hop.port}` : '';
+    return configValue(`${hop.username ? `${hop.username}@` : ''}${hop.host}${port}`);
+  };
 
-  let text = `Host ${alias}\n`;
-  if (target.host) text += `  HostName ${configValue(target.host)}\n`;
+  let text = `Host ${configValue(target.host)}\n`;
   if (target.port && target.port !== 22) text += `  Port ${target.port}\n`;
   if (target.username) text += `  User ${configValue(target.username)}\n`;
   if (target.authType === 'keyfile' && target.keyFilePath) {
     text += `  IdentityFile ${configValue(target.keyFilePath)}\n`;
   }
-  if (chain.length) text += `  ProxyJump ${jumpAlias(0)}\n`;
+  if (chain.length) text += `  ProxyJump ${jumpSpec(chain[0])}\n`;
   text += renderAlgorithmDirectives(target);
 
   chain.forEach((hop, i) => {
-    text += `\nHost ${jumpAlias(i)}\n`;
-    text += `  HostName ${configValue(hop.host)}\n`;
+    text += `\nHost ${configValue(hop.host)}\n`;
     if (hop.port && hop.port !== 22) text += `  Port ${hop.port}\n`;
     if (hop.username) text += `  User ${configValue(hop.username)}\n`;
     if (hop.authType === 'keyfile' && hop.keyFilePath) {
       text += `  IdentityFile ${configValue(hop.keyFilePath)}\n`;
     }
-    if (chain[i + 1]) text += `  ProxyJump ${jumpAlias(i + 1)}\n`;
+    if (chain[i + 1]) text += `  ProxyJump ${jumpSpec(chain[i + 1])}\n`;
   });
 
-  if (includePath) text += `\nInclude ${configValue(includePath)}\n`;
+  // `Host *` resets the block context so the Include is processed whatever
+  // block is active and the user's bare top-level directives land in a
+  // catch-all block instead of one of our host-specific ones.
+  if (includePath) text += `\nHost *\nInclude ${configValue(includePath)}\n`;
   return text;
 }

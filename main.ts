@@ -47,8 +47,6 @@ const userFolderRepo = new FileUserFolderRepository(vault);
 const connectionFolderRepo = new FileConnectionFolderRepository(vault);
 const ptyGateway = new NodePtyGateway();
 const sessionConfigStore = new TempSessionConfigStore();
-// Remove session configs left behind by a crash/kill (onExit never fired)
-sessionConfigStore.sweep();
 const shellDetector = new WindowsShellDetector();
 const sessionRegistry = new SessionRegistry();
 
@@ -136,6 +134,10 @@ const gotTheLock = app.requestSingleInstanceLock();
 if (!gotTheLock) {
   app.quit();
 } else {
+  // Remove session configs left behind by a crash/kill (onExit never fired).
+  // Only the lock holder sweeps — a second instance must never wipe the live
+  // instance's session config dirs.
+  sessionConfigStore.sweep();
   app.on('second-instance', () => {
     // Focus the already-open window instead of opening a second one
     if (mainWindow) {

@@ -10,8 +10,10 @@
  * ssh resolves them natively via -F — no nested command strings to quote.
  *
  * @param configPath absolute path returned by SessionConfigStore.write()
- * @param alias      unique Host alias for this session
+ * @param target     real host name to connect to: ssh matches Host patterns
+ *                   (the session config's and the user's own) against the name
+ *                   given on the command line, so the alias alone is not enough
  */
-export function buildSshArgs(configPath: string, alias: string): string[] {
-  return ['-F', configPath, alias];
+export function buildSshArgs(configPath: string, target: string): string[] {
+  return ['-F', configPath, target];
 }
