@@ -71,6 +71,27 @@ describe.skipIf(!sshAvailable())('ssh -G against a generated session config', ()
     expect(out).toMatch(/^user jump$/m);
   });
 
+  it('resolves a keyfile jump host verbatim (the shape that broke with a quoted ProxyCommand)', () => {
+    const jumpKey = path.join(dir, 'jump_id');
+    fs.writeFileSync(jumpKey, 'dummy');
+    const cfgPath = path.join(dir, `${ALIAS}-keyjump.conf`);
+    fs.writeFileSync(cfgPath, renderSessionSshConfig({
+      ...target,
+      keyFilePath: keyFile,
+      resolvedJumpChain: [{
+        host: 'bastion.internal', username: 'jump', port: 2201,
+        authType: 'keyfile', keyFilePath: jumpKey,
+      }],
+    }, null));
+
+    // The hop's key path must come through verbatim — no quoting artefacts
+    const jumpOut = execFileSync('ssh', ['-G', ...buildSshArgs(cfgPath, 'bastion.internal')], { encoding: 'utf8' });
+    expect(jumpOut.toLowerCase()).toContain(`identityfile ${jumpKey.toLowerCase()}`);
+
+    const targetOut = execFileSync('ssh', ['-G', ...buildSshArgs(cfgPath, 'cards.internal')], { encoding: 'utf8' });
+    expect(targetOut).toMatch(/^proxyjump jump@bastion\.internal:2201$/m);
+  });
+
   it('resolves via the real host names so the user config keeps matching', () => {
     const userConfig = path.join(dir, 'user-config');
     fs.writeFileSync(userConfig, [

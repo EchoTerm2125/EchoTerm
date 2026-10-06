@@ -175,7 +175,7 @@ describe('renderSshConfig', () => {
     expect(text).toContain('  Port 2222\n');
   });
 
-  it('renders manual jump host with default port 22', () => {
+  it('renders manual jump host without a port when it is 22', () => {
     const text = renderSshConfig(
       [makeConnection({
         name: 'via', host: 'via.local',
@@ -183,7 +183,30 @@ describe('renderSshConfig', () => {
       })],
       [],
     );
-    expect(text).toContain('  ProxyJump jump@bastion.local:22\n');
+    expect(text).toContain('  ProxyJump jump@bastion.local\n');
+  });
+
+  it('renders manual jump host custom port', () => {
+    const text = renderSshConfig(
+      [makeConnection({
+        name: 'via', host: 'via.local',
+        jumpHost: { type: 'manual', host: 'bastion.local', username: 'jump', port: 2200, authType: null, keyFilePath: null },
+      })],
+      [],
+    );
+    expect(text).toContain('  ProxyJump jump@bastion.local:2200\n');
+  });
+
+  it('omits the jump user when blank instead of emitting "@host"', () => {
+    const text = renderSshConfig(
+      [makeConnection({
+        name: 'via', host: 'via.local',
+        jumpHost: { type: 'manual', host: 'bastion.local', username: '', port: 22, authType: null, keyFilePath: null },
+      })],
+      [],
+    );
+    expect(text).toContain('  ProxyJump bastion.local\n');
+    expect(text).not.toContain('@');
   });
 
   it('renders reference jump host by the referenced connection name', () => {
@@ -356,6 +379,23 @@ describe('renderSessionSshConfig', () => {
   it('rejects values containing double quotes (whole config would be rejected)', () => {
     const evil = makeResolved({ username: 'al"ice' });
     expect(() => renderSessionSshConfig(evil, null)).toThrow(/double quotes/);
+  });
+
+  it('rejects an empty host (would emit a bare Host line)', () => {
+    expect(() => renderSessionSshConfig(makeResolved({ host: '' }), null)).toThrow(/empty/);
+  });
+
+  it('rejects a host containing pattern metacharacters', () => {
+    expect(() => renderSessionSshConfig(makeResolved({ host: 'a*' }), null)).toThrow(/metacharacters/);
+  });
+
+  it('rejects a jump hop containing pattern metacharacters', () => {
+    const withHop = makeResolved({
+      resolvedJumpChain: [{
+        host: 'bast?on', username: 'jump', port: 22, authType: null, keyFilePath: null,
+      }],
+    });
+    expect(() => renderSessionSshConfig(withHop, null)).toThrow(/metacharacters/);
   });
 
   it('quotes values containing spaces', () => {

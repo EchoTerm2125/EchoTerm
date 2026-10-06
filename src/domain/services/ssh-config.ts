@@ -109,6 +109,17 @@ function configValue(value: string): string {
   return /\s/.test(value) ? `"${value}"` : value;
 }
 
+/**
+ * Format a value used as an ssh `Host` pattern. The directive takes patterns,
+ * so glob metacharacters would make the block match unintended hosts, and an
+ * empty value emits a bare `Host` line — both are rejected.
+ */
+function hostPattern(value: string): string {
+  if (!value) throw new Error('SSH host must not be empty.');
+  if (/[*?[\]!]/.test(value)) throw new Error('SSH host must not contain pattern metacharacters.');
+  return configValue(value);
+}
+
 /** Render the algorithm override directives shared by export and session rendering. */
 function renderAlgorithmDirectives(o: AlgorithmOverrides): string {
   let text = '';
@@ -140,7 +151,10 @@ export function renderSshConfig(connections: Connection[], users: User[]): strin
     if (conn.jumpHost) {
       if (conn.jumpHost.type === 'manual') {
         const jh = conn.jumpHost;
-        configText += `  ProxyJump ${jh.username}@${jh.host}:${jh.port}\n`;
+        // A blank jump user must not become "@host" — ssh rejects that outright
+        const user = jh.username ? `${jh.username}@` : '';
+        const port = jh.port && jh.port !== 22 ? `:${jh.port}` : '';
+        configText += `  ProxyJump ${user}${jh.host}${port}\n`;
       } else if (conn.jumpHost.type === 'reference') {
         const refId = conn.jumpHost.connectionId;
         const jc = connections.find(c => c.id === refId);
@@ -182,7 +196,7 @@ export function renderSessionSshConfig(
     return configValue(`${hop.username ? `${hop.username}@` : ''}${hop.host}${port}`);
   };
 
-  let text = `Host ${configValue(target.host)}\n`;
+  let text = `Host ${hostPattern(target.host)}\n`;
   if (target.port && target.port !== 22) text += `  Port ${target.port}\n`;
   if (target.username) text += `  User ${configValue(target.username)}\n`;
   if (target.authType === 'keyfile' && target.keyFilePath) {
@@ -192,7 +206,7 @@ export function renderSessionSshConfig(
   text += renderAlgorithmDirectives(target);
 
   chain.forEach((hop, i) => {
-    text += `\nHost ${configValue(hop.host)}\n`;
+    text += `\nHost ${hostPattern(hop.host)}\n`;
     if (hop.port && hop.port !== 22) text += `  Port ${hop.port}\n`;
     if (hop.username) text += `  User ${configValue(hop.username)}\n`;
     if (hop.authType === 'keyfile' && hop.keyFilePath) {
