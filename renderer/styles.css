@@ -1113,10 +1113,41 @@ html, body {
 /* ═══ xterm overrides ═══ */
 .xterm {
   height: 100%;
-  padding: 0;
+  /* Right gutter for xterm's overlay scrollbar, so the thumb never sits on top
+     of the text. Must equal xterm's scrollbar width (overviewRuler?.width ||
+     14, see VerticalScrollbar's verticalScrollbarSize): a fixed JS constant
+     that does not scale with --ui-scale, hence the raw px. */
+  padding: 0 14px 0 0;
+  /* The gutter sits inside .xterm, so show the terminal background here rather
+     than the pane's (which is tinted in echo-selected panes). */
+  background-color: var(--bg-primary);
 }
-.xterm-viewport {
-  scrollbar-width: thin;
+.xterm .xterm-viewport {
+  /* xterm 6 scrolls through its own overlay scrollbar, so this element's native
+     one is redundant. xterm.css forces overflow-y: scroll on it, which keeps a
+     track painted even without content; it used to hide behind the opaque
+     .xterm-scrollable-element, but the right-hand gutter above exposes it, and
+     being narrower than the gutter it left the overlay thumb looking
+     off-centre. */
+  scrollbar-width: none;
+  /* xterm.css paints this element full-bleed black; it would show through the
+     gutter above. */
+  background-color: transparent;
+}
+/* xterm pins its overlay scrollbar to the right edge of
+   .xterm-scrollable-element (right: 0, set inline by JS). Move it into the
+   gutter. Only .slider gets inline layer hinting, so `transform` is free. */
+.xterm .xterm-scrollable-element > .scrollbar.vertical {
+  transform: translateX(14px);
+}
+/* Thin the painted thumb to 6px while keeping the full 14px drag target: under
+   the global border-box the transparent borders shrink the content box, and
+   background-clip keeps the colour inside it. Outranks the background rules
+   xterm injects for .slider. */
+.xterm .xterm-scrollable-element > .scrollbar.vertical > .slider {
+  border-left: 4px solid transparent;
+  border-right: 4px solid transparent;
+  background-clip: content-box;
 }
 .xterm-cursor {
   transition: none !important;
