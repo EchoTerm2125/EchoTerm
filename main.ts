@@ -363,6 +363,7 @@ ipcMain.handle('ssh:connection-folder-save', (event, folderData) => sshControlle
 ipcMain.handle('ssh:connection-folder-delete', (event, folderId) => sshController.deleteConnectionFolder(folderId));
 ipcMain.handle('ssh:connection-folder-duplicate', (event, folderId) => sshController.duplicateConnectionFolder(folderId));
 ipcMain.handle('ssh:connect', (event, connectionId) => sshController.connect(connectionId));
+ipcMain.handle('ssh:reconnect', (event, sessionId, connectionId) => sshController.reconnect(sessionId, connectionId));
 ipcMain.handle('ssh:open-connection-folder', (event, folderId) => sshController.openConnectionFolder(folderId));
 ipcMain.handle('ssh:import-config', (event, customPath) => sshController.importConfig(customPath));
 ipcMain.handle('ssh:import-winscp', (event, chooseFile) => sshController.importWinScp(chooseFile));

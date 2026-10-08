@@ -75,6 +75,8 @@
     const echoBtn = $('#ctxEcho');
     const echoSep = $('#ctxEchoSep');
     const pasteAllBtn = $('#ctxPasteAll');
+    const reconnectBtn = $('#ctxReconnect');
+    const reconnectSep = $('#ctxReconnectSep');
     const showMenu = (e) => {
       e.preventDefault(); e.stopPropagation();
       contextTargetId = id;
@@ -83,6 +85,11 @@
       if (echoBtn) echoBtn.classList.toggle('hidden', !show);
       if (echoSep) echoSep.classList.toggle('hidden', !show);
       if (pasteAllBtn) pasteAllBtn.classList.toggle('hidden', !show);
+      // Reconnect is an SSH-pane action; its separator goes with it.
+      const ts = state.terminals.get(id);
+      const showReconnect = !!ts && ts.shell === 'ssh';
+      if (reconnectBtn) reconnectBtn.classList.toggle('hidden', !showReconnect);
+      if (reconnectSep) reconnectSep.classList.toggle('hidden', !showReconnect);
       positionContextMenu(contextMenu, e.clientX, e.clientY);
     };
     paneEl.querySelector('.pane-titlebar').addEventListener('contextmenu', showMenu);
@@ -110,6 +117,18 @@
     }
     // Single-target items disappear under a multi-selection.
     toggleMenuItems(tabContextMenu, ['tab-rename', 'tab-close'], multi);
+
+    // Reconnect targets SSH panes only; across a multi-selection it becomes a
+    // batch action over the SSH tabs in it.
+    const reconnectBtn = tabContextMenu.querySelector('[data-action="tab-reconnect"]');
+    if (reconnectBtn) {
+      const sshCount = [...state.selectedTabs]
+        .filter((tid) => state.terminals.get(tid)?.shell === 'ssh').length;
+      reconnectBtn.classList.toggle('hidden', sshCount === 0);
+      reconnectBtn.textContent = sshCount > 1
+        ? App.__('tabCtxReconnectSelected') + ` (${sshCount})`
+        : App.__('tabCtxReconnect');
+    }
 
     // "Close Others" is selection-relative and shows how many tabs it closes.
     const btnCloseOthers = tabContextMenu.querySelector('[data-action="tab-close-others"]');
@@ -275,6 +294,10 @@
             App.Terminal.pasteToTerminal(null);
             break;
           }
+          case 'reconnect': {
+            App.Terminal.requestReconnect(id);
+            break;
+          }
           case 'echo': {
             const t = state.terminals.get(id);
             if (t) {
@@ -318,6 +341,12 @@
           case 'tab-rename':
             App.Tabs.startTabRename(id);
             break;
+          case 'tab-reconnect': {
+            // Every selected SSH tab, or the single target.
+            if (state.selectedTabs.size > 1) App.Terminal.reconnectTabs([...state.selectedTabs]);
+            else App.Terminal.requestReconnect(id);
+            break;
+          }
           case 'tab-close':
             showConfirm(
               App.__('confirmCloseTerminal'),

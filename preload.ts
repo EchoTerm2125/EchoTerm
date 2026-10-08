@@ -119,6 +119,7 @@ const api: WindowApi = {
   sshConnectionFolderDuplicate: (folderId) => ipcRenderer.invoke('ssh:connection-folder-duplicate', folderId),
 
   sshConnect: (connectionId) => ipcRenderer.invoke('ssh:connect', connectionId),
+  sshReconnect: (sessionId, connectionId) => ipcRenderer.invoke('ssh:reconnect', sessionId, connectionId),
   sshOpenConnectionFolder: (folderId) => ipcRenderer.invoke('ssh:open-connection-folder', folderId),
   sshImportConfig: (filePath) => ipcRenderer.invoke('ssh:import-config', filePath),
   sshImportWinScp: (chooseFile) => ipcRenderer.invoke('ssh:import-winscp', chooseFile),

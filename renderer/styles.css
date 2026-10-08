@@ -859,7 +859,8 @@ html, body {
   color: white;
 }
 
-.pane .pane-titlebar .pane-paste {
+.pane .pane-titlebar .pane-paste,
+.pane .pane-titlebar .pane-reconnect {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -874,9 +875,15 @@ html, body {
   transition: all var(--transition);
 }
 
-.pane .pane-titlebar .pane-paste:hover {
+.pane .pane-titlebar .pane-paste:hover,
+.pane .pane-titlebar .pane-reconnect:hover:not(:disabled) {
   background: rgba(137, 180, 250, 0.2);
   color: var(--accent);
+}
+
+.pane .pane-titlebar .pane-reconnect:disabled {
+  cursor: default;
+  opacity: 0.4;
 }
 
 /* Terminal xterm container */

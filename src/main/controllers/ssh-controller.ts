@@ -13,6 +13,7 @@ import { promisify } from 'util';
 
 import type { Connection, ConnectionFolder, User, UserFolder } from '../../domain/entities/ssh';
 import type { DialogService } from '../../domain/ports/dialog-service';
+import type { PtyProcessHandle } from '../../domain/ports/pty-gateway';
 import { parseSshConfigText } from '../../domain/services/ssh-config';
 import { mapWinScpSessions, parseWinScpIni, parseWinScpRegistryOutput } from '../../domain/services/winscp';
 import type { WinScpRawSession } from '../../domain/services/winscp';
@@ -258,12 +259,50 @@ export class SshController {
   // ── Sessions ──
 
   connect(connectionId: string) {
-    const id = this.registry.createId();
-    const events = sessionEvents(this.registry, id, this.send);
-    const result = this.spawnSshSessionUseCase.execute(connectionId, id, os.homedir(), events);
+    return this.startSession(connectionId, this.registry.createId());
+  }
+
+  /**
+   * Replace the session behind a pane's id with a fresh one to the same
+   * Connection. The pane keeps its id, so its displayed content survives.
+   * A pane whose session already exited has no registry entry left — that is
+   * the ordinary case, so a missing entry is not an error.
+   */
+  reconnect(sessionId: number, connectionId: string) {
+    const previous = this.registry.get(sessionId);
+    if (previous && previous.shell !== 'ssh') {
+      return { error: 'Session not found.', errorCode: 'SESSION_NOT_FOUND' };
+    }
+    const result = this.startSession(connectionId, sessionId);
     if ('error' in result) return { error: result.error, errorCode: result.errorCode };
-    this.registry.register(id, { handle: result.handle, shell: 'ssh' });
-    return { id: result.id, shell: 'ssh', label: result.label, host: result.host, username: result.username };
+    // The replacement is registered under the same id before the old process
+    // is killed, so the old exit is already superseded by startSession's guard.
+    if (previous) previous.handle.kill();
+    return { success: true };
+  }
+
+  /**
+   * Spawn an ssh session under the given id. `isSuperseded` tells the use
+   * case's exit handler whether the registry has since adopted a different
+   * process for this id — which is how a Reconnect keeps the superseded
+   * process's exit from tearing down the session that replaced it.
+   */
+  private startSession(connectionId: string, sessionId: number) {
+    const events = sessionEvents(this.registry, sessionId, this.send);
+    let handle: PtyProcessHandle | null = null;
+    const isSuperseded = () => {
+      const current = this.registry.get(sessionId);
+      return !!current && current.handle !== handle;
+    };
+    const result = this.spawnSshSessionUseCase.execute(
+      connectionId, sessionId, os.homedir(), events, isSuperseded);
+    if ('error' in result) return { error: result.error, errorCode: result.errorCode };
+    handle = result.handle;
+    this.registry.register(sessionId, { handle: result.handle, shell: 'ssh' });
+    return {
+      id: result.id, shell: 'ssh', label: result.label, host: result.host,
+      username: result.username, connectionId,
+    };
   }
 
   openConnectionFolder(folderId: string) {

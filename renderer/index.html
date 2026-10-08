@@ -217,12 +217,16 @@
     <div class="context-separator"></div>
     <button data-action="echo" id="ctxEcho" data-i18n="ctxToggleEcho">Toggle Echo</button>
     <div class="context-separator" id="ctxEchoSep"></div>
+    <button data-action="reconnect" id="ctxReconnect" data-i18n="ctxReconnect">Reconnect</button>
+    <div class="context-separator" id="ctxReconnectSep"></div>
     <button data-action="close" data-i18n="ctxClosePane">Close Pane</button>
   </div>
 
   <!-- ═══Tab context menu  ═══-->
   <div id="tabContextMenu" class="context-menu hidden" data-overlay>
     <button data-action="tab-rename" data-i18n="tabCtxRename">Rename Tab</button>
+    <div class="context-separator"></div>
+    <button data-action="tab-reconnect" id="tabCtxReconnect" data-i18n="tabCtxReconnect">Reconnect</button>
     <div class="context-separator"></div>
     <button data-action="tab-close" data-i18n="tabCtxClose">Close Tab</button>
     <button data-action="tab-close-selected" id="btnCloseSelected" data-i18n="tabCtxCloseSelected">Close Selected</button>

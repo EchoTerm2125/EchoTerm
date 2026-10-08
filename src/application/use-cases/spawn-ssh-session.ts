@@ -23,7 +23,13 @@ export class SpawnSshSession {
     private readonly configStore: SessionConfigStore,
   ) {}
 
-  execute(connectionId: string, sessionId: number, cwd: string, events: SessionEvents): SpawnSshSessionResult {
+  execute(
+    connectionId: string,
+    sessionId: number,
+    cwd: string,
+    events: SessionEvents,
+    isSuperseded?: () => boolean,
+  ): SpawnSshSessionResult {
     const target = this.connections.findResolvedById(connectionId);
     if (!target) return { error: 'Connection not found.', errorCode: 'CONNECTION_NOT_FOUND' };
     if (target.jumpChainError) {
@@ -74,6 +80,11 @@ export class SpawnSshSession {
 
       handle.onData(events.onData);
       handle.onExit(() => {
+        // A Reconnect may have replaced this process while keeping the same
+        // session id (and so the same config file): the superseded process's
+        // exit must not delete the config the replacement is using, nor report
+        // the pane as exited.
+        if (isSuperseded && isSuperseded()) return;
         this.configStore.remove(configPath);
         events.onExit();
       });
