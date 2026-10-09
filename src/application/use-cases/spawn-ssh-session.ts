@@ -80,12 +80,11 @@ export class SpawnSshSession {
 
       handle.onData(events.onData);
       handle.onExit(() => {
-        // A Reconnect may have replaced this process while keeping the same
-        // session id (and so the same config file): the superseded process's
-        // exit must not delete the config the replacement is using, nor report
-        // the pane as exited.
-        if (isSuperseded && isSuperseded()) return;
+        // Each spawn writes its own config file (write() mints a fresh path),
+        // so a superseded process must still delete its own. It must only skip
+        // reporting the exit — the replacement owns the pane now.
         this.configStore.remove(configPath);
+        if (isSuperseded && isSuperseded()) return;
         events.onExit();
       });
 
