@@ -324,6 +324,7 @@
     optionsTabCloseConfirm: 'Xác nhận trước khi đóng tab',
     optionsWindowCloseConfirm: 'Xác nhận trước khi đóng cửa sổ',
     optionsGroupCloseConfirm: 'Xác nhận trước khi xóa nhóm',
+    optionsReconnectConfirm: 'Xác nhận trước khi kết nối lại terminal',
     optionsSshJumpWarn: 'Cảnh báo về máy chủ trung gian chưa chọn khi nhập SSH',
     optionsPastePreview: 'Xác nhận trước khi dán nội dung nhiều dòng',
     optionsRightClickPaste: 'Nhấp chuột phải để sao chép / dán',

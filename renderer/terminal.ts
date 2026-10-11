@@ -469,13 +469,15 @@ import './icons';
       run();
       return;
     }
-    App.Menus.showConfirm(App.__('confirmReconnect'), run, null, 'paneReconnectTitle');
+    App.Menus.showConfirm(App.__('confirmReconnect'), run, 'skipReconnectConfirm', 'paneReconnectTitle');
   }
 
-  // Reconnect several panes: one confirm for the batch (always shown, so the
-  // local shells it will not touch are accounted for) and one summary of
-  // whatever failed. `confirmKey` names the confirm's first line; callers with
-  // a non-Selected-tabs target set pass their own wording.
+  // Reconnect several panes: one confirm for the batch (so the local shells it
+  // will not touch are accounted for) and one summary of whatever failed. The
+  // batch confirm honours the same "don't show again" choice as the single-pane
+  // one; the failure summary is never suppressed. `confirmKey` names the
+  // confirm's first line; callers with a non-Selected-tabs target set pass
+  // their own wording.
   function reconnectTabs(ids, confirmKey) {
     const sshIds = ids.filter((tid) => {
       const ts = state.terminals.get(tid);
@@ -508,7 +510,7 @@ import './icons';
         });
       };
       runAt(0);
-    }, null, 'paneReconnectTitle');
+    }, 'skipReconnectConfirm', 'paneReconnectTitle');
   }
 
   function setSinglePane(id) {

@@ -207,7 +207,7 @@ const DOM_IDS = [
   'btnEchoPaste', 'btnEchoReconnect', 'groupList', 'btnNewGroup', 'gitBashStatus',
   'statusTerminalCount', 'statusEcho', 'statusShell',
   'btnSettings', 'optionsPanel', 'optTabCloseConfirm', 'optWindowCloseConfirm',
-  'optGroupCloseConfirm', 'optSshJumpWarn', 'optPastePreview', 'optRightClickPaste',
+  'optGroupCloseConfirm', 'optReconnectConfirm', 'optSshJumpWarn', 'optPastePreview', 'optRightClickPaste',
   'optFolderAutoEcho',
   'tabCtxMoveSep', 'tabCtxMoveItem', 'tabCtxGroupSubmenu',
   'btnResetSettings', 'btnClearSshData', 'btnClearCache', 'btnClearAllData',
@@ -243,6 +243,7 @@ function scaffoldDom() {
       el = document.createElement('button');
     } else if (id === 'confirmDontShowAgain' || id === 'optTabCloseConfirm' ||
                id === 'optWindowCloseConfirm' || id === 'optGroupCloseConfirm' ||
+               id === 'optReconnectConfirm' ||
                id === 'optSshJumpWarn' || id === 'optPastePreview' ||
                id === 'optRightClickPaste' || id === 'pastePreviewDontShow' ||
                id === 'optFolderAutoEcho' ||

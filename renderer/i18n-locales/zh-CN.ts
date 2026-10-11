@@ -324,6 +324,7 @@
     optionsTabCloseConfirm: '关闭标签前确认',
     optionsWindowCloseConfirm: '关闭窗口前确认',
     optionsGroupCloseConfirm: '删除组前确认',
+    optionsReconnectConfirm: '重新连接终端前确认',
     optionsSshJumpWarn: 'SSH 导入时警告未选中的跳板机',
     optionsPastePreview: '粘贴多行内容前确认',
     optionsRightClickPaste: '右键复制 / 粘贴',

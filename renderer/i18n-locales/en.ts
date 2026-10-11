@@ -325,6 +325,7 @@
     optionsTabCloseConfirm: 'Confirm before closing a tab',
     optionsWindowCloseConfirm: 'Confirm before closing window',
     optionsGroupCloseConfirm: 'Confirm before deleting a group',
+    optionsReconnectConfirm: 'Confirm before reconnecting a terminal',
     optionsSshJumpWarn: 'Warn about unselected jump hosts on SSH import',
     optionsPastePreview: 'Confirm before pasting multi-line content',
     optionsRightClickPaste: 'Right click to copy / paste',

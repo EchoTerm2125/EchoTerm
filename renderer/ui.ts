@@ -14,6 +14,7 @@
   const SETTINGS_STORAGE_KEYS = [
     'appTheme', 'uiFontSize', 'termFontSize', 'maxRetainedLines', 'defaultShell',
     'skipTabCloseConfirm', 'skipCloseConfirm', 'skipGroupCloseConfirm',
+    'skipReconnectConfirm',
     'skipSshJumpWarn', 'skipPastePreview', 'skipRightClickPaste',
     'skipAutoEchoFolderOpen',
     'i18nLocale', 'sshSidebarWidth',
@@ -186,6 +187,10 @@
     App.optGroupCloseConfirm.checked =
       localStorage.getItem('skipGroupCloseConfirm') !== 'true';
 
+    // Reconnect confirm
+    App.optReconnectConfirm.checked =
+      localStorage.getItem('skipReconnectConfirm') !== 'true';
+
     // SSH import jump host warning
     App.optSshJumpWarn.checked =
       localStorage.getItem('skipSshJumpWarn') !== 'true';
@@ -357,6 +362,15 @@
         localStorage.removeItem('skipGroupCloseConfirm');
       } else {
         localStorage.setItem('skipGroupCloseConfirm', 'true');
+      }
+    });
+
+    // Reconnect confirm toggle
+    App.optReconnectConfirm.addEventListener('change', () => {
+      if (App.optReconnectConfirm.checked) {
+        localStorage.removeItem('skipReconnectConfirm');
+      } else {
+        localStorage.setItem('skipReconnectConfirm', 'true');
       }
     });
 

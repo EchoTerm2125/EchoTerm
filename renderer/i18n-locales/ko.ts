@@ -324,6 +324,7 @@
     optionsTabCloseConfirm: '탭을 닫기 전에 확인',
     optionsWindowCloseConfirm: '창을 닫기 전에 확인',
     optionsGroupCloseConfirm: '그룹을 삭제하기 전에 확인',
+    optionsReconnectConfirm: '터미널을 다시 연결하기 전에 확인',
     optionsSshJumpWarn: 'SSH 가져오기 시 선택되지 않은 점프 호스트 경고',
     optionsPastePreview: '여러 줄 내용을 붙여넣기 전에 확인',
     optionsRightClickPaste: '오른쪽 클릭으로 복사 / 붙여넣기',

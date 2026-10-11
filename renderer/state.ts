@@ -60,6 +60,7 @@ import { getIpcClient } from './ipc-client';
   const optTabCloseConfirm = $('#optTabCloseConfirm');
   const optWindowCloseConfirm = $('#optWindowCloseConfirm');
   const optGroupCloseConfirm = $('#optGroupCloseConfirm');
+  const optReconnectConfirm = $('#optReconnectConfirm');
   const optSshJumpWarn = $('#optSshJumpWarn');
   const optPastePreview = $('#optPastePreview');
   const optRightClickPaste = $('#optRightClickPaste');
@@ -129,6 +130,7 @@ import { getIpcClient } from './ipc-client';
     optTabCloseConfirm,
     optWindowCloseConfirm,
     optGroupCloseConfirm,
+    optReconnectConfirm,
     optSshJumpWarn,
     optPastePreview,
     optRightClickPaste,

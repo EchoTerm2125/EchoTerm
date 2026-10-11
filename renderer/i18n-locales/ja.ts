@@ -324,6 +324,7 @@
     optionsTabCloseConfirm: 'タブを閉じる前に確認',
     optionsWindowCloseConfirm: 'ウィンドウを閉じる前に確認',
     optionsGroupCloseConfirm: 'グループを削除する前に確認',
+    optionsReconnectConfirm: 'ターミナルを再接続する前に確認',
     optionsSshJumpWarn: 'SSH インポート時に未選択のジャンプホストを警告',
     optionsPastePreview: '複数行の内容を貼り付ける前に確認',
     optionsRightClickPaste: '右クリックでコピー / 貼り付け',

@@ -324,6 +324,7 @@
     optionsTabCloseConfirm: 'Sekme kapatılmadan önce onayla',
     optionsWindowCloseConfirm: 'Pencere kapatılmadan önce onayla',
     optionsGroupCloseConfirm: 'Grup silinmeden önce onayla',
+    optionsReconnectConfirm: 'Terminal yeniden bağlanmadan önce onayla',
     optionsSshJumpWarn: 'SSH içe aktarımında seçilmemiş atlama sunucuları hakkında uyar',
     optionsPastePreview: 'Çok satırlı içerik yapıştırılmadan önce onayla',
     optionsRightClickPaste: 'Kopyalamak / yapıştırmak için sağ tıklayın',

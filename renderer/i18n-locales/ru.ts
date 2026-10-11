@@ -324,6 +324,7 @@
     optionsTabCloseConfirm: 'Подтверждать закрытие вкладки',
     optionsWindowCloseConfirm: 'Подтверждать закрытие окна',
     optionsGroupCloseConfirm: 'Подтверждать удаление группы',
+    optionsReconnectConfirm: 'Подтверждать переподключение терминала',
     optionsSshJumpWarn: 'Предупреждать о невыбранных хостах перехода при импорте SSH',
     optionsPastePreview: 'Подтверждать вставку многострочного содержимого',
     optionsRightClickPaste: 'Правый клик для копирования / вставки',

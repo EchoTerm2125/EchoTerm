@@ -324,6 +324,7 @@
     optionsTabCloseConfirm: '關閉標籤前確認',
     optionsWindowCloseConfirm: '關閉視窗前確認',
     optionsGroupCloseConfirm: '刪除群組前確認',
+    optionsReconnectConfirm: '重新連線終端機前確認',
     optionsSshJumpWarn: 'SSH 匯入時警告未選取的跳板機',
     optionsPastePreview: '貼上多行內容前確認',
     optionsRightClickPaste: '右鍵複製 / 貼上',

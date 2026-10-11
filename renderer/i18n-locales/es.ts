@@ -324,6 +324,7 @@
     optionsTabCloseConfirm: 'Confirmar al cerrar una pestaña',
     optionsWindowCloseConfirm: 'Confirmar al cerrar la ventana',
     optionsGroupCloseConfirm: 'Confirmar al eliminar un grupo',
+    optionsReconnectConfirm: 'Confirmar al reconectar una terminal',
     optionsSshJumpWarn: 'Advertir sobre hosts de salto no seleccionados al importar SSH',
     optionsPastePreview: 'Confirmar antes de pegar contenido de varias líneas',
     optionsRightClickPaste: 'Clic derecho para copiar / pegar',

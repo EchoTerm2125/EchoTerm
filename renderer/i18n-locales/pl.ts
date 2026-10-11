@@ -324,6 +324,7 @@
     optionsTabCloseConfirm: 'Potwierdź przed zamknięciem karty',
     optionsWindowCloseConfirm: 'Potwierdź przed zamknięciem okna',
     optionsGroupCloseConfirm: 'Potwierdź przed usunięciem grupy',
+    optionsReconnectConfirm: 'Potwierdź przed ponownym połączeniem terminala',
     optionsSshJumpWarn: 'Ostrzegaj o nieodznaczonych hostach pośrednich podczas importu SSH',
     optionsPastePreview: 'Potwierdź przed wklejeniem zawartości wieloliniowej',
     optionsRightClickPaste: 'Prawy przycisk do kopiowania / wklejania',
