@@ -204,7 +204,7 @@ const _localStore: Record<string, string> = {};
 const DOM_IDS = [
   'terminal-container', 'tabList', 'btnNewTerminal', 'btnNewTermDropdown',
   'newTermDropdown', 'btnEchoMode', 'btnEchoAll', 'btnEchoToggle',
-  'btnEchoPaste', 'groupList', 'btnNewGroup', 'gitBashStatus',
+  'btnEchoPaste', 'btnEchoReconnect', 'groupList', 'btnNewGroup', 'gitBashStatus',
   'statusTerminalCount', 'statusEcho', 'statusShell',
   'btnSettings', 'optionsPanel', 'optTabCloseConfirm', 'optWindowCloseConfirm',
   'optGroupCloseConfirm', 'optSshJumpWarn', 'optPastePreview', 'optRightClickPaste',
@@ -283,7 +283,8 @@ function scaffoldDom() {
     const tabActions = document.createElement('div');
     tabActions.className = 'tab-actions';
     for (const id of ['btnNewTerminal', 'btnNewTermDropdown', 'btnEchoMode',
-                      'btnEchoAll', 'btnEchoToggle', 'btnEchoPaste', 'newTermDropdown']) {
+                      'btnEchoAll', 'btnEchoToggle', 'btnEchoPaste', 'btnEchoReconnect',
+                      'newTermDropdown']) {
       const el = document.getElementById(id);
       if (el) tabActions.appendChild(el);
     }

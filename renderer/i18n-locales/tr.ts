@@ -43,6 +43,10 @@
     echoEnableAllTitle: 'Tüm terminallerde yankıyı etkinleştir',
     echoToggleAllTitle: 'Her terminalin yankı durumunu değiştir',
     echoPasteAllTitle: 'Yankı etkin tüm terminallere yapıştır',
+    echoReconnect: 'Yankı etkin olanları yeniden bağla',
+    echoReconnectTitle: 'Yankı etkin tüm SSH terminallerini yeniden bağla',
+    echoReconnectNone: 'Yankı etkin terminal yok.',
+    echoReconnectNoSsh: 'Yeniden bağlanacak yankı etkin SSH terminali yok.',
 
     // ── Group bar ────────────────────────────────────────────────────────────
     groupDefaultName: 'Grup {n}',
@@ -123,6 +127,7 @@
     confirmReconnect: 'Bu terminal yeniden bağlansın mı?\nOturum sonlandırılacak.',
     confirmReconnectSelected: 'Seçili {count} terminal yeniden bağlansın mı?\nTüm oturumlar sonlandırılacak.',
     confirmReconnectSkipLocal: 'Seçimdeki {count} yerel kabuk yeniden bağlanmayacak.',
+    confirmReconnectEcho: 'Yankı etkin {count} SSH terminali yeniden bağlansın mı?\nTüm oturumlar sonlandırılacak.',
     reconnectFailedSummary: 'Yeniden bağlanılamadı: {names}',
     confirmDeleteSshConnection: 'SSH bağlantısı "{name}" silinsin mi?',
     confirmDeleteSshConnectionFolder: 'Bağlantı klasörü "{name}" silinsin mi?\nİçindeki {connections} bağlantı ve {subfolders} alt klasör kalıcı olarak silinecek.',

@@ -44,6 +44,10 @@
     echoEnableAllTitle: 'Enable echo on all terminals',
     echoToggleAllTitle: 'Toggle each terminal\'s echo state',
     echoPasteAllTitle: 'Paste to all echo-enabled terminals',
+    echoReconnect: 'Reconnect Echo-enabled',
+    echoReconnectTitle: 'Reconnect all echo-enabled SSH terminals',
+    echoReconnectNone: 'No echo-enabled terminals.',
+    echoReconnectNoSsh: 'No echo-enabled SSH terminals to reconnect.',
 
     // ── Group bar ────────────────────────────────────────────────────────────
     groupDefaultName: 'Group {n}',
@@ -124,6 +128,7 @@
     confirmReconnect: 'Reconnect this terminal?\nThe session will be terminated.',
     confirmReconnectSelected: 'Reconnect {count} selected terminal{plural}?\nAll sessions will be terminated.',
     confirmReconnectSkipLocal: '{count} local shell{plural} in the selection will not be reconnected.',
+    confirmReconnectEcho: 'Reconnect {count} echo-enabled SSH terminal{plural}?\nAll sessions will be terminated.',
     reconnectFailedSummary: 'Could not reconnect: {names}',
     confirmDeleteSshConnection: 'Delete SSH connection "{name}"?',
     confirmDeleteSshConnectionFolder: 'Delete connection folder "{name}"?\n{connections} connection(s) inside it and {subfolders} sub-folder(s) will be permanently deleted.',

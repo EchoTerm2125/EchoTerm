@@ -43,6 +43,10 @@
     echoEnableAllTitle: '在所有终端上启用回显',
     echoToggleAllTitle: '切换每个终端的回显状态',
     echoPasteAllTitle: '粘贴到所有已启用回显的终端',
+    echoReconnect: '重新连接已启用回显',
+    echoReconnectTitle: '重新连接所有已启用回显的 SSH 终端',
+    echoReconnectNone: '没有已启用回显的终端。',
+    echoReconnectNoSsh: '没有已启用回显的 SSH 终端可供重新连接。',
 
     // ── Group bar ────────────────────────────────────────────────────────────
     groupDefaultName: '组 {n}',
@@ -123,6 +127,7 @@
     confirmReconnect: '重新连接此终端？\n当前会话将被终止。',
     confirmReconnectSelected: '重新连接 {count} 个选中的终端？\n所有会话将被终止。',
     confirmReconnectSkipLocal: '选中的 {count} 个本地 shell 将不会被重新连接。',
+    confirmReconnectEcho: '重新连接 {count} 个已启用回显的 SSH 终端？\n所有会话将被终止。',
     reconnectFailedSummary: '无法重新连接：{names}',
     confirmDeleteSshConnection: '删除 SSH 连接 "{name}"？',
     confirmDeleteSshConnectionFolder: '删除连接文件夹 "{name}"？\n其中 {connections} 个连接和 {subfolders} 个子文件夹将被永久删除。',

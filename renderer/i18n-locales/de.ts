@@ -43,6 +43,10 @@
     echoEnableAllTitle: 'Echo auf allen Terminals aktivieren',
     echoToggleAllTitle: 'Echo-Zustand jedes Terminals umschalten',
     echoPasteAllTitle: 'In alle Terminals mit aktiviertem Echo einfügen',
+    echoReconnect: 'Mit Echo neu verbinden',
+    echoReconnectTitle: 'Alle SSH-Terminals mit aktiviertem Echo neu verbinden',
+    echoReconnectNone: 'Keine Terminals mit aktiviertem Echo.',
+    echoReconnectNoSsh: 'Keine SSH-Terminals mit aktiviertem Echo zum Neuverbinden.',
 
     // ── Group bar ────────────────────────────────────────────────────────────
     groupDefaultName: 'Gruppe {n}',
@@ -123,6 +127,7 @@
     confirmReconnect: 'Dieses Terminal neu verbinden?\nDie Sitzung wird beendet.',
     confirmReconnectSelected: 'Ausgewählte {count} Terminals neu verbinden?\nAlle Sitzungen werden beendet.',
     confirmReconnectSkipLocal: 'Die {count} lokalen Shells der Auswahl werden nicht neu verbunden.',
+    confirmReconnectEcho: '{count} SSH-Terminals mit aktiviertem Echo neu verbinden?\nAlle Sitzungen werden beendet.',
     reconnectFailedSummary: 'Neuverbindung fehlgeschlagen: {names}',
     confirmDeleteSshConnection: 'SSH-Verbindung „{name}“ löschen?',
     confirmDeleteSshConnectionFolder: 'Verbindungsordner „{name}“ löschen?\n{connections} Verbindung(en) darin und {subfolders} Unterordner werden dauerhaft gelöscht.',

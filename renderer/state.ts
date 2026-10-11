@@ -48,6 +48,7 @@ import { getIpcClient } from './ipc-client';
   const btnEchoAll = $('#btnEchoAll');
   const btnEchoToggle = $('#btnEchoToggle');
   const btnEchoPaste = $('#btnEchoPaste');
+  const btnEchoReconnect = $('#btnEchoReconnect');
   const groupList = $('#groupList');
   const btnNewGroup = $('#btnNewGroup');
   const gitBashStatus = $('#gitBashStatus');
@@ -116,6 +117,7 @@ import { getIpcClient } from './ipc-client';
     btnEchoAll,
     btnEchoToggle,
     btnEchoPaste,
+    btnEchoReconnect,
     groupList,
     btnNewGroup,
     gitBashStatus,

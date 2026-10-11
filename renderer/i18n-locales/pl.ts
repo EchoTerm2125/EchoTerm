@@ -43,6 +43,10 @@
     echoEnableAllTitle: 'Włącz echo na wszystkich terminalach',
     echoToggleAllTitle: 'Przełącz stan echo każdego terminala',
     echoPasteAllTitle: 'Wklej do wszystkich terminali z włączonym echo',
+    echoReconnect: 'Połącz ponownie z włączonym echem',
+    echoReconnectTitle: 'Połącz ponownie wszystkie terminale SSH z włączonym echo',
+    echoReconnectNone: 'Brak terminali z włączonym echo.',
+    echoReconnectNoSsh: 'Brak terminali SSH z włączonym echo do ponownego połączenia.',
 
     // ── Group bar ────────────────────────────────────────────────────────────
     groupDefaultName: 'Grupa {n}',
@@ -123,6 +127,7 @@
     confirmReconnect: 'Połączyć ponownie ten terminal?\nSesja zostanie zakończona.',
     confirmReconnectSelected: 'Połączyć ponownie zaznaczone terminale ({count})?\nWszystkie sesje zostaną zakończone.',
     confirmReconnectSkipLocal: 'Zaznaczone powłoki lokalne ({count}) nie zostaną połączone ponownie.',
+    confirmReconnectEcho: 'Połączyć ponownie terminale SSH z włączonym echo ({count})?\nWszystkie sesje zostaną zakończone.',
     reconnectFailedSummary: 'Nie udało się połączyć ponownie: {names}',
     confirmDeleteSshConnection: 'Usunąć połączenie SSH „{name}”?',
     confirmDeleteSshConnectionFolder: 'Usunąć folder połączeń „{name}”?\n{connections} połączeń i {subfolders} podfolderów zostanie trwale usuniętych.',

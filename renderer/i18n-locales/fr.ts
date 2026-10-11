@@ -43,6 +43,10 @@
     echoEnableAllTitle: 'Activer l’écho sur tous les terminaux',
     echoToggleAllTitle: 'Basculer l’état d’écho de chaque terminal',
     echoPasteAllTitle: 'Coller dans tous les terminaux avec écho activé',
+    echoReconnect: 'Reconnecter avec écho',
+    echoReconnectTitle: 'Reconnecter tous les terminaux SSH avec écho activé',
+    echoReconnectNone: 'Aucun terminal avec écho activé.',
+    echoReconnectNoSsh: 'Aucun terminal SSH avec écho activé à reconnecter.',
 
     // ── Group bar ────────────────────────────────────────────────────────────
     groupDefaultName: 'Groupe {n}',
@@ -123,6 +127,7 @@
     confirmReconnect: 'Reconnecter ce terminal ?\nLa session sera terminée.',
     confirmReconnectSelected: 'Reconnecter les {count} terminaux sélectionnés ?\nToutes les sessions seront terminées.',
     confirmReconnectSkipLocal: 'Les {count} shells locaux de la sélection ne seront pas reconnectés.',
+    confirmReconnectEcho: 'Reconnecter les {count} terminaux SSH avec écho activé ?\nToutes les sessions seront terminées.',
     reconnectFailedSummary: 'Échec de la reconnexion : {names}',
     confirmDeleteSshConnection: 'Supprimer la connexion SSH « {name} » ?',
     confirmDeleteSshConnectionFolder: 'Supprimer le dossier de connexion « {name} » ?\n{connections} connexion(s) et {subfolders} sous-dossier(s) seront définitivement supprimées.',

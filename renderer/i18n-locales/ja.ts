@@ -43,6 +43,10 @@
     echoEnableAllTitle: 'すべてのターミナルでエコーを有効化',
     echoToggleAllTitle: '各ターミナルのエコー状態を切り替え',
     echoPasteAllTitle: 'エコーが有効なすべてのターミナルに貼り付け',
+    echoReconnect: 'エコー有効を再接続',
+    echoReconnectTitle: 'エコーが有効なすべての SSH ターミナルを再接続します',
+    echoReconnectNone: 'エコーが有効なターミナルがありません。',
+    echoReconnectNoSsh: 'エコーが有効な SSH ターミナルがないため、再接続できません。',
 
     // ── Group bar ────────────────────────────────────────────────────────────
     groupDefaultName: 'グループ {n}',
@@ -123,6 +127,7 @@
     confirmReconnect: 'このターミナルを再接続しますか？\n現在のセッションは終了します。',
     confirmReconnectSelected: '選択した {count} 台のターミナルを再接続しますか？\nすべてのセッションが終了します。',
     confirmReconnectSkipLocal: '選択範囲内の {count} 個のローカルシェルは再接続されません。',
+    confirmReconnectEcho: 'エコーが有効な {count} 台の SSH ターミナルを再接続しますか？\nすべてのセッションが終了します。',
     reconnectFailedSummary: '再接続できませんでした: {names}',
     confirmDeleteSshConnection: 'SSH 接続「{name}」を削除しますか？',
     confirmDeleteSshConnectionFolder: '接続フォルダ「{name}」を削除しますか？\n{connections} 件の接続と {subfolders} 個のサブフォルダが完全に削除されます。',

@@ -43,6 +43,10 @@
     echoEnableAllTitle: 'Bật tiếng vọng trên tất cả terminal',
     echoToggleAllTitle: 'Chuyển đổi trạng thái tiếng vọng của từng terminal',
     echoPasteAllTitle: 'Dán vào tất cả terminal đã bật tiếng vọng',
+    echoReconnect: 'Kết nối lại mục đã bật tiếng vọng',
+    echoReconnectTitle: 'Kết nối lại tất cả terminal SSH đã bật tiếng vọng',
+    echoReconnectNone: 'Không có terminal nào đã bật tiếng vọng.',
+    echoReconnectNoSsh: 'Không có terminal SSH đã bật tiếng vọng nào để kết nối lại.',
 
     // ── Group bar ────────────────────────────────────────────────────────────
     groupDefaultName: 'Nhóm {n}',
@@ -123,6 +127,7 @@
     confirmReconnect: 'Kết nối lại terminal này?\nPhiên hiện tại sẽ bị chấm dứt.',
     confirmReconnectSelected: 'Kết nối lại {count} terminal đã chọn?\nTất cả phiên sẽ bị chấm dứt.',
     confirmReconnectSkipLocal: '{count} shell cục bộ trong vùng chọn sẽ không được kết nối lại.',
+    confirmReconnectEcho: 'Kết nối lại {count} terminal SSH đã bật tiếng vọng?\nTất cả phiên sẽ bị chấm dứt.',
     reconnectFailedSummary: 'Không thể kết nối lại: {names}',
     confirmDeleteSshConnection: 'Xóa kết nối SSH "{name}"?',
     confirmDeleteSshConnectionFolder: 'Xóa thư mục kết nối "{name}"?\n{connections} kết nối và {subfolders} thư mục con bên trong sẽ bị xóa vĩnh viễn.',

@@ -43,6 +43,10 @@
     echoEnableAllTitle: 'Включить эхо на всех терминалах',
     echoToggleAllTitle: 'Переключить состояние эхо на каждом терминале',
     echoPasteAllTitle: 'Вставить во все терминалы с включённым эхо',
+    echoReconnect: 'Переподключить с эхо',
+    echoReconnectTitle: 'Переподключить все SSH-терминалы с включённым эхо',
+    echoReconnectNone: 'Нет терминалов с включённым эхо.',
+    echoReconnectNoSsh: 'Нет SSH-терминалов с включённым эхо для переподключения.',
 
     // ── Group bar ────────────────────────────────────────────────────────────
     groupDefaultName: 'Группа {n}',
@@ -123,6 +127,7 @@
     confirmReconnect: 'Переподключить этот терминал?\nСеанс будет завершён.',
     confirmReconnectSelected: 'Переподключить выбранные терминалы ({count})?\nВсе сеансы будут завершены.',
     confirmReconnectSkipLocal: 'Выбранные локальные оболочки ({count}) переподключены не будут.',
+    confirmReconnectEcho: 'Переподключить SSH-терминалы с включённым эхо ({count})?\nВсе сеансы будут завершены.',
     reconnectFailedSummary: 'Не удалось переподключиться: {names}',
     confirmDeleteSshConnection: 'Удалить SSH-подключение «{name}»?',
     confirmDeleteSshConnectionFolder: 'Удалить папку подключений «{name}»?\n{connections} подключение(я) и {subfolders} вложенная(ые) папка(и) будут удалены навсегда.',

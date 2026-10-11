@@ -43,6 +43,10 @@
     echoEnableAllTitle: '在所有終端機上啟用回顯',
     echoToggleAllTitle: '切換每個終端機的回顯狀態',
     echoPasteAllTitle: '貼上到所有已啟用回顯的終端機',
+    echoReconnect: '重新連線已啟用回顯',
+    echoReconnectTitle: '重新連線所有已啟用回顯的 SSH 終端機',
+    echoReconnectNone: '沒有已啟用回顯的終端機。',
+    echoReconnectNoSsh: '沒有已啟用回顯的 SSH 終端機可供重新連線。',
 
     // ── Group bar ────────────────────────────────────────────────────────────
     groupDefaultName: '群組 {n}',
@@ -123,6 +127,7 @@
     confirmReconnect: '重新連線此終端機？\n目前的工作階段將被終止。',
     confirmReconnectSelected: '重新連線 {count} 個已選取的終端機？\n所有工作階段將被終止。',
     confirmReconnectSkipLocal: '已選取範圍中的 {count} 個本地 shell 不會重新連線。',
+    confirmReconnectEcho: '重新連線 {count} 個已啟用回顯的 SSH 終端機？\n所有工作階段將被終止。',
     reconnectFailedSummary: '無法重新連線：{names}',
     confirmDeleteSshConnection: '刪除 SSH 連線「{name}」？',
     confirmDeleteSshConnectionFolder: '刪除連線資料夾「{name}」？\n其中 {connections} 個連線和 {subfolders} 個子資料夾將被永久刪除。',

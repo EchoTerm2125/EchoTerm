@@ -43,6 +43,10 @@
     echoEnableAllTitle: 'Habilitar eco en todas las terminales',
     echoToggleAllTitle: 'Alternar el estado de eco de cada terminal',
     echoPasteAllTitle: 'Pegar en todas las terminales con eco habilitado',
+    echoReconnect: 'Reconectar con eco',
+    echoReconnectTitle: 'Reconectar todas las terminales SSH con eco habilitado',
+    echoReconnectNone: 'No hay terminales con eco habilitado.',
+    echoReconnectNoSsh: 'No hay terminales SSH con eco habilitado para reconectar.',
 
     // ── Group bar ────────────────────────────────────────────────────────────
     groupDefaultName: 'Grupo {n}',
@@ -123,6 +127,7 @@
     confirmReconnect: '¿Reconectar esta terminal?\nLa sesión se terminará.',
     confirmReconnectSelected: '¿Reconectar {count} terminales seleccionadas?\nTodas las sesiones terminarán.',
     confirmReconnectSkipLocal: 'Los {count} shells locales de la selección no se reconectarán.',
+    confirmReconnectEcho: '¿Reconectar {count} terminales SSH con eco habilitado?\nTodas las sesiones terminarán.',
     reconnectFailedSummary: 'No se pudo reconectar: {names}',
     confirmDeleteSshConnection: '¿Eliminar la conexión SSH "{name}"?',
     confirmDeleteSshConnectionFolder: '¿Eliminar la carpeta de conexión "{name}"?\n{connections} conexión(es) y {subfolders} subcarpeta(s) se eliminarán permanentemente.',

@@ -43,6 +43,10 @@
     echoEnableAllTitle: '모든 터미널에서 에코 활성화',
     echoToggleAllTitle: '각 터미널의 에코 상태 전환',
     echoPasteAllTitle: '에코가 활성화된 모든 터미널에 붙여넣기',
+    echoReconnect: '에코 활성 다시 연결',
+    echoReconnectTitle: '에코가 활성화된 모든 SSH 터미널 다시 연결',
+    echoReconnectNone: '에코가 활성화된 터미널이 없습니다.',
+    echoReconnectNoSsh: '다시 연결할 에코가 활성화된 SSH 터미널이 없습니다.',
 
     // ── Group bar ────────────────────────────────────────────────────────────
     groupDefaultName: '그룹 {n}',
@@ -123,6 +127,7 @@
     confirmReconnect: '이 터미널을 다시 연결할까요?\n현재 세션이 종료됩니다.',
     confirmReconnectSelected: '선택한 터미널 {count}개를 다시 연결할까요?\n모든 세션이 종료됩니다.',
     confirmReconnectSkipLocal: '선택 항목 중 로컬 셸 {count}개는 다시 연결되지 않습니다.',
+    confirmReconnectEcho: '에코가 활성화된 SSH 터미널 {count}개를 다시 연결할까요?\n모든 세션이 종료됩니다.',
     reconnectFailedSummary: '다시 연결하지 못했습니다: {names}',
     confirmDeleteSshConnection: 'SSH 연결 "{name}"을(를) 삭제할까요?',
     confirmDeleteSshConnectionFolder: '연결 폴더 "{name}"을(를) 삭제할까요?\n{connections}개의 연결과 {subfolders}개의 하위 폴더가 영구 삭제됩니다.',

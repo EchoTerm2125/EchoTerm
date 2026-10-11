@@ -474,8 +474,9 @@ import './icons';
 
   // Reconnect several panes: one confirm for the batch (always shown, so the
   // local shells it will not touch are accounted for) and one summary of
-  // whatever failed.
-  function reconnectTabs(ids) {
+  // whatever failed. `confirmKey` names the confirm's first line; callers with
+  // a non-Selected-tabs target set pass their own wording.
+  function reconnectTabs(ids, confirmKey) {
     const sshIds = ids.filter((tid) => {
       const ts = state.terminals.get(tid);
       return ts && ts.shell === 'ssh' && ts.connectionId;
@@ -483,7 +484,7 @@ import './icons';
     if (sshIds.length === 0) return;
     const skippedLocals = ids.length - sshIds.length;
 
-    let message = App._p('confirmReconnectSelected', sshIds.length);
+    let message = App._p(confirmKey || 'confirmReconnectSelected', sshIds.length);
     if (skippedLocals > 0) message += '\n' + App._p('confirmReconnectSkipLocal', skippedLocals);
 
     App.Menus.showConfirm(message, () => {
