@@ -71,6 +71,131 @@
     });
   }
 
+  // ── Shared submenu structure ──────────────────────────────────────────────
+  // Every context submenu is a pinned Filter box over a height-capped scrolling
+  // option list. buildSubmenu() rebuilds both from option entries; typing in the
+  // Filter box narrows the list to matching options.
+  const SUBMENU_FILTER = '.context-submenu-filter';
+  const SUBMENU_OPTIONS = '.context-submenu-options';
+  const SUBMENU_EMPTY = '.context-submenu-empty';
+
+  function buildSubmenu(submenu, entries) {
+    submenu.innerHTML = '';
+
+    const filter = document.createElement('input');
+    filter.type = 'text';
+    filter.className = 'context-submenu-filter';
+    filter.placeholder = App.__('submenuFilterPlaceholder');
+    filter.setAttribute('aria-label', filter.placeholder);
+    filter.autocomplete = 'off';
+    filter.spellcheck = false;
+    // A click here must not bubble to the document's close-all-menus listener.
+    filter.addEventListener('click', (e) => e.stopPropagation());
+    filter.addEventListener('input', () => applySubmenuFilter(submenu));
+    filter.addEventListener('keydown', (e) => onSubmenuFilterKeydown(submenu, e));
+    submenu.appendChild(filter);
+
+    const list = document.createElement('div');
+    list.className = 'context-submenu-options';
+    for (const { label, onClick } of entries) {
+      const btn = document.createElement('button');
+      btn.textContent = label;
+      btn.addEventListener('click', onClick);
+      list.appendChild(btn);
+    }
+    submenu.appendChild(list);
+
+    const empty = document.createElement('div');
+    empty.className = 'context-submenu-empty hidden';
+    empty.textContent = App.__('submenuFilterNoMatches');
+    submenu.appendChild(empty);
+  }
+
+  // Case-insensitive substring match over the option labels; options that do
+  // not match are hidden and the empty text stands in for an empty list.
+  function applySubmenuFilter(submenu) {
+    const filter = submenu.querySelector(SUBMENU_FILTER);
+    const list = submenu.querySelector(SUBMENU_OPTIONS);
+    const empty = submenu.querySelector(SUBMENU_EMPTY);
+    if (!filter || !list || !empty) return;
+    const q = (filter.value || '').trim().toLowerCase();
+    let visible = 0;
+    for (const btn of list.children) {
+      const match = !q || (btn.textContent || '').toLowerCase().includes(q);
+      btn.classList.toggle('hidden', !match);
+      btn.classList.remove('highlighted');
+      if (match) visible++;
+    }
+    empty.classList.toggle('hidden', visible > 0);
+  }
+
+  function visibleSubmenuOptions(submenu) {
+    return [...submenu.querySelectorAll(`${SUBMENU_OPTIONS} button:not(.hidden)`)];
+  }
+
+  function highlightSubmenuOption(submenu, idx) {
+    const opts = visibleSubmenuOptions(submenu);
+    if (opts.length === 0) return;
+    const clamped = Math.max(0, Math.min(idx, opts.length - 1));
+    for (const o of opts) o.classList.remove('highlighted');
+    opts[clamped].classList.add('highlighted');
+    opts[clamped].scrollIntoView({ block: 'nearest' });
+  }
+
+  function onSubmenuFilterKeydown(submenu, e) {
+    const opts = visibleSubmenuOptions(submenu);
+    const idx = opts.findIndex((b) => b.classList.contains('highlighted'));
+    switch (e.key) {
+      case 'ArrowDown':
+        e.preventDefault();
+        highlightSubmenuOption(submenu, idx + 1);
+        break;
+      case 'ArrowUp':
+        e.preventDefault();
+        highlightSubmenuOption(submenu, idx - 1);
+        break;
+      case 'Enter': {
+        // The highlighted option, else the only/first visible one.
+        e.preventDefault();
+        const target = idx >= 0 ? opts[idx] : opts[0];
+        if (target) target.click();
+        break;
+      }
+      case 'Escape':
+        e.preventDefault();
+        if (e.currentTarget.value) {
+          e.currentTarget.value = '';
+          applySubmenuFilter(submenu);
+          highlightSubmenuOption(submenu, 0);
+        } else {
+          closeAllMenus();
+        }
+        break;
+    }
+  }
+
+  // The Filter box takes focus as the submenu opens so typing filters right
+  // away. Focus also pins the flyout open (see bindSubmenuHover).
+  function openSubmenu(submenu) {
+    submenu.classList.remove('hidden');
+    const filter = submenu.querySelector(SUBMENU_FILTER);
+    if (filter) filter.focus();
+    applySubmenuFilter(submenu);
+    positionSubmenu(submenu);
+  }
+
+  // A closed submenu never keeps stale filter text: reopening always shows the
+  // full list.
+  function closeSubmenu(submenu) {
+    if (!submenu) return;
+    submenu.classList.add('hidden');
+    const filter = submenu.querySelector(SUBMENU_FILTER);
+    if (filter && filter.value) {
+      filter.value = '';
+      applySubmenuFilter(submenu);
+    }
+  }
+
   function bindContextMenu(paneEl, id) {
     const echoBtn = $('#ctxEcho');
     const echoSep = $('#ctxEchoSep');
@@ -146,30 +271,29 @@
     // Populate "Move to Group" submenu
     const currentGroupId = state.terminalGroups.get(id);
     const submenu = App.tabCtxGroupSubmenu;
-    submenu.innerHTML = '';
-    let hasOtherGroups = false;
+    const entries = [];
     for (const gid of state.groupOrder) {
       if (gid === currentGroupId) continue;
       const g = state.groups.get(gid);
       if (!g) continue;
-      hasOtherGroups = true;
-      const btn = document.createElement('button');
-      btn.textContent = g.name;
-      btn.addEventListener('click', () => {
-        closeAllMenus();
-        App.Tabs.setTabContextTargetId(null);
-        const toMove = state.selectedTabs.size > 0
-          ? [...state.selectedTabs]
-          : [id];
-        for (const tid of toMove) {
-          App.Groups.moveTerminalToGroup(tid, gid);
-        }
-        App.Tabs.clearTabSelection();
+      entries.push({
+        label: g.name,
+        onClick: () => {
+          closeAllMenus();
+          App.Tabs.setTabContextTargetId(null);
+          const toMove = state.selectedTabs.size > 0
+            ? [...state.selectedTabs]
+            : [id];
+          for (const tid of toMove) {
+            App.Groups.moveTerminalToGroup(tid, gid);
+          }
+          App.Tabs.clearTabSelection();
+        },
       });
-      submenu.appendChild(btn);
     }
+    buildSubmenu(submenu, entries);
 
-    const showMove = hasOtherGroups;
+    const showMove = entries.length > 0;
     if (App.tabCtxMoveSep) App.tabCtxMoveSep.classList.toggle('hidden', !showMove);
     if (App.tabCtxMoveItem) App.tabCtxMoveItem.classList.toggle('hidden', !showMove);
     // Ensure submenu starts hidden
@@ -239,7 +363,10 @@
     contextMenu.classList.add('hidden');
     tabContextMenu.classList.add('hidden');
     groupContextMenu.classList.add('hidden');
-    if (App.tabCtxGroupSubmenu) App.tabCtxGroupSubmenu.classList.add('hidden');
+    // Every open flyout, whoever built it (tab groups, SSH folders, …).
+    for (const sub of document.querySelectorAll('.context-submenu')) {
+      closeSubmenu(sub);
+    }
   }
 
   function bindSubmenuHover() {
@@ -249,14 +376,21 @@
 
     let hideTimer = null;
 
+    // While the Filter box has focus the user is typing into the flyout, so the
+    // hover-based hide must not pull it away mid-word.
+    const focusIsInside = () => submenu.contains(document.activeElement);
+    const hide = () => {
+      if (focusIsInside()) return;
+      closeSubmenu(submenu);
+    };
+
     trigger.addEventListener('mouseenter', () => {
       clearTimeout(hideTimer);
-      submenu.classList.remove('hidden');
-      positionSubmenu(submenu);
+      openSubmenu(submenu);
     });
 
     trigger.addEventListener('mouseleave', () => {
-      hideTimer = setTimeout(() => submenu.classList.add('hidden'), 150);
+      hideTimer = setTimeout(hide, 150);
     });
 
     submenu.addEventListener('mouseenter', () => {
@@ -264,7 +398,17 @@
     });
 
     submenu.addEventListener('mouseleave', () => {
-      hideTimer = setTimeout(() => submenu.classList.add('hidden'), 150);
+      hideTimer = setTimeout(hide, 150);
+    });
+
+    // The flyout is pinned open while it holds focus; once focus leaves, the
+    // next hover-out closes it normally.
+    submenu.addEventListener('focusout', () => {
+      setTimeout(() => {
+        if (!trigger.matches(':hover') && !submenu.matches(':hover') && !focusIsInside()) {
+          closeSubmenu(submenu);
+        }
+      }, 0);
     });
   }
 
@@ -527,6 +671,7 @@
   App.Menus = {
     bindContextMenu, showTabContextMenu, showGroupContextMenu, setupContextMenu,
     bindCloseConfirmDialog, showConfirm, bindSubmenuHover, positionContextMenu, positionSubmenu,
+    buildSubmenu, openSubmenu, closeSubmenu, applySubmenuFilter,
   };
 })();
 

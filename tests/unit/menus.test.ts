@@ -122,6 +122,111 @@ describe('Menus (menus.js)', () => {
     });
   });
 
+  describe('context submenu filter', () => {
+    function buildSub() {
+      const App = getApp();
+      const submenu = document.createElement('div');
+      submenu.className = 'context-submenu';
+      document.body.appendChild(submenu);
+      const clicked: string[] = [];
+      App.Menus.buildSubmenu(submenu, [
+        { label: 'Alpha', onClick: () => clicked.push('Alpha') },
+        { label: 'beta', onClick: () => clicked.push('beta') },
+        { label: 'Alpine', onClick: () => clicked.push('Alpine') },
+      ]);
+      return { App, submenu, clicked };
+    }
+
+    function options(submenu: HTMLElement) {
+      return [...submenu.querySelectorAll('.context-submenu-options button')];
+    }
+
+    afterEach(() => {
+      document.body.innerHTML = '';
+    });
+
+    it('builds a Filter box, an option list and hidden empty text', () => {
+      const { submenu } = buildSub();
+      expect(submenu.querySelector('.context-submenu-filter')).not.toBeNull();
+      expect(options(submenu).length).toBe(3);
+      const empty = submenu.querySelector('.context-submenu-empty') as HTMLElement;
+      expect(empty.classList.contains('hidden')).toBe(true);
+    });
+
+    it('filters options case-insensitively on substring', () => {
+      const { submenu } = buildSub();
+      const filter = submenu.querySelector('.context-submenu-filter') as HTMLInputElement;
+
+      filter.value = 'AL';
+      filter.dispatchEvent(new Event('input'));
+
+      const visible = options(submenu).filter((b) => !b.classList.contains('hidden'));
+      expect(visible.map((b) => b.textContent)).toEqual(['Alpha', 'Alpine']);
+      expect((submenu.querySelector('.context-submenu-empty') as HTMLElement).classList.contains('hidden')).toBe(true);
+    });
+
+    it('shows the empty text when nothing matches', () => {
+      const { submenu } = buildSub();
+      const filter = submenu.querySelector('.context-submenu-filter') as HTMLInputElement;
+
+      filter.value = 'zzz';
+      filter.dispatchEvent(new Event('input'));
+
+      expect(options(submenu).every((b) => b.classList.contains('hidden'))).toBe(true);
+      expect((submenu.querySelector('.context-submenu-empty') as HTMLElement).classList.contains('hidden')).toBe(false);
+    });
+
+    it('Enter activates the highlighted option, else the first visible one', () => {
+      const { submenu, clicked } = buildSub();
+      const filter = submenu.querySelector('.context-submenu-filter') as HTMLInputElement;
+
+      filter.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowDown', bubbles: true }));
+      filter.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowDown', bubbles: true }));
+      filter.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
+      expect(clicked).toEqual(['beta']);
+
+      // No highlight (e.g. after re-filtering) → Enter takes the first visible.
+      clicked.length = 0;
+      filter.dispatchEvent(new Event('input'));
+      filter.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
+      expect(clicked).toEqual(['Alpha']);
+    });
+
+    it('Escape clears the filter first, then closes the menu', () => {
+      const { submenu } = buildSub();
+      const filter = submenu.querySelector('.context-submenu-filter') as HTMLInputElement;
+
+      filter.value = 'zzz';
+      filter.dispatchEvent(new Event('input'));
+      filter.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
+      expect(filter.value).toBe('');
+      expect(options(submenu).every((b) => !b.classList.contains('hidden'))).toBe(true);
+      expect(submenu.classList.contains('hidden')).toBe(false);
+
+      filter.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
+      expect(submenu.classList.contains('hidden')).toBe(true);
+    });
+
+    it('closeSubmenu clears stale filter text on close', () => {
+      const { App, submenu } = buildSub();
+      const filter = submenu.querySelector('.context-submenu-filter') as HTMLInputElement;
+
+      filter.value = 'al';
+      filter.dispatchEvent(new Event('input'));
+      App.Menus.closeSubmenu(submenu);
+
+      expect(submenu.classList.contains('hidden')).toBe(true);
+      expect(filter.value).toBe('');
+      expect(options(submenu).every((b) => !b.classList.contains('hidden'))).toBe(true);
+    });
+
+    it('openSubmenu focuses the Filter box', () => {
+      const { App, submenu } = buildSub();
+      App.Menus.openSubmenu(submenu);
+      expect(document.activeElement).toBe(submenu.querySelector('.context-submenu-filter'));
+    });
+  });
+
   describe('positionSubmenu', () => {
     function makeSubmenu() {
       const trigger = document.createElement('div');

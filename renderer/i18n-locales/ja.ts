@@ -307,6 +307,8 @@
     sshCtxDuplicate: '複製',
     sshCtxDuplicateSelected: '選択項目を複製 ({count})',
     sshCtxNoOtherFolders: '他のフォルダはありません',
+    submenuFilterPlaceholder: '絞り込み…',
+    submenuFilterNoMatches: '一致する項目がありません',
 
     // ── Settings / Options Panel ──────────────────────────────────────────────
     optionsTitleAppearance: '外観',

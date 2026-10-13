@@ -1697,22 +1697,33 @@ import {
       });
     });
 
-    // Submenu hover handling
+    // Submenu hover handling (Filter box pins the flyout open — see menus.js)
     if (sshCtxMoveItem && sshCtxFolderSubmenu) {
       let hideTimer = null;
+      const focusIsInside = () => sshCtxFolderSubmenu.contains(document.activeElement);
+      const hide = () => {
+        if (focusIsInside()) return;
+        App.Menus.closeSubmenu(sshCtxFolderSubmenu);
+      };
       sshCtxMoveItem.addEventListener('mouseenter', () => {
         clearTimeout(hideTimer);
-        sshCtxFolderSubmenu.classList.remove('hidden');
-        App.Menus.positionSubmenu(sshCtxFolderSubmenu);
+        App.Menus.openSubmenu(sshCtxFolderSubmenu);
       });
       sshCtxMoveItem.addEventListener('mouseleave', () => {
-        hideTimer = setTimeout(() => sshCtxFolderSubmenu.classList.add('hidden'), 150);
+        hideTimer = setTimeout(hide, 150);
       });
       sshCtxFolderSubmenu.addEventListener('mouseenter', () => {
         clearTimeout(hideTimer);
       });
       sshCtxFolderSubmenu.addEventListener('mouseleave', () => {
-        sshCtxFolderSubmenu.classList.add('hidden');
+        hideTimer = setTimeout(hide, 150);
+      });
+      sshCtxFolderSubmenu.addEventListener('focusout', () => {
+        setTimeout(() => {
+          if (!sshCtxMoveItem.matches(':hover') && !sshCtxFolderSubmenu.matches(':hover') && !focusIsInside()) {
+            App.Menus.closeSubmenu(sshCtxFolderSubmenu);
+          }
+        }, 0);
       });
     }
 
@@ -1801,49 +1812,53 @@ import {
         for (const id of itemIds) collectDescendants(id);
       }
 
-      sshCtxFolderSubmenu.innerHTML = '';
       // Depth-first tree order with the dialog selects' ├─ / └─ labels, so each
       // target reads exactly as the folder name does in the dialogs.
-      let hasGroups = false;
+      const entries = [];
       for (const { id: folderId, label } of folderTreeLabelEntries(folders)) {
         // Skip current parent (already here) and excluded folders
         if (itemIds.length === 1 && folderId === currentParentId) continue;
         if ((isFolderMove || isUserFolderMove) && excludedFolderIds.has(folderId)) continue;
-        hasGroups = true;
-        const btn = document.createElement('button');
-        btn.textContent = label;
-        btn.addEventListener('click', async () => {
-          sshContextMenu.classList.add('hidden');
-          if (sshCtxFolderSubmenu) sshCtxFolderSubmenu.classList.add('hidden');
-          if (isFolderMove) {
-            for (const id of itemIds) {
-              await api.sshConnectionFolderSave({ id, parentId: folderId });
+        entries.push({
+          label,
+          onClick: async () => {
+            sshContextMenu.classList.add('hidden');
+            App.Menus.closeSubmenu(sshCtxFolderSubmenu);
+            if (isFolderMove) {
+              for (const id of itemIds) {
+                await api.sshConnectionFolderSave({ id, parentId: folderId });
+              }
+            } else if (isUserFolderMove) {
+              for (const id of itemIds) {
+                await api.sshUserFolderSave({ id, parentId: folderId });
+              }
+            } else if (isUserMove) {
+              for (const id of itemIds) {
+                await api.sshUserSave({ id, folderId });
+              }
+            } else {
+              for (const id of itemIds) {
+                await api.sshConnectionSave({ id, folderId });
+              }
             }
-          } else if (isUserFolderMove) {
-            for (const id of itemIds) {
-              await api.sshUserFolderSave({ id, parentId: folderId });
-            }
-          } else if (isUserMove) {
-            for (const id of itemIds) {
-              await api.sshUserSave({ id, folderId });
-            }
-          } else {
-            for (const id of itemIds) {
-              await api.sshConnectionSave({ id, folderId });
-            }
-          }
-          clearSshSelection();
-          await refreshAll();
+            clearSshSelection();
+            await refreshAll();
+          },
         });
-        sshCtxFolderSubmenu.appendChild(btn);
       }
-
-      if (!hasGroups) {
-        const hint = document.createElement('button');
-        hint.textContent = App.__('sshCtxNoOtherFolders');
-        hint.style.color = 'var(--text-muted)';
-        hint.style.fontStyle = 'italic';
-        sshCtxFolderSubmenu.appendChild(hint);
+      const noFolders = entries.length === 0;
+      if (noFolders) {
+        // Nothing to move into: say so in place of the option list.
+        entries.push({ label: App.__('sshCtxNoOtherFolders'), onClick: () => {} });
+      }
+      App.Menus.buildSubmenu(sshCtxFolderSubmenu, entries);
+      if (noFolders) {
+        const hint = sshCtxFolderSubmenu.querySelector('.context-submenu-options button');
+        if (hint) {
+          hint.style.color = 'var(--text-muted)';
+          hint.style.fontStyle = 'italic';
+          hint.disabled = true;
+        }
       }
     }
 

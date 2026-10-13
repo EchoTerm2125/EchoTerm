@@ -34,6 +34,37 @@ describe('Integration: Context Menus', () => {
       expect(g2Button).not.toBeUndefined();
     });
 
+    it('builds the submenu as a Filter box over a scrollable option list', () => {
+      App.Menus.showTabContextMenu(
+        new MouseEvent('contextmenu', { bubbles: true, clientX: 100, clientY: 200 }),
+        1
+      );
+
+      const submenu = App.tabCtxGroupSubmenu;
+      expect(submenu.querySelector('.context-submenu-filter')).not.toBeNull();
+      const list = submenu.querySelector('.context-submenu-options');
+      expect(list).not.toBeNull();
+      // Options live in the capped, scrolling list — not loose in the flyout.
+      expect(list.querySelectorAll('button').length).toBe(1);
+    });
+
+    it('narrows the option list as the Filter box is typed into', () => {
+      App.Menus.showTabContextMenu(
+        new MouseEvent('contextmenu', { bubbles: true, clientX: 100, clientY: 200 }),
+        1
+      );
+
+      const submenu = App.tabCtxGroupSubmenu;
+      const filter = submenu.querySelector('.context-submenu-filter') as HTMLInputElement;
+      filter.value = 'zzz';
+      filter.dispatchEvent(new Event('input'));
+
+      const visible = [...submenu.querySelectorAll('.context-submenu-options button')]
+        .filter((b: any) => !b.classList.contains('hidden'));
+      expect(visible.length).toBe(0);
+      expect((submenu.querySelector('.context-submenu-empty') as HTMLElement).classList.contains('hidden')).toBe(false);
+    });
+
     it('selects the right-clicked tab if not already selected', () => {
       App.Menus.showTabContextMenu(
         new MouseEvent('contextmenu', { bubbles: true, clientX: 100, clientY: 200 }),

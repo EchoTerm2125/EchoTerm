@@ -307,6 +307,8 @@
     sshCtxDuplicate: 'Dupliquer',
     sshCtxDuplicateSelected: 'Dupliquer la sélection ({count})',
     sshCtxNoOtherFolders: 'Aucun autre dossier',
+    submenuFilterPlaceholder: 'Filtrer…',
+    submenuFilterNoMatches: 'Aucun résultat',
 
     // ── Settings / Options Panel ──────────────────────────────────────────────
     optionsTitleAppearance: 'Apparence',

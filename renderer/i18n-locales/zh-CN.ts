@@ -307,6 +307,8 @@
     sshCtxDuplicate: '复制',
     sshCtxDuplicateSelected: '复制选中 ({count})',
     sshCtxNoOtherFolders: '没有其他文件夹',
+    submenuFilterPlaceholder: '筛选…',
+    submenuFilterNoMatches: '没有匹配项',
 
     // ── Settings / Options Panel ─────────────────────────────────────────────
     optionsTitleAppearance: '外观',

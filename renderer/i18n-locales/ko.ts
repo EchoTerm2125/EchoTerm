@@ -307,6 +307,8 @@
     sshCtxDuplicate: '복제',
     sshCtxDuplicateSelected: '선택 항목 복제 ({count})',
     sshCtxNoOtherFolders: '다른 폴더가 없습니다',
+    submenuFilterPlaceholder: '필터…',
+    submenuFilterNoMatches: '일치하는 항목 없음',
 
     // ── Settings / Options Panel ──────────────────────────────────────────────
     optionsTitleAppearance: '모양',

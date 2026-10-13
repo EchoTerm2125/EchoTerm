@@ -307,6 +307,8 @@
     sshCtxDuplicate: 'Çoğalt',
     sshCtxDuplicateSelected: 'Seçilenleri Çoğalt ({count})',
     sshCtxNoOtherFolders: 'Başka klasör yok',
+    submenuFilterPlaceholder: 'Filtrele…',
+    submenuFilterNoMatches: 'Eşleşme yok',
 
     // ── Settings / Options Panel ──────────────────────────────────────────────
     optionsTitleAppearance: 'Görünüm',

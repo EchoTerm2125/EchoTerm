@@ -307,6 +307,8 @@
     sshCtxDuplicate: 'Дублировать',
     sshCtxDuplicateSelected: 'Дублировать выбранные ({count})',
     sshCtxNoOtherFolders: 'Других папок нет',
+    submenuFilterPlaceholder: 'Фильтр…',
+    submenuFilterNoMatches: 'Нет совпадений',
 
     // ── Settings / Options Panel ──────────────────────────────────────────────
     optionsTitleAppearance: 'Внешний вид',

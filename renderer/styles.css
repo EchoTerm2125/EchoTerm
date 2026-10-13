@@ -1101,6 +1101,53 @@ html, body {
   transform: translateX(calc(2px * var(--ui-scale)));
 }
 
+.context-submenu button.highlighted {
+  background: var(--bg-hover);
+  color: var(--text-primary);
+  transform: translateX(calc(2px * var(--ui-scale)));
+}
+
+/* Pinned Filter box; only the option list below it scrolls */
+.context-submenu-filter {
+  width: 100%;
+  padding: calc(5px * var(--ui-scale)) calc(10px * var(--ui-scale));
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  font-size: calc(var(--app-font-size) * 0.923);
+  font-family: inherit;
+  outline: none;
+  box-sizing: border-box;
+  flex-shrink: 0;
+  margin-bottom: calc(2px * var(--ui-scale));
+  transition: border-color var(--transition), box-shadow var(--transition);
+}
+.context-submenu-filter:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-wash);
+}
+.context-submenu-filter::placeholder {
+  color: var(--text-muted);
+}
+
+/* Height-capped option list: long submenus scroll instead of growing */
+.context-submenu-options {
+  display: flex;
+  flex-direction: column;
+  gap: calc(2px * var(--ui-scale));
+  overflow-y: auto;
+  /* Hybrid clamp: a fixed cap on large windows, viewport-relative on small */
+  max-height: calc(min(320px, 60vh) * var(--ui-scale));
+}
+
+.context-submenu-empty {
+  padding: calc(10px * var(--ui-scale)) calc(12px * var(--ui-scale));
+  color: var(--text-muted);
+  font-style: italic;
+  text-align: center;
+}
+
 /* ═══ Scrollbar ═══ */
 ::-webkit-scrollbar {
   width: 6px;

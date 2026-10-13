@@ -307,6 +307,8 @@
     sshCtxDuplicate: 'Nhân bản',
     sshCtxDuplicateSelected: 'Nhân bản các mục đã chọn ({count})',
     sshCtxNoOtherFolders: 'Không có thư mục khác',
+    submenuFilterPlaceholder: 'Lọc…',
+    submenuFilterNoMatches: 'Không có kết quả',
 
     // ── Settings / Options Panel ──────────────────────────────────────────────
     optionsTitleAppearance: 'Giao diện',
