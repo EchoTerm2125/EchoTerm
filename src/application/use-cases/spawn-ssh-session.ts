@@ -10,7 +10,7 @@ import type { SessionConfigStore } from '../../domain/ports/session-config-store
 import type { SessionEvents } from '../session-events';
 import { buildSshArgs } from '../../domain/services/ssh-args';
 import { renderSessionSshConfig } from '../../domain/services/ssh-config';
-import { isPasswordPrompt, isPassphrasePrompt } from '../../domain/services/password-prompt';
+import { credentialForPrompt, type CredentialSlot } from '../../domain/services/password-prompt';
 
 export type SpawnSshSessionResult =
   | { id: number; shell: string; label: string; host: string; username: string | null; handle: PtyProcessHandle }
@@ -56,25 +56,29 @@ export class SpawnSshSession {
       const args = buildSshArgs(configPath, target.host);
       const handle = this.pty.spawn('ssh.exe', args, { cols: 80, rows: 24, cwd });
 
-      // Auto-inject password if using password auth (for the TARGET host)
-      if (target.authType === 'password' && target.password) {
-        let passwordSent = false;
+      // Auto-inject stored credentials as ssh prompts for them. Jump hops
+      // authenticate before the target (ProxyJump chains ssh processes), so the
+      // slots are in authentication order: nearest jump hop first, target last.
+      const slots: CredentialSlot[] = [
+        ...target.resolvedJumpChain.map(hop => ({
+          authType: hop.authType,
+          password: hop.password,
+          keyPassword: hop.keyPassword,
+          keyFilePath: hop.keyFilePath,
+          consumed: false,
+        })),
+        {
+          authType: target.authType,
+          password: target.password,
+          keyPassword: target.keyPassword,
+          keyFilePath: target.keyFilePath,
+          consumed: false,
+        },
+      ];
+      if (slots.some(slot => slot.password || slot.keyPassword)) {
         handle.onData((data) => {
-          if (!passwordSent && isPasswordPrompt(data)) {
-            handle.write(target.password + '\r');
-            passwordSent = true;
-          }
-        });
-      }
-
-      // Auto-inject key passphrase if using keyfile auth with stored passphrase
-      if (target.authType === 'keyfile' && target.keyPassword) {
-        let keyPassSent = false;
-        handle.onData((data) => {
-          if (!keyPassSent && isPassphrasePrompt(data)) {
-            handle.write(target.keyPassword + '\r');
-            keyPassSent = true;
-          }
+          const credential = credentialForPrompt(slots, data);
+          if (credential) handle.write(credential + '\r');
         });
       }
 

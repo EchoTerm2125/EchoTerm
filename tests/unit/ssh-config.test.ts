@@ -306,6 +306,7 @@ describe('renderSessionSshConfig', () => {
       resolvedJumpChain: [{
         host: 'bastion.example.com', username: 'jump', port: 2200,
         authType: 'keyfile', keyFilePath: 'C:\\keys\\jh_rsa',
+        password: null, keyPassword: null,
       }],
     }), null);
     expect(text).toBe(
@@ -323,8 +324,8 @@ describe('renderSessionSshConfig', () => {
   it('renders a multi-hop chain as Host blocks, nearest hop first', () => {
     const text = renderSessionSshConfig(makeResolved({
       resolvedJumpChain: [
-        { host: 'hop1.example.com', username: 'u1', port: 22, authType: 'password', keyFilePath: null },
-        { host: 'hop2.example.com', username: 'u2', port: 22, authType: 'keyfile', keyFilePath: 'C:\\keys\\k2' },
+        { host: 'hop1.example.com', username: 'u1', port: 22, authType: 'password', keyFilePath: null, password: null, keyPassword: null },
+        { host: 'hop2.example.com', username: 'u2', port: 22, authType: 'keyfile', keyFilePath: 'C:\\keys\\k2', password: null, keyPassword: null },
       ],
     }), null);
     expect(text).toBe(
@@ -393,6 +394,7 @@ describe('renderSessionSshConfig', () => {
     const withHop = makeResolved({
       resolvedJumpChain: [{
         host: 'bast?on', username: 'jump', port: 22, authType: null, keyFilePath: null,
+        password: null, keyPassword: null,
       }],
     });
     expect(() => renderSessionSshConfig(withHop, null)).toThrow(/metacharacters/);

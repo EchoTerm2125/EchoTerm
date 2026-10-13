@@ -24,12 +24,18 @@ class FakePty implements PtyGateway {
 class FakeHandle implements PtyProcessHandle {
   private exitCb: ((exitCode: number) => void) | null = null;
   written: string[] = [];
+  private dataCallbacks: ((data: string) => void)[] = [];
 
-  onData(_callback: (data: string) => void): void { /* not under test */ }
+  onData(callback: (data: string) => void): void { this.dataCallbacks.push(callback); }
   onExit(callback: (exitCode: number) => void): void { this.exitCb = callback; }
   write(data: string): void { this.written.push(data); }
   resize(_cols: number, _rows: number): void { /* not under test */ }
   kill(): void { /* not under test */ }
+
+  /** Simulate terminal output arriving from the spawned ssh process. */
+  emit(data: string): void {
+    for (const callback of this.dataCallbacks) callback(data);
+  }
 
   exit(): void {
     if (this.exitCb) this.exitCb(0);
@@ -125,5 +131,59 @@ describe('SpawnSshSession — config cleanup on exit', () => {
     expect('error' in result).toBe(true);
     expect(store.removed).toEqual([store.written[0].path]);
     expect(events.exited).toBe(0);
+  });
+});
+
+describe('SpawnSshSession — credential auto-injection', () => {
+  function spawn(target: ResolvedConnection): FakeHandle {
+    const pty = new FakePty();
+    const useCase = new SpawnSshSession(fakeConnections(target), pty, new FakeConfigStore());
+    const result = useCase.execute('c1', 1, '/home', makeEvents());
+    if ('error' in result) throw new Error(result.error);
+    return pty.handles[0];
+  }
+
+  it('injects the jump host’s stored key password before the target’s', () => {
+    const handle = spawn(makeTarget({
+      authType: 'keyfile', password: null, keyFilePath: 'C:\\keys\\target', keyPassword: 'target-kp',
+      resolvedJumpChain: [{
+        host: 'bastion.example', username: 'jump', port: 22,
+        authType: 'keyfile', keyFilePath: 'C:\\keys\\jump', password: null, keyPassword: 'jump-kp',
+      }],
+    }));
+
+    // ProxyJump: the jump hop authenticates first, its prompt arrives first
+    handle.emit("Enter passphrase for key 'C:\\keys\\jump': ");
+    expect(handle.written).toEqual(['jump-kp\r']);
+
+    handle.emit("Enter passphrase for key 'C:\\keys\\target': ");
+    expect(handle.written).toEqual(['jump-kp\r', 'target-kp\r']);
+  });
+
+  it('injects stored passwords in authentication order (jump host, then target)', () => {
+    const handle = spawn(makeTarget({
+      authType: 'password', password: 'target-pw',
+      resolvedJumpChain: [{
+        host: 'bastion.example', username: 'jump', port: 22,
+        authType: 'password', password: 'jump-pw', keyFilePath: null, keyPassword: null,
+      }],
+    }));
+
+    handle.emit('Password: ');
+    handle.emit('Password: ');
+    expect(handle.written).toEqual(['jump-pw\r', 'target-pw\r']);
+  });
+
+  it('does not inject anything when no credentials are stored', () => {
+    const handle = spawn(makeTarget({ password: null }));
+    handle.emit('Password: ');
+    expect(handle.written).toEqual([]);
+  });
+
+  it('does not resend a rejected credential — the user takes over', () => {
+    const handle = spawn(makeTarget());
+    handle.emit('Password: ');
+    handle.emit('Password: ');
+    expect(handle.written).toEqual(['pw\r']);
   });
 });

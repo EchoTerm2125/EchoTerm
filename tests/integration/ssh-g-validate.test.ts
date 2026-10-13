@@ -31,6 +31,7 @@ describe.skipIf(!sshAvailable())('ssh -G against a generated session config', ()
     resolvedJumpChain: [{
       host: 'bastion.internal', username: 'jump', port: 2201,
       authType: 'password', keyFilePath: null,
+      password: null, keyPassword: null,
     }],
     hostKeyAlgorithms: '+ssh-rsa', kexAlgorithms: null, pubkeyAcceptedAlgorithms: null,
     ciphers: null, macs: null, caSignatureAlgorithms: null, compression: null,
@@ -81,6 +82,7 @@ describe.skipIf(!sshAvailable())('ssh -G against a generated session config', ()
       resolvedJumpChain: [{
         host: 'bastion.internal', username: 'jump', port: 2201,
         authType: 'keyfile', keyFilePath: jumpKey,
+        password: null, keyPassword: null,
       }],
     }, null));
 

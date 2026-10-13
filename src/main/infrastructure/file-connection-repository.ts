@@ -48,6 +48,8 @@ export class FileConnectionRepository implements ConnectionRepository {
           port: jh.port,
           authType: jh.authType ?? null,
           keyFilePath: jh.keyFilePath ?? null,
+          password: null,
+          keyPassword: null,
         });
         break;
       }
@@ -68,6 +70,8 @@ export class FileConnectionRepository implements ConnectionRepository {
         port: hop.port || 22,
         authType: hopUser ? hopUser.authType : null,
         keyFilePath: hopUser ? hopUser.keyFilePath : null,
+        password: hopUser?.password ?? null,
+        keyPassword: hopUser?.keyPassword ?? null,
       });
       current = hop;
     }

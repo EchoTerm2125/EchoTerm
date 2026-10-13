@@ -1,5 +1,14 @@
 // Unit tests for src/domain/services/password-prompt.ts
-import { isPasswordPrompt, isPassphrasePrompt } from '../../src/domain/services/password-prompt';
+import {
+  credentialForPrompt,
+  isPasswordPrompt,
+  isPassphrasePrompt,
+  type CredentialSlot,
+} from '../../src/domain/services/password-prompt';
+
+function slot(partial: Partial<CredentialSlot> = {}): CredentialSlot {
+  return { authType: null, password: null, keyPassword: null, keyFilePath: null, consumed: false, ...partial };
+}
 
 describe('isPasswordPrompt', () => {
   it('matches "Password:" (capitalized prompt)', () => {
@@ -34,5 +43,48 @@ describe('isPassphrasePrompt', () => {
 
   it('does not match a plain password prompt', () => {
     expect(isPassphrasePrompt('Password: ')).toBe(false);
+  });
+});
+
+describe('credentialForPrompt', () => {
+  it('returns the first unused password slot for a password prompt', () => {
+    const slots = [slot({ authType: 'password', password: 'hop-pw' }), slot({ authType: 'password', password: 'target-pw' })];
+    expect(credentialForPrompt(slots, 'Password: ')).toBe('hop-pw');
+    expect(credentialForPrompt(slots, 'Password: ')).toBe('target-pw');
+    expect(credentialForPrompt(slots, 'Password: ')).toBeNull();
+  });
+
+  it('attributes a passphrase prompt to the key file it names', () => {
+    const slots = [
+      slot({ authType: 'keyfile', keyFilePath: 'C:\\keys\\jump', keyPassword: 'jump-kp' }),
+      slot({ authType: 'keyfile', keyFilePath: 'C:\\keys\\target', keyPassword: 'target-kp' }),
+    ];
+    expect(credentialForPrompt(slots, "Enter passphrase for key 'C:\\keys\\target': ")).toBe('target-kp');
+    expect(slots[1].consumed).toBe(true);
+    expect(slots[0].consumed).toBe(false);
+  });
+
+  it('matches key paths across separators and case', () => {
+    const slots = [slot({ authType: 'keyfile', keyFilePath: 'C:\\Keys\\id_rsa', keyPassword: 'kp' })];
+    expect(credentialForPrompt(slots, "Enter passphrase for key 'c:/keys/id_rsa': ")).toBe('kp');
+  });
+
+  it('falls back to slot order when the prompt names no key file', () => {
+    const slots = [slot({ authType: 'keyfile', keyFilePath: 'C:\\keys\\a', keyPassword: 'first' })];
+    expect(credentialForPrompt(slots, 'Enter passphrase')).toBe('first');
+  });
+
+  it('ignores slots whose auth type does not match the prompt', () => {
+    const keyOnly = [slot({ authType: 'keyfile', keyFilePath: 'C:\\keys\\a', keyPassword: 'kp' })];
+    expect(credentialForPrompt(keyOnly, 'Password: ')).toBeNull();
+    expect(keyOnly[0].consumed).toBe(false);
+
+    const pwOnly = [slot({ authType: 'password', password: 'pw' })];
+    expect(credentialForPrompt(pwOnly, "Enter passphrase for key 'C:\\keys\\a': ")).toBeNull();
+    expect(pwOnly[0].consumed).toBe(false);
+  });
+
+  it('returns null for output that is not a credential prompt', () => {
+    expect(credentialForPrompt([slot({ authType: 'password', password: 'pw' })], 'Welcome to Ubuntu')).toBeNull();
   });
 });

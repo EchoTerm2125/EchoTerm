@@ -77,6 +77,9 @@ export interface ResolvedJumpHost {
   port: number;
   authType: AuthType | null;
   keyFilePath: string | null;
+  /** Stored credentials of the jump host's User — a manual jump host has none. */
+  password: string | null;
+  keyPassword: string | null;
 }
 
 /** Why a jump chain could not be resolved: a reference loop or a missing reference. */

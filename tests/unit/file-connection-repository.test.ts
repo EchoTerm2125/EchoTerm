@@ -42,14 +42,14 @@ describe('FileConnectionRepository.findResolvedById — jump chain', () => {
     }));
     const resolved = repo.findResolvedById('c1');
     expect(resolved.resolvedJumpChain).toEqual([
-      { host: 'bastion', username: 'jump', port: 2222, authType: 'password', keyFilePath: null },
+      { host: 'bastion', username: 'jump', port: 2222, authType: 'password', keyFilePath: null, password: null, keyPassword: null },
     ]);
     expect(resolved.jumpChainError).toBeUndefined();
   });
 
   it('resolves a reference hop with the referenced connection’s user auth', () => {
     const repo = makeRepo(data({
-      users: [{ id: 'u1', name: 'JumpUser', username: 'jump', authType: 'keyfile', keyFilePath: 'C:\\keys\\j.key' }],
+      users: [{ id: 'u1', name: 'JumpUser', username: 'jump', authType: 'keyfile', keyFilePath: 'C:\\keys\\j.key', keyPassword: 'jump-kp' }],
       connections: [
         { id: 'c1', name: 'A', host: 'a.example', port: 22, jumpHost: { type: 'reference', connectionId: 'c2' } },
         { id: 'c2', name: 'Bastion', host: 'b.example', port: 2201, userId: 'u1' },
@@ -57,9 +57,20 @@ describe('FileConnectionRepository.findResolvedById — jump chain', () => {
     }));
     const resolved = repo.findResolvedById('c1');
     expect(resolved.resolvedJumpChain).toEqual([
-      { host: 'b.example', username: 'jump', port: 2201, authType: 'keyfile', keyFilePath: 'C:\\keys\\j.key' },
+      { host: 'b.example', username: 'jump', port: 2201, authType: 'keyfile', keyFilePath: 'C:\\keys\\j.key', password: null, keyPassword: 'jump-kp' },
     ]);
     expect(resolved.jumpChainError).toBeUndefined();
+  });
+
+  it('carries a reference hop’s stored password', () => {
+    const repo = makeRepo(data({
+      users: [{ id: 'u1', name: 'JumpUser', username: 'jump', authType: 'password', password: 'jump-pw' }],
+      connections: [
+        { id: 'c1', name: 'A', host: 'a.example', port: 22, jumpHost: { type: 'reference', connectionId: 'c2' } },
+        { id: 'c2', name: 'Bastion', host: 'b.example', port: 22, userId: 'u1' },
+      ],
+    }));
+    expect(repo.findResolvedById('c1').resolvedJumpChain[0].password).toBe('jump-pw');
   });
 
   it('walks a multi-hop chain: reference to a connection that has its own jump', () => {
