@@ -1039,11 +1039,11 @@ html, body {
   align-items: center;
   justify-content: space-between;
   padding: calc(6px * var(--ui-scale)) calc(12px * var(--ui-scale));
-  border-radius: 4px;
+  border-radius: var(--radius-sm);
   font-size: calc(var(--app-font-size) * 0.923);
   color: var(--text-primary);
   cursor: pointer;
-  transition: background var(--transition);
+  transition: background var(--transition), color var(--transition);
   user-select: none;
 }
 
@@ -1051,10 +1051,23 @@ html, body {
   background: var(--bg-hover);
 }
 
+/* Keep the trigger lit with an accent wash while its flyout is open */
+.context-submenu-trigger:has(.context-submenu:not(.hidden)) {
+  background: var(--accent-wash);
+  color: var(--accent);
+}
+
 .submenu-arrow {
   font-size: calc(var(--app-font-size) * 0.692);
   color: var(--text-muted);
   margin-left: calc(16px * var(--ui-scale));
+  transition: color var(--transition), transform var(--transition);
+}
+
+.context-submenu-trigger:hover .submenu-arrow,
+.context-submenu-trigger:has(.context-submenu:not(.hidden)) .submenu-arrow {
+  color: var(--accent);
+  transform: translateX(calc(2px * var(--ui-scale)));
 }
 
 .context-submenu {
@@ -1064,16 +1077,23 @@ html, body {
   margin-left: 2px;
   background: var(--bg-surface);
   border: 1px solid var(--border);
-  border-radius: 10px;
-  padding: calc(4px * var(--ui-scale));
+  border-radius: var(--radius-lg);
+  padding: calc(5px * var(--ui-scale));
   z-index: 310;
-  min-width: calc(150px * var(--ui-scale));
+  min-width: calc(160px * var(--ui-scale));
   width: max-content;
   box-shadow: var(--shadow-lg), var(--top-highlight);
   display: flex;
   flex-direction: column;
-  gap: calc(2px * var(--ui-scale));
-  animation: menuPop 0.12s ease;
+  gap: calc(3px * var(--ui-scale));
+  transform-origin: top left;
+  animation: submenuPop 0.14s cubic-bezier(0.2, 0.9, 0.3, 1.2);
+}
+
+/* Flyout slides in from the parent trigger's edge */
+@keyframes submenuPop {
+  from { opacity: 0; transform: translateX(calc(-6px * var(--ui-scale))) scale(0.97); }
+  to   { opacity: 1; transform: translateX(0) scale(1); }
 }
 
 .context-submenu.hidden {
@@ -1092,25 +1112,27 @@ html, body {
   color: var(--text-primary);
   font-size: calc(var(--app-font-size) * 0.923);
   cursor: pointer;
-  transition: background var(--transition), transform var(--transition);
+  transition: background var(--transition), color var(--transition),
+              transform var(--transition), box-shadow var(--transition);
 }
 
 .context-submenu button:hover {
   background: var(--bg-hover);
   color: var(--text-primary);
-  transform: translateX(calc(2px * var(--ui-scale)));
 }
 
+/* Keyboard-highlighted option: accent wash + leading accent bar */
 .context-submenu button.highlighted {
-  background: var(--bg-hover);
-  color: var(--text-primary);
+  background: var(--accent-wash);
+  color: var(--accent);
+  box-shadow: inset 2px 0 0 var(--accent);
   transform: translateX(calc(2px * var(--ui-scale)));
 }
 
 /* Pinned Filter box; only the option list below it scrolls */
 .context-submenu-filter {
   width: 100%;
-  padding: calc(5px * var(--ui-scale)) calc(10px * var(--ui-scale));
+  padding: calc(6px * var(--ui-scale)) calc(10px * var(--ui-scale));
   border: 1px solid var(--border);
   border-radius: var(--radius-sm);
   background: var(--bg-primary);
@@ -1120,8 +1142,10 @@ html, body {
   outline: none;
   box-sizing: border-box;
   flex-shrink: 0;
-  margin-bottom: calc(2px * var(--ui-scale));
   transition: border-color var(--transition), box-shadow var(--transition);
+}
+.context-submenu-filter:hover:not(:focus) {
+  border-color: color-mix(in srgb, var(--accent) 40%, var(--border));
 }
 .context-submenu-filter:focus {
   border-color: var(--accent);
@@ -1141,9 +1165,22 @@ html, body {
   max-height: calc(min(320px, 60vh) * var(--ui-scale));
 }
 
+/* Slim scrollbar inside the option list */
+.context-submenu-options::-webkit-scrollbar {
+  width: 4px;
+}
+.context-submenu-options::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 2px;
+}
+.context-submenu-options::-webkit-scrollbar-thumb:hover {
+  background: var(--text-muted);
+}
+
 .context-submenu-empty {
-  padding: calc(10px * var(--ui-scale)) calc(12px * var(--ui-scale));
+  padding: calc(12px * var(--ui-scale)) calc(16px * var(--ui-scale));
   color: var(--text-muted);
+  font-size: calc(var(--app-font-size) * 0.846);
   font-style: italic;
   text-align: center;
 }
