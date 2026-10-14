@@ -300,4 +300,73 @@ describe('Menus (menus.js)', () => {
       expect(submenu.style.top).toBe('');
     });
   });
+
+  describe('submenu hover pinning', () => {
+    const HOVER_DELAY = 200; // the 150ms hide timer plus slack
+
+    function bind() {
+      const App = getApp();
+      const trigger = document.createElement('div');
+      trigger.className = 'context-submenu-trigger';
+      const submenu = document.createElement('div');
+      submenu.className = 'context-submenu hidden';
+      trigger.appendChild(submenu);
+      document.body.appendChild(trigger);
+      App.Menus.buildSubmenu(submenu, [
+        { label: 'Alpha', onClick: () => {} },
+        { label: 'beta', onClick: () => {} },
+      ]);
+      App.Menus.bindSubmenuHover(trigger, submenu);
+      return { trigger, submenu };
+    }
+
+    const filterOf = (submenu: HTMLElement) =>
+      submenu.querySelector('.context-submenu-filter') as HTMLInputElement;
+
+    it('hover-opened flyout closes when the mouse leaves, despite Filter focus', async () => {
+      const { trigger, submenu } = bind();
+
+      trigger.dispatchEvent(new MouseEvent('mouseenter'));
+      expect(submenu.classList.contains('hidden')).toBe(false);
+      // openSubmenu focuses the Filter box…
+      expect(document.activeElement).toBe(filterOf(submenu));
+
+      trigger.dispatchEvent(new MouseEvent('mouseleave'));
+      await new Promise((r) => setTimeout(r, HOVER_DELAY));
+
+      // …but hover-close must still work: no other menu item is hovered.
+      expect(submenu.classList.contains('hidden')).toBe(true);
+    });
+
+    it('typing into the Filter box pins the flyout open against hover-close', async () => {
+      const { trigger, submenu } = bind();
+
+      trigger.dispatchEvent(new MouseEvent('mouseenter'));
+      filterOf(submenu).value = 'al';
+      filterOf(submenu).dispatchEvent(new Event('input'));
+
+      trigger.dispatchEvent(new MouseEvent('mouseleave'));
+      await new Promise((r) => setTimeout(r, HOVER_DELAY));
+
+      expect(submenu.classList.contains('hidden')).toBe(false);
+    });
+
+    it('a later hover-open is hover-dismissable again after a typing pin', async () => {
+      const App = getApp();
+      const { trigger, submenu } = bind();
+
+      // Pin via typing, then close through the real path (which clears the pin).
+      trigger.dispatchEvent(new MouseEvent('mouseenter'));
+      filterOf(submenu).dispatchEvent(new Event('input'));
+      App.Menus.closeSubmenu(submenu);
+      expect(submenu.classList.contains('hidden')).toBe(true);
+
+      // Re-open by hovering only: no typing, so it must close on hover-out.
+      trigger.dispatchEvent(new MouseEvent('mouseenter'));
+      trigger.dispatchEvent(new MouseEvent('mouseleave'));
+      await new Promise((r) => setTimeout(r, HOVER_DELAY));
+
+      expect(submenu.classList.contains('hidden')).toBe(true);
+    });
+  });
 });

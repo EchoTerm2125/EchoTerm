@@ -90,8 +90,17 @@
     filter.autocomplete = 'off';
     filter.spellcheck = false;
     // A click here must not bubble to the document's close-all-menus listener.
-    filter.addEventListener('click', (e) => e.stopPropagation());
-    filter.addEventListener('input', () => applySubmenuFilter(submenu));
+    // Clicking is also intent to type, so the flyout pins open (see bindSubmenuHover).
+    filter.addEventListener('click', (e) => {
+      e.stopPropagation();
+      setSubmenuPinned(submenu, true);
+    });
+    filter.addEventListener('input', () => {
+      applySubmenuFilter(submenu);
+      // Typing is intent to use the flyout: pin it so a wandering mouse cannot
+      // close it mid-search (see bindSubmenuHover).
+      setSubmenuPinned(submenu, true);
+    });
     filter.addEventListener('keydown', (e) => onSubmenuFilterKeydown(submenu, e));
     submenu.appendChild(filter);
 
@@ -175,11 +184,15 @@
   }
 
   // The Filter box takes focus as the submenu opens so typing filters right
-  // away. Focus also pins the flyout open (see bindSubmenuHover).
-  function openSubmenu(submenu) {
+  // away. A caller that does not pass `pinned` gets focus-driven pinning (see
+  // setSubmenuPinned); hover-driven callers pass `false` so the flyout stays
+  // hover-dismissable even though the Filter box holds focus.
+  function openSubmenu(submenu, pinned) {
     submenu.classList.remove('hidden');
     const filter = submenu.querySelector(SUBMENU_FILTER);
     if (filter) filter.focus();
+    const focusPinned = filter ? document.activeElement === filter : false;
+    setSubmenuPinned(submenu, typeof pinned === 'boolean' ? pinned : focusPinned);
     applySubmenuFilter(submenu);
     positionSubmenu(submenu);
   }
@@ -189,11 +202,23 @@
   function closeSubmenu(submenu) {
     if (!submenu) return;
     submenu.classList.add('hidden');
+    setSubmenuPinned(submenu, false);
     const filter = submenu.querySelector(SUBMENU_FILTER);
     if (filter && filter.value) {
       filter.value = '';
       applySubmenuFilter(submenu);
     }
+  }
+
+  // While a submenu is "pinned" open, hovering off it must not close it, so the
+  // user can type into the Filter box. A hover-opened flyout is never pinned,
+  // even though openSubmenu focuses the Filter box; the pin only comes from the
+  // user clicking/typing into the box, or from a keyboard-only open.
+  const PINNED_SUBMENUS = new WeakSet();
+  function setSubmenuPinned(submenu, pinned) {
+    if (!submenu) return;
+    if (pinned) PINNED_SUBMENUS.add(submenu);
+    else PINNED_SUBMENUS.delete(submenu);
   }
 
   function bindContextMenu(paneEl, id) {
@@ -369,24 +394,32 @@
     }
   }
 
-  function bindSubmenuHover() {
-    const trigger = App.tabCtxMoveItem;
-    const submenu = App.tabCtxGroupSubmenu;
+  // Wire one context-menu item to its flyout. Hovering the trigger opens it;
+  // leaving the trigger and its flyout closes it again — unless the flyout was
+  // opened by the keyboard (see setSubmenuPinned), in which case focus in the
+  // Filter box keeps it open for typing. Defaults to the tab "Move to Group"
+  // item; the SSH panel passes its own trigger/flyout pair.
+  function bindSubmenuHover(trigger = App.tabCtxMoveItem, submenu = App.tabCtxGroupSubmenu) {
     if (!trigger || !submenu) return;
 
     let hideTimer = null;
 
-    // While the Filter box has focus the user is typing into the flyout, so the
-    // hover-based hide must not pull it away mid-word.
-    const focusIsInside = () => submenu.contains(document.activeElement);
+    // Hovering off only closes a flyout that focus is not pinning open.
     const hide = () => {
-      if (focusIsInside()) return;
+      if (PINNED_SUBMENUS.has(submenu)) return;
       closeSubmenu(submenu);
     };
+    const focusIsInside = () => submenu.contains(document.activeElement);
 
     trigger.addEventListener('mouseenter', () => {
       clearTimeout(hideTimer);
-      openSubmenu(submenu);
+      // A fresh hover-open stays hover-dismissable even though the Filter box
+      // takes focus below. But when the user is already typing in the open
+      // flyout, crossing the trigger with the pointer must not drop the pin.
+      const typingHere = !submenu.classList.contains('hidden')
+        && PINNED_SUBMENUS.has(submenu)
+        && submenu.contains(document.activeElement);
+      if (!typingHere) openSubmenu(submenu, false);
     });
 
     trigger.addEventListener('mouseleave', () => {
@@ -401,7 +434,7 @@
       hideTimer = setTimeout(hide, 150);
     });
 
-    // The flyout is pinned open while it holds focus; once focus leaves, the
+    // The flyout stays pinned open while it holds focus; once focus leaves, the
     // next hover-out closes it normally.
     submenu.addEventListener('focusout', () => {
       setTimeout(() => {

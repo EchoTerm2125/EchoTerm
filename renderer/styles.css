@@ -1135,7 +1135,7 @@ html, body {
   padding: calc(6px * var(--ui-scale)) calc(10px * var(--ui-scale));
   border: 1px solid var(--border);
   border-radius: var(--radius-sm);
-  background: var(--bg-primary);
+  background: var(--bg-surface);
   color: var(--text-primary);
   font-size: calc(var(--app-font-size) * 0.923);
   font-family: inherit;
@@ -1149,7 +1149,6 @@ html, body {
 }
 .context-submenu-filter:focus {
   border-color: var(--accent);
-  box-shadow: 0 0 0 3px var(--accent-wash);
 }
 .context-submenu-filter::placeholder {
   color: var(--text-muted);

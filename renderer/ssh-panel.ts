@@ -1698,34 +1698,7 @@ import {
     });
 
     // Submenu hover handling (Filter box pins the flyout open — see menus.js)
-    if (sshCtxMoveItem && sshCtxFolderSubmenu) {
-      let hideTimer = null;
-      const focusIsInside = () => sshCtxFolderSubmenu.contains(document.activeElement);
-      const hide = () => {
-        if (focusIsInside()) return;
-        App.Menus.closeSubmenu(sshCtxFolderSubmenu);
-      };
-      sshCtxMoveItem.addEventListener('mouseenter', () => {
-        clearTimeout(hideTimer);
-        App.Menus.openSubmenu(sshCtxFolderSubmenu);
-      });
-      sshCtxMoveItem.addEventListener('mouseleave', () => {
-        hideTimer = setTimeout(hide, 150);
-      });
-      sshCtxFolderSubmenu.addEventListener('mouseenter', () => {
-        clearTimeout(hideTimer);
-      });
-      sshCtxFolderSubmenu.addEventListener('mouseleave', () => {
-        hideTimer = setTimeout(hide, 150);
-      });
-      sshCtxFolderSubmenu.addEventListener('focusout', () => {
-        setTimeout(() => {
-          if (!sshCtxMoveItem.matches(':hover') && !sshCtxFolderSubmenu.matches(':hover') && !focusIsInside()) {
-            App.Menus.closeSubmenu(sshCtxFolderSubmenu);
-          }
-        }, 0);
-      });
-    }
+    App.Menus.bindSubmenuHover(sshCtxMoveItem, sshCtxFolderSubmenu);
 
     // Hide on outside click
     document.addEventListener('click', () => {
