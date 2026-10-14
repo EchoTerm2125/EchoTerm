@@ -407,6 +407,12 @@
     // Hovering off only closes a flyout that focus is not pinning open.
     const hide = () => {
       if (PINNED_SUBMENUS.has(submenu)) return;
+      // The flyout is a child of the trigger, so while the pointer is anywhere
+      // on the trigger the user is still hovering this item. The flyout's pop-in
+      // animation sweeps it left under the cursor, which can fire a stray
+      // mouseleave on the flyout right after opening; without this check that
+      // stray leave would close the flyout out from under the pointer.
+      if (trigger.matches(':hover')) return;
       closeSubmenu(submenu);
     };
     const focusIsInside = () => submenu.contains(document.activeElement);
