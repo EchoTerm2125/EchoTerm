@@ -1184,6 +1184,170 @@ html, body {
   text-align: center;
 }
 
+/* ═══ Searchable dialog dropdown ═══ */
+/* Same Filter box over a height-capped option list as .context-submenu, but the
+   popup lives in a body-level layer and is positioned `fixed`: the dialog box
+   scrolls (`overflow-y: auto`), so an inline popup would be clipped at its edge. */
+.ssh-select {
+  position: relative;
+}
+
+.ssh-select-trigger {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: calc(8px * var(--ui-scale));
+  width: 100%;
+  padding: calc(6px * var(--ui-scale)) calc(10px * var(--ui-scale));
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  font-size: calc(var(--app-font-size) * 0.923);
+  font-family: inherit;
+  text-align: left;
+  cursor: pointer;
+  outline: none;
+  transition: border-color var(--transition), box-shadow var(--transition);
+}
+.ssh-select-trigger:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-wash);
+}
+.ssh-select-label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.ssh-select-label.ssh-select-placeholder {
+  color: var(--text-muted);
+}
+.ssh-select-arrow {
+  flex-shrink: 0;
+  font-size: calc(var(--app-font-size) * 0.692);
+  color: var(--text-muted);
+  transition: color var(--transition), transform var(--transition);
+}
+.ssh-select-trigger[aria-expanded="true"] .ssh-select-arrow {
+  color: var(--accent);
+  transform: rotate(180deg);
+}
+
+.ssh-select-layer {
+  position: fixed;
+  inset: 0;
+  z-index: 320;
+  pointer-events: none;
+}
+
+.ssh-select-popup {
+  position: fixed;
+  z-index: 321;
+  min-width: calc(160px * var(--ui-scale));
+  display: flex;
+  flex-direction: column;
+  gap: calc(3px * var(--ui-scale));
+  padding: calc(5px * var(--ui-scale));
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg), var(--top-highlight);
+  pointer-events: auto;
+}
+
+/* Pinned Filter box; only the option list below it scrolls */
+.ssh-select-filter {
+  width: 100%;
+  padding: calc(6px * var(--ui-scale)) calc(10px * var(--ui-scale));
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--bg-surface);
+  color: var(--text-primary);
+  font-size: calc(var(--app-font-size) * 0.923);
+  font-family: inherit;
+  outline: none;
+  box-sizing: border-box;
+  flex-shrink: 0;
+  transition: border-color var(--transition), box-shadow var(--transition);
+}
+.ssh-select-filter:hover:not(:focus) {
+  border-color: color-mix(in srgb, var(--accent) 40%, var(--border));
+}
+.ssh-select-filter:focus {
+  border-color: var(--accent);
+}
+.ssh-select-filter::placeholder {
+  color: var(--text-muted);
+}
+
+.ssh-select-options {
+  display: flex;
+  flex-direction: column;
+  gap: calc(2px * var(--ui-scale));
+  overflow-y: auto;
+  max-height: calc(min(320px, 60vh) * var(--ui-scale));
+}
+.ssh-select-options::-webkit-scrollbar {
+  width: 4px;
+}
+.ssh-select-options::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 2px;
+}
+.ssh-select-options::-webkit-scrollbar-thumb:hover {
+  background: var(--text-muted);
+}
+
+.ssh-select-option {
+  display: block;
+  width: 100%;
+  text-align: left;
+  white-space: nowrap;
+  padding: calc(6px * var(--ui-scale)) calc(12px * var(--ui-scale));
+  border: none;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--text-primary);
+  font-size: calc(var(--app-font-size) * 0.923);
+  font-family: inherit;
+  cursor: pointer;
+  transition: background var(--transition), color var(--transition),
+              transform var(--transition), box-shadow var(--transition);
+}
+.ssh-select-option:hover {
+  background: var(--bg-hover);
+}
+/* Keyboard-highlighted option: accent wash + leading accent bar */
+.ssh-select-option.highlighted {
+  background: var(--accent-wash);
+  color: var(--accent);
+  box-shadow: inset 2px 0 0 var(--accent);
+  transform: translateX(calc(2px * var(--ui-scale)));
+}
+.ssh-select-option[aria-selected="true"] {
+  color: var(--accent);
+}
+.ssh-select-option.disabled {
+  color: var(--text-muted);
+  opacity: 0.55;
+  cursor: default;
+}
+
+.ssh-select-header {
+  padding: calc(4px * var(--ui-scale)) calc(12px * var(--ui-scale));
+  color: var(--text-muted);
+  font-size: calc(var(--app-font-size) * 0.846);
+  white-space: nowrap;
+}
+
+.ssh-select-empty {
+  padding: calc(12px * var(--ui-scale)) calc(16px * var(--ui-scale));
+  color: var(--text-muted);
+  font-size: calc(var(--app-font-size) * 0.846);
+  font-style: italic;
+  text-align: center;
+}
+
 /* ═══ Scrollbar ═══ */
 ::-webkit-scrollbar {
   width: 6px;

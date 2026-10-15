@@ -108,6 +108,19 @@ function flush() {
   return new Promise((resolve) => setTimeout(resolve, 0));
 }
 
+// The six data-driven dialog dropdowns are custom searchable selects: the chosen
+// value lives in a hidden input under the field name, the rows in a body-level
+// popup (see docs/adr/0013-searchable-dialog-dropdowns.md).
+function selectValue(name: string): string | null {
+  const input = document.querySelector(`#sshDialogBody input[name="${name}"]`) as HTMLInputElement | null;
+  return input ? input.value : null;
+}
+
+function selectPopup(name: string): HTMLElement | null {
+  const root = document.querySelector(`#sshDialogBody .ssh-select[data-select-name="${name}"]`) as HTMLElement | null;
+  return root ? document.getElementById(root.dataset.selectPopup as string) : null;
+}
+
 function getConfirmElements() {
   return {
     dialog: document.getElementById('confirmDialog'),
@@ -198,17 +211,13 @@ describe('SshPanel (ssh-panel.ts)', () => {
     it('preselects the folder when adding a connection from a folder context menu', async () => {
       await getApp().SshPanel.showConnectionDialog(undefined, 'f1');
 
-      const select = document.querySelector('#sshDialogBody select[name="connGroup"]');
-      expect(select).not.toBeNull();
-      expect(select.value).toBe('f1');
+      expect(selectValue('connGroup')).toBe('f1');
     });
 
     it('preselects the parent folder when adding a sub folder', async () => {
       await getApp().SshPanel.showConnectionFolderDialog(undefined, 'f1');
 
-      const select = document.querySelector('#sshDialogBody select[name="groupParent"]');
-      expect(select).not.toBeNull();
-      expect(select.value).toBe('f1');
+      expect(selectValue('groupParent')).toBe('f1');
     });
   });
 
@@ -422,8 +431,7 @@ describe('SshPanel (ssh-panel.ts)', () => {
       addParentBtn().click();
       await flush();
 
-      const select = document.querySelector('#sshDialogBody select[name="groupParent"]') as HTMLSelectElement;
-      expect(select.value).toBe('p1');
+      expect(selectValue('groupParent')).toBe('p1');
     });
 
     it('preselects the shared folder when adding a parent folder for multiple connections', async () => {
@@ -445,8 +453,7 @@ describe('SshPanel (ssh-panel.ts)', () => {
       addParentBtn().click();
       await flush();
 
-      const select = document.querySelector('#sshDialogBody select[name="groupParent"]') as HTMLSelectElement;
-      expect(select.value).toBe('f1');
+      expect(selectValue('groupParent')).toBe('f1');
     });
   });
 
@@ -525,8 +532,7 @@ describe('SshPanel (ssh-panel.ts)', () => {
       const dialog = document.getElementById('sshDialog');
       expect(dialog.classList.contains('hidden')).toBe(false);
       expect(dialog.dataset.type).toBe('connection');
-      const groupSelect = document.querySelector('#sshDialogBody select[name="connGroup"]') as HTMLSelectElement;
-      expect(groupSelect.value).toBe('');
+      expect(selectValue('connGroup')).toBe('');
     });
 
     it('Add Folder opens the folder dialog with no parent preselected', async () => {
@@ -538,8 +544,7 @@ describe('SshPanel (ssh-panel.ts)', () => {
       const dialog = document.getElementById('sshDialog');
       expect(dialog.classList.contains('hidden')).toBe(false);
       expect(dialog.dataset.type).toBe('connectionFolder');
-      const parentSelect = document.querySelector('#sshDialogBody select[name="groupParent"]') as HTMLSelectElement;
-      expect(parentSelect.value).toBe('');
+      expect(selectValue('groupParent')).toBe('');
     });
 
     it('Add User opens the user dialog', async () => {
@@ -839,13 +844,16 @@ describe('SshPanel (ssh-panel.ts)', () => {
       ]);
       await App.SshPanel.showConnectionDialog();
 
-      const select = document.querySelector('#sshDialogBody select[name="connUser"]');
-      const groups = select.querySelectorAll('optgroup');
-      expect(groups.length).toBe(2);
-      expect(groups[0].label).toBe('└─ Team A');
-      expect(groups[0].querySelector('[value="u1"]')).not.toBeNull();
-      expect(groups[1].label).toBe(App.__('sshFormUserUngrouped'));
-      expect(groups[1].querySelector('[value="u2"]')).not.toBeNull();
+      const popup = selectPopup('connUser');
+      // Folder names are non-selectable headers; only users are rows.
+      const structure = [...popup.querySelectorAll('.ssh-select-header, .ssh-select-option')].map(el => el.textContent);
+      expect(structure).toEqual([
+        App.__('sshFormSelectUser'),
+        '└─ Team A',
+        '\u00A0\u00A0\u00A0Admin (admin)',
+        App.__('sshFormUserUngrouped'),
+        'Ops (ops)',
+      ]);
     });
 
     it('shows the full user folder tree (indented by depth) in the connection dialog', async () => {
@@ -862,16 +870,16 @@ describe('SshPanel (ssh-panel.ts)', () => {
       ]);
       await App.SshPanel.showConnectionDialog();
 
-      const select = document.querySelector('#sshDialogBody select[name="connUser"]');
-      const labels = [...select.querySelectorAll('optgroup')].map(g => g.label);
+      const popup = selectPopup('connUser');
+      const labels = [...popup.querySelectorAll('.ssh-select-header')].map(h => h.textContent);
       expect(labels[0]).toBe('└─ Team A');
       expect(labels[1]).toBe('\u00A0\u00A0\u00A0└─ Sub');
       expect(labels[2]).toBe(App.__('sshFormUserUngrouped'));
-      expect(select.querySelector('[value="u2"]')).not.toBeNull();
-      expect(select.querySelector('[value="u3"]')).not.toBeNull();
+      expect(popup.querySelector('.ssh-select-option[data-value="u2"]')).not.toBeNull();
+      expect(popup.querySelector('.ssh-select-option[data-value="u3"]')).not.toBeNull();
       // User names are indented to line up with their folder name column
-      expect(select.querySelector('[value="u1"]').textContent).toBe('\u00A0\u00A0\u00A0Admin (admin)');
-      expect(select.querySelector('[value="u2"]').textContent).toBe('\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0Root (root)');
+      expect(popup.querySelector('.ssh-select-option[data-value="u1"]').textContent).toBe('\u00A0\u00A0\u00A0Admin (admin)');
+      expect(popup.querySelector('.ssh-select-option[data-value="u2"]').textContent).toBe('\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0Root (root)');
     });
 
     it('keeps the parent folder name visible even when it has no direct members', async () => {
@@ -888,11 +896,11 @@ describe('SshPanel (ssh-panel.ts)', () => {
       ]);
       await App.SshPanel.showConnectionDialog();
 
-      const select = document.querySelector('#sshDialogBody select[name="connUser"]');
-      const labels = [...select.querySelectorAll('optgroup')].map(g => g.label);
+      const popup = selectPopup('connUser');
+      const labels = [...popup.querySelectorAll('.ssh-select-header')].map(h => h.textContent);
       expect(labels[0]).toBe('└─ Team A');
       expect(labels[1]).toBe('\u00A0\u00A0\u00A0└─ Sub');
-      expect(select.querySelector('[value="u1"]')).not.toBeNull();
+      expect(popup.querySelector('.ssh-select-option[data-value="u1"]')).not.toBeNull();
     });
 
     it('preselects the right-clicked user folder as parent when adding a sub user folder', async () => {
@@ -912,9 +920,7 @@ describe('SshPanel (ssh-panel.ts)', () => {
       menuBtn.click();
       await flush();
 
-      const select = document.querySelector('#sshDialogBody select[name="userFolderParent"]') as HTMLSelectElement;
-      expect(select).not.toBeNull();
-      expect(select.value).toBe('uf1');
+      expect(selectValue('userFolderParent')).toBe('uf1');
     });
 
     it('shows the connection folder tree (all selectable) in the connection dialog', async () => {
@@ -928,15 +934,15 @@ describe('SshPanel (ssh-panel.ts)', () => {
       ]);
       await App.SshPanel.showConnectionDialog();
 
-      const select = document.querySelector('#sshDialogBody select[name="connGroup"]') as HTMLSelectElement;
-      const opts = [...select.options].filter(o => o.value !== '');
+      const popup = selectPopup('connGroup');
+      const opts = [...popup.querySelectorAll('.ssh-select-option')].filter(o => o.dataset.value !== '');
       expect(opts.map(o => o.textContent)).toEqual([
         '├─ Dev',
         '└─ Prod',
         '\u00A0\u00A0\u00A0├─ EU',
         '\u00A0\u00A0\u00A0└─ US',
       ]);
-      for (const o of opts) expect(o.disabled).toBe(false);
+      for (const o of opts) expect(o.getAttribute('aria-disabled')).toBeNull();
     });
 
     it('shows the user folder tree (all selectable) in the user dialog', async () => {
@@ -948,10 +954,10 @@ describe('SshPanel (ssh-panel.ts)', () => {
       ]);
       await App.SshPanel.showUserDialog();
 
-      const select = document.querySelector('#sshDialogBody select[name="userFolder"]') as HTMLSelectElement;
-      const opts = [...select.options].filter(o => o.value !== '');
+      const popup = selectPopup('userFolder');
+      const opts = [...popup.querySelectorAll('.ssh-select-option')].filter(o => o.dataset.value !== '');
       expect(opts.map(o => o.textContent)).toEqual(['└─ Team A', '\u00A0\u00A0\u00A0└─ Sub']);
-      for (const o of opts) expect(o.disabled).toBe(false);
+      for (const o of opts) expect(o.getAttribute('aria-disabled')).toBeNull();
     });
 
     it('disables self and descendants in the connection folder parent select', async () => {
@@ -964,11 +970,11 @@ describe('SshPanel (ssh-panel.ts)', () => {
       ]);
       await App.SshPanel.showConnectionFolderDialog('g1');
 
-      const select = document.querySelector('#sshDialogBody select[name="groupParent"]') as HTMLSelectElement;
-      const opt = (id) => [...select.options].find(o => o.value === id);
-      expect(opt('g1').disabled).toBe(true);
-      expect(opt('g2').disabled).toBe(true);
-      expect(opt('g3').disabled).toBe(false);
+      const popup = selectPopup('groupParent');
+      const opt = (id) => popup.querySelector(`.ssh-select-option[data-value="${id}"]`);
+      expect(opt('g1').getAttribute('aria-disabled')).toBe('true');
+      expect(opt('g2').getAttribute('aria-disabled')).toBe('true');
+      expect(opt('g3').getAttribute('aria-disabled')).toBeNull();
     });
 
     it('disables self and descendants in the user folder parent select', async () => {
@@ -981,11 +987,54 @@ describe('SshPanel (ssh-panel.ts)', () => {
       ]);
       await App.SshPanel.showUserFolderDialog('uf1');
 
-      const select = document.querySelector('#sshDialogBody select[name="userFolderParent"]') as HTMLSelectElement;
-      const opt = (id) => [...select.options].find(o => o.value === id);
-      expect(opt('uf1').disabled).toBe(true);
-      expect(opt('uf2').disabled).toBe(true);
-      expect(opt('uf3').disabled).toBe(false);
+      const popup = selectPopup('userFolderParent');
+      const opt = (id) => popup.querySelector(`.ssh-select-option[data-value="${id}"]`);
+      expect(opt('uf1').getAttribute('aria-disabled')).toBe('true');
+      expect(opt('uf2').getAttribute('aria-disabled')).toBe('true');
+      expect(opt('uf3').getAttribute('aria-disabled')).toBeNull();
+    });
+
+    it('narrows the option list as the user types in the Filter box', async () => {
+      const App = getApp();
+      const api = window.api;
+      vi.mocked(api.sshConnectionFolderList).mockResolvedValue([
+        { id: 'g1', name: 'Prod', parentId: null },
+        { id: 'g2', name: 'Staging', parentId: null },
+      ]);
+      await App.SshPanel.showConnectionDialog();
+
+      const root = document.querySelector('#sshDialogBody .ssh-select[data-select-name="connGroup"]') as HTMLElement;
+      (root.querySelector('.ssh-select-trigger') as HTMLElement).click();
+
+      const popup = selectPopup('connGroup');
+      expect(popup.classList.contains('hidden')).toBe(false);
+
+      const filter = popup.querySelector('.ssh-select-filter') as HTMLInputElement;
+      filter.value = 'staging';
+      filter.dispatchEvent(new Event('input', { bubbles: true }));
+
+      const option = (value) => popup.querySelector(`.ssh-select-option[data-value="${value}"]`);
+      expect(option('g2').classList.contains('hidden')).toBe(false);
+      expect(option('g1').classList.contains('hidden')).toBe(true);
+    });
+
+    it('writes the chosen row into the hidden input and shows it on the trigger', async () => {
+      const App = getApp();
+      const api = window.api;
+      vi.mocked(api.sshConnectionFolderList).mockResolvedValue([
+        { id: 'g1', name: 'Prod', parentId: null },
+      ]);
+      await App.SshPanel.showConnectionDialog();
+
+      const root = document.querySelector('#sshDialogBody .ssh-select[data-select-name="connGroup"]') as HTMLElement;
+      (root.querySelector('.ssh-select-trigger') as HTMLElement).click();
+
+      const popup = selectPopup('connGroup');
+      (popup.querySelector('.ssh-select-option[data-value="g1"]') as HTMLElement).click();
+
+      expect(selectValue('connGroup')).toBe('g1');
+      expect((root.querySelector('.ssh-select-label') as HTMLElement).textContent).toBe('└─ Prod');
+      expect(popup.classList.contains('hidden')).toBe(true);
     });
 
     it('shows the user folder context menu actions', async () => {
