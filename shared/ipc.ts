@@ -386,8 +386,10 @@ export interface WindowApi {
   // SSH actions
   sshConnect(connectionId: string): Promise<SpawnResult>;
   /** Replace a live pane's session with a fresh one to the same Connection,
-   *  keeping the pane's id (and so its displayed content). */
-  sshReconnect(sessionId: number, connectionId: string): Promise<IpcOutcome>;
+   *  keeping the pane's id (and so its displayed content). `size` is the
+   *  pane's current geometry, so the replacement pty never needs the
+   *  resize that would make ConPTY repaint over the kept content. */
+  sshReconnect(sessionId: number, connectionId: string, size?: { cols: number; rows: number }): Promise<IpcOutcome>;
   sshOpenConnectionFolder(folderId: string): Promise<SshConnectionFolderOpen & { error?: string; errorCode?: string }>;
   sshImportConfig(filePath?: string): Promise<ImportConfigResult>;
   /** Read WinSCP's saved sites; `chooseFile` opens a picker for a WinSCP.ini. */

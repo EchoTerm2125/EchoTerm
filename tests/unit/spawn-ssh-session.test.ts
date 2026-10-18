@@ -134,6 +134,31 @@ describe('SpawnSshSession — config cleanup on exit', () => {
   });
 });
 
+describe('SpawnSshSession — spawn geometry', () => {
+  function spawnedOptions(size?: { cols: number; rows: number }): PtySpawnOptions {
+    const pty = new FakePty();
+    const useCase = new SpawnSshSession(fakeConnections(makeTarget()), pty, new FakeConfigStore());
+    const result = useCase.execute('c1', 1, '/home', makeEvents(), undefined, size);
+    if ('error' in result) throw new Error(result.error);
+    return pty.spawned[0].options;
+  }
+
+  it('defaults to 80x24 when no size is given', () => {
+    const options = spawnedOptions();
+    expect([options.cols, options.rows]).toEqual([80, 24]);
+  });
+
+  it('spawns at the pane geometry a Reconnect passes', () => {
+    const options = spawnedOptions({ cols: 132, rows: 43 });
+    expect([options.cols, options.rows]).toEqual([132, 43]);
+  });
+
+  it('falls back to 80x24 for a malformed size', () => {
+    const options = spawnedOptions({ cols: -1, rows: Number.NaN });
+    expect([options.cols, options.rows]).toEqual([80, 24]);
+  });
+});
+
 describe('SpawnSshSession — credential auto-injection', () => {
   function spawn(target: ResolvedConnection): FakeHandle {
     const pty = new FakePty();

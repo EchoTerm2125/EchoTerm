@@ -268,12 +268,12 @@ export class SshController {
    * A pane whose session already exited has no registry entry left — that is
    * the ordinary case, so a missing entry is not an error.
    */
-  reconnect(sessionId: number, connectionId: string) {
+  reconnect(sessionId: number, connectionId: string, size?: { cols: number; rows: number }) {
     const previous = this.registry.get(sessionId);
     if (previous && previous.shell !== 'ssh') {
       return { error: 'Session not found.', errorCode: 'SESSION_NOT_FOUND' };
     }
-    const result = this.startSession(connectionId, sessionId);
+    const result = this.startSession(connectionId, sessionId, size);
     if ('error' in result) return { error: result.error, errorCode: result.errorCode };
     // The replacement is registered under the same id before the old process
     // is killed, so the old exit is already superseded by startSession's guard.
@@ -287,7 +287,7 @@ export class SshController {
    * process for this id — which is how a Reconnect keeps the superseded
    * process's exit from tearing down the session that replaced it.
    */
-  private startSession(connectionId: string, sessionId: number) {
+  private startSession(connectionId: string, sessionId: number, size?: { cols: number; rows: number }) {
     const events = sessionEvents(this.registry, sessionId, this.send);
     let handle: PtyProcessHandle | null = null;
     const isSuperseded = () => {
@@ -295,7 +295,7 @@ export class SshController {
       return !!current && current.handle !== handle;
     };
     const result = this.spawnSshSessionUseCase.execute(
-      connectionId, sessionId, os.homedir(), events, isSuperseded);
+      connectionId, sessionId, os.homedir(), events, isSuperseded, size);
     if ('error' in result) return { error: result.error, errorCode: result.errorCode };
     handle = result.handle;
     this.registry.register(sessionId, { handle: result.handle, shell: 'ssh' });

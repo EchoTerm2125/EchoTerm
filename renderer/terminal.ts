@@ -429,9 +429,21 @@ import './icons';
 
     termState._reconnecting = true;
     setReconnectBusy(termState, true);
+    // Push the pane's content into the scrollback first: ConPTY renders the
+    // replacement session's output against its own fresh buffer with absolute
+    // cursor positions, so it must land on a blank viewport — otherwise those
+    // writes shred whatever the pane is showing.
+    termState.term.write('\x1b[999;1H' + '\n'.repeat(termState.term.rows));
+    // The pane's current geometry travels with the request so the replacement
+    // pty spawns at the right size — a resize after the fact would make ConPTY
+    // repaint over the content this pane keeps.
+    const { cols, rows } = termState.term;
+    const size = Number.isInteger(cols) && cols > 0 && Number.isInteger(rows) && rows > 0
+      ? { cols, rows }
+      : undefined;
     let result;
     try {
-      result = await api.sshReconnect(id, termState.connectionId);
+      result = await api.sshReconnect(id, termState.connectionId, size);
     } catch (err) {
       // A rejected invoke must still clear the busy state below, or the pane's
       // Reconnect stays disabled for the rest of the session.
@@ -446,12 +458,12 @@ import './icons';
     if (result && result.error) return { error: sshErrorText(result), errorCode: result.errorCode };
 
     const live = markSshPaneLive(termState);
-    // The replacement pty starts at 80x24: hand it the pane's real geometry and
-    // drop the superseded session's prompt/paste detection state.
+    // Drop the superseded session's prompt/paste detection state. No resize
+    // here: the replacement pty already spawned at the pane's geometry, and
+    // any resize would make ConPTY repaint over the content this pane kept.
     live.outBuf = '';
     live.pwPrompt = false;
     if (live.term.options) live.term.options.ignoreBracketedPasteMode = false;
-    api.resize(id, live.term.cols, live.term.rows);
     return { success: true };
   }
 

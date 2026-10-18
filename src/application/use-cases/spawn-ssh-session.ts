@@ -29,6 +29,7 @@ export class SpawnSshSession {
     cwd: string,
     events: SessionEvents,
     isSuperseded?: () => boolean,
+    size?: { cols: number; rows: number },
   ): SpawnSshSessionResult {
     const target = this.connections.findResolvedById(connectionId);
     if (!target) return { error: 'Connection not found.', errorCode: 'CONNECTION_NOT_FOUND' };
@@ -52,9 +53,13 @@ export class SpawnSshSession {
 
     try {
       // Spawn with the real host name (not the alias) so Host patterns in the
-      // user's own ssh config keep matching this connection
+      // user's own ssh config keep matching this connection. A Reconnect passes
+      // the pane's real geometry: spawning at the default 80x24 and resizing
+      // after would make ConPTY repaint over the content the pane kept.
       const args = buildSshArgs(configPath, target.host);
-      const handle = this.pty.spawn('ssh.exe', args, { cols: 80, rows: 24, cwd });
+      const cols = size && Number.isInteger(size.cols) && size.cols > 0 ? size.cols : 80;
+      const rows = size && Number.isInteger(size.rows) && size.rows > 0 ? size.rows : 24;
+      const handle = this.pty.spawn('ssh.exe', args, { cols, rows, cwd });
 
       // Auto-inject stored credentials as ssh prompts for them. Jump hops
       // authenticate before the target (ProxyJump chains ssh processes), so the
