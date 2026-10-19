@@ -2732,7 +2732,7 @@ import {
 
   // Inline part of a searchable dropdown: the trigger plus the hidden value
   // input. The popup is built separately and attached to the body-level layer
-  // so the dialog box's own `overflow-y: auto` cannot clip it.
+  // so the dialog's scrolling body cannot clip it.
   let sshSelectSeq = 0;
   function searchableSelectHtml(name) {
     const popupId = `sshSelectPopup${++sshSelectSeq}`;

@@ -495,15 +495,15 @@
   <!-- ═══SSH Connection Dialog (add/edit connections, users, groups)  ═══-->
   <div id="sshDialog" class="ssh-dialog-overlay hidden" data-overlay>
     <div class="ssh-dialog-box">
-      <div class="ssh-dialog-header">
+      <div class="ssh-dialog-header ssh-dialog-header-buttons">
         <span id="sshDialogTitle" data-i18n="sshDialogTitleNewConn">New Connection</span>
+        <div class="ssh-dialog-buttons">
+          <button id="sshDialogCancel" class="ssh-dialog-btn ssh-dialog-btn-cancel" data-i18n="sshDialogCancel">Cancel</button>
+          <button id="sshDialogSave" class="ssh-dialog-btn ssh-dialog-btn-save" data-i18n="sshDialogSave">Save</button>
+        </div>
       </div>
       <div id="sshDialogBody" class="ssh-dialog-body">
         <!-- Form injected by ssh-panel.js -->
-      </div>
-      <div class="ssh-dialog-buttons">
-        <button id="sshDialogCancel" class="ssh-dialog-btn ssh-dialog-btn-cancel" data-i18n="sshDialogCancel">Cancel</button>
-        <button id="sshDialogSave" class="ssh-dialog-btn ssh-dialog-btn-save" data-i18n="sshDialogSave">Save</button>
       </div>
     </div>
   </div>

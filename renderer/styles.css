@@ -2794,7 +2794,9 @@ html, body {
   border-radius: 14px;
   width: calc(380px * var(--ui-scale));
   max-height: 80vh;
-  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
   box-shadow: var(--shadow-lg), var(--top-highlight);
   animation: dialogPop 0.18s ease;
 }
@@ -2809,6 +2811,7 @@ html, body {
 }
 
 .ssh-dialog-header {
+  flex: 0 0 auto;
   padding: calc(12px * var(--ui-scale)) calc(16px * var(--ui-scale)) calc(8px * var(--ui-scale));
   font-weight: 600;
   font-size: calc(var(--app-font-size) * 1.077);
@@ -2826,6 +2829,9 @@ html, body {
 }
 
 .ssh-dialog-body {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
   padding: calc(12px * var(--ui-scale)) calc(16px * var(--ui-scale));
 }
 
