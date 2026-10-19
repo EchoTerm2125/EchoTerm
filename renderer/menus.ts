@@ -461,10 +461,18 @@
         if (!id) return;
 
         switch (action) {
+          case 'select-all': {
+            const ts = state.terminals.get(id);
+            if (ts?.term) {
+              ts.term.selectAll();
+              ts.term.focus();
+            }
+            break;
+          }
           case 'copy': {
             const ts = state.terminals.get(id);
             if (ts?.term) {
-              const sel = ts.term.getSelection();
+              const sel = App.Terminal.trimSelection(ts.term.getSelection());
               if (sel) navigator.clipboard.writeText(sel).catch(() => {});
             }
             break;

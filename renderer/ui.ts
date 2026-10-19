@@ -618,6 +618,17 @@
       if (ctrl && !e.shiftKey && e.code === 'KeyW') { e.preventDefault(); e.stopPropagation(); if (state.activeTerminalId) App.Menus.showConfirm(App.__('confirmCloseTerminal'), () => App.Terminal.closeTerminal(state.activeTerminalId), 'skipTabCloseConfirm'); return; }
       if (ctrl && !e.shiftKey && e.code === 'KeyF') { e.preventDefault(); e.stopPropagation(); App.Search.handleShortcut(false); return; }
       if (ctrl && e.shiftKey && e.code === 'KeyF') { e.preventDefault(); e.stopPropagation(); App.Search.handleShortcut(true); return; }
+      // Select All targets the Active pane, and only when that pane's own
+      // terminal input holds focus, so it never fires from a dialog, a rename
+      // box, the Find bar, or the sidebar.
+      if (ctrl && e.shiftKey && e.code === 'KeyA') {
+        const ts = state.terminals.get(state.activeTerminalId);
+        if (ts?.term && document.activeElement === ts.term.textarea) {
+          e.preventDefault(); e.stopPropagation();
+          ts.term.selectAll();
+        }
+        return;
+      }
       if (ctrl && e.key === 'Tab') { e.preventDefault(); e.stopPropagation(); App.Terminal.cycleTerminal(e.shiftKey ? -1 : 1); return; }
     }, true);
   }

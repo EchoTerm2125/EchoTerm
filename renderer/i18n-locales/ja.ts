@@ -90,6 +90,7 @@
 
     // ── Context menus ────────────────────────────────────────────────────────
     ctxCopy: 'コピー',
+    ctxSelectAll: 'すべて選択',
     ctxPaste: '貼り付け',
     ctxPasteAll: 'すべて貼り付け',
     ctxReconnect: '再接続',

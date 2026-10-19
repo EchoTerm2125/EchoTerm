@@ -90,6 +90,7 @@
 
     // ── Context menus ────────────────────────────────────────────────────────
     ctxCopy: '복사',
+    ctxSelectAll: '모두 선택',
     ctxPaste: '붙여넣기',
     ctxPasteAll: '모두 붙여넣기',
     ctxReconnect: '다시 연결',

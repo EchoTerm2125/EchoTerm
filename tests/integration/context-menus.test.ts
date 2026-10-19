@@ -319,6 +319,60 @@ describe('Integration: Context Menus', () => {
     });
   });
 
+  describe('context menu — Select All', () => {
+    function buildMenu(): HTMLElement {
+      const menu = document.getElementById('contextMenu') as HTMLElement;
+      menu.innerHTML = `<button data-action="select-all" data-i18n="ctxSelectAll"></button>`;
+      App.Menus.setupContextMenu();
+      return menu;
+    }
+
+    function open(paneEl: HTMLElement, id: number) {
+      App.Menus.bindContextMenu(paneEl, id);
+      paneEl.querySelector('.xterm-container').dispatchEvent(
+        new MouseEvent('contextmenu', { bubbles: true, clientX: 10, clientY: 10 })
+      );
+    }
+
+    it('selects the whole pane buffer and leaves the terminal focused', () => {
+      const menu = buildMenu();
+      const entry = App.state.terminals.get(1);
+      const selectAll = vi.spyOn(entry.term, 'selectAll');
+      const focus = vi.spyOn(entry.term, 'focus');
+
+      open(entry.paneEl, 1);
+      (menu.querySelector('[data-action="select-all"]') as HTMLElement).click();
+
+      expect(selectAll).toHaveBeenCalled();
+      expect(focus).toHaveBeenCalled();
+    });
+  });
+
+  describe('context menu — Copy', () => {
+    function buildMenu(): HTMLElement {
+      const menu = document.getElementById('contextMenu') as HTMLElement;
+      menu.innerHTML = `<button data-action="copy"></button>`;
+      App.Menus.setupContextMenu();
+      return menu;
+    }
+
+    it('drops the trailing blank rows a Select All copy would otherwise include', () => {
+      const menu = buildMenu();
+      const entry = App.state.terminals.get(1);
+      // What xterm's selectAll() + getSelection() yields: the content followed
+      // by every empty row below it, all the way to the bottom of the buffer.
+      vi.spyOn(entry.term, 'getSelection').mockReturnValue('prompt\n$ \n\n\n   \n');
+
+      App.Menus.bindContextMenu(entry.paneEl, 1);
+      entry.paneEl.querySelector('.xterm-container').dispatchEvent(
+        new MouseEvent('contextmenu', { bubbles: true, clientX: 10, clientY: 10 })
+      );
+      (menu.querySelector('[data-action="copy"]') as HTMLElement).click();
+
+      expect(navigator.clipboard.writeText).toHaveBeenCalledWith('prompt\n$');
+    });
+  });
+
   describe('context menu viewport clamping', () => {
     afterEach(() => {
       vi.restoreAllMocks();

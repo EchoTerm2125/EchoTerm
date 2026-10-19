@@ -90,6 +90,7 @@
 
     // ── Context menus ────────────────────────────────────────────────────────
     ctxCopy: 'Copiar',
+    ctxSelectAll: 'Selecionar tudo',
     ctxPaste: 'Colar',
     ctxPasteAll: 'Colar em todas',
     ctxReconnect: 'Reconectar',

@@ -90,6 +90,7 @@
 
     // ── Context menus ────────────────────────────────────────────────────────
     ctxCopy: 'Sao chép',
+    ctxSelectAll: 'Chọn tất cả',
     ctxPaste: 'Dán',
     ctxPasteAll: 'Dán vào tất cả',
     ctxReconnect: 'Kết nối lại',

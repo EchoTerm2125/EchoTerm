@@ -122,6 +122,18 @@ describe('Menus (menus.js)', () => {
     });
   });
 
+  describe('trimSelection', () => {
+    it('drops trailing whitespace-only rows but keeps the content', () => {
+      const App = getApp();
+      expect(App.Terminal.trimSelection('prompt\n$ \n\n\n   \n')).toBe('prompt\n$');
+    });
+
+    it('leaves a selection with no trailing whitespace untouched', () => {
+      const App = getApp();
+      expect(App.Terminal.trimSelection('a\nb')).toBe('a\nb');
+    });
+  });
+
   describe('context submenu filter', () => {
     function buildSub() {
       const App = getApp();

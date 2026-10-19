@@ -90,6 +90,7 @@
 
     // ── Context menus ────────────────────────────────────────────────────────
     ctxCopy: 'Kopyala',
+    ctxSelectAll: 'Tümünü seç',
     ctxPaste: 'Yapıştır',
     ctxPasteAll: 'Tümüne Yapıştır',
     ctxReconnect: 'Yeniden bağlan',

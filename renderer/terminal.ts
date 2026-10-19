@@ -116,7 +116,8 @@ import './icons';
       e.stopImmediatePropagation();
       const sel = term.getSelection();
       if (sel) {
-        navigator.clipboard.writeText(sel).catch(() => {});
+        const out = trimSelection(sel);
+        if (out) navigator.clipboard.writeText(out).catch(() => {});
         term.clearSelection();
         term.focus();
       } else {
@@ -699,7 +700,8 @@ import './icons';
       e.stopImmediatePropagation();
       const sel = term.getSelection();
       if (sel) {
-        navigator.clipboard.writeText(sel).catch(() => {});
+        const out = trimSelection(sel);
+        if (out) navigator.clipboard.writeText(out).catch(() => {});
         term.clearSelection();
         term.focus();
       } else {
@@ -974,6 +976,13 @@ import './icons';
     document.addEventListener('keydown', escHandler);
   }
 
+  // A copy of xterm's selectAll() spans the whole buffer, including the empty
+  // rows below the last output; pasting that would trail a run of blank lines.
+  // Drop that trailing whitespace run on every path to the clipboard.
+  function trimSelection(sel: string) {
+    return sel.replace(/\s+$/, '');
+  }
+
   // ─── Expose ─────────────────────────────────────────────────────────────────
   App.Terminal = {
     spawnTerminal, spawnSshTerminal, focusTerminal, closeTerminal, handleTerminalExit,
@@ -981,7 +990,7 @@ import './icons';
     setEchoCheckboxesVisible, cycleTerminal, pasteToTerminal, showPastePreview, noteOutput,
     paneName, connectionIdentity, paneTitle, renderPaneTitle,
     reconnectTerminal, requestReconnect, reconnectTabs,
-    refocus,
+    refocus, trimSelection,
   };
 })();
 

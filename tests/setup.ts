@@ -30,6 +30,7 @@ class MockTerminal {
   focus() { this.textarea?.focus(); }
   write(_data) { /* noop in tests */ }
   getSelection() { return ''; }
+  selectAll() { /* noop in tests */ }
   dispose() { this._disposed = true; this.textarea?.remove?.(); }
   _fireData(data) { if (this._onData) this._onData(data); }
   _fireResize(cols, rows) { if (this._onResize) this._onResize({ cols, rows }); }
