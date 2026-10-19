@@ -49,9 +49,13 @@ export function credentialForPrompt(slots: CredentialSlot[], data: string): stri
   if (isPassphrasePrompt(data)) {
     const keyPath = data.match(/passphrase for key '([^']+)'/i)?.[1];
     const available = slots.filter(s => !s.consumed && s.authType === 'keyfile' && s.keyPassword);
-    const slot = (keyPath ? available.find(s => s.keyFilePath && sameKeyPath(s.keyFilePath, keyPath)) : undefined)
-      ?? available[0]
-      ?? null;
+    // A named key is only ever served by its own slot: an unmatched path means
+    // the prompt belongs to a key we do not hold, so injecting another slot's
+    // passphrase would fail the login and burn its one-shot injection. The
+    // slot-order fallback is for prompts that arrive with no key path at all.
+    const slot = keyPath
+      ? available.find(s => s.keyFilePath && sameKeyPath(s.keyFilePath, keyPath)) ?? null
+      : available[0] ?? null;
     if (!slot) return null;
     slot.consumed = true;
     return slot.keyPassword;

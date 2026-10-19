@@ -69,6 +69,12 @@ describe('credentialForPrompt', () => {
     expect(credentialForPrompt(slots, "Enter passphrase for key 'c:/keys/id_rsa': ")).toBe('kp');
   });
 
+  it('does not inject for a named key that matches no stored slot', () => {
+    const slots = [slot({ authType: 'keyfile', keyFilePath: 'C:\\keys\\stored', keyPassword: 'kp' })];
+    expect(credentialForPrompt(slots, "Enter passphrase for key 'C:\\keys\\other': ")).toBeNull();
+    expect(slots[0].consumed).toBe(false);
+  });
+
   it('falls back to slot order when the prompt names no key file', () => {
     const slots = [slot({ authType: 'keyfile', keyFilePath: 'C:\\keys\\a', keyPassword: 'first' })];
     expect(credentialForPrompt(slots, 'Enter passphrase')).toBe('first');
