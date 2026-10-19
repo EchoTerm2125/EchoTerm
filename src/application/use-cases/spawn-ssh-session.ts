@@ -62,10 +62,14 @@ export class SpawnSshSession {
       const handle = this.pty.spawn('ssh.exe', args, { cols, rows, cwd });
 
       // Auto-inject stored credentials as ssh prompts for them. Jump hops
-      // authenticate before the target (ProxyJump chains ssh processes), so the
-      // slots are in authentication order: nearest jump hop first, target last.
+      // authenticate before the target, and a ProxyJump chain is entered from
+      // its FARTHEST hop inward (each hop's Host block is reached through the
+      // next one), while resolvedJumpChain lists hops nearest-first — so the
+      // hop slots are reversed, keeping the target last. Slots must be in
+      // authentication order because the target's password prompts carry no
+      // hop identity to disambiguate them.
       const slots: CredentialSlot[] = [
-        ...target.resolvedJumpChain.map(hop => ({
+        ...[...target.resolvedJumpChain].reverse().map(hop => ({
           authType: hop.authType,
           password: hop.password,
           keyPassword: hop.keyPassword,

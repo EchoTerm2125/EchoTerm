@@ -183,14 +183,16 @@
     }
   }
 
-  // The Filter box takes focus as the submenu opens so typing filters right
-  // away. A caller that does not pass `pinned` gets focus-driven pinning (see
-  // setSubmenuPinned); hover-driven callers pass `false` so the flyout stays
-  // hover-dismissable even though the Filter box holds focus.
+  // Only a non-hover open takes focus: the hover path passes `pinned === false`
+  // and leaves focus on the pane's terminal, so sweeping the pointer across a
+  // submenu trigger never steals keyboard input. A caller that omits `pinned`
+  // (keyboard open) focuses the Filter box so typing filters right away, and
+  // the pin then follows the focus (see setSubmenuPinned).
   function openSubmenu(submenu, pinned) {
     submenu.classList.remove('hidden');
+    const focusFilter = pinned !== false;
     const filter = submenu.querySelector(SUBMENU_FILTER);
-    if (filter) filter.focus();
+    if (focusFilter && filter) filter.focus();
     const focusPinned = filter ? document.activeElement === filter : false;
     setSubmenuPinned(submenu, typeof pinned === 'boolean' ? pinned : focusPinned);
     applySubmenuFilter(submenu);
@@ -198,11 +200,14 @@
   }
 
   // A closed submenu never keeps stale filter text: reopening always shows the
-  // full list.
+  // full list. Focus is never left inside the hidden flyout, where keystrokes
+  // would vanish silently instead of reaching the terminal.
   function closeSubmenu(submenu) {
     if (!submenu) return;
     submenu.classList.add('hidden');
     setSubmenuPinned(submenu, false);
+    const active = document.activeElement as HTMLElement | null;
+    if (active && submenu.contains(active)) active.blur();
     const filter = submenu.querySelector(SUBMENU_FILTER);
     if (filter && filter.value) {
       filter.value = '';
@@ -211,9 +216,9 @@
   }
 
   // While a submenu is "pinned" open, hovering off it must not close it, so the
-  // user can type into the Filter box. A hover-opened flyout is never pinned,
-  // even though openSubmenu focuses the Filter box; the pin only comes from the
-  // user clicking/typing into the box, or from a keyboard-only open.
+  // user can type into the Filter box. A hover-opened flyout is never pinned;
+  // the pin only comes from the user clicking/typing into the box, or from a
+  // keyboard-only open.
   const PINNED_SUBMENUS = new WeakSet();
   function setSubmenuPinned(submenu, pinned) {
     if (!submenu) return;
@@ -419,8 +424,8 @@
 
     trigger.addEventListener('mouseenter', () => {
       clearTimeout(hideTimer);
-      // A fresh hover-open stays hover-dismissable even though the Filter box
-      // takes focus below. But when the user is already typing in the open
+      // A fresh hover-open never takes focus (see openSubmenu) and stays
+      // hover-dismissable. But when the user is already typing in the open
       // flyout, crossing the trigger with the pointer must not drop the pin.
       const typingHere = !submenu.classList.contains('hidden')
         && PINNED_SUBMENUS.has(submenu)

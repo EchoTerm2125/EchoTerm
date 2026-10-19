@@ -335,13 +335,15 @@ describe('Menus (menus.js)', () => {
     const filterOf = (submenu: HTMLElement) =>
       submenu.querySelector('.context-submenu-filter') as HTMLInputElement;
 
-    it('hover-opened flyout closes when the mouse leaves, despite Filter focus', async () => {
+    it('hover-open leaves the pane focused and still closes when the mouse leaves', async () => {
       const { trigger, submenu } = bind();
+      const before = document.activeElement;
 
       trigger.dispatchEvent(new MouseEvent('mouseenter'));
       expect(submenu.classList.contains('hidden')).toBe(false);
-      // openSubmenu focuses the Filter box…
-      expect(document.activeElement).toBe(filterOf(submenu));
+      // A hover-open must not steal keyboard focus from the pane's terminal.
+      expect(document.activeElement).toBe(before);
+      expect(document.activeElement).not.toBe(filterOf(submenu));
 
       trigger.dispatchEvent(new MouseEvent('mouseleave'));
       await new Promise((r) => setTimeout(r, HOVER_DELAY));

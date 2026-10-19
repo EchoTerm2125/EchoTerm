@@ -1710,6 +1710,12 @@ import {
   }
 
   async function showSshContextMenu(e, actions) {
+    // A new right-click discards any open Move-to-Folder flyout: its pin and
+    // stale filter text must not survive into this menu. SSH right-click
+    // handlers stop propagation, so the document-level closeAllMenus never runs
+    // for them — clearing here is the only reset.
+    App.Menus.closeSubmenu(sshCtxFolderSubmenu);
+
     // Show/hide items based on available actions
     const allBtns = sshContextMenu.querySelectorAll('button');
     allBtns.forEach(b => b.classList.add('hidden'));

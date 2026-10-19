@@ -185,7 +185,7 @@ describe('SpawnSshSession — credential auto-injection', () => {
     expect(handle.written).toEqual(['jump-kp\r', 'target-kp\r']);
   });
 
-  it('injects stored passwords in authentication order (jump host, then target)', () => {
+  it('injects passwords in authentication order (jump host, then target)', () => {
     const handle = spawn(makeTarget({
       authType: 'password', password: 'target-pw',
       resolvedJumpChain: [{
@@ -197,6 +197,23 @@ describe('SpawnSshSession — credential auto-injection', () => {
     handle.emit('Password: ');
     handle.emit('Password: ');
     expect(handle.written).toEqual(['jump-pw\r', 'target-pw\r']);
+  });
+
+  it('orders a multi-hop chain farthest hop first, matching ProxyJump authentication order', () => {
+    const handle = spawn(makeTarget({
+      authType: 'password', password: 'target-pw',
+      // resolvedJumpChain is nearest-first: the target jumps via `near`, which
+      // jumps via `far`, so ssh dials and authenticates to `far` first.
+      resolvedJumpChain: [
+        { host: 'near.example', username: 'near', port: 22, authType: 'password', password: 'near-pw', keyFilePath: null, keyPassword: null },
+        { host: 'far.example', username: 'far', port: 22, authType: 'password', password: 'far-pw', keyFilePath: null, keyPassword: null },
+      ],
+    }));
+
+    handle.emit('Password: ');
+    handle.emit('Password: ');
+    handle.emit('Password: ');
+    expect(handle.written).toEqual(['far-pw\r', 'near-pw\r', 'target-pw\r']);
   });
 
   it('does not inject anything when no credentials are stored', () => {
