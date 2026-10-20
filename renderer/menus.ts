@@ -655,6 +655,7 @@
   let _confirmDialog, _confirmMessage, _confirmOk, _confirmCancel, _confirmDontShow;
   let _confirmCallback = null;
   let _confirmStorageKey = null;
+  let _confirmOnCancel = null;
 
   function initConfirmDialog() {
     if (_confirmDialog) return;
@@ -672,22 +673,27 @@
       if (_confirmCallback) _confirmCallback();
       _confirmCallback = null;
       _confirmStorageKey = null;
+      _confirmOnCancel = null;
     });
     _confirmCancel.addEventListener('click', () => {
       _confirmDialog.classList.add('hidden');
       _confirmCallback = null;
       _confirmStorageKey = null;
+      if (_confirmOnCancel) _confirmOnCancel();
+      _confirmOnCancel = null;
     });
     _confirmDialog.addEventListener('click', (e) => {
       if (e.target === _confirmDialog) {
         _confirmDialog.classList.add('hidden');
         _confirmCallback = null;
         _confirmStorageKey = null;
+        if (_confirmOnCancel) _confirmOnCancel();
+        _confirmOnCancel = null;
       }
     });
   }
 
-  function showConfirm(message, callback, storageKey, okLabelKey?) {
+  function showConfirm(message, callback, storageKey, okLabelKey?, cancelLabelKey?, onCancel?) {
     initConfirmDialog();
     if (storageKey && localStorage.getItem(storageKey) === 'true') {
       callback();
@@ -695,8 +701,10 @@
     }
     _confirmMessage.textContent = message;
     _confirmOk.textContent = App.__(okLabelKey || 'confirmClose');
+    _confirmCancel.textContent = App.__(cancelLabelKey || 'confirmCancel');
     _confirmCallback = callback;
     _confirmStorageKey = storageKey || null;
+    _confirmOnCancel = onCancel || null;
     if (_confirmDontShow) {
       _confirmDontShow.checked = false;
       // Without a storage key the dialog always warns — hide the now-pointless

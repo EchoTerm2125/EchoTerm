@@ -99,6 +99,9 @@ function scaffoldSshDom() {
     el.type = 'password';
     document.body.appendChild(el);
   }
+  // Mirror renderer/index.html: the form body is nested inside #sshDialog, so
+  // keydown events from its fields bubble up to the dialog's handler.
+  document.getElementById('sshDialog').appendChild(document.getElementById('sshDialogBody'));
   // Context menu contents (mirrors renderer/index.html)
   buildSshContextMenu(document.getElementById('sshContextMenu'));
 }
@@ -204,6 +207,170 @@ describe('SshPanel (ssh-panel.ts)', () => {
       await flush();
 
       expect(api.sshConnectionSave).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('unsaved changes guard', () => {
+    const dialogEl = () => document.getElementById('sshDialog');
+    const isHidden = (el: HTMLElement | null) => !!el && el.classList.contains('hidden');
+
+    function setField(name: string, value: string) {
+      (document.querySelector(`#sshDialogBody [name="${name}"]`) as HTMLInputElement).value = value;
+    }
+
+    function pressKey(key: string) {
+      const target = document.querySelector('#sshDialogBody input') as HTMLElement;
+      target.dispatchEvent(new KeyboardEvent('keydown', { key, bubbles: true }));
+    }
+
+    it('closes an untouched new-connection dialog without asking', async () => {
+      await getApp().SshPanel.showConnectionDialog();
+
+      (document.getElementById('sshDialogCancel') as HTMLElement).click();
+      await flush();
+
+      expect(isHidden(dialogEl())).toBe(true);
+      expect(isHidden(getConfirmElements().dialog)).toBe(true);
+    });
+
+    it('closes an untouched edit dialog without asking', async () => {
+      await getApp().SshPanel.showConnectionDialog('c1');
+
+      (document.getElementById('sshDialogCancel') as HTMLElement).click();
+      await flush();
+
+      expect(isHidden(dialogEl())).toBe(true);
+      expect(isHidden(getConfirmElements().dialog)).toBe(true);
+    });
+
+    it('asks before discarding a change and names both choices', async () => {
+      const App = getApp();
+      await App.SshPanel.showConnectionDialog();
+      setField('connName', 'VM1');
+
+      (document.getElementById('sshDialogCancel') as HTMLElement).click();
+      await flush();
+
+      const confirm = getConfirmElements();
+      expect(isHidden(dialogEl())).toBe(false);
+      expect(isHidden(confirm.dialog)).toBe(false);
+      expect(confirm.message.textContent).toBe(App.__('confirmDiscardChanges'));
+      expect(confirm.ok.textContent).toBe(App.__('confirmDiscard'));
+      expect(confirm.cancel.textContent).toBe(App.__('confirmKeepEditing'));
+    });
+
+    it('closes the dialog when Discard is chosen', async () => {
+      await getApp().SshPanel.showConnectionDialog();
+      setField('connName', 'VM1');
+
+      (document.getElementById('sshDialogCancel') as HTMLElement).click();
+      await flush();
+      (getConfirmElements().ok as HTMLElement).click();
+      await flush();
+
+      expect(isHidden(dialogEl())).toBe(true);
+    });
+
+    it('keeps the dialog open and refocuses its first field when Keep editing is chosen', async () => {
+      await getApp().SshPanel.showConnectionDialog();
+      setField('connName', 'VM1');
+
+      (document.getElementById('sshDialogCancel') as HTMLElement).click();
+      await flush();
+      (getConfirmElements().cancel as HTMLElement).click();
+      await flush();
+
+      expect(isHidden(dialogEl())).toBe(false);
+      expect(document.activeElement).toBe(document.querySelector('#sshDialogBody input[name="connName"]'));
+    });
+
+    it('asks on Escape and does not stack a second prompt', async () => {
+      const App = getApp();
+      const showConfirm = vi.spyOn(App.Menus, 'showConfirm');
+      await App.SshPanel.showConnectionDialog();
+      setField('connName', 'VM1');
+
+      pressKey('Escape');
+      await flush();
+      pressKey('Escape');
+      await flush();
+
+      expect(showConfirm).toHaveBeenCalledTimes(1);
+      expect(isHidden(dialogEl())).toBe(false);
+      expect(isHidden(getConfirmElements().dialog)).toBe(false);
+    });
+
+    it('does not save when Enter is pressed while the prompt is open', async () => {
+      const api = window.api;
+      await getApp().SshPanel.showConnectionDialog();
+      setField('connName', 'VM1');
+      setField('connHost', 'vm1.com');
+
+      (document.getElementById('sshDialogCancel') as HTMLElement).click();
+      await flush();
+      pressKey('Enter');
+      await flush();
+
+      expect(api.sshConnectionSave).not.toHaveBeenCalled();
+      expect(isHidden(dialogEl())).toBe(false);
+    });
+
+    it('does not count a password typed then erased in the edit-user dialog', async () => {
+      await getApp().SshPanel.showUserDialog('u1');
+      const password = document.querySelector('#sshDialogBody input[name="userPassword"]') as HTMLInputElement;
+      password.value = 'secret';
+      password.value = '';
+
+      (document.getElementById('sshDialogCancel') as HTMLElement).click();
+      await flush();
+
+      expect(isHidden(dialogEl())).toBe(true);
+      expect(isHidden(getConfirmElements().dialog)).toBe(true);
+    });
+
+    it('asks when the clear-password toggle is switched', async () => {
+      await getApp().SshPanel.showUserDialog('u1');
+
+      (document.getElementById('dialogClearPassword') as HTMLElement).click();
+      (document.getElementById('sshDialogCancel') as HTMLElement).click();
+      await flush();
+
+      expect(isHidden(dialogEl())).toBe(false);
+      expect(isHidden(getConfirmElements().dialog)).toBe(false);
+    });
+
+    it('guards the connection-folder dialog', async () => {
+      await getApp().SshPanel.showConnectionFolderDialog();
+      setField('groupName', 'New Folder');
+
+      (document.getElementById('sshDialogCancel') as HTMLElement).click();
+      await flush();
+
+      expect(isHidden(dialogEl())).toBe(false);
+      expect(isHidden(getConfirmElements().dialog)).toBe(false);
+    });
+
+    it('guards the user-folder dialog', async () => {
+      await getApp().SshPanel.showUserFolderDialog();
+      setField('userFolderName', 'Ops');
+
+      (document.getElementById('sshDialogCancel') as HTMLElement).click();
+      await flush();
+
+      expect(isHidden(dialogEl())).toBe(false);
+      expect(isHidden(getConfirmElements().dialog)).toBe(false);
+    });
+
+    it('lets Save close the dialog without asking', async () => {
+      await getApp().SshPanel.showConnectionDialog();
+      setField('connName', 'VM1');
+      setField('connHost', 'vm1.com');
+
+      (document.getElementById('sshDialogSave') as HTMLElement).click();
+      await flush();
+
+      expect(isHidden(dialogEl())).toBe(true);
+      expect(isHidden(getConfirmElements().dialog)).toBe(true);
     });
   });
 

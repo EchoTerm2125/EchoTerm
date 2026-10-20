@@ -54,6 +54,13 @@ import {
   let editingUserId = null;
   let editingUserFolderId = null;
 
+  // Raw form values captured when the SSH edit dialog opened, used to decide
+  // whether closing it would discard edits. Null while no dialog is open.
+  let sshDialogInitialValues: Map<string, string> | null = null;
+  // True while the unsaved-changes guard is asking; the dialog's own keyboard
+  // handling stays inert so Enter cannot save behind the prompt.
+  let discardPromptOpen = false;
+
   // Fields the dialogs mark `required`. The save handler reads the form directly
   // instead of submitting it, so it must validate these itself — `required`
   // alone would not stop a save, and would still accept whitespace.
@@ -2482,11 +2489,7 @@ import {
 
   // --- Generic Dialog
   function bindDialog() {
-    sshDialogCancel.addEventListener('click', () => {
-      pendingAdoptTarget = null;
-      disposeDialogSelects();
-      sshDialog.classList.add('hidden');
-    });
+    sshDialogCancel.addEventListener('click', guardedCloseDialog);
 
     sshDialogSave.addEventListener('click', async () => {
       const form = sshDialogBody.querySelector('form');
@@ -2639,14 +2642,71 @@ import {
       await refreshAll();
     });
 
-    // Close on Escape, submit on Enter
+    // Close on Escape, submit on Enter. While the unsaved-changes guard is
+    // asking, both stay inert: Escape must not stack a second prompt, and Enter
+    // must not save the form behind it.
     sshDialog.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape') { pendingAdoptTarget = null; disposeDialogSelects(); sshDialog.classList.add('hidden'); }
+      if (discardPromptOpen) return;
+      if (e.key === 'Escape') guardedCloseDialog();
       if (e.key === 'Enter' && e.target.tagName === 'INPUT' && e.target.closest('form')) {
         e.preventDefault();
         sshDialogSave.click();
       }
     });
+  }
+
+  // ─── Unsaved changes guard ─────────────────────────────────────────────────
+  // Snapshot every named control's raw value when the dialog opens — hidden
+  // searchable-select inputs included — and compare the same way when it
+  // closes. Raw comparison, rather than an "input event fired" flag, keeps the
+  // edit-user dialog honest: its password field starts empty and empty means
+  // "keep existing", so typing then erasing must not read as a change.
+  function formValues(form) {
+    const values = new Map<string, string>();
+    for (const [name, value] of new FormData(form).entries()) {
+      values.set(name, String(value));
+    }
+    return values;
+  }
+
+  function captureDialogSnapshot() {
+    const form = sshDialogBody.querySelector('form');
+    sshDialogInitialValues = form ? formValues(form) : null;
+  }
+
+  function dialogHasUnsavedChanges() {
+    if (!sshDialogInitialValues) return false;
+    const form = sshDialogBody.querySelector('form');
+    if (!form) return false;
+    const current = formValues(form);
+    if (current.size !== sshDialogInitialValues.size) return true;
+    for (const [name, value] of sshDialogInitialValues) {
+      if (current.get(name) !== value) return true;
+    }
+    return false;
+  }
+
+  function closeDialogNow() {
+    sshDialogInitialValues = null;
+    pendingAdoptTarget = null;
+    disposeDialogSelects();
+    sshDialog.classList.add('hidden');
+  }
+
+  function guardedCloseDialog() {
+    if (!dialogHasUnsavedChanges()) {
+      closeDialogNow();
+      return;
+    }
+    discardPromptOpen = true;
+    App.Menus.showConfirm(
+      App.__('confirmDiscardChanges'),
+      () => { discardPromptOpen = false; closeDialogNow(); },
+      null,
+      'confirmDiscard',
+      'confirmKeepEditing',
+      () => { discardPromptOpen = false; focusFirstTextInput(sshDialog); }
+    );
   }
 
   // Focus the first visible text input inside a popup
@@ -2664,6 +2724,12 @@ import {
     if (type) el.dataset.type = type;
     el.classList.remove('hidden');
     focusFirstTextInput(el);
+    // The edit dialog's form is fully built and populated by now, so this is
+    // the point where "opened with" can be captured.
+    if (el === sshDialog) {
+      discardPromptOpen = false;
+      captureDialogSnapshot();
+    }
   }
 
   // ─── Searchable dropdowns ────────────────────────────────────────────────
