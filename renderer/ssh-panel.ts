@@ -34,6 +34,7 @@ import {
   const sshPasswordCancel = $('#sshPasswordCancel');
   const sshImportDialog = $('#sshImportDialog');
   const sshImportBody = $('#sshImportBody');
+  const sshImportSelectAllBar = $('#sshImportSelectAllBar');
   const sshImportCancel = $('#sshImportCancel');
   const sshImportConfirm = $('#sshImportConfirm');
   const sshImportChooseIni = $('#sshImportChooseIni');
@@ -2148,6 +2149,7 @@ import {
         : (importMode === 'update' ? App.__('sshImportUpdateTitle') : App.__('sshImportTitle'));
     }
     sshImportConfirm.textContent = importMode === 'update' ? App.__('sshImportBtnUpdate') : App.__('sshImportBtnImport');
+    sshImportConfirm.disabled = false;
     if (sshImportChooseIni) sshImportChooseIni.classList.toggle('hidden', !isWinScp);
 
     if (result.error) {
@@ -2161,6 +2163,7 @@ import {
         ? App.__('sshImportWinScpNoSites')
         : result.error;
       sshImportBody.innerHTML = `<div class="ssh-empty-hint">${escHtml(msg)}</div>`;
+      if (sshImportSelectAllBar) sshImportSelectAllBar.classList.add('hidden');
       sshImportDialog.classList.remove('hidden');
       return;
     }
@@ -2214,6 +2217,40 @@ import {
         ${optionsField}
       `;
       sshImportBody.appendChild(globalOpts);
+    }
+
+    // --- Import selection: host name → checked, kept for the dialog's lifetime
+    // so that re-rendering the list never discards the user's choices.
+    const importSelection = new Map<string, boolean>();
+
+    // --- Select-all master control, in the bar between the header and the list
+    if (sshImportSelectAllBar) {
+      sshImportSelectAllBar.innerHTML = `
+        <label><input type="checkbox" name="importSelectAll" checked /> ${App.__('sshImportSelectAll')}</label>
+      `;
+    }
+    const selectAllCb = sshImportSelectAllBar ? sshImportSelectAllBar.querySelector('input') as HTMLInputElement : null;
+
+    // All / none / mixed, judged over the rows currently listed
+    function syncSelectAllState() {
+      const boxes = [...sshImportBody.querySelectorAll('input[name="importHost"]')] as HTMLInputElement[];
+      const checkedCount = boxes.filter(b => b.checked).length;
+      if (!selectAllCb) return;
+      selectAllCb.checked = boxes.length > 0 && checkedCount === boxes.length;
+      selectAllCb.indeterminate = checkedCount > 0 && checkedCount < boxes.length;
+      sshImportConfirm.disabled = checkedCount === 0;
+    }
+
+    if (selectAllCb) {
+      selectAllCb.addEventListener('change', () => {
+        for (const cb of [...sshImportBody.querySelectorAll('input[name="importHost"]')] as HTMLInputElement[]) {
+          cb.checked = selectAllCb.checked;
+          const row = cb.closest('.ssh-import-row') as any;
+          if (row && row._hostData) importSelection.set(row._hostData.name, cb.checked);
+        }
+        selectAllCb.indeterminate = false;
+        syncSelectAllState();
+      });
     }
 
     // Whether a global update field is selected (missing checkbox = on)
@@ -2300,8 +2337,9 @@ import {
           : '';
         const detailDisplay = `<span class="ssh-import-detail">${escHtml(target + folderInfo)}</span>`;
 
+        const checked = importSelection.get(host.name) !== false;
         row.innerHTML = `
-          <input type="checkbox" name="importHost" value="${escHtml(host.name)}" checked />
+          <input type="checkbox" name="importHost" value="${escHtml(host.name)}"${checked ? ' checked' : ''} />
           <div class="ssh-import-info">
             <div class="ssh-import-title-row">
               <span class="ssh-import-name">${escHtml(host.name)}</span>
@@ -2315,28 +2353,18 @@ import {
         row._hostData = host;
         row._importStatus = existing ? 'update' : 'new';
         row._existingConn = existing;
+        const rowCb = row.querySelector('input[name="importHost"]');
+        if (rowCb) {
+          rowCb.addEventListener('change', () => {
+            importSelection.set(host.name, rowCb.checked);
+            syncSelectAllState();
+          });
+        }
         sshImportBody.appendChild(row);
         shown++;
       }
 
-      // Auto-check jump hosts: if a host is checked and has a proxyJump in the list, check it too
-      const allRows = sshImportBody.querySelectorAll('.ssh-import-row');
-      for (const row of allRows) {
-        const host = row._hostData;
-        const cb = row.querySelector('input[name="importHost"]');
-        if (!cb || !cb.checked || !host.proxyJump) continue;
-        // Find the jump host row
-        for (const jRow of allRows) {
-          if (jRow._hostData.name === host.proxyJump) {
-            const jCb = jRow.querySelector('input[name="importHost"]');
-            if (jCb && !jCb.checked) {
-              jCb.checked = true;
-              jCb.indeterminate = true; // visual hint it was auto-checked
-            }
-            break;
-          }
-        }
-      }
+      if (sshImportSelectAllBar) sshImportSelectAllBar.classList.toggle('hidden', shown === 0);
 
       if (shown === 0) {
         const msg = importMode === 'update'
@@ -2347,6 +2375,8 @@ import {
         hint.innerHTML = escHtml(msg);
         sshImportBody.appendChild(hint);
       }
+
+      syncSelectAllState();
     }
 
     // --- Refresh the list when update fields are checked/unchecked

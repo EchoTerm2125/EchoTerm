@@ -281,6 +281,7 @@
     sshImportJumpVia: '↪ qua {host}',
     sshImportJumpNotInConfig: ' (không có trong cấu hình)',
     sshImportNoNewHosts: 'Không tìm thấy máy chủ mới. Tất cả đã được nhập.',
+    sshImportSelectAll: 'Chọn tất cả',
     sshImportNoExistingToUpdate: 'Không tìm thấy kết nối hiện có để cập nhật.',
     sshImportNoHosts: 'Không tìm thấy máy chủ nào trong cấu hình SSH.',
     sshImportWinScpTitle: 'Nhập từ WinSCP',

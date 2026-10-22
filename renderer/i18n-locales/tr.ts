@@ -281,6 +281,7 @@
     sshImportJumpVia: '↪ {host} üzerinden',
     sshImportJumpNotInConfig: ' (yapılandırmada yok)',
     sshImportNoNewHosts: 'Yeni sunucu bulunamadı. Tümü zaten içe aktarıldı.',
+    sshImportSelectAll: 'Tümünü seç',
     sshImportNoExistingToUpdate: 'Güncellenecek mevcut bağlantı bulunamadı.',
     sshImportNoHosts: 'SSH yapılandırmasında sunucu bulunamadı.',
     sshImportWinScpTitle: 'WinSCP konumundan içe aktar',

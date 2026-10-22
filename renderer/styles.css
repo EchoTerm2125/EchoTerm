@@ -2670,6 +2670,26 @@ html, body {
   font-size: calc(var(--app-font-size) * 0.769);
   color: var(--text-muted);
 }
+.ssh-import-selectall {
+  flex: 0 0 auto;
+  background: var(--bg-surface);
+  padding: calc(6px * var(--ui-scale)) calc(16px * var(--ui-scale)) calc(8px * var(--ui-scale));
+  border-bottom: 1px solid var(--border);
+}
+.ssh-import-selectall label {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: calc(6px * var(--ui-scale));
+  margin-bottom: 0;
+  font-size: calc(var(--app-font-size) * 0.846);
+  font-weight: 600;
+  color: var(--text-secondary);
+  cursor: pointer;
+}
+.ssh-import-selectall input[type="checkbox"] {
+  margin: 0;
+}
 .ssh-import-row {
   display: flex;
   align-items: flex-start;
@@ -2752,7 +2772,6 @@ html, body {
   font-size: calc(var(--app-font-size) * 0.769);
   color: var(--text-muted);
   cursor: pointer;
-  grid-column: 2;
 }
 .ssh-update-field input[type="checkbox"] {
   margin: 0;
@@ -2760,7 +2779,7 @@ html, body {
 
 .ssh-update-global {
   display: grid;
-  grid-template-columns: auto 1fr;
+  grid-template-columns: 1fr 1fr;
   align-items: center;
   column-gap: calc(8px * var(--ui-scale));
   row-gap: calc(4px * var(--ui-scale));
@@ -2769,8 +2788,7 @@ html, body {
   border-bottom: 1px solid var(--border);
 }
 .ssh-update-global-title {
-  grid-row: 1;
-  grid-column: 1;
+  grid-column: 1 / -1;
   font-size: calc(var(--app-font-size) * 0.846);
   font-weight: 600;
   color: var(--text-secondary);
@@ -2877,6 +2895,12 @@ html, body {
   font-size: calc(var(--app-font-size) * 0.923);
   cursor: pointer;
   transition: all var(--transition);
+}
+
+.ssh-dialog-btn:disabled {
+  opacity: 0.5;
+  cursor: default;
+  pointer-events: none;
 }
 
 .ssh-dialog-btn-cancel {

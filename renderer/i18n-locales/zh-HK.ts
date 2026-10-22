@@ -281,6 +281,7 @@
     sshImportJumpVia: '↪ 經由 {host}',
     sshImportJumpNotInConfig: '（不在設定中）',
     sshImportNoNewHosts: '未發現新主機。所有主機已匯入。',
+    sshImportSelectAll: '全選',
     sshImportNoExistingToUpdate: '未找到可更新的現有連線。',
     sshImportNoHosts: 'SSH 設定中找不到主機。',
     sshImportWinScpTitle: '從 WinSCP 匯入',

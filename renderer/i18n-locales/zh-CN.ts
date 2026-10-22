@@ -281,6 +281,7 @@
     sshImportJumpVia: '↪ 经由 {host}',
     sshImportJumpNotInConfig: '（不在配置中）',
     sshImportNoNewHosts: '未发现新主机。所有主机已导入。',
+    sshImportSelectAll: '全选',
     sshImportNoExistingToUpdate: '未找到可更新的现有连接。',
     sshImportNoHosts: 'SSH 配置中未找到主机。',
     sshImportWinScpTitle: '从 WinSCP 导入',

@@ -281,6 +281,7 @@
     sshImportJumpVia: '↪ {host} 경유',
     sshImportJumpNotInConfig: ' (설정에 없음)',
     sshImportNoNewHosts: '새 호스트가 없습니다. 모두 이미 가져왔습니다.',
+    sshImportSelectAll: '모두 선택',
     sshImportNoExistingToUpdate: '업데이트할 기존 연결이 없습니다.',
     sshImportNoHosts: 'SSH 설정에서 호스트를 찾을 수 없습니다.',
     sshImportWinScpTitle: 'WinSCP에서 가져오기',

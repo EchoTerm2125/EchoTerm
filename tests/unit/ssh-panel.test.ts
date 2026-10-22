@@ -6,7 +6,7 @@ import { resetTestEnv, loadModules, getApp } from '../setup.js';
 const SSH_DIV_IDS = [
   'sshSidebar', 'sshConnectionList', 'sshUserList', 'sshSplitHandle',
   'sshPasswordDialog', 'sshPasswordTitle', 'sshPasswordConfirmGroup', 'sshPasswordError',
-  'sshImportDialog', 'sshImportBody',
+  'sshImportDialog', 'sshImportSelectAllBar', 'sshImportBody',
   'sshContextMenu',
   'sshDialog', 'sshDialogTitle', 'sshDialogBody',
 ];
@@ -165,6 +165,66 @@ describe('SshPanel (ssh-panel.ts)', () => {
 
       const userList = document.getElementById('sshUserList');
       expect(userList.querySelector('.ssh-user-item[data-user-id="u1"]')).not.toBeNull();
+    });
+  });
+
+  describe('import selection', () => {
+    const HOSTS = [
+      { name: 'Alpha', host: 'a.example.com', port: 22, user: 'root', identityFile: null, proxyJump: null },
+      { name: 'Bravo', host: 'b.example.com', port: 22, user: 'root', identityFile: null, proxyJump: null },
+      { name: 'Charlie', host: 'c.example.com', port: 22, user: 'root', identityFile: null, proxyJump: null },
+    ];
+
+    const rowBoxes = () => [...document.querySelectorAll('#sshImportBody input[name="importHost"]')] as HTMLInputElement[];
+    const master = () => document.querySelector('#sshImportSelectAllBar input[name="importSelectAll"]') as HTMLInputElement;
+
+    async function openImportDialog(buttonId = 'btnSshImport') {
+      vi.mocked(window.api.sshImportConfig).mockResolvedValue({ hosts: HOSTS.map(h => ({ ...h })) } as any);
+      (document.getElementById(buttonId) as HTMLElement).click();
+      await flush();
+      await flush();
+    }
+
+    it('starts with every row and the master checked', async () => {
+      await openImportDialog();
+
+      expect(rowBoxes().length).toBe(3);
+      expect(rowBoxes().every(b => b.checked)).toBe(true);
+      expect(master().checked).toBe(true);
+      expect(master().indeterminate).toBe(false);
+    });
+
+    it('deselects every row through the master, then shows a mixed state', async () => {
+      await openImportDialog();
+
+      master().click();
+      expect(rowBoxes().some(b => b.checked)).toBe(false);
+      expect(master().checked).toBe(false);
+      expect(master().indeterminate).toBe(false);
+
+      rowBoxes()[1].click();
+      expect(master().checked).toBe(false);
+      expect(master().indeterminate).toBe(true);
+    });
+
+    it('keeps a manual uncheck when an update field re-renders the list', async () => {
+      vi.mocked(window.api.sshConnectionList).mockResolvedValue([
+        { id: 'c1', name: 'Alpha', host: 'old.example.com', port: 22, userId: null, folderId: null },
+        { id: 'c2', name: 'Bravo', host: 'old.example.com', port: 22, userId: null, folderId: null },
+      ] as any);
+      await openImportDialog('btnSshUpdate');
+
+      rowBoxes()[0].click();
+      expect(rowBoxes()[0].checked).toBe(false);
+
+      const hostField = document.getElementById('updGlobalHost') as HTMLInputElement;
+      hostField.checked = false;
+      hostField.dispatchEvent(new Event('change'));
+
+      const after = rowBoxes();
+      expect(after.length).toBe(2);
+      expect(after[0].checked).toBe(false);
+      expect(after[1].checked).toBe(true);
     });
   });
 

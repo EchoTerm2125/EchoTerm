@@ -281,6 +281,7 @@
     sshImportJumpVia: '↪ przez {host}',
     sshImportJumpNotInConfig: ' (brak w konfiguracji)',
     sshImportNoNewHosts: 'Nie znaleziono nowych hostów. Wszystkie są już zaimportowane.',
+    sshImportSelectAll: 'Zaznacz wszystko',
     sshImportNoExistingToUpdate: 'Nie znaleziono istniejących połączeń do zaktualizowania.',
     sshImportNoHosts: 'Nie znaleziono hostów w konfiguracji SSH.',
     sshImportWinScpTitle: 'Importuj z WinSCP',
