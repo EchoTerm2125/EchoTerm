@@ -138,6 +138,10 @@
     App.groupList.appendChild(tab);
     group._tabEl = tab;
 
+    setTimeout(() => {
+      tab.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'end' });
+    }, 50);
+
     if (isDefault) {
       state.activeGroupId = id;
       tab.classList.add('active');

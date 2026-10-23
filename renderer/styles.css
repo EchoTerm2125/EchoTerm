@@ -336,7 +336,7 @@ html, body {
   overflow-x: auto;
   overflow-y: hidden;
   scrollbar-width: thin;
-  flex: 1;
+  flex: 0 1 auto;
   min-width: 0;
   gap: calc(2px * var(--ui-scale));
 }
@@ -456,7 +456,7 @@ html, body {
 
 #btnNewGroup {
   flex-shrink: 0;
-  margin-left: 2px;
+  margin-left: calc(4px * var(--ui-scale));
 }
 
 /* ═══ Tab Bar ═══ */
