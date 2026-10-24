@@ -327,6 +327,8 @@ html, body {
   flex-shrink: 0;
   gap: 0;
   padding: 0 calc(4px * var(--ui-scale));
+  /* Anchors the overlay strip slider, which must not scroll with the list. */
+  position: relative;
 }
 
 .group-list {
@@ -335,18 +337,15 @@ html, body {
   height: 100%;
   overflow-x: auto;
   overflow-y: hidden;
-  scrollbar-width: thin;
+  /* Replaced by .strip-slider: a native bar would reserve layout height. */
+  scrollbar-width: none;
   flex: 0 1 auto;
   min-width: 0;
   gap: calc(2px * var(--ui-scale));
 }
 
 .group-list::-webkit-scrollbar {
-  height: 2px;
-}
-.group-list::-webkit-scrollbar-thumb {
-  background: var(--border);
-  border-radius: 2px;
+  display: none;
 }
 
 .group-item {
@@ -459,6 +458,44 @@ html, body {
   margin-left: calc(4px * var(--ui-scale));
 }
 
+/* ═══ Strip Slider (Group bar & Tab bar) ═══ */
+/* Painted over the bottom edge of either strip rather than in a reserved lane,
+   mirroring the terminal's overlay slider (6px, terminal foreground at 20%
+   opacity). It appears on hover only, never widens on hover, and only the
+   thumb accepts pointer events, so clicks elsewhere reach the entry beneath. */
+.strip-slider {
+  position: absolute;
+  bottom: 0;
+  height: 6px;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity var(--transition);
+  z-index: 6;
+}
+
+.strip-slider.visible {
+  opacity: 1;
+}
+
+.strip-thumb {
+  position: absolute;
+  top: 0;
+  height: 6px;
+  background: color-mix(in srgb, var(--text-primary) 20%, transparent);
+}
+
+.strip-slider.visible .strip-thumb {
+  pointer-events: auto;
+}
+
+.strip-thumb:hover {
+  background: color-mix(in srgb, var(--text-primary) 40%, transparent);
+}
+
+.strip-thumb:active {
+  background: color-mix(in srgb, var(--text-primary) 60%, transparent);
+}
+
 /* ═══ Tab Bar ═══ */
 .tab-bar {
   display: flex;
@@ -469,6 +506,8 @@ html, body {
   overflow: visible;
   flex-shrink: 0;
   gap: 0;
+  /* Anchors the overlay strip slider, which must not scroll with the list. */
+  position: relative;
 }
 
 .tab-list {
@@ -477,7 +516,8 @@ html, body {
   height: 100%;
   overflow-x: auto;
   overflow-y: hidden;
-  scrollbar-width: thin;
+  /* Replaced by .strip-slider: a native bar would reserve layout height. */
+  scrollbar-width: none;
   padding: 0;
   flex: 1;
   min-width: 0;
@@ -537,11 +577,7 @@ html, body {
 }
 
 .tab-list::-webkit-scrollbar {
-  height: 3px;
-}
-.tab-list::-webkit-scrollbar-thumb {
-  background: var(--border);
-  border-radius: 2px;
+  display: none;
 }
 
 .tab-item {
@@ -1170,7 +1206,6 @@ html, body {
 }
 .context-submenu-options::-webkit-scrollbar-thumb {
   background: var(--border);
-  border-radius: 2px;
 }
 .context-submenu-options::-webkit-scrollbar-thumb:hover {
   background: var(--text-muted);
@@ -1292,7 +1327,6 @@ html, body {
 }
 .ssh-select-options::-webkit-scrollbar-thumb {
   background: var(--border);
-  border-radius: 2px;
 }
 .ssh-select-options::-webkit-scrollbar-thumb:hover {
   background: var(--text-muted);
@@ -1358,7 +1392,6 @@ html, body {
 }
 ::-webkit-scrollbar-thumb {
   background: var(--border);
-  border-radius: 3px;
 }
 ::-webkit-scrollbar-thumb:hover {
   background: var(--text-muted);
@@ -2450,7 +2483,6 @@ html, body {
 .ssh-list::-webkit-scrollbar { width: 3px; }
 .ssh-list::-webkit-scrollbar-thumb {
   background: var(--border);
-  border-radius: 2px;
 }
 
 /* ── SSH Items ── */

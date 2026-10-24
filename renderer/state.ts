@@ -25,6 +25,7 @@ import { getIpcClient } from './ipc-client';
     groupEchoActive: new Map(), // groupId -> boolean (echo state per group)
     groupEchoSelection: new Map(), // groupId -> Set of terminal IDs selected for echo
     groupEchoTerminals: new Map(), // groupId -> Set of terminal IDs that were in the group when selection was saved
+    groupActiveTerminal: new Map(), // groupId -> terminal ID shown when the group was last active
     selectedTabs: new Set(),       // set of tab IDs currently multi-selected
     lastClickedTabId: null,        // for shift-click range selection
     selectedGroups: new Set(),     // set of group IDs currently multi-selected

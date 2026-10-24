@@ -147,7 +147,11 @@
 
   function updateTabSelection(id) {
     for (const [tid, tab] of tabCache) {
-      tab.classList.toggle('active', tid === id);
+      const isActive = tid === id;
+      tab.classList.toggle('active', isActive);
+      // Ctrl+Tab cycles without touching the tab strip, so the active Tab can sit
+      // beyond the viewport; reveal it. 'nearest' only moves when needed.
+      if (isActive) tab.scrollIntoView({ block: 'nearest', inline: 'nearest' });
     }
   }
 

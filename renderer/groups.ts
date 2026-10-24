@@ -157,6 +157,9 @@
     const wasEcho = state.echoModeActive;
     if (oldGroupId) {
       state.groupEchoActive.set(oldGroupId, wasEcho);
+      if (state.activeTerminalId !== null) {
+        state.groupActiveTerminal.set(oldGroupId, state.activeTerminalId);
+      }
       if (wasEcho) {
         state.groupEchoSelection.set(oldGroupId, new Set(state.echoSelection));
         state.groupEchoTerminals.set(oldGroupId, new Set(getGroupTerminalIds(oldGroupId)));
@@ -182,7 +185,13 @@
     state.echoModeActive = false;
 
     for (const [gid, g] of state.groups) {
-      if (g._tabEl) g._tabEl.classList.toggle('active', gid === groupId);
+      if (!g._tabEl) continue;
+      const isActive = gid === groupId;
+      g._tabEl.classList.toggle('active', isActive);
+      // Switching can be triggered from outside the bar (moving the active tab,
+      // opening a Connection folder), so the active entry may be scrolled out of
+      // view. Reveal it without animating: 'nearest' only moves when needed.
+      if (isActive) g._tabEl.scrollIntoView({ block: 'nearest', inline: 'nearest' });
     }
 
     App.Tabs.clearTabSelection();
@@ -191,8 +200,12 @@
 
     const groupTerminals = getGroupTerminalIds(groupId);
     if (groupTerminals.length > 0) {
-      const focusId = groupTerminals.includes(state.activeTerminalId)
-        ? state.activeTerminalId : groupTerminals[0];
+      // Returning to a group shows the pane it last showed, not whichever pane
+      // the previous group was on.
+      const remembered = state.groupActiveTerminal.get(groupId);
+      const focusId = groupTerminals.includes(remembered)
+        ? remembered
+        : groupTerminals.includes(state.activeTerminalId) ? state.activeTerminalId : groupTerminals[0];
       App.Terminal.focusTerminal(focusId);
     } else {
       state.activeTerminalId = null;
@@ -230,6 +243,7 @@
     state.groupEchoActive.delete(groupId);
     state.groupEchoSelection.delete(groupId);
     state.groupEchoTerminals.delete(groupId);
+    state.groupActiveTerminal.delete(groupId);
     const idx = state.groupOrder.indexOf(groupId);
     if (idx !== -1) state.groupOrder.splice(idx, 1);
 
@@ -359,6 +373,9 @@
         state.echoSelection.delete(tid);
       }
     }
+    // Showing and hiding tabs changes the strip's scroll width, which neither a
+    // child-list mutation nor the list's own resize reports.
+    App.ScrollStrip?.refresh?.();
   }
 
   function updateGroupTabs() {

@@ -21,6 +21,7 @@ import './i18n-locales/tr';
 import './i18n-locales/vi';
 import './i18n-locales/pl';
 import './state';
+import './scroll-strip';
 import './ui';
 import './theme';
 import './icons';

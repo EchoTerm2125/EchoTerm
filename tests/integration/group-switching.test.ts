@@ -72,6 +72,42 @@ describe('Integration: Group Switching', () => {
       expect(App.state.selectedGroups.has(g1.id)).toBe(true);
     });
 
+    it('re-measures the strip sliders after tabs are shown or hidden', () => {
+      // Regression: returning to a tab-heavy group left the tab strip's slider
+      // stale, because hiding/showing tabs changes scrollWidth without adding,
+      // removing, or resizing anything the strip observes.
+      const refresh = vi.fn();
+      App.ScrollStrip = { refresh };
+      const g2 = App.Groups.createGroup('Group 2', false);
+
+      refresh.mockClear();
+      App.Groups.switchGroup(g2.id);
+
+      expect(refresh).toHaveBeenCalled();
+    });
+
+    it('shows the terminal the group last showed', () => {
+      const g1 = App.Groups.createGroup('Group 1', true);
+      injectTerminal(1);
+      injectTerminal(2);
+      g1.terminalIds.add(1);
+      g1.terminalIds.add(2);
+      App.state.terminalGroups.set(1, g1.id);
+      App.state.terminalGroups.set(2, g1.id);
+      App.Terminal.focusTerminal(2);
+
+      const g2 = App.Groups.createGroup('Group 2', false);
+      injectTerminal(3);
+      g2.terminalIds.add(3);
+      App.state.terminalGroups.set(3, g2.id);
+
+      App.Groups.switchGroup(g2.id);
+      App.Terminal.focusTerminal(3);
+      App.Groups.switchGroup(g1.id);
+
+      expect(App.state.activeTerminalId).toBe(2);
+    });
+
     it('hides echo control buttons when switching to a group with echo off', () => {
       const g1 = App.Groups.createGroup('Group 1', true);
       const g2 = App.Groups.createGroup('Group 2', false);
