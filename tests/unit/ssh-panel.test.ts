@@ -874,6 +874,25 @@ describe('SshPanel (ssh-panel.ts)', () => {
       expect(menuBtn('ssh-add-folder').classList.contains('hidden')).toBe(true);
     });
 
+    it('takes no action when the section "+" button is right-clicked', async () => {
+      const sectionEl = connSection() as HTMLElement;
+      const wrapper = document.createElement('div');
+      wrapper.className = 'ssh-section-add-wrapper';
+      const addBtn = document.createElement('button');
+      addBtn.id = 'btnAddSshSectionConn';
+      addBtn.className = 'ssh-section-add-btn';
+      wrapper.appendChild(addBtn);
+      sectionEl.insertBefore(wrapper, sectionEl.firstChild);
+
+      const menu = document.getElementById('sshContextMenu') as HTMLElement;
+      menu.classList.add('hidden');
+
+      addBtn.dispatchEvent(new MouseEvent('contextmenu', { bubbles: true, clientX: 100, clientY: 100 }));
+      await flush();
+
+      expect(menu.classList.contains('hidden')).toBe(true);
+    });
+
     it('Add Connection opens the connection dialog with no folder preselected', async () => {
       connSection().dispatchEvent(new MouseEvent('contextmenu', { bubbles: true, clientX: 100, clientY: 100 }));
       await flush();

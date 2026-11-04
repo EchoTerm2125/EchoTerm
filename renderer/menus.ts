@@ -59,16 +59,33 @@
     }
   }
 
-  // Hide any separator that no longer divides two visible items, so hiding a
-  // menu item never leaves a dangling or leading/trailing divider.
+  // A Shortcut hint is truthful only when the shortcut reaches the clicked
+  // target: Ctrl+W and Ctrl+Shift+A act on the Active pane, so their hints stay
+  // hidden on any other pane or tab. Bindings live in App.UI.bindKeyboardShortcuts().
+  function syncShortcutHints(menu, targetIsActive) {
+    for (const hint of menu.querySelectorAll('.context-shortcut[data-scope="target"]')) {
+      hint.classList.toggle('hidden', !targetIsActive);
+    }
+  }
+
+  // Show a separator only when visible items sit on both sides of it. The child
+  // before it must be a visible item rather than another separator, so hiding a
+  // whole section never leaves two dividers back to back, a leading divider, or
+  // a dangling trailing one.
   function syncSeparators(menu) {
     const children = [...menu.children];
-    children.forEach((el, i) => {
-      if (!el.classList.contains('context-separator')) return;
-      const before = children.slice(0, i).some((c) => !c.classList.contains('hidden'));
-      const after = children.slice(i + 1).some((c) => !c.classList.contains('hidden'));
-      el.classList.toggle('hidden', !before || !after);
-    });
+    let hasVisibleBefore = false;
+    for (let i = 0; i < children.length; i++) {
+      const el = children[i];
+      if (el.classList.contains('context-separator')) {
+        const hasAfter = children.slice(i + 1)
+          .some((c) => !c.classList.contains('context-separator') && !c.classList.contains('hidden'));
+        el.classList.toggle('hidden', !(hasVisibleBefore && hasAfter));
+        hasVisibleBefore = false;
+      } else if (!el.classList.contains('hidden')) {
+        hasVisibleBefore = true;
+      }
+    }
   }
 
   // ── Shared submenu structure ──────────────────────────────────────────────
@@ -245,6 +262,7 @@
       const showReconnect = !!ts && ts.shell === 'ssh';
       if (reconnectBtn) reconnectBtn.classList.toggle('hidden', !showReconnect);
       if (reconnectSep) reconnectSep.classList.toggle('hidden', !showReconnect);
+      syncShortcutHints(contextMenu, id === state.activeTerminalId);
       positionContextMenu(contextMenu, e.clientX, e.clientY);
     };
     paneEl.querySelector('.pane-titlebar').addEventListener('contextmenu', showMenu);
@@ -329,6 +347,7 @@
     // Ensure submenu starts hidden
     submenu.classList.add('hidden');
 
+    syncShortcutHints(tabContextMenu, id === state.activeTerminalId);
     syncSeparators(tabContextMenu);
     positionContextMenu(tabContextMenu, e.clientX, e.clientY);
   }
@@ -393,6 +412,10 @@
     contextMenu.classList.add('hidden');
     tabContextMenu.classList.add('hidden');
     groupContextMenu.classList.add('hidden');
+    // The SSH sidebar's menu is built by another module, but it must close with
+    // the rest so a right-click elsewhere never leaves two menus on screen.
+    const sshMenu = document.getElementById('sshContextMenu');
+    if (sshMenu) sshMenu.classList.add('hidden');
     // Every open flyout, whoever built it (tab groups, SSH folders, …).
     for (const sub of document.querySelectorAll('.context-submenu')) {
       closeSubmenu(sub);
@@ -643,12 +666,20 @@
       });
     });
 
-    document.addEventListener('click', () => {
+    // Capture, so a click outside closes the open menu even when the clicked
+    // control stops propagation (the SSH section "+" buttons do). A click on a
+    // menu item is left to that item's own handler, which hides the menu.
+    document.addEventListener('click', (e) => {
+      const target = e.target as Element | null;
+      if (target && typeof target.closest === 'function' && target.closest('.context-menu')) return;
       closeAllMenus();
-    });
+    }, true);
+    // Capture for the same reason: an outside right-click closes the open menu
+    // before the right-clicked surface's handler opens its own menu, so two
+    // context menus never stay on screen at once.
     document.addEventListener('contextmenu', () => {
       closeAllMenus();
-    });
+    }, true);
   }
 
   // ─── Reusable confirm dialog ───────────────────────────────────────────────

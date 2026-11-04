@@ -212,7 +212,7 @@ const DOM_IDS = [
   'optFolderAutoEcho',
   'tabCtxMoveSep', 'tabCtxMoveItem', 'tabCtxGroupSubmenu',
   'btnResetSettings', 'btnClearSshData', 'btnClearCache', 'btnClearAllData',
-  'contextMenu', 'tabContextMenu', 'groupContextMenu',
+  'contextMenu', 'tabContextMenu', 'groupContextMenu', 'sshContextMenu',
   'ctxEcho', 'ctxEchoSep', 'ctxPasteAll', 'btnCloseSelected',
   'ctxReconnect', 'ctxReconnectSep', 'tabCtxReconnect',
   'confirmDialog', 'confirmMessage', 'confirmOk', 'confirmCancel',
@@ -257,6 +257,9 @@ function scaffoldDom() {
       el = document.createElement('div');
     }
     el.id = id;
+    if (['contextMenu', 'tabContextMenu', 'groupContextMenu', 'sshContextMenu'].includes(id)) {
+      el.className = 'context-menu';
+    }
     if (id === 'newTermDropdown' || id === 'optionsPanel') {
       el.classList.add('hidden');
     }

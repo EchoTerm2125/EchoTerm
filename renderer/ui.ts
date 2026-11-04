@@ -66,6 +66,12 @@
       }
     });
 
+    // A right-click elsewhere dismisses the shell dropdown too, even where its
+    // target stops propagation — capture runs before the pane's own menu opens.
+    document.addEventListener('contextmenu', () => {
+      App.newTermDropdown.classList.add('hidden');
+    }, true);
+
     App.btnEchoMode.addEventListener('click', () => {
       App.Echo.toggleEchoMode();
     });

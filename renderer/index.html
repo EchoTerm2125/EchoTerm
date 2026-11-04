@@ -212,16 +212,16 @@
 
   <!-- ═══ Context menu (hidden by default)  ═══-->
   <div id="contextMenu" class="context-menu hidden" data-overlay>
-    <button data-action="select-all" data-i18n="ctxSelectAll">Select All</button>
+    <button data-action="select-all"><span class="menu-item-label" data-i18n="ctxSelectAll">Select All</span><span class="context-shortcut" data-scope="target">Ctrl+Shift+A</span></button>
     <button data-action="copy" data-i18n="ctxCopy">Copy</button>
     <button data-action="paste" data-i18n="ctxPaste">Paste</button>
     <button data-action="paste-all" id="ctxPasteAll" data-i18n="ctxPasteAll">Paste All</button>
     <div class="context-separator"></div>
-    <button data-action="echo" id="ctxEcho" data-i18n="ctxToggleEcho">Toggle Echo</button>
+    <button data-action="echo" id="ctxEcho"><span class="menu-item-label" data-i18n="ctxToggleEcho">Toggle Echo</span><span class="context-shortcut">Ctrl+Shift+T</span></button>
     <div class="context-separator" id="ctxEchoSep"></div>
     <button data-action="reconnect" id="ctxReconnect" data-i18n="ctxReconnect">Reconnect</button>
     <div class="context-separator" id="ctxReconnectSep"></div>
-    <button data-action="close" data-i18n="ctxClosePane">Close Pane</button>
+    <button data-action="close"><span class="menu-item-label" data-i18n="ctxClosePane">Close Pane</span><span class="context-shortcut" data-scope="target">Ctrl+W</span></button>
   </div>
 
   <!-- ═══Tab context menu  ═══-->
@@ -230,7 +230,7 @@
     <div class="context-separator"></div>
     <button data-action="tab-reconnect" id="tabCtxReconnect" data-i18n="tabCtxReconnect">Reconnect</button>
     <div class="context-separator"></div>
-    <button data-action="tab-close" data-i18n="tabCtxClose">Close Tab</button>
+    <button data-action="tab-close"><span class="menu-item-label" data-i18n="tabCtxClose">Close Tab</span><span class="context-shortcut" data-scope="target">Ctrl+W</span></button>
     <button data-action="tab-close-selected" id="btnCloseSelected" data-i18n="tabCtxCloseSelected">Close Selected</button>
     <div class="context-separator"></div>
     <button data-action="tab-close-others" data-i18n="tabCtxCloseOthers">Close Others</button>

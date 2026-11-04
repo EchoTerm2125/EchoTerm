@@ -1058,6 +1058,26 @@ html, body {
   transform: translateX(calc(2px * var(--ui-scale)));
 }
 
+/* An item with a Shortcut hint lays its label left and its keys right. */
+.context-menu button:has(.context-shortcut) {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: calc(20px * var(--ui-scale));
+}
+
+.context-shortcut {
+  flex: none;
+  color: var(--text-muted);
+  font-size: calc(var(--app-font-size) * 0.769);
+  letter-spacing: 0.02em;
+}
+
+/* On a white surface the hint recedes further than --text-muted allows. */
+[data-theme="light"] .context-shortcut {
+  color: #9ca0b0;
+}
+
 .context-separator {
   height: 1px;
   background: var(--border);

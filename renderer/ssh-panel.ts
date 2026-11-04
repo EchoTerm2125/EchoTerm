@@ -1074,6 +1074,12 @@ import {
       if (e.target.closest('.ssh-section-add-wrapper')) return;
       closeSshAddMenus();
     });
+
+    // A right-click anywhere dismisses them as well as the header menu; capture
+    // so it still runs when the right-clicked item stops propagation.
+    document.addEventListener('contextmenu', () => {
+      closeSshHeaderDropdown();
+    }, true);
   }
 
   // --- Panel Button Bindings
@@ -1500,8 +1506,9 @@ import {
     if (sshScrollEl) {
       sshScrollEl.addEventListener('contextmenu', (e) => {
         // Item/folder right-clicks are handled (and stopped) by the list-level
-        // handlers above; keep this guard as a safety net.
-        if (e.target.closest('.ssh-folder, .ssh-conn-item, .ssh-user-item, .ssh-action-btn')) return;
+        // handlers above; keep this guard as a safety net. The section "+"
+        // controls take no action on a right-click either.
+        if (e.target.closest('.ssh-folder, .ssh-conn-item, .ssh-user-item, .ssh-action-btn, .ssh-section-add-wrapper')) return;
         e.preventDefault();
         e.stopPropagation();
         // A new right-click discards any pending "Add Parent Folder" flow and any selection
