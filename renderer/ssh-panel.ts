@@ -2223,13 +2223,37 @@ import {
     // so that re-rendering the list never discards the user's choices.
     const importSelection = new Map<string, boolean>();
 
-    // --- Select-all master control, in the bar between the header and the list
+    // --- Select-all master control and Filter box, in the bar between the
+    // header and the list. The filter only hides Import rows; it never changes
+    // the Import selection or which rows the master control toggles.
     if (sshImportSelectAllBar) {
       sshImportSelectAllBar.innerHTML = `
         <label><input type="checkbox" name="importSelectAll" checked /> ${App.__('sshImportSelectAll')}</label>
+        <input id="sshImportFilter" class="ssh-import-filter" type="text" placeholder="${escHtml(App.__('sshImportFilterPlaceholder'))}" />
       `;
     }
     const selectAllCb = sshImportSelectAllBar ? sshImportSelectAllBar.querySelector('input') as HTMLInputElement : null;
+    const importFilterInput = sshImportSelectAllBar
+      ? sshImportSelectAllBar.querySelector('#sshImportFilter') as HTMLInputElement
+      : null;
+    let importFilterQuery = '';
+
+    if (importFilterInput) {
+      importFilterInput.addEventListener('input', () => {
+        importFilterQuery = importFilterInput.value.trim().toLowerCase();
+        renderImportRows();
+      });
+      // Escape clears the filter first; an empty box lets the dialog's own
+      // Escape handler close the whole dialog.
+      importFilterInput.addEventListener('keydown', (e) => {
+        if (e.key !== 'Escape' || !importFilterInput.value) return;
+        e.preventDefault();
+        e.stopPropagation();
+        importFilterInput.value = '';
+        importFilterQuery = '';
+        renderImportRows();
+      });
+    }
 
     // All / none / mixed, judged over the rows currently listed
     function syncSelectAllState() {
@@ -2262,6 +2286,23 @@ import {
     // Sort hosts alphabetically by name
     hosts.sort((a, b) => (a.name || '').localeCompare(b.name || ''));
 
+    // Case-insensitive substring match over the details an Import row shows.
+    function hostMatchesFilter(host) {
+      if (!importFilterQuery) return true;
+      const target = host.user
+        ? `${host.user}@${host.host}:${host.port}`
+        : `${host.host}:${host.port}`;
+      const haystack = [
+        host.name,
+        host.host,
+        host.user,
+        target,
+        host.proxyJump,
+        host.folderPath,
+      ].filter(Boolean).join('\n').toLowerCase();
+      return haystack.includes(importFilterQuery);
+    }
+
     // --- Build / refresh the list based on the currently checked update fields
     function renderImportRows() {
       // Preserve the notices and global options (keeps their change listeners)
@@ -2275,6 +2316,7 @@ import {
       const doOptions = isUpdateFieldOn('updGlobalOptions');
 
       let shown = 0;
+      let eligible = 0;
       for (const host of hosts) {
         const existing = existingConns.find(c => c.name.toLowerCase() === host.name.toLowerCase());
 
@@ -2282,8 +2324,12 @@ import {
         if (importMode === 'import' && existing) continue;
         if (importMode === 'update' && !existing) continue;
 
+        eligible++;
+        const matchesFilter = hostMatchesFilter(host);
+
         const row: any = document.createElement('label');
         row.className = 'ssh-import-row';
+        if (!matchesFilter) row.classList.add('hidden');
         const authInfo = host.identityFile
           ? App.__('sshImportAuthKeyfile', { file: escHtml(host.identityFile.split(/[\\/]/).pop() || host.identityFile) })
           : App.__('sshImportAuthPassword');
@@ -2361,18 +2407,23 @@ import {
           });
         }
         sshImportBody.appendChild(row);
-        shown++;
+        if (matchesFilter) shown++;
       }
 
-      if (sshImportSelectAllBar) sshImportSelectAllBar.classList.toggle('hidden', shown === 0);
+      if (sshImportSelectAllBar) sshImportSelectAllBar.classList.toggle('hidden', eligible === 0);
 
-      if (shown === 0) {
+      if (eligible === 0) {
         const msg = importMode === 'update'
           ? App.__('sshImportNoExistingToUpdate')
           : App.__('sshImportNoNewHosts');
         const hint = document.createElement('div');
         hint.className = 'ssh-empty-hint';
         hint.innerHTML = escHtml(msg);
+        sshImportBody.appendChild(hint);
+      } else if (shown === 0) {
+        const hint = document.createElement('div');
+        hint.className = 'ssh-empty-hint';
+        hint.innerHTML = escHtml(App.__('sshImportFilterNoMatch'));
         sshImportBody.appendChild(hint);
       }
 
@@ -2390,6 +2441,7 @@ import {
     renderImportRows();
 
     sshImportDialog.classList.remove('hidden');
+    if (importFilterInput) importFilterInput.focus();
   }
 
   function bindImportDialog() {
@@ -2406,9 +2458,30 @@ import {
       });
     }
 
-    sshImportConfirm.addEventListener('click', async () => {
-      const checkboxes = sshImportBody.querySelectorAll('input[name="importHost"]:checked');
+    sshImportConfirm.addEventListener('click', () => {
+      const checkboxes = [...sshImportBody.querySelectorAll('input[name="importHost"]:checked')];
       const allRows = [...sshImportBody.querySelectorAll('.ssh-import-row')];
+      const selectedHosts = checkboxes
+        .map(cb => (cb.closest('.ssh-import-row') as any)?._hostData)
+        .filter(Boolean);
+
+      // Every Import/Update action is listed back to the user, including rows
+      // the Filter box currently hides.
+      const showImportConfirmation = () => {
+        const lines = selectedHosts.map(host => {
+          const target = host.user
+            ? `${host.user}@${host.host}:${host.port}`
+            : `${host.host}:${host.port}`;
+          return `${host.name} — ${target}`;
+        });
+        const messageKey = importMode === 'update' ? 'sshImportConfirmUpdate' : 'sshImportConfirmImport';
+        App.Menus.showConfirm(
+          App.__(messageKey, { count: selectedHosts.length, list: lines.join('\n') }),
+          () => doImportFromConfig(checkboxes),
+          null,
+          importMode === 'update' ? 'sshImportBtnUpdate' : 'sshImportBtnImport'
+        );
+      };
 
       // Warn if a checked host's jump host is not also checked
       const missingJumps = [];
@@ -2433,13 +2506,15 @@ import {
         const names = missingJumps.map(m => `"${m.host}" needs "${m.jump}"`).join('\n');
         App.Menus.showConfirm(
           App.__('confirmJumpHostsMissing', { names }),
-          () => doImportFromConfig(checkboxes),
+          // The confirm dialog clears its callback right after invoking it, so
+          // open the item list on the next tick as a separate confirmation.
+          () => setTimeout(showImportConfirmation, 0),
           'skipSshJumpWarn'
         );
         return;
       }
 
-      await doImportFromConfig(checkboxes);
+      showImportConfirmation();
     });
 
     // --- Import execution

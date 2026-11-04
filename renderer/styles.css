@@ -2704,11 +2704,15 @@ html, body {
 }
 .ssh-import-selectall {
   flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  gap: calc(10px * var(--ui-scale));
   background: var(--bg-surface);
   padding: calc(6px * var(--ui-scale)) calc(16px * var(--ui-scale)) calc(8px * var(--ui-scale));
   border-bottom: 1px solid var(--border);
 }
 .ssh-import-selectall label {
+  flex: 0 0 auto;
   display: flex;
   flex-direction: row;
   align-items: center;
@@ -2718,6 +2722,27 @@ html, body {
   font-weight: 600;
   color: var(--text-secondary);
   cursor: pointer;
+}
+/* Mirrors the Search panel window's .panel-input (renderer/search-window.css) */
+.ssh-import-filter {
+  flex: 1 1 auto;
+  min-width: 0;
+  padding: calc(5px * var(--ui-scale)) calc(8px * var(--ui-scale));
+  font-family: inherit;
+  font-size: var(--app-font-size);
+  color: var(--text-primary);
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: calc(4px * var(--ui-scale));
+  outline: none;
+  box-sizing: border-box;
+}
+.ssh-import-filter:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-wash);
+}
+.ssh-import-filter::placeholder {
+  color: var(--text-muted);
 }
 .ssh-import-selectall input[type="checkbox"] {
   margin: 0;

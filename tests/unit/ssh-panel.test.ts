@@ -102,6 +102,9 @@ function scaffoldSshDom() {
   // Mirror renderer/index.html: the form body is nested inside #sshDialog, so
   // keydown events from its fields bubble up to the dialog's handler.
   document.getElementById('sshDialog').appendChild(document.getElementById('sshDialogBody'));
+  // The import list and its Filter box bar live inside #sshImportDialog.
+  document.getElementById('sshImportDialog').appendChild(document.getElementById('sshImportSelectAllBar'));
+  document.getElementById('sshImportDialog').appendChild(document.getElementById('sshImportBody'));
   // Context menu contents (mirrors renderer/index.html)
   buildSshContextMenu(document.getElementById('sshContextMenu'));
 }
@@ -178,8 +181,8 @@ describe('SshPanel (ssh-panel.ts)', () => {
     const rowBoxes = () => [...document.querySelectorAll('#sshImportBody input[name="importHost"]')] as HTMLInputElement[];
     const master = () => document.querySelector('#sshImportSelectAllBar input[name="importSelectAll"]') as HTMLInputElement;
 
-    async function openImportDialog(buttonId = 'btnSshImport') {
-      vi.mocked(window.api.sshImportConfig).mockResolvedValue({ hosts: HOSTS.map(h => ({ ...h })) } as any);
+    async function openImportDialog(buttonId = 'btnSshImport', hosts = HOSTS) {
+      vi.mocked(window.api.sshImportConfig).mockResolvedValue({ hosts: hosts.map(h => ({ ...h })) } as any);
       (document.getElementById(buttonId) as HTMLElement).click();
       await flush();
       await flush();
@@ -192,6 +195,127 @@ describe('SshPanel (ssh-panel.ts)', () => {
       expect(rowBoxes().every(b => b.checked)).toBe(true);
       expect(master().checked).toBe(true);
       expect(master().indeterminate).toBe(false);
+    });
+
+    it('filters rows by name or target without changing the Import selection', async () => {
+      await openImportDialog();
+
+      const filter = document.getElementById('sshImportFilter') as HTMLInputElement;
+      expect(filter).not.toBeNull();
+      filter.value = 'b.example';
+      filter.dispatchEvent(new Event('input'));
+
+      const visibleRows = () => [...document.querySelectorAll('#sshImportBody .ssh-import-row:not(.hidden)')];
+      expect(visibleRows().map(row => row.querySelector('.ssh-import-name').textContent)).toEqual(['Bravo']);
+
+      // Uncheck the one visible row; the hidden rows keep their selection.
+      (visibleRows()[0].querySelector('input[name="importHost"]') as HTMLInputElement).click();
+
+      filter.value = '';
+      filter.dispatchEvent(new Event('input'));
+      expect(rowBoxes().map(box => box.checked)).toEqual([true, false, true]);
+      expect(master().indeterminate).toBe(true);
+    });
+
+    it('matches the connection identity shown on the row', async () => {
+      await openImportDialog();
+
+      const filter = document.getElementById('sshImportFilter') as HTMLInputElement;
+      filter.value = 'root@b.example.com:22';
+      filter.dispatchEvent(new Event('input'));
+
+      const rows = [...document.querySelectorAll('#sshImportBody .ssh-import-row:not(.hidden)')];
+      expect(rows.map(row => row.querySelector('.ssh-import-name').textContent)).toEqual(['Bravo']);
+    });
+
+    it('keeps the Filter box visible when no row matches', async () => {
+      await openImportDialog();
+
+      const filter = document.getElementById('sshImportFilter') as HTMLInputElement;
+      filter.value = 'nothing-matches';
+      filter.dispatchEvent(new Event('input'));
+
+      expect(document.querySelectorAll('#sshImportBody .ssh-import-row:not(.hidden)').length).toBe(0);
+      expect(document.getElementById('sshImportSelectAllBar').classList.contains('hidden')).toBe(false);
+      expect(document.querySelector('#sshImportBody .ssh-empty-hint').textContent)
+        .toContain('No import rows match the filter.');
+
+      filter.value = '';
+      filter.dispatchEvent(new Event('input'));
+      expect(document.querySelectorAll('#sshImportBody .ssh-import-row:not(.hidden)').length).toBe(3);
+    });
+
+    it('clears the filter before Escape closes the dialog', async () => {
+      await openImportDialog();
+
+      const filter = document.getElementById('sshImportFilter') as HTMLInputElement;
+      filter.value = 'Bravo';
+      filter.dispatchEvent(new Event('input'));
+
+      filter.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
+      expect(filter.value).toBe('');
+      expect(document.querySelectorAll('#sshImportBody .ssh-import-row:not(.hidden)').length).toBe(3);
+      expect(document.getElementById('sshImportDialog').classList.contains('hidden')).toBe(false);
+
+      filter.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
+      expect(document.getElementById('sshImportDialog').classList.contains('hidden')).toBe(true);
+    });
+
+    it('lists every selected row, including hidden ones, before applying', async () => {
+      await openImportDialog();
+      const api = window.api;
+
+      const filter = document.getElementById('sshImportFilter') as HTMLInputElement;
+      filter.value = 'Alpha';
+      filter.dispatchEvent(new Event('input'));
+
+      (document.getElementById('sshImportConfirm') as HTMLElement).click();
+
+      const { dialog, message, ok } = getConfirmElements();
+      expect(dialog.classList.contains('hidden')).toBe(false);
+      expect(message.textContent).toContain('Import 3 item(s):');
+      expect(message.textContent).toContain('Alpha — root@a.example.com:22');
+      expect(message.textContent).toContain('Bravo — root@b.example.com:22');
+      expect(message.textContent).toContain('Charlie — root@c.example.com:22');
+      expect(api.sshImportApply).not.toHaveBeenCalled();
+
+      (ok as HTMLElement).click();
+      await flush();
+      expect(api.sshImportApply).toHaveBeenCalledWith(expect.objectContaining({
+        mode: 'import',
+        hosts: expect.arrayContaining([
+          expect.objectContaining({ name: 'Alpha' }),
+          expect.objectContaining({ name: 'Bravo' }),
+          expect.objectContaining({ name: 'Charlie' }),
+        ]),
+      }));
+    });
+
+    it('shows the jump warning before the Import confirmation', async () => {
+      const api = window.api;
+      const jumpHosts = [
+        { ...HOSTS[0], proxyJump: 'Bravo' },
+        { ...HOSTS[1] },
+        { ...HOSTS[2] },
+      ];
+      await openImportDialog('btnSshImport', jumpHosts);
+
+      rowBoxes()[1].click();
+      (document.getElementById('sshImportConfirm') as HTMLElement).click();
+
+      const { message, ok } = getConfirmElements();
+      expect(message.textContent).toContain('jump hosts are not selected');
+      expect(api.sshImportApply).not.toHaveBeenCalled();
+
+      (ok as HTMLElement).click();
+      await flush();
+      expect(message.textContent).toContain('Import 2 item(s):');
+      expect(message.textContent).toContain('Alpha — root@a.example.com:22');
+      expect(message.textContent).toContain('Charlie — root@c.example.com:22');
+
+      (ok as HTMLElement).click();
+      await flush();
+      expect(api.sshImportApply).toHaveBeenCalled();
     });
 
     it('deselects every row through the master, then shows a mixed state', async () => {
@@ -1759,6 +1883,9 @@ describe('SshPanel (ssh-panel.ts)', () => {
       await flush();
 
       (document.getElementById('sshImportConfirm') as HTMLElement).click();
+      const { message, ok } = getConfirmElements();
+      expect(message.textContent).toContain('Update 1 item(s):');
+      (ok as HTMLElement).click();
       await flush();
 
       expect(api.sshImportApply).toHaveBeenCalledWith(expect.objectContaining({
@@ -1796,6 +1923,9 @@ describe('SshPanel (ssh-panel.ts)', () => {
       await flush();
 
       (document.getElementById('sshImportConfirm') as HTMLElement).click();
+      const { message, ok } = getConfirmElements();
+      expect(message.textContent).toContain('Update 1 item(s):');
+      (ok as HTMLElement).click();
       await flush();
 
       expect(api.sshImportApply).toHaveBeenCalledWith(expect.objectContaining({
@@ -1872,6 +2002,9 @@ describe('SshPanel (ssh-panel.ts)', () => {
       (document.getElementById('btnSshImportWinScp') as HTMLElement).click();
       await flush();
       (document.getElementById('sshImportConfirm') as HTMLElement).click();
+      const { message, ok } = getConfirmElements();
+      expect(message.textContent).toContain('Import 1 item(s):');
+      (ok as HTMLElement).click();
       await flush();
 
       const req = vi.mocked(api.sshImportApply).mock.calls[0][0];
