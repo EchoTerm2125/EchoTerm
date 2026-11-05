@@ -19,14 +19,12 @@
     shellSsh: 'SSH',
 
     // ── Toolbar ──────────────────────────────────────────────────────────────
-    toolbarSidebarToggle: 'Barra lateral (Ctrl+Shift+S)',
     toolbarSettings: 'Configurações',
     winMinimizeTitle: 'Minimizar',
     winMaximizeTitle: 'Maximizar',
     winRestoreTitle: 'Restaurar',
 
     // ── New Terminal Dropdown ────────────────────────────────────────────────
-    newTerminalTitle: 'Nova terminal (Ctrl+N)',
     newTermDropdownTitle: 'Selecionar tipo de terminal',
     powershellLabel: 'PowerShell',
     cmdLabel: 'CMD',
@@ -50,7 +48,6 @@
 
     // ── Group bar ────────────────────────────────────────────────────────────
     groupDefaultName: 'Grupo {n}',
-    newGroupTitle: 'Novo grupo (Ctrl+Shift+N)',
     closeGroupTitle: 'Fechar grupo',
 
     // ── Tab ──────────────────────────────────────────────────────────────────
@@ -94,8 +91,8 @@
     ctxPaste: 'Colar',
     ctxPasteAll: 'Colar em todas',
     ctxReconnect: 'Reconectar',
-    ctxToggleEcho: 'Alternar eco',
-    ctxClosePane: 'Fechar painel',
+    ctxToggleEcho: 'Alternar modo Echo',
+    ctxClosePane: 'Fechar terminal',
     tabCtxRename: 'Renomear guia',
     tabCtxReconnect: 'Reconectar',
     tabCtxReconnectSelected: 'Reconectar selecionadas',
@@ -339,6 +336,18 @@
     optionsSshJumpWarn: 'Avisar sobre hosts de salto não selecionados na importação SSH',
     optionsPastePreview: 'Confirmar antes de colar conteúdo de várias linhas',
     optionsRightClickPaste: 'Clique direito para copiar / colar',
+    optionsTitleShortcuts: 'Atalhos de teclado',
+    optionsShortcutColumnKeys: 'Atalho',
+    optionsShortcutColumnAction: 'Ação',
+    optionsShortcutNewTerminal: 'Novo terminal',
+    optionsShortcutNewGroup: 'Novo grupo',
+    optionsShortcutCloseTerminal: 'Fechar terminal ativo',
+    optionsShortcutFind: 'Localizar no terminal ativo',
+    optionsShortcutSearchAll: 'Pesquisar em todos os terminais visíveis',
+    optionsShortcutSelectAll: 'Selecionar todo o texto do terminal ativo',
+    optionsShortcutNextTerminal: 'Terminal seguinte',
+    optionsShortcutPrevTerminal: 'Terminal anterior',
+    optionsShortcutToggleSidebar: 'Alternar barra lateral SSH',
 
     // ── Danger Zone ──────────────────────────────────────────────────────────
     optionsTitleDanger: 'Zona de perigo',

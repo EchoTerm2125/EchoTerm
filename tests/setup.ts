@@ -332,9 +332,11 @@ export async function resetTestEnv() {
 
 /**
  * Load additional renderer modules. Each IIFE registers on window.App.
+ * 'ui' depends on the shortcut registry, which is loaded first.
  */
 export async function loadModules(...names) {
   for (const name of names) {
+    if (name === 'ui') await import('../renderer/shortcuts.ts');
     await import(`../renderer/${name}.ts`);
   }
 }

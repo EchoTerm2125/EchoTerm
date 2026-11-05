@@ -97,12 +97,18 @@ Grab the latest release:
 
 | Shortcut | Action |
 |---|---|
-| `Ctrl+N` | New tab |
+| `Ctrl+N` | New terminal |
 | `Ctrl+Shift+N` | New group |
-| `Ctrl+Shift+T` | Toggle echo mode |
+| `Ctrl+Shift+T` | Toggle Echo mode |
 | `Ctrl+W` | Close active terminal |
-| `Ctrl+Tab` / `Ctrl+Shift+Tab` | Switch terminal |
-| `Ctrl+Shift+S` | Show/hide SSH sidebar |
+| `Ctrl+F` | Find in active terminal |
+| `Ctrl+Shift+F` | Search all visible terminals |
+| `Ctrl+Shift+A` | Select all text in the active terminal |
+| `Ctrl+Tab` | Next terminal |
+| `Ctrl+Shift+Tab` | Previous terminal |
+| `Ctrl+Shift+S` | Toggle SSH sidebar |
+
+The same list lives in the app under Settings → Keyboard Shortcuts.
 
 ---
 

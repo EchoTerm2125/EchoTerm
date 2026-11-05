@@ -20,14 +20,12 @@
     shellSsh: 'SSH',
 
     // ── Toolbar ──────────────────────────────────────────────────────────────
-    toolbarSidebarToggle: 'Sidebar (Ctrl+Shift+S)',
     toolbarSettings: 'Settings',
     winMinimizeTitle: 'Minimize',
     winMaximizeTitle: 'Maximize',
     winRestoreTitle: 'Restore',
 
     // ── New Terminal Dropdown ────────────────────────────────────────────────
-    newTerminalTitle: 'New Terminal (Ctrl+N)',
     newTermDropdownTitle: 'Select terminal type',
     powershellLabel: 'PowerShell',
     cmdLabel: 'CMD',
@@ -51,7 +49,6 @@
 
     // ── Group bar ────────────────────────────────────────────────────────────
     groupDefaultName: 'Group {n}',
-    newGroupTitle: 'New Group (Ctrl+Shift+N)',
     closeGroupTitle: 'Close Group',
 
     // ── Tab ──────────────────────────────────────────────────────────────────
@@ -95,8 +92,8 @@
     ctxPaste: 'Paste',
     ctxPasteAll: 'Paste All',
     ctxReconnect: 'Reconnect',
-    ctxToggleEcho: 'Toggle Echo',
-    ctxClosePane: 'Close Pane',
+    ctxToggleEcho: 'Toggle Echo mode',
+    ctxClosePane: 'Close terminal',
     tabCtxRename: 'Rename Tab',
     tabCtxReconnect: 'Reconnect',
     tabCtxReconnectSelected: 'Reconnect Selected',
@@ -340,6 +337,18 @@
     optionsSshJumpWarn: 'Warn about unselected jump hosts on SSH import',
     optionsPastePreview: 'Confirm before pasting multi-line content',
     optionsRightClickPaste: 'Right click to copy / paste',
+    optionsTitleShortcuts: 'Keyboard Shortcuts',
+    optionsShortcutColumnKeys: 'Shortcut',
+    optionsShortcutColumnAction: 'Action',
+    optionsShortcutNewTerminal: 'New terminal',
+    optionsShortcutNewGroup: 'New group',
+    optionsShortcutCloseTerminal: 'Close active terminal',
+    optionsShortcutFind: 'Find in active terminal',
+    optionsShortcutSearchAll: 'Search all visible terminals',
+    optionsShortcutSelectAll: 'Select all text in the active terminal',
+    optionsShortcutNextTerminal: 'Next terminal',
+    optionsShortcutPrevTerminal: 'Previous terminal',
+    optionsShortcutToggleSidebar: 'Toggle SSH sidebar',
 
     // ── Danger Zone ──────────────────────────────────────────────────────────
     optionsTitleDanger: 'Danger Zone',

@@ -51,6 +51,28 @@ interface ThemeEngine {
   onThemeChange(fn: (theme: 'dark' | 'light') => void): void;
 }
 
+/** One App-wide shortcut definition (renderer/shortcuts.ts) */
+interface ShortcutDef {
+  id: string;
+  code?: string;
+  key?: string;
+  shift?: boolean;
+  labelKey: string;
+  when?: () => boolean;
+  run: () => void;
+}
+
+/** Shortcut registry: one definition list behind bindings and every display surface */
+interface ShortcutRegistry {
+  DEFS: ShortcutDef[];
+  bind(): void;
+  refresh(): void;
+  renderTable(container: HTMLElement | null): void;
+  renderKeys(def: ShortcutDef): HTMLElement;
+  hydrate(root?: ParentNode): void;
+  format(def: ShortcutDef): string;
+}
+
 /**
  * The renderer-wide namespace object. Each renderer module extends it.
  * Phase 1 keeps an index signature (members are `any`); well-known members
@@ -63,6 +85,7 @@ interface AppGlobal {
   _n: PluralKeyFn;
   i18n: I18nEngine;
   Theme: ThemeEngine;
+  Shortcuts: ShortcutRegistry;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   [key: string]: any;
 }

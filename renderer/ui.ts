@@ -614,29 +614,8 @@
   }
 
   function bindKeyboardShortcuts() {
-    // Capture phase so shortcuts fire before xterm.js consumes Ctrl+W / Ctrl+Tab
-    // (which map to control characters) from the focused terminal textarea.
-    document.addEventListener('keydown', (e) => {
-      const ctrl = e.ctrlKey || e.metaKey;
-      if (ctrl && !e.shiftKey && e.code === 'KeyN') { e.preventDefault(); e.stopPropagation(); App.Terminal.spawnTerminal(state.selectedShell); return; }
-      if (ctrl && e.shiftKey && e.code === 'KeyN') { e.preventDefault(); e.stopPropagation(); const count = state.groups.size + 1; const group = App.Groups.createGroup(App.__('groupDefaultName', { n: count })); App.Groups.switchGroup(group.id); App.Terminal.spawnTerminal(state.selectedShell); return; }
-      if (ctrl && e.shiftKey && e.code === 'KeyT') { e.preventDefault(); e.stopPropagation(); App.Echo.toggleEchoMode(); return; }
-      if (ctrl && !e.shiftKey && e.code === 'KeyW') { e.preventDefault(); e.stopPropagation(); if (state.activeTerminalId) App.Menus.showConfirm(App.__('confirmCloseTerminal'), () => App.Terminal.closeTerminal(state.activeTerminalId), 'skipTabCloseConfirm'); return; }
-      if (ctrl && !e.shiftKey && e.code === 'KeyF') { e.preventDefault(); e.stopPropagation(); App.Search.handleShortcut(false); return; }
-      if (ctrl && e.shiftKey && e.code === 'KeyF') { e.preventDefault(); e.stopPropagation(); App.Search.handleShortcut(true); return; }
-      // Select All targets the Active pane, and only when that pane's own
-      // terminal input holds focus, so it never fires from a dialog, a rename
-      // box, the Find bar, or the sidebar.
-      if (ctrl && e.shiftKey && e.code === 'KeyA') {
-        const ts = state.terminals.get(state.activeTerminalId);
-        if (ts?.term && document.activeElement === ts.term.textarea) {
-          e.preventDefault(); e.stopPropagation();
-          ts.term.selectAll();
-        }
-        return;
-      }
-      if (ctrl && e.key === 'Tab') { e.preventDefault(); e.stopPropagation(); App.Terminal.cycleTerminal(e.shiftKey ? -1 : 1); return; }
-    }, true);
+    // Bindings and their display share one definition list (renderer/shortcuts.ts).
+    App.Shortcuts.bind();
   }
 
   function bindGlobalEvents() {

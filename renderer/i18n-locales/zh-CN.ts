@@ -19,14 +19,12 @@
     shellSsh: 'SSH',
 
     // ── Toolbar ──────────────────────────────────────────────────────────────
-    toolbarSidebarToggle: '侧边栏 (Ctrl+Shift+S)',
     toolbarSettings: '设置',
     winMinimizeTitle: '最小化',
     winMaximizeTitle: '最大化',
     winRestoreTitle: '还原',
 
     // ── New Terminal Dropdown ────────────────────────────────────────────────
-    newTerminalTitle: '新建终端 (Ctrl+N)',
     newTermDropdownTitle: '选择终端类型',
     powershellLabel: 'PowerShell',
     cmdLabel: 'CMD',
@@ -50,7 +48,6 @@
 
     // ── Group bar ────────────────────────────────────────────────────────────
     groupDefaultName: '组 {n}',
-    newGroupTitle: '新建组 (Ctrl+Shift+N)',
     closeGroupTitle: '关闭组',
 
     // ── Tab ──────────────────────────────────────────────────────────────────
@@ -94,8 +91,8 @@
     ctxPaste: '粘贴',
     ctxPasteAll: '全部粘贴',
     ctxReconnect: '重新连接',
-    ctxToggleEcho: '切换回显',
-    ctxClosePane: '关闭窗格',
+    ctxToggleEcho: '切换 Echo 模式',
+    ctxClosePane: '关闭终端',
     tabCtxRename: '重命名标签',
     tabCtxReconnect: '重新连接',
     tabCtxReconnectSelected: '重新连接选中项',
@@ -339,6 +336,18 @@
     optionsSshJumpWarn: 'SSH 导入时警告未选中的跳板机',
     optionsPastePreview: '粘贴多行内容前确认',
     optionsRightClickPaste: '右键复制 / 粘贴',
+    optionsTitleShortcuts: '键盘快捷键',
+    optionsShortcutColumnKeys: '快捷键',
+    optionsShortcutColumnAction: '操作',
+    optionsShortcutNewTerminal: '新建终端',
+    optionsShortcutNewGroup: '新建分组',
+    optionsShortcutCloseTerminal: '关闭活动终端',
+    optionsShortcutFind: '在活动终端中查找',
+    optionsShortcutSearchAll: '搜索所有可见终端',
+    optionsShortcutSelectAll: '全选活动终端中的文本',
+    optionsShortcutNextTerminal: '下一个终端',
+    optionsShortcutPrevTerminal: '上一个终端',
+    optionsShortcutToggleSidebar: '切换 SSH 侧边栏',
 
     // ── Danger Zone ──────────────────────────────────────────────────────────
     optionsTitleDanger: '危险区域',

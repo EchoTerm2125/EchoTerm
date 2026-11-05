@@ -19,14 +19,12 @@
     shellSsh: 'SSH',
 
     // ── Toolbar ──────────────────────────────────────────────────────────────
-    toolbarSidebarToggle: '사이드바 (Ctrl+Shift+S)',
     toolbarSettings: '설정',
     winMinimizeTitle: '최소화',
     winMaximizeTitle: '최대화',
     winRestoreTitle: '복원',
 
     // ── New Terminal Dropdown ────────────────────────────────────────────────
-    newTerminalTitle: '새 터미널 (Ctrl+N)',
     newTermDropdownTitle: '터미널 유형 선택',
     powershellLabel: 'PowerShell',
     cmdLabel: 'CMD',
@@ -50,7 +48,6 @@
 
     // ── Group bar ────────────────────────────────────────────────────────────
     groupDefaultName: '그룹 {n}',
-    newGroupTitle: '새 그룹 (Ctrl+Shift+N)',
     closeGroupTitle: '그룹 닫기',
 
     // ── Tab ──────────────────────────────────────────────────────────────────
@@ -94,8 +91,8 @@
     ctxPaste: '붙여넣기',
     ctxPasteAll: '모두 붙여넣기',
     ctxReconnect: '다시 연결',
-    ctxToggleEcho: '에코 전환',
-    ctxClosePane: '패널 닫기',
+    ctxToggleEcho: 'Echo 모드 전환',
+    ctxClosePane: '터미널 닫기',
     tabCtxRename: '탭 이름 바꾸기',
     tabCtxReconnect: '다시 연결',
     tabCtxReconnectSelected: '선택 항목 다시 연결',
@@ -339,6 +336,18 @@
     optionsSshJumpWarn: 'SSH 가져오기 시 선택되지 않은 점프 호스트 경고',
     optionsPastePreview: '여러 줄 내용을 붙여넣기 전에 확인',
     optionsRightClickPaste: '오른쪽 클릭으로 복사 / 붙여넣기',
+    optionsTitleShortcuts: '키보드 단축키',
+    optionsShortcutColumnKeys: '단축키',
+    optionsShortcutColumnAction: '작업',
+    optionsShortcutNewTerminal: '새 터미널',
+    optionsShortcutNewGroup: '새 그룹',
+    optionsShortcutCloseTerminal: '활성 터미널 닫기',
+    optionsShortcutFind: '활성 터미널에서 찾기',
+    optionsShortcutSearchAll: '표시된 모든 터미널 검색',
+    optionsShortcutSelectAll: '활성 터미널의 텍스트 모두 선택',
+    optionsShortcutNextTerminal: '다음 터미널',
+    optionsShortcutPrevTerminal: '이전 터미널',
+    optionsShortcutToggleSidebar: 'SSH 사이드바 전환',
 
     // ── Danger Zone ──────────────────────────────────────────────────────────
     optionsTitleDanger: '위험 구역',

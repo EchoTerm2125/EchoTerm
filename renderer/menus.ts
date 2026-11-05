@@ -61,7 +61,7 @@
 
   // A Shortcut hint is truthful only when the shortcut reaches the clicked
   // target: Ctrl+W and Ctrl+Shift+A act on the Active pane, so their hints stay
-  // hidden on any other pane or tab. Bindings live in App.UI.bindKeyboardShortcuts().
+  // hidden on any other pane or tab. Bindings live in App.Shortcuts.
   function syncShortcutHints(menu, targetIsActive) {
     for (const hint of menu.querySelectorAll('.context-shortcut[data-scope="target"]')) {
       hint.classList.toggle('hidden', !targetIsActive);

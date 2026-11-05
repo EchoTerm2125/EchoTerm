@@ -19,14 +19,12 @@
     shellSsh: 'SSH',
 
     // ── Toolbar ──────────────────────────────────────────────────────────────
-    toolbarSidebarToggle: 'Боковая панель (Ctrl+Shift+S)',
     toolbarSettings: 'Настройки',
     winMinimizeTitle: 'Свернуть',
     winMaximizeTitle: 'Развернуть',
     winRestoreTitle: 'Восстановить',
 
     // ── New Terminal Dropdown ────────────────────────────────────────────────
-    newTerminalTitle: 'Новый терминал (Ctrl+N)',
     newTermDropdownTitle: 'Выберите тип терминала',
     powershellLabel: 'PowerShell',
     cmdLabel: 'CMD',
@@ -50,7 +48,6 @@
 
     // ── Group bar ────────────────────────────────────────────────────────────
     groupDefaultName: 'Группа {n}',
-    newGroupTitle: 'Новая группа (Ctrl+Shift+N)',
     closeGroupTitle: 'Закрыть группу',
 
     // ── Tab ──────────────────────────────────────────────────────────────────
@@ -94,8 +91,8 @@
     ctxPaste: 'Вставить',
     ctxPasteAll: 'Вставить во все',
     ctxReconnect: 'Переподключить',
-    ctxToggleEcho: 'Переключить эхо',
-    ctxClosePane: 'Закрыть панель',
+    ctxToggleEcho: 'Переключить режим Echo',
+    ctxClosePane: 'Закрыть терминал',
     tabCtxRename: 'Переименовать вкладку',
     tabCtxReconnect: 'Переподключить',
     tabCtxReconnectSelected: 'Переподключить выбранные',
@@ -339,6 +336,18 @@
     optionsSshJumpWarn: 'Предупреждать о невыбранных хостах перехода при импорте SSH',
     optionsPastePreview: 'Подтверждать вставку многострочного содержимого',
     optionsRightClickPaste: 'Правый клик для копирования / вставки',
+    optionsTitleShortcuts: 'Сочетания клавиш',
+    optionsShortcutColumnKeys: 'Сочетание',
+    optionsShortcutColumnAction: 'Действие',
+    optionsShortcutNewTerminal: 'Новый терминал',
+    optionsShortcutNewGroup: 'Новая группа',
+    optionsShortcutCloseTerminal: 'Закрыть активный терминал',
+    optionsShortcutFind: 'Найти в активном терминале',
+    optionsShortcutSearchAll: 'Поиск во всех видимых терминалах',
+    optionsShortcutSelectAll: 'Выделить весь текст активного терминала',
+    optionsShortcutNextTerminal: 'Следующий терминал',
+    optionsShortcutPrevTerminal: 'Предыдущий терминал',
+    optionsShortcutToggleSidebar: 'Переключить боковую панель SSH',
 
     // ── Danger Zone ──────────────────────────────────────────────────────────
     optionsTitleDanger: 'Опасная зона',

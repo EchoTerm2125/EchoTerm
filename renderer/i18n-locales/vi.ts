@@ -19,14 +19,12 @@
     shellSsh: 'SSH',
 
     // ── Toolbar ──────────────────────────────────────────────────────────────
-    toolbarSidebarToggle: 'Thanh bên (Ctrl+Shift+S)',
     toolbarSettings: 'Cài đặt',
     winMinimizeTitle: 'Thu nhỏ',
     winMaximizeTitle: 'Phóng to',
     winRestoreTitle: 'Khôi phục',
 
     // ── New Terminal Dropdown ────────────────────────────────────────────────
-    newTerminalTitle: 'Terminal mới (Ctrl+N)',
     newTermDropdownTitle: 'Chọn loại terminal',
     powershellLabel: 'PowerShell',
     cmdLabel: 'CMD',
@@ -50,7 +48,6 @@
 
     // ── Group bar ────────────────────────────────────────────────────────────
     groupDefaultName: 'Nhóm {n}',
-    newGroupTitle: 'Nhóm mới (Ctrl+Shift+N)',
     closeGroupTitle: 'Đóng nhóm',
 
     // ── Tab ──────────────────────────────────────────────────────────────────
@@ -94,8 +91,8 @@
     ctxPaste: 'Dán',
     ctxPasteAll: 'Dán vào tất cả',
     ctxReconnect: 'Kết nối lại',
-    ctxToggleEcho: 'Chuyển đổi tiếng vọng',
-    ctxClosePane: 'Đóng khung',
+    ctxToggleEcho: 'Bật/tắt chế độ Echo',
+    ctxClosePane: 'Đóng terminal',
     tabCtxRename: 'Đổi tên tab',
     tabCtxReconnect: 'Kết nối lại',
     tabCtxReconnectSelected: 'Kết nối lại các tab đã chọn',
@@ -339,6 +336,18 @@
     optionsSshJumpWarn: 'Cảnh báo về máy chủ trung gian chưa chọn khi nhập SSH',
     optionsPastePreview: 'Xác nhận trước khi dán nội dung nhiều dòng',
     optionsRightClickPaste: 'Nhấp chuột phải để sao chép / dán',
+    optionsTitleShortcuts: 'Phím tắt',
+    optionsShortcutColumnKeys: 'Phím tắt',
+    optionsShortcutColumnAction: 'Hành động',
+    optionsShortcutNewTerminal: 'Terminal mới',
+    optionsShortcutNewGroup: 'Nhóm mới',
+    optionsShortcutCloseTerminal: 'Đóng terminal đang hoạt động',
+    optionsShortcutFind: 'Tìm trong terminal đang hoạt động',
+    optionsShortcutSearchAll: 'Tìm trong tất cả terminal hiển thị',
+    optionsShortcutSelectAll: 'Chọn toàn bộ văn bản trong terminal đang hoạt động',
+    optionsShortcutNextTerminal: 'Terminal tiếp theo',
+    optionsShortcutPrevTerminal: 'Terminal trước',
+    optionsShortcutToggleSidebar: 'Bật/tắt thanh bên SSH',
 
     // ── Danger Zone ──────────────────────────────────────────────────────────
     optionsTitleDanger: 'Vùng nguy hiểm',

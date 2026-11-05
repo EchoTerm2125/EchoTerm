@@ -120,7 +120,6 @@ import {
     bindSectionAddButtons();
     bindPasswordDialog();
     bindDialog();
-    bindKeyboardShortcut();
 
     // --- Search filter
     bindSearchFilter();
@@ -3479,23 +3478,17 @@ import {
     showPopup(sshDialog, 'userFolder');
   }
 
-  // --- Keyboard Shortcut
-  function bindKeyboardShortcut() {
-    document.addEventListener('keydown', (e) => {
-      if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.code === 'KeyS') {
-        e.preventDefault();
-        if (sshSidebar) {
-          if (sshSidebar.classList.contains('collapsed')) {
-            sshSidebar.classList.remove('collapsed');
-            const savedWidth = localStorage.getItem('sshSidebarWidth');
-            sshSidebar.style.width = savedWidth ? savedWidth + 'px' : '';
-          } else {
-            sshSidebar.style.width = '';
-            sshSidebar.classList.add('collapsed');
-          }
-        }
-      }
-    });
+  // --- Sidebar toggle (Ctrl+Shift+S is bound by renderer/shortcuts.ts)
+  function toggleSidebar() {
+    if (!sshSidebar) return;
+    if (sshSidebar.classList.contains('collapsed')) {
+      sshSidebar.classList.remove('collapsed');
+      const savedWidth = localStorage.getItem('sshSidebarWidth');
+      sshSidebar.style.width = savedWidth ? savedWidth + 'px' : '';
+    } else {
+      sshSidebar.style.width = '';
+      sshSidebar.classList.add('collapsed');
+    }
   }
 
   // --- Sidebar resize handle
@@ -3630,7 +3623,7 @@ import {
   App.SshPanel = {
     init, refreshAll, connectSsh, openSshConnectionFolder,
     showConnectionDialog, showUserDialog, showConnectionFolderDialog, showUserFolderDialog,
-    showPasswordUnlock, showPasswordSetup, updatePasswordIcon,
+    showPasswordUnlock, showPasswordSetup, updatePasswordIcon, toggleSidebar,
   };
 })();
 

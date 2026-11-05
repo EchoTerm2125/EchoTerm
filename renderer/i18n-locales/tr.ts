@@ -19,14 +19,12 @@
     shellSsh: 'SSH',
 
     // ── Toolbar ──────────────────────────────────────────────────────────────
-    toolbarSidebarToggle: 'Kenar Çubuğu (Ctrl+Shift+S)',
     toolbarSettings: 'Ayarlar',
     winMinimizeTitle: 'Küçült',
     winMaximizeTitle: 'Ekranı Kapla',
     winRestoreTitle: 'Geri Yükle',
 
     // ── New Terminal Dropdown ────────────────────────────────────────────────
-    newTerminalTitle: 'Yeni Terminal (Ctrl+N)',
     newTermDropdownTitle: 'Terminal türünü seç',
     powershellLabel: 'PowerShell',
     cmdLabel: 'CMD',
@@ -50,7 +48,6 @@
 
     // ── Group bar ────────────────────────────────────────────────────────────
     groupDefaultName: 'Grup {n}',
-    newGroupTitle: 'Yeni Grup (Ctrl+Shift+N)',
     closeGroupTitle: 'Grubu Kapat',
 
     // ── Tab ──────────────────────────────────────────────────────────────────
@@ -94,8 +91,8 @@
     ctxPaste: 'Yapıştır',
     ctxPasteAll: 'Tümüne Yapıştır',
     ctxReconnect: 'Yeniden bağlan',
-    ctxToggleEcho: 'Yankıyı Değiştir',
-    ctxClosePane: 'Bölmeyi Kapat',
+    ctxToggleEcho: 'Echo modunu aç/kapat',
+    ctxClosePane: 'Terminali kapat',
     tabCtxRename: 'Sekmeyi Yeniden Adlandır',
     tabCtxReconnect: 'Yeniden bağlan',
     tabCtxReconnectSelected: 'Seçilenleri yeniden bağla',
@@ -339,6 +336,18 @@
     optionsSshJumpWarn: 'SSH içe aktarımında seçilmemiş atlama sunucuları hakkında uyar',
     optionsPastePreview: 'Çok satırlı içerik yapıştırılmadan önce onayla',
     optionsRightClickPaste: 'Kopyalamak / yapıştırmak için sağ tıklayın',
+    optionsTitleShortcuts: 'Klavye kısayolları',
+    optionsShortcutColumnKeys: 'Kısayol',
+    optionsShortcutColumnAction: 'Eylem',
+    optionsShortcutNewTerminal: 'Yeni terminal',
+    optionsShortcutNewGroup: 'Yeni grup',
+    optionsShortcutCloseTerminal: 'Etkin terminali kapat',
+    optionsShortcutFind: 'Etkin terminalde bul',
+    optionsShortcutSearchAll: 'Görünen tüm terminallerde ara',
+    optionsShortcutSelectAll: 'Etkin terminaldeki tüm metni seç',
+    optionsShortcutNextTerminal: 'Sonraki terminal',
+    optionsShortcutPrevTerminal: 'Önceki terminal',
+    optionsShortcutToggleSidebar: 'SSH kenar çubuğunu aç/kapat',
 
     // ── Danger Zone ──────────────────────────────────────────────────────────
     optionsTitleDanger: 'Tehlikeli Bölge',

@@ -19,14 +19,12 @@
     shellSsh: 'SSH',
 
     // ── Toolbar ──────────────────────────────────────────────────────────────
-    toolbarSidebarToggle: 'Seitenleiste (Ctrl+Shift+S)',
     toolbarSettings: 'Einstellungen',
     winMinimizeTitle: 'Minimieren',
     winMaximizeTitle: 'Maximieren',
     winRestoreTitle: 'Wiederherstellen',
 
     // ── New Terminal Dropdown ────────────────────────────────────────────────
-    newTerminalTitle: 'Neues Terminal (Ctrl+N)',
     newTermDropdownTitle: 'Terminaltyp auswählen',
     powershellLabel: 'PowerShell',
     cmdLabel: 'CMD',
@@ -50,7 +48,6 @@
 
     // ── Group bar ────────────────────────────────────────────────────────────
     groupDefaultName: 'Gruppe {n}',
-    newGroupTitle: 'Neue Gruppe (Ctrl+Shift+N)',
     closeGroupTitle: 'Gruppe schließen',
 
     // ── Tab ──────────────────────────────────────────────────────────────────
@@ -94,8 +91,8 @@
     ctxPaste: 'Einfügen',
     ctxPasteAll: 'In alle einfügen',
     ctxReconnect: 'Neu verbinden',
-    ctxToggleEcho: 'Echo umschalten',
-    ctxClosePane: 'Bereich schließen',
+    ctxToggleEcho: 'Echo-Modus umschalten',
+    ctxClosePane: 'Terminal schließen',
     tabCtxRename: 'Tab umbenennen',
     tabCtxReconnect: 'Neu verbinden',
     tabCtxReconnectSelected: 'Ausgewählte neu verbinden',
@@ -339,6 +336,18 @@
     optionsSshJumpWarn: 'Vor nicht ausgewählten Sprunghosts beim SSH-Import warnen',
     optionsPastePreview: 'Vor dem Einfügen mehrzeiliger Inhalte bestätigen',
     optionsRightClickPaste: 'Rechtsklick zum Kopieren / Einfügen',
+    optionsTitleShortcuts: 'Tastenkombinationen',
+    optionsShortcutColumnKeys: 'Tastenkombination',
+    optionsShortcutColumnAction: 'Aktion',
+    optionsShortcutNewTerminal: 'Neues Terminal',
+    optionsShortcutNewGroup: 'Neue Gruppe',
+    optionsShortcutCloseTerminal: 'Aktives Terminal schließen',
+    optionsShortcutFind: 'Im aktiven Terminal suchen',
+    optionsShortcutSearchAll: 'Alle sichtbaren Terminals durchsuchen',
+    optionsShortcutSelectAll: 'Gesamten Text im aktiven Terminal auswählen',
+    optionsShortcutNextTerminal: 'Nächstes Terminal',
+    optionsShortcutPrevTerminal: 'Vorheriges Terminal',
+    optionsShortcutToggleSidebar: 'SSH-Seitenleiste umschalten',
 
     // ── Danger Zone ──────────────────────────────────────────────────────────
     optionsTitleDanger: 'Gefahrenzone',

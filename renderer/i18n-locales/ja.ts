@@ -19,14 +19,12 @@
     shellSsh: 'SSH',
 
     // ── Toolbar ──────────────────────────────────────────────────────────────
-    toolbarSidebarToggle: 'サイドバー (Ctrl+Shift+S)',
     toolbarSettings: '設定',
     winMinimizeTitle: '最小化',
     winMaximizeTitle: '最大化',
     winRestoreTitle: '元のサイズに戻す',
 
     // ── New Terminal Dropdown ────────────────────────────────────────────────
-    newTerminalTitle: '新しいターミナル (Ctrl+N)',
     newTermDropdownTitle: 'ターミナルの種類を選択',
     powershellLabel: 'PowerShell',
     cmdLabel: 'CMD',
@@ -50,7 +48,6 @@
 
     // ── Group bar ────────────────────────────────────────────────────────────
     groupDefaultName: 'グループ {n}',
-    newGroupTitle: '新しいグループ (Ctrl+Shift+N)',
     closeGroupTitle: 'グループを閉じる',
 
     // ── Tab ──────────────────────────────────────────────────────────────────
@@ -94,8 +91,8 @@
     ctxPaste: '貼り付け',
     ctxPasteAll: 'すべて貼り付け',
     ctxReconnect: '再接続',
-    ctxToggleEcho: 'エコー切り替え',
-    ctxClosePane: 'ペインを閉じる',
+    ctxToggleEcho: 'Echo モードを切り替え',
+    ctxClosePane: 'ターミナルを閉じる',
     tabCtxRename: 'タブ名を変更',
     tabCtxReconnect: '再接続',
     tabCtxReconnectSelected: '選択したタブを再接続',
@@ -339,6 +336,18 @@
     optionsSshJumpWarn: 'SSH インポート時に未選択のジャンプホストを警告',
     optionsPastePreview: '複数行の内容を貼り付ける前に確認',
     optionsRightClickPaste: '右クリックでコピー / 貼り付け',
+    optionsTitleShortcuts: 'キーボードショートカット',
+    optionsShortcutColumnKeys: 'ショートカット',
+    optionsShortcutColumnAction: 'アクション',
+    optionsShortcutNewTerminal: '新しいターミナル',
+    optionsShortcutNewGroup: '新しいグループ',
+    optionsShortcutCloseTerminal: 'アクティブなターミナルを閉じる',
+    optionsShortcutFind: 'アクティブなターミナルで検索',
+    optionsShortcutSearchAll: '表示中のすべてのターミナルを検索',
+    optionsShortcutSelectAll: 'アクティブなターミナルのテキストをすべて選択',
+    optionsShortcutNextTerminal: '次のターミナル',
+    optionsShortcutPrevTerminal: '前のターミナル',
+    optionsShortcutToggleSidebar: 'SSH サイドバーを切り替え',
 
     // ── Danger Zone ──────────────────────────────────────────────────────────
     optionsTitleDanger: '危険ゾーン',

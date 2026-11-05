@@ -19,14 +19,12 @@
     shellSsh: 'SSH',
 
     // ── Toolbar ──────────────────────────────────────────────────────────────
-    toolbarSidebarToggle: '側邊欄 (Ctrl+Shift+S)',
     toolbarSettings: '設定',
     winMinimizeTitle: '最小化',
     winMaximizeTitle: '最大化',
     winRestoreTitle: '還原',
 
     // ── New Terminal Dropdown ────────────────────────────────────────────────
-    newTerminalTitle: '新增終端機 (Ctrl+N)',
     newTermDropdownTitle: '選擇終端機類型',
     powershellLabel: 'PowerShell',
     cmdLabel: 'CMD',
@@ -50,7 +48,6 @@
 
     // ── Group bar ────────────────────────────────────────────────────────────
     groupDefaultName: '群組 {n}',
-    newGroupTitle: '新增群組 (Ctrl+Shift+N)',
     closeGroupTitle: '關閉群組',
 
     // ── Tab ──────────────────────────────────────────────────────────────────
@@ -94,8 +91,8 @@
     ctxPaste: '貼上',
     ctxPasteAll: '全部貼上',
     ctxReconnect: '重新連線',
-    ctxToggleEcho: '切換回顯',
-    ctxClosePane: '關閉窗格',
+    ctxToggleEcho: '切換 Echo 模式',
+    ctxClosePane: '關閉終端機',
     tabCtxRename: '重新命名標籤',
     tabCtxReconnect: '重新連線',
     tabCtxReconnectSelected: '重新連線已選取',
@@ -339,6 +336,18 @@
     optionsSshJumpWarn: 'SSH 匯入時警告未選取的跳板機',
     optionsPastePreview: '貼上多行內容前確認',
     optionsRightClickPaste: '右鍵複製 / 貼上',
+    optionsTitleShortcuts: '鍵盤快捷鍵',
+    optionsShortcutColumnKeys: '快捷鍵',
+    optionsShortcutColumnAction: '動作',
+    optionsShortcutNewTerminal: '新增終端機',
+    optionsShortcutNewGroup: '新增群組',
+    optionsShortcutCloseTerminal: '關閉使用中終端機',
+    optionsShortcutFind: '在使用中終端機中尋找',
+    optionsShortcutSearchAll: '搜尋所有可見終端機',
+    optionsShortcutSelectAll: '全選使用中終端機中的文字',
+    optionsShortcutNextTerminal: '下一個終端機',
+    optionsShortcutPrevTerminal: '上一個終端機',
+    optionsShortcutToggleSidebar: '切換 SSH 側邊欄',
 
     // ── Danger Zone ──────────────────────────────────────────────────────────
     optionsTitleDanger: '危險區域',

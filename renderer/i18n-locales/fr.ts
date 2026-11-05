@@ -19,14 +19,12 @@
     shellSsh: 'SSH',
 
     // ── Toolbar ──────────────────────────────────────────────────────────────
-    toolbarSidebarToggle: 'Barre latérale (Ctrl+Shift+S)',
     toolbarSettings: 'Paramètres',
     winMinimizeTitle: 'Réduire',
     winMaximizeTitle: 'Agrandir',
     winRestoreTitle: 'Restaurer',
 
     // ── New Terminal Dropdown ────────────────────────────────────────────────
-    newTerminalTitle: 'Nouveau terminal (Ctrl+N)',
     newTermDropdownTitle: 'Sélectionner le type de terminal',
     powershellLabel: 'PowerShell',
     cmdLabel: 'CMD',
@@ -50,7 +48,6 @@
 
     // ── Group bar ────────────────────────────────────────────────────────────
     groupDefaultName: 'Groupe {n}',
-    newGroupTitle: 'Nouveau groupe (Ctrl+Shift+N)',
     closeGroupTitle: 'Fermer le groupe',
 
     // ── Tab ──────────────────────────────────────────────────────────────────
@@ -94,8 +91,8 @@
     ctxPaste: 'Coller',
     ctxPasteAll: 'Coller partout',
     ctxReconnect: 'Reconnecter',
-    ctxToggleEcho: 'Basculer l’écho',
-    ctxClosePane: 'Fermer le volet',
+    ctxToggleEcho: 'Basculer le mode Echo',
+    ctxClosePane: 'Fermer le terminal',
     tabCtxRename: 'Renommer l’onglet',
     tabCtxReconnect: 'Reconnecter',
     tabCtxReconnectSelected: 'Reconnecter la sélection',
@@ -339,6 +336,18 @@
     optionsSshJumpWarn: 'Avertir des hôtes de saut non sélectionnés lors de l’import SSH',
     optionsPastePreview: 'Confirmer avant de coller un contenu multiligne',
     optionsRightClickPaste: 'Clic droit pour copier / coller',
+    optionsTitleShortcuts: 'Raccourcis clavier',
+    optionsShortcutColumnKeys: 'Raccourci',
+    optionsShortcutColumnAction: 'Action',
+    optionsShortcutNewTerminal: 'Nouveau terminal',
+    optionsShortcutNewGroup: 'Nouveau groupe',
+    optionsShortcutCloseTerminal: 'Fermer le terminal actif',
+    optionsShortcutFind: 'Rechercher dans le terminal actif',
+    optionsShortcutSearchAll: 'Rechercher dans tous les terminaux visibles',
+    optionsShortcutSelectAll: 'Sélectionner tout le texte du terminal actif',
+    optionsShortcutNextTerminal: 'Terminal suivant',
+    optionsShortcutPrevTerminal: 'Terminal précédent',
+    optionsShortcutToggleSidebar: 'Afficher/masquer la barre latérale SSH',
 
     // ── Danger Zone ──────────────────────────────────────────────────────────
     optionsTitleDanger: 'Zone de danger',

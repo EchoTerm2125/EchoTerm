@@ -1918,6 +1918,67 @@ html, body {
   border-bottom: 1px solid var(--border);
 }
 
+/* Keyboard Shortcuts table — one row per App-wide shortcut */
+.options-shortcut-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.options-shortcut-table th {
+  padding: calc(9px * var(--ui-scale)) calc(14px * var(--ui-scale));
+  border-bottom: 1px solid var(--border);
+  font-size: calc(var(--app-font-size) * 0.769);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  text-align: left;
+  color: var(--text-muted);
+}
+
+.options-shortcut-table th:first-child {
+  width: 45%;
+}
+
+.options-shortcut-table td {
+  padding: calc(9px * var(--ui-scale)) calc(14px * var(--ui-scale));
+  font-size: calc(var(--app-font-size) * 0.923);
+  vertical-align: middle;
+}
+
+.options-shortcut-table tbody tr:not(:last-child) td {
+  border-bottom: 1px solid var(--border);
+}
+
+.shortcut-table-action {
+  color: var(--text-primary);
+}
+
+.shortcut-keys {
+  display: inline-flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: calc(4px * var(--ui-scale));
+}
+
+.shortcut-keys kbd {
+  min-width: calc(22px * var(--ui-scale));
+  padding: calc(2px * var(--ui-scale)) calc(7px * var(--ui-scale));
+  border: 1px solid var(--border);
+  border-bottom-width: 2px;
+  border-radius: var(--radius-sm);
+  background: var(--bg-surface);
+  color: var(--text-primary);
+  font-family: 'Cascadia Mono', Consolas, monospace;
+  font-size: calc(var(--app-font-size) * 0.769);
+  line-height: 1.35;
+  text-align: center;
+}
+
+.shortcut-key-plus {
+  color: var(--text-muted);
+  font-size: calc(var(--app-font-size) * 0.769);
+}
+
 /* Theme picker tiles (Appearance section) */
 .options-theme-grid {
   display: grid;
