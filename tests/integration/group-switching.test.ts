@@ -294,5 +294,31 @@ describe('Integration: Group Switching', () => {
       expect(App.state.groups.get(g1.id).terminalIds.has(1)).toBe(false);
       expect(App.state.groups.get(g2.id).terminalIds.has(1)).toBe(true);
     });
+
+    it('shows only the active pane after a drop into a non-echo group', () => {
+      // Regression: dropping a tab onto another group's chip left every pane of
+      // that group visible, stacking them, because moveTerminalToGroup revealed
+      // the group's panes (refreshGroupVisibility) after switchGroup had already
+      // collapsed the view.
+      const g1 = App.Groups.createGroup('Group 1', true);
+      const g2 = App.Groups.createGroup('Group 2', false);
+
+      injectTerminal(1);
+      injectTerminal(2);
+      App.state.terminalGroups.set(1, g1.id);
+      App.state.terminalGroups.set(2, g2.id);
+      g1.terminalIds.add(1);
+      g2.terminalIds.add(2);
+
+      App.Groups.switchGroup(g2.id);
+      App.Terminal.focusTerminal(2);
+      App.Groups.moveTerminalToGroup(2, g1.id);
+
+      const pane1 = App.state.terminals.get(1).paneEl;
+      const pane2 = App.state.terminals.get(2).paneEl;
+      expect(App.state.activeGroupId).toBe(g1.id);
+      expect(pane1.style.display).toBe('none');
+      expect(pane2.style.display).toBe('flex');
+    });
   });
 });

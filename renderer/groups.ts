@@ -418,6 +418,16 @@
 
     updateGroupTabs();
     refreshGroupVisibility();
+    // refreshGroupVisibility() reveals every pane of the active group, which is
+    // only right in Echo mode. Outside it, exactly one pane (the active one) is
+    // visible, so a move that lands in the group being watched must re-collapse
+    // the view — otherwise the dropped pane stacks beside the existing one.
+    if (!state.echoModeActive) {
+      const groupIds = getGroupTerminalIds(state.activeGroupId);
+      const visibleId = groupIds.includes(state.activeTerminalId)
+        ? state.activeTerminalId : groupIds[0];
+      if (visibleId !== undefined) App.Terminal.showOnlyPane(visibleId);
+    }
     App.UI.updateStatusBar();
   }
 
