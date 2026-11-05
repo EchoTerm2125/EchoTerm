@@ -19,14 +19,12 @@
     shellSsh: 'SSH',
 
     // ── Toolbar ──────────────────────────────────────────────────────────────
-    toolbarSidebarToggle: '사이드바 (Ctrl+Shift+S)',
     toolbarSettings: '설정',
     winMinimizeTitle: '최소화',
     winMaximizeTitle: '최대화',
     winRestoreTitle: '복원',
 
     // ── New Terminal Dropdown ────────────────────────────────────────────────
-    newTerminalTitle: '새 터미널 (Ctrl+N)',
     newTermDropdownTitle: '터미널 유형 선택',
     powershellLabel: 'PowerShell',
     cmdLabel: 'CMD',
@@ -43,10 +41,13 @@
     echoEnableAllTitle: '모든 터미널에서 에코 활성화',
     echoToggleAllTitle: '각 터미널의 에코 상태 전환',
     echoPasteAllTitle: '에코가 활성화된 모든 터미널에 붙여넣기',
+    echoReconnect: '에코 활성 다시 연결',
+    echoReconnectTitle: '에코가 활성화된 모든 SSH 터미널 다시 연결',
+    echoReconnectNone: '에코가 활성화된 터미널이 없습니다.',
+    echoReconnectNoSsh: '다시 연결할 에코가 활성화된 SSH 터미널이 없습니다.',
 
     // ── Group bar ────────────────────────────────────────────────────────────
     groupDefaultName: '그룹 {n}',
-    newGroupTitle: '새 그룹 (Ctrl+Shift+N)',
     closeGroupTitle: '그룹 닫기',
 
     // ── Tab ──────────────────────────────────────────────────────────────────
@@ -54,6 +55,7 @@
 
     // ── Pane titlebar ────────────────────────────────────────────────────────
     panePasteTitle: '붙여넣기',
+    paneReconnectTitle: '다시 연결',
     paneEchoTitle: '이 터미널에 입력 에코',
     paneEchoLabel: '에코',
     paneCloseTitle: '닫기',
@@ -85,11 +87,15 @@
 
     // ── Context menus ────────────────────────────────────────────────────────
     ctxCopy: '복사',
+    ctxSelectAll: '모두 선택',
     ctxPaste: '붙여넣기',
     ctxPasteAll: '모두 붙여넣기',
-    ctxToggleEcho: '에코 전환',
-    ctxClosePane: '패널 닫기',
+    ctxReconnect: '다시 연결',
+    ctxToggleEcho: 'Echo 모드 전환',
+    ctxClosePane: '터미널 닫기',
     tabCtxRename: '탭 이름 바꾸기',
+    tabCtxReconnect: '다시 연결',
+    tabCtxReconnectSelected: '선택 항목 다시 연결',
     tabCtxClose: '탭 닫기',
     tabCtxCloseSelected: '선택한 탭 닫기',
     tabCtxCloseOthers: '다른 탭 닫기',
@@ -105,6 +111,9 @@
     confirmCancel: '취소',
     confirmClose: '닫기',
     confirmDelete: '삭제',
+    confirmDiscard: '버리기',
+    confirmDiscardChanges: '저장되지 않은 변경 사항을 버리시겠습니까?',
+    confirmKeepEditing: '계속 편집',
     confirmDuplicate: '복제',
     confirmDontShowAgain: '다시 표시하지 않음',
     confirmCloseTerminal: '이 터미널을 닫을까요?\n세션이 종료됩니다.',
@@ -116,6 +125,11 @@
     confirmCloseGroupWithTerminals: '그룹 "{name}"을(를) 닫을까요?\n터미널 {count}개가 닫힙니다.',
     confirmCloseApp: 'EchoTerm을 닫을까요?\n모든 터미널 세션이 종료됩니다.',
     confirmCloseAllGroupTerminals: '그룹 "{name}"의 터미널 {count}개를 모두 닫을까요?\n모든 세션이 종료됩니다.',
+    confirmReconnect: '이 터미널을 다시 연결할까요?\n현재 세션이 종료됩니다.',
+    confirmReconnectSelected: '선택한 터미널 {count}개를 다시 연결할까요?\n모든 세션이 종료됩니다.',
+    confirmReconnectSkipLocal: '선택 항목 중 로컬 셸 {count}개는 다시 연결되지 않습니다.',
+    confirmReconnectEcho: '에코가 활성화된 SSH 터미널 {count}개를 다시 연결할까요?\n모든 세션이 종료됩니다.',
+    reconnectFailedSummary: '다시 연결하지 못했습니다: {names}',
     confirmDeleteSshConnection: 'SSH 연결 "{name}"을(를) 삭제할까요?',
     confirmDeleteSshConnectionFolder: '연결 폴더 "{name}"을(를) 삭제할까요?\n{connections}개의 연결과 {subfolders}개의 하위 폴더가 영구 삭제됩니다.',
     confirmDeleteMultiSshConnectionFolder: '내부의 {connections}개의 연결과 {subfolders}개의 하위 폴더도 영구 삭제됩니다.',
@@ -264,6 +278,11 @@
     sshImportJumpVia: '↪ {host} 경유',
     sshImportJumpNotInConfig: ' (설정에 없음)',
     sshImportNoNewHosts: '새 호스트가 없습니다. 모두 이미 가져왔습니다.',
+    sshImportSelectAll: '모두 선택',
+    sshImportFilterPlaceholder: '필터...',
+    sshImportFilterNoMatch: '필터와 일치하는 가져오기 행이 없습니다.',
+    sshImportConfirmImport: '가져오기 {count}개 항목:\n\n{list}',
+    sshImportConfirmUpdate: '업데이트 {count}개 항목:\n\n{list}',
     sshImportNoExistingToUpdate: '업데이트할 기존 연결이 없습니다.',
     sshImportNoHosts: 'SSH 설정에서 호스트를 찾을 수 없습니다.',
     sshImportWinScpTitle: 'WinSCP에서 가져오기',
@@ -294,6 +313,8 @@
     sshCtxDuplicate: '복제',
     sshCtxDuplicateSelected: '선택 항목 복제 ({count})',
     sshCtxNoOtherFolders: '다른 폴더가 없습니다',
+    submenuFilterPlaceholder: '필터…',
+    submenuFilterNoMatches: '일치하는 항목 없음',
 
     // ── Settings / Options Panel ──────────────────────────────────────────────
     optionsTitleAppearance: '모양',
@@ -311,9 +332,22 @@
     optionsTabCloseConfirm: '탭을 닫기 전에 확인',
     optionsWindowCloseConfirm: '창을 닫기 전에 확인',
     optionsGroupCloseConfirm: '그룹을 삭제하기 전에 확인',
+    optionsReconnectConfirm: '터미널을 다시 연결하기 전에 확인',
     optionsSshJumpWarn: 'SSH 가져오기 시 선택되지 않은 점프 호스트 경고',
     optionsPastePreview: '여러 줄 내용을 붙여넣기 전에 확인',
     optionsRightClickPaste: '오른쪽 클릭으로 복사 / 붙여넣기',
+    optionsTitleShortcuts: '키보드 단축키',
+    optionsShortcutColumnKeys: '단축키',
+    optionsShortcutColumnAction: '작업',
+    optionsShortcutNewTerminal: '새 터미널',
+    optionsShortcutNewGroup: '새 그룹',
+    optionsShortcutCloseTerminal: '활성 터미널 닫기',
+    optionsShortcutFind: '활성 터미널에서 찾기',
+    optionsShortcutSearchAll: '표시된 모든 터미널 검색',
+    optionsShortcutSelectAll: '활성 터미널의 텍스트 모두 선택',
+    optionsShortcutNextTerminal: '다음 터미널',
+    optionsShortcutPrevTerminal: '이전 터미널',
+    optionsShortcutToggleSidebar: 'SSH 사이드바 전환',
 
     // ── Danger Zone ──────────────────────────────────────────────────────────
     optionsTitleDanger: '위험 구역',
@@ -358,6 +392,8 @@
     // ── Error messages ───────────────────────────────────────────────────────
     errorUnknownShell: '알 수 없는 셸: {shell}',
     errorConnectionNotFound: '연결을 찾을 수 없습니다.',
+    errorSessionConfig: 'SSH 세션 설정을 준비하지 못했습니다.',
+    errorJumpChainInvalid: '점프 호스트 체인이 잘못되었습니다. 루프가 있거나 삭제된 연결을 참조합니다.',
     errorConnectionFolderNotFound: '연결 폴더를 찾을 수 없습니다.',
     errorFieldBlank: '이 항목은 비워 둘 수 없습니다.',
     errorConfigNotFound: '설정 파일을 찾을 수 없습니다: {path}',

@@ -19,14 +19,12 @@
     shellSsh: 'SSH',
 
     // ── Toolbar ──────────────────────────────────────────────────────────────
-    toolbarSidebarToggle: 'Thanh bên (Ctrl+Shift+S)',
     toolbarSettings: 'Cài đặt',
     winMinimizeTitle: 'Thu nhỏ',
     winMaximizeTitle: 'Phóng to',
     winRestoreTitle: 'Khôi phục',
 
     // ── New Terminal Dropdown ────────────────────────────────────────────────
-    newTerminalTitle: 'Terminal mới (Ctrl+N)',
     newTermDropdownTitle: 'Chọn loại terminal',
     powershellLabel: 'PowerShell',
     cmdLabel: 'CMD',
@@ -43,10 +41,13 @@
     echoEnableAllTitle: 'Bật tiếng vọng trên tất cả terminal',
     echoToggleAllTitle: 'Chuyển đổi trạng thái tiếng vọng của từng terminal',
     echoPasteAllTitle: 'Dán vào tất cả terminal đã bật tiếng vọng',
+    echoReconnect: 'Kết nối lại mục đã bật tiếng vọng',
+    echoReconnectTitle: 'Kết nối lại tất cả terminal SSH đã bật tiếng vọng',
+    echoReconnectNone: 'Không có terminal nào đã bật tiếng vọng.',
+    echoReconnectNoSsh: 'Không có terminal SSH đã bật tiếng vọng nào để kết nối lại.',
 
     // ── Group bar ────────────────────────────────────────────────────────────
     groupDefaultName: 'Nhóm {n}',
-    newGroupTitle: 'Nhóm mới (Ctrl+Shift+N)',
     closeGroupTitle: 'Đóng nhóm',
 
     // ── Tab ──────────────────────────────────────────────────────────────────
@@ -54,6 +55,7 @@
 
     // ── Pane titlebar ────────────────────────────────────────────────────────
     panePasteTitle: 'Dán',
+    paneReconnectTitle: 'Kết nối lại',
     paneEchoTitle: 'Tiếng vọng đầu vào tới terminal này',
     paneEchoLabel: 'Tiếng vọng',
     paneCloseTitle: 'Đóng',
@@ -85,11 +87,15 @@
 
     // ── Context menus ────────────────────────────────────────────────────────
     ctxCopy: 'Sao chép',
+    ctxSelectAll: 'Chọn tất cả',
     ctxPaste: 'Dán',
     ctxPasteAll: 'Dán vào tất cả',
-    ctxToggleEcho: 'Chuyển đổi tiếng vọng',
-    ctxClosePane: 'Đóng khung',
+    ctxReconnect: 'Kết nối lại',
+    ctxToggleEcho: 'Bật/tắt chế độ Echo',
+    ctxClosePane: 'Đóng terminal',
     tabCtxRename: 'Đổi tên tab',
+    tabCtxReconnect: 'Kết nối lại',
+    tabCtxReconnectSelected: 'Kết nối lại các tab đã chọn',
     tabCtxClose: 'Đóng tab',
     tabCtxCloseSelected: 'Đóng các tab đã chọn',
     tabCtxCloseOthers: 'Đóng các tab khác',
@@ -105,6 +111,9 @@
     confirmCancel: 'Hủy',
     confirmClose: 'Đóng',
     confirmDelete: 'Xóa',
+    confirmDiscard: 'Bỏ',
+    confirmDiscardChanges: 'Bỏ các thay đổi chưa lưu?',
+    confirmKeepEditing: 'Tiếp tục chỉnh sửa',
     confirmDuplicate: 'Nhân bản',
     confirmDontShowAgain: 'Không hiển thị lại',
     confirmCloseTerminal: 'Đóng terminal này?\nPhiên sẽ bị chấm dứt.',
@@ -116,6 +125,11 @@
     confirmCloseGroupWithTerminals: 'Đóng nhóm "{name}"?\n{count} terminal sẽ được đóng.',
     confirmCloseApp: 'Đóng EchoTerm?\nTất cả phiên terminal sẽ bị chấm dứt.',
     confirmCloseAllGroupTerminals: 'Đóng tất cả {count} terminal trong nhóm "{name}"?\nTất cả phiên sẽ bị chấm dứt.',
+    confirmReconnect: 'Kết nối lại terminal này?\nPhiên hiện tại sẽ bị chấm dứt.',
+    confirmReconnectSelected: 'Kết nối lại {count} terminal đã chọn?\nTất cả phiên sẽ bị chấm dứt.',
+    confirmReconnectSkipLocal: '{count} shell cục bộ trong vùng chọn sẽ không được kết nối lại.',
+    confirmReconnectEcho: 'Kết nối lại {count} terminal SSH đã bật tiếng vọng?\nTất cả phiên sẽ bị chấm dứt.',
+    reconnectFailedSummary: 'Không thể kết nối lại: {names}',
     confirmDeleteSshConnection: 'Xóa kết nối SSH "{name}"?',
     confirmDeleteSshConnectionFolder: 'Xóa thư mục kết nối "{name}"?\n{connections} kết nối và {subfolders} thư mục con bên trong sẽ bị xóa vĩnh viễn.',
     confirmDeleteMultiSshConnectionFolder: 'Thao tác này cũng sẽ xóa vĩnh viễn {connections} kết nối và {subfolders} thư mục con bên trong.',
@@ -264,6 +278,11 @@
     sshImportJumpVia: '↪ qua {host}',
     sshImportJumpNotInConfig: ' (không có trong cấu hình)',
     sshImportNoNewHosts: 'Không tìm thấy máy chủ mới. Tất cả đã được nhập.',
+    sshImportSelectAll: 'Chọn tất cả',
+    sshImportFilterPlaceholder: 'Lọc...',
+    sshImportFilterNoMatch: 'Không có dòng nhập nào khớp với bộ lọc.',
+    sshImportConfirmImport: 'Nhập {count} mục:\n\n{list}',
+    sshImportConfirmUpdate: 'Cập nhật {count} mục:\n\n{list}',
     sshImportNoExistingToUpdate: 'Không tìm thấy kết nối hiện có để cập nhật.',
     sshImportNoHosts: 'Không tìm thấy máy chủ nào trong cấu hình SSH.',
     sshImportWinScpTitle: 'Nhập từ WinSCP',
@@ -294,6 +313,8 @@
     sshCtxDuplicate: 'Nhân bản',
     sshCtxDuplicateSelected: 'Nhân bản các mục đã chọn ({count})',
     sshCtxNoOtherFolders: 'Không có thư mục khác',
+    submenuFilterPlaceholder: 'Lọc…',
+    submenuFilterNoMatches: 'Không có kết quả',
 
     // ── Settings / Options Panel ──────────────────────────────────────────────
     optionsTitleAppearance: 'Giao diện',
@@ -311,9 +332,22 @@
     optionsTabCloseConfirm: 'Xác nhận trước khi đóng tab',
     optionsWindowCloseConfirm: 'Xác nhận trước khi đóng cửa sổ',
     optionsGroupCloseConfirm: 'Xác nhận trước khi xóa nhóm',
+    optionsReconnectConfirm: 'Xác nhận trước khi kết nối lại terminal',
     optionsSshJumpWarn: 'Cảnh báo về máy chủ trung gian chưa chọn khi nhập SSH',
     optionsPastePreview: 'Xác nhận trước khi dán nội dung nhiều dòng',
     optionsRightClickPaste: 'Nhấp chuột phải để sao chép / dán',
+    optionsTitleShortcuts: 'Phím tắt',
+    optionsShortcutColumnKeys: 'Phím tắt',
+    optionsShortcutColumnAction: 'Hành động',
+    optionsShortcutNewTerminal: 'Terminal mới',
+    optionsShortcutNewGroup: 'Nhóm mới',
+    optionsShortcutCloseTerminal: 'Đóng terminal đang hoạt động',
+    optionsShortcutFind: 'Tìm trong terminal đang hoạt động',
+    optionsShortcutSearchAll: 'Tìm trong tất cả terminal hiển thị',
+    optionsShortcutSelectAll: 'Chọn toàn bộ văn bản trong terminal đang hoạt động',
+    optionsShortcutNextTerminal: 'Terminal tiếp theo',
+    optionsShortcutPrevTerminal: 'Terminal trước',
+    optionsShortcutToggleSidebar: 'Bật/tắt thanh bên SSH',
 
     // ── Danger Zone ──────────────────────────────────────────────────────────
     optionsTitleDanger: 'Vùng nguy hiểm',
@@ -358,6 +392,8 @@
     // ── Error messages ───────────────────────────────────────────────────────
     errorUnknownShell: 'Shell không xác định: {shell}',
     errorConnectionNotFound: 'Không tìm thấy kết nối.',
+    errorSessionConfig: 'Không thể chuẩn bị cấu hình phiên SSH.',
+    errorJumpChainInvalid: 'Chuỗi máy nhảy không hợp lệ: có vòng lặp hoặc tham chiếu đến kết nối đã xóa.',
     errorConnectionFolderNotFound: 'Không tìm thấy thư mục kết nối.',
     errorFieldBlank: 'Trường này không được để trống.',
     errorConfigNotFound: 'Không tìm thấy tệp cấu hình: {path}',

@@ -18,6 +18,9 @@
     // ── Localize static DOM text ──
     if (App.i18n && App.i18n.localizeDom) App.i18n.localizeDom();
 
+    // ── Render the Keyboard Shortcuts tab and hydrate its other copies ──
+    App.Shortcuts.refresh();
+
     // ── Populate shell icons from TAB_ICONS (single source of truth) ──
     App.UI.populateShellIcons();
 
@@ -81,6 +84,8 @@
       if (App.state.echoModeActive) App.Echo.updateEchoAllButton();
       // Re-localize all DOM (catches data-i18n attributes on dynamic elements)
       App.i18n.localizeDom();
+      // Re-render localized shortcut labels and tooltips
+      App.Shortcuts.refresh();
       // Refresh SSH sidebar tree and password icon
       if (App.SshPanel && App.SshPanel.refreshAll) App.SshPanel.refreshAll();
       if (App.SshPanel && App.SshPanel.updatePasswordIcon) App.SshPanel.updatePasswordIcon();

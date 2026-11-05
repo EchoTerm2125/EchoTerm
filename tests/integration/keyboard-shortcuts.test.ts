@@ -169,4 +169,37 @@ describe('Integration: Keyboard Shortcuts', () => {
       expect(findBarFor(1)).toBeNull();
     });
   });
+
+  describe('Ctrl+Shift+A → Select All', () => {
+    const press = () => document.dispatchEvent(new KeyboardEvent('keydown', {
+      key: 'A',
+      code: 'KeyA',
+      ctrlKey: true,
+      shiftKey: true,
+      bubbles: true,
+    }));
+
+    it('selects the Active pane buffer when its terminal has focus', () => {
+      const entry = App.state.terminals.get(1);
+      entry.term.open(entry.paneEl.querySelector('.xterm-container'));
+      entry.term.focus();
+      const spy = vi.spyOn(entry.term, 'selectAll');
+
+      press();
+
+      expect(spy).toHaveBeenCalled();
+    });
+
+    it('does not fire while another element has focus', () => {
+      const entry = App.state.terminals.get(1);
+      const input = document.createElement('input');
+      document.body.appendChild(input);
+      input.focus();
+      const spy = vi.spyOn(entry.term, 'selectAll');
+
+      press();
+
+      expect(spy).not.toHaveBeenCalled();
+    });
+  });
 });

@@ -19,14 +19,12 @@
     shellSsh: 'SSH',
 
     // ── Toolbar ──────────────────────────────────────────────────────────────
-    toolbarSidebarToggle: 'Barra lateral (Ctrl+Shift+S)',
     toolbarSettings: 'Ajustes',
     winMinimizeTitle: 'Minimizar',
     winMaximizeTitle: 'Maximizar',
     winRestoreTitle: 'Restaurar',
 
     // ── New Terminal Dropdown ────────────────────────────────────────────────
-    newTerminalTitle: 'Nueva terminal (Ctrl+N)',
     newTermDropdownTitle: 'Seleccionar tipo de terminal',
     powershellLabel: 'PowerShell',
     cmdLabel: 'CMD',
@@ -43,10 +41,13 @@
     echoEnableAllTitle: 'Habilitar eco en todas las terminales',
     echoToggleAllTitle: 'Alternar el estado de eco de cada terminal',
     echoPasteAllTitle: 'Pegar en todas las terminales con eco habilitado',
+    echoReconnect: 'Reconectar con eco',
+    echoReconnectTitle: 'Reconectar todas las terminales SSH con eco habilitado',
+    echoReconnectNone: 'No hay terminales con eco habilitado.',
+    echoReconnectNoSsh: 'No hay terminales SSH con eco habilitado para reconectar.',
 
     // ── Group bar ────────────────────────────────────────────────────────────
     groupDefaultName: 'Grupo {n}',
-    newGroupTitle: 'Nuevo grupo (Ctrl+Shift+N)',
     closeGroupTitle: 'Cerrar grupo',
 
     // ── Tab ──────────────────────────────────────────────────────────────────
@@ -54,6 +55,7 @@
 
     // ── Pane titlebar ────────────────────────────────────────────────────────
     panePasteTitle: 'Pegar',
+    paneReconnectTitle: 'Reconectar',
     paneEchoTitle: 'Eco de entrada en esta terminal',
     paneEchoLabel: 'Eco',
     paneCloseTitle: 'Cerrar',
@@ -85,11 +87,15 @@
 
     // ── Context menus ────────────────────────────────────────────────────────
     ctxCopy: 'Copiar',
+    ctxSelectAll: 'Seleccionar todo',
     ctxPaste: 'Pegar',
     ctxPasteAll: 'Pegar en todas',
-    ctxToggleEcho: 'Alternar eco',
-    ctxClosePane: 'Cerrar panel',
+    ctxReconnect: 'Reconectar',
+    ctxToggleEcho: 'Alternar el modo Echo',
+    ctxClosePane: 'Cerrar terminal',
     tabCtxRename: 'Renombrar pestaña',
+    tabCtxReconnect: 'Reconectar',
+    tabCtxReconnectSelected: 'Reconectar seleccionadas',
     tabCtxClose: 'Cerrar pestaña',
     tabCtxCloseSelected: 'Cerrar seleccionadas',
     tabCtxCloseOthers: 'Cerrar otras',
@@ -105,6 +111,9 @@
     confirmCancel: 'Cancelar',
     confirmClose: 'Cerrar',
     confirmDelete: 'Eliminar',
+    confirmDiscard: 'Descartar',
+    confirmDiscardChanges: '¿Descartar los cambios sin guardar?',
+    confirmKeepEditing: 'Seguir editando',
     confirmDuplicate: 'Duplicar',
     confirmDontShowAgain: 'No volver a mostrar',
     confirmCloseTerminal: '¿Cerrar esta terminal?\nLa sesión terminará.',
@@ -116,6 +125,11 @@
     confirmCloseGroupWithTerminals: '¿Cerrar el grupo "{name}"?\nSe cerrarán terminales ({count}).',
     confirmCloseApp: '¿Cerrar EchoTerm?\nTodas las sesiones de terminal terminarán.',
     confirmCloseAllGroupTerminals: '¿Cerrar las terminales ({count}) del grupo "{name}"?\nTodas las sesiones terminarán.',
+    confirmReconnect: '¿Reconectar esta terminal?\nLa sesión se terminará.',
+    confirmReconnectSelected: '¿Reconectar {count} terminales seleccionadas?\nTodas las sesiones terminarán.',
+    confirmReconnectSkipLocal: 'Los {count} shells locales de la selección no se reconectarán.',
+    confirmReconnectEcho: '¿Reconectar {count} terminales SSH con eco habilitado?\nTodas las sesiones terminarán.',
+    reconnectFailedSummary: 'No se pudo reconectar: {names}',
     confirmDeleteSshConnection: '¿Eliminar la conexión SSH "{name}"?',
     confirmDeleteSshConnectionFolder: '¿Eliminar la carpeta de conexión "{name}"?\n{connections} conexión(es) y {subfolders} subcarpeta(s) se eliminarán permanentemente.',
     confirmDeleteMultiSshConnectionFolder: 'Esto también eliminará permanentemente {connections} conexión(es) y {subfolders} subcarpeta(s) en su interior.',
@@ -264,6 +278,11 @@
     sshImportJumpVia: '↪ vía {host}',
     sshImportJumpNotInConfig: ' (no está en la configuración)',
     sshImportNoNewHosts: 'No se encontraron hosts nuevos. Todos ya están importados.',
+    sshImportSelectAll: 'Seleccionar todo',
+    sshImportFilterPlaceholder: 'Filtrar...',
+    sshImportFilterNoMatch: 'Ninguna fila de importación coincide con el filtro.',
+    sshImportConfirmImport: 'Importar {count} elemento(s):\n\n{list}',
+    sshImportConfirmUpdate: 'Actualizar {count} elemento(s):\n\n{list}',
     sshImportNoExistingToUpdate: 'No se encontraron conexiones existentes para actualizar.',
     sshImportNoHosts: 'No se encontraron hosts en la configuración SSH.',
     sshImportWinScpTitle: 'Importar desde WinSCP',
@@ -294,6 +313,8 @@
     sshCtxDuplicate: 'Duplicar',
     sshCtxDuplicateSelected: 'Duplicar seleccionados ({count})',
     sshCtxNoOtherFolders: 'No hay otras carpetas',
+    submenuFilterPlaceholder: 'Filtrar…',
+    submenuFilterNoMatches: 'Sin coincidencias',
 
     // ── Settings / Options Panel ──────────────────────────────────────────────
     optionsTitleAppearance: 'Apariencia',
@@ -311,9 +332,22 @@
     optionsTabCloseConfirm: 'Confirmar al cerrar una pestaña',
     optionsWindowCloseConfirm: 'Confirmar al cerrar la ventana',
     optionsGroupCloseConfirm: 'Confirmar al eliminar un grupo',
+    optionsReconnectConfirm: 'Confirmar al reconectar una terminal',
     optionsSshJumpWarn: 'Advertir sobre hosts de salto no seleccionados al importar SSH',
     optionsPastePreview: 'Confirmar antes de pegar contenido de varias líneas',
     optionsRightClickPaste: 'Clic derecho para copiar / pegar',
+    optionsTitleShortcuts: 'Atajos de teclado',
+    optionsShortcutColumnKeys: 'Atajo',
+    optionsShortcutColumnAction: 'Acción',
+    optionsShortcutNewTerminal: 'Nuevo terminal',
+    optionsShortcutNewGroup: 'Nuevo grupo',
+    optionsShortcutCloseTerminal: 'Cerrar el terminal activo',
+    optionsShortcutFind: 'Buscar en el terminal activo',
+    optionsShortcutSearchAll: 'Buscar en todos los terminales visibles',
+    optionsShortcutSelectAll: 'Seleccionar todo el texto del terminal activo',
+    optionsShortcutNextTerminal: 'Terminal siguiente',
+    optionsShortcutPrevTerminal: 'Terminal anterior',
+    optionsShortcutToggleSidebar: 'Alternar la barra lateral SSH',
 
     // ── Danger Zone ──────────────────────────────────────────────────────────
     optionsTitleDanger: 'Zona de peligro',
@@ -358,6 +392,8 @@
     // ── Error messages ───────────────────────────────────────────────────────
     errorUnknownShell: 'Shell desconocido: {shell}',
     errorConnectionNotFound: 'Conexión no encontrada.',
+    errorSessionConfig: 'No se pudo preparar la configuración de la sesión SSH.',
+    errorJumpChainInvalid: 'La cadena de servidores de salto no es válida: tiene un bucle o hace referencia a una conexión eliminada.',
     errorConnectionFolderNotFound: 'Carpeta de conexión no encontrada.',
     errorFieldBlank: 'Este campo no puede estar vacío.',
     errorConfigNotFound: 'Archivo de configuración no encontrado: {path}',

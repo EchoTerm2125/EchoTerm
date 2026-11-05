@@ -3,7 +3,7 @@
    Pure logic — no Node/Electron imports allowed (see .dependency-cruiser.cjs).
    ═══════════════════════════════════════════════════════════════════════════ */
 
-import type { Connection, User } from '../entities/ssh';
+import type { Connection, ResolvedConnection, ResolvedJumpHost, User } from '../entities/ssh';
 
 // ─── Parsing ─────────────────────────────────────────────────────────────────
 
@@ -87,6 +87,52 @@ export function parseSshConfigText(content: string, homePrefix: string): SshConf
 
 // ─── Rendering ───────────────────────────────────────────────────────────────
 
+/** The seven optional algorithm/compression override directives. */
+interface AlgorithmOverrides {
+  hostKeyAlgorithms: string | null;
+  kexAlgorithms: string | null;
+  pubkeyAcceptedAlgorithms: string | null;
+  ciphers: string | null;
+  macs: string | null;
+  caSignatureAlgorithms: string | null;
+  compression: string | null;
+}
+
+/**
+ * Validate and format a directive value: newlines would inject extra config
+ * lines (e.g. a smuggled ProxyCommand) and stray double quotes make ssh reject
+ * the whole file ("invalid quotes"); values containing whitespace need double
+ * quotes so ssh does not split them.
+ */
+function configValue(value: string): string {
+  if (/[\r\n"]/.test(value)) throw new Error('SSH config values must not contain newlines or double quotes.');
+  return /\s/.test(value) ? `"${value}"` : value;
+}
+
+/**
+ * Format a value used as an ssh `Host` pattern. The directive takes patterns,
+ * so glob metacharacters would make the block match unintended hosts, and an
+ * empty value emits a bare `Host` line — both are rejected.
+ */
+function hostPattern(value: string): string {
+  if (!value) throw new Error('SSH host must not be empty.');
+  if (/[*?[\]!]/.test(value)) throw new Error('SSH host must not contain pattern metacharacters.');
+  return configValue(value);
+}
+
+/** Render the algorithm override directives shared by export and session rendering. */
+function renderAlgorithmDirectives(o: AlgorithmOverrides): string {
+  let text = '';
+  if (o.hostKeyAlgorithms) text += `  HostKeyAlgorithms ${configValue(o.hostKeyAlgorithms)}\n`;
+  if (o.kexAlgorithms) text += `  KexAlgorithms ${configValue(o.kexAlgorithms)}\n`;
+  if (o.pubkeyAcceptedAlgorithms) text += `  PubkeyAcceptedAlgorithms ${configValue(o.pubkeyAcceptedAlgorithms)}\n`;
+  if (o.ciphers) text += `  Ciphers ${configValue(o.ciphers)}\n`;
+  if (o.macs) text += `  MACs ${configValue(o.macs)}\n`;
+  if (o.caSignatureAlgorithms) text += `  CASignatureAlgorithms ${configValue(o.caSignatureAlgorithms)}\n`;
+  if (o.compression) text += `  Compression ${configValue(o.compression)}\n`;
+  return text;
+}
+
 /** Render connections (with their stored users) as SSH config text. */
 export function renderSshConfig(connections: Connection[], users: User[]): string {
   let configText = '';
@@ -105,7 +151,10 @@ export function renderSshConfig(connections: Connection[], users: User[]): strin
     if (conn.jumpHost) {
       if (conn.jumpHost.type === 'manual') {
         const jh = conn.jumpHost;
-        configText += `  ProxyJump ${jh.username}@${jh.host}:${jh.port}\n`;
+        // A blank jump user must not become "@host" — ssh rejects that outright
+        const user = jh.username ? `${jh.username}@` : '';
+        const port = jh.port && jh.port !== 22 ? `:${jh.port}` : '';
+        configText += `  ProxyJump ${user}${jh.host}${port}\n`;
       } else if (conn.jumpHost.type === 'reference') {
         const refId = conn.jumpHost.connectionId;
         const jc = connections.find(c => c.id === refId);
@@ -113,14 +162,62 @@ export function renderSshConfig(connections: Connection[], users: User[]): strin
       }
     }
     // Algorithm overrides for legacy servers
-    if (conn.hostKeyAlgorithms) configText += `  HostKeyAlgorithms ${conn.hostKeyAlgorithms}\n`;
-    if (conn.kexAlgorithms) configText += `  KexAlgorithms ${conn.kexAlgorithms}\n`;
-    if (conn.pubkeyAcceptedAlgorithms) configText += `  PubkeyAcceptedAlgorithms ${conn.pubkeyAcceptedAlgorithms}\n`;
-    if (conn.ciphers) configText += `  Ciphers ${conn.ciphers}\n`;
-    if (conn.macs) configText += `  MACs ${conn.macs}\n`;
-    if (conn.caSignatureAlgorithms) configText += `  CASignatureAlgorithms ${conn.caSignatureAlgorithms}\n`;
-    if (conn.compression) configText += `  Compression ${conn.compression}\n`;
+    configText += renderAlgorithmDirectives(conn);
     configText += '\n';
   }
   return configText;
+}
+
+/**
+ * Render the per-session ssh config used with `ssh -F`.
+ *
+ * EchoTerm's Host blocks come first and are keyed on the real host names: the
+ * session is spawned with the target's host name and every ProxyJump hop with
+ * its own, so both our blocks and the user's own host-specific blocks match.
+ * We deliberately omit HostName so a `Host <name>` entry in the user's config
+ * can still remap it (a stored ssh alias keeps resolving). An Include of the
+ * user's own ~/.ssh/config follows behind a `Host *` reset (an Include inside
+ * a non-matching Host block is ignored entirely). ssh takes the first obtained
+ * value per option, so our explicit values win while the user's config still
+ * applies to everything else.
+ *
+ * @param target      connection with user credentials and jump chain resolved
+ * @param includePath absolute path of the user's ~/.ssh/config, or null if absent
+ */
+export function renderSessionSshConfig(
+  target: ResolvedConnection,
+  includePath: string | null,
+): string {
+  const chain = target.resolvedJumpChain;
+  // ProxyJump carries the hop's real host name (plus user/port like the old -J
+  // argument) so each hop's own ssh process matches the user's host config too.
+  const jumpSpec = (hop: ResolvedJumpHost): string => {
+    const port = hop.port && hop.port !== 22 ? `:${hop.port}` : '';
+    return configValue(`${hop.username ? `${hop.username}@` : ''}${hop.host}${port}`);
+  };
+
+  let text = `Host ${hostPattern(target.host)}\n`;
+  if (target.port && target.port !== 22) text += `  Port ${target.port}\n`;
+  if (target.username) text += `  User ${configValue(target.username)}\n`;
+  if (target.authType === 'keyfile' && target.keyFilePath) {
+    text += `  IdentityFile ${configValue(target.keyFilePath)}\n`;
+  }
+  if (chain.length) text += `  ProxyJump ${jumpSpec(chain[0])}\n`;
+  text += renderAlgorithmDirectives(target);
+
+  chain.forEach((hop, i) => {
+    text += `\nHost ${hostPattern(hop.host)}\n`;
+    if (hop.port && hop.port !== 22) text += `  Port ${hop.port}\n`;
+    if (hop.username) text += `  User ${configValue(hop.username)}\n`;
+    if (hop.authType === 'keyfile' && hop.keyFilePath) {
+      text += `  IdentityFile ${configValue(hop.keyFilePath)}\n`;
+    }
+    if (chain[i + 1]) text += `  ProxyJump ${jumpSpec(chain[i + 1])}\n`;
+  });
+
+  // `Host *` resets the block context so the Include is processed whatever
+  // block is active and the user's bare top-level directives land in a
+  // catch-all block instead of one of our host-specific ones.
+  if (includePath) text += `\nHost *\nInclude ${configValue(includePath)}\n`;
+  return text;
 }

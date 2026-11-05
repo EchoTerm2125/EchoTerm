@@ -34,6 +34,7 @@ import {
   const sshPasswordCancel = $('#sshPasswordCancel');
   const sshImportDialog = $('#sshImportDialog');
   const sshImportBody = $('#sshImportBody');
+  const sshImportSelectAllBar = $('#sshImportSelectAllBar');
   const sshImportCancel = $('#sshImportCancel');
   const sshImportConfirm = $('#sshImportConfirm');
   const sshImportChooseIni = $('#sshImportChooseIni');
@@ -53,6 +54,13 @@ import {
   let editingConnectionFolderId = null;
   let editingUserId = null;
   let editingUserFolderId = null;
+
+  // Raw form values captured when the SSH edit dialog opened, used to decide
+  // whether closing it would discard edits. Null while no dialog is open.
+  let sshDialogInitialValues: Map<string, string> | null = null;
+  // True while the unsaved-changes guard is asking; the dialog's own keyboard
+  // handling stays inert so Enter cannot save behind the prompt.
+  let discardPromptOpen = false;
 
   // Fields the dialogs mark `required`. The save handler reads the form directly
   // instead of submitting it, so it must validate these itself — `required`
@@ -112,7 +120,6 @@ import {
     bindSectionAddButtons();
     bindPasswordDialog();
     bindDialog();
-    bindKeyboardShortcut();
 
     // --- Search filter
     bindSearchFilter();
@@ -1066,6 +1073,12 @@ import {
       if (e.target.closest('.ssh-section-add-wrapper')) return;
       closeSshAddMenus();
     });
+
+    // A right-click anywhere dismisses them as well as the header menu; capture
+    // so it still runs when the right-clicked item stops propagation.
+    document.addEventListener('contextmenu', () => {
+      closeSshHeaderDropdown();
+    }, true);
   }
 
   // --- Panel Button Bindings
@@ -1492,8 +1505,9 @@ import {
     if (sshScrollEl) {
       sshScrollEl.addEventListener('contextmenu', (e) => {
         // Item/folder right-clicks are handled (and stopped) by the list-level
-        // handlers above; keep this guard as a safety net.
-        if (e.target.closest('.ssh-folder, .ssh-conn-item, .ssh-user-item, .ssh-action-btn')) return;
+        // handlers above; keep this guard as a safety net. The section "+"
+        // controls take no action on a right-click either.
+        if (e.target.closest('.ssh-folder, .ssh-conn-item, .ssh-user-item, .ssh-action-btn, .ssh-section-add-wrapper')) return;
         e.preventDefault();
         e.stopPropagation();
         // A new right-click discards any pending "Add Parent Folder" flow and any selection
@@ -1697,24 +1711,8 @@ import {
       });
     });
 
-    // Submenu hover handling
-    if (sshCtxMoveItem && sshCtxFolderSubmenu) {
-      let hideTimer = null;
-      sshCtxMoveItem.addEventListener('mouseenter', () => {
-        clearTimeout(hideTimer);
-        sshCtxFolderSubmenu.classList.remove('hidden');
-        App.Menus.positionSubmenu(sshCtxFolderSubmenu);
-      });
-      sshCtxMoveItem.addEventListener('mouseleave', () => {
-        hideTimer = setTimeout(() => sshCtxFolderSubmenu.classList.add('hidden'), 150);
-      });
-      sshCtxFolderSubmenu.addEventListener('mouseenter', () => {
-        clearTimeout(hideTimer);
-      });
-      sshCtxFolderSubmenu.addEventListener('mouseleave', () => {
-        sshCtxFolderSubmenu.classList.add('hidden');
-      });
-    }
+    // Submenu hover handling (Filter box pins the flyout open — see menus.js)
+    App.Menus.bindSubmenuHover(sshCtxMoveItem, sshCtxFolderSubmenu);
 
     // Hide on outside click
     document.addEventListener('click', () => {
@@ -1726,6 +1724,12 @@ import {
   }
 
   async function showSshContextMenu(e, actions) {
+    // A new right-click discards any open Move-to-Folder flyout: its pin and
+    // stale filter text must not survive into this menu. SSH right-click
+    // handlers stop propagation, so the document-level closeAllMenus never runs
+    // for them — clearing here is the only reset.
+    App.Menus.closeSubmenu(sshCtxFolderSubmenu);
+
     // Show/hide items based on available actions
     const allBtns = sshContextMenu.querySelectorAll('button');
     allBtns.forEach(b => b.classList.add('hidden'));
@@ -1801,49 +1805,53 @@ import {
         for (const id of itemIds) collectDescendants(id);
       }
 
-      sshCtxFolderSubmenu.innerHTML = '';
       // Depth-first tree order with the dialog selects' ├─ / └─ labels, so each
       // target reads exactly as the folder name does in the dialogs.
-      let hasGroups = false;
+      const entries = [];
       for (const { id: folderId, label } of folderTreeLabelEntries(folders)) {
         // Skip current parent (already here) and excluded folders
         if (itemIds.length === 1 && folderId === currentParentId) continue;
         if ((isFolderMove || isUserFolderMove) && excludedFolderIds.has(folderId)) continue;
-        hasGroups = true;
-        const btn = document.createElement('button');
-        btn.textContent = label;
-        btn.addEventListener('click', async () => {
-          sshContextMenu.classList.add('hidden');
-          if (sshCtxFolderSubmenu) sshCtxFolderSubmenu.classList.add('hidden');
-          if (isFolderMove) {
-            for (const id of itemIds) {
-              await api.sshConnectionFolderSave({ id, parentId: folderId });
+        entries.push({
+          label,
+          onClick: async () => {
+            sshContextMenu.classList.add('hidden');
+            App.Menus.closeSubmenu(sshCtxFolderSubmenu);
+            if (isFolderMove) {
+              for (const id of itemIds) {
+                await api.sshConnectionFolderSave({ id, parentId: folderId });
+              }
+            } else if (isUserFolderMove) {
+              for (const id of itemIds) {
+                await api.sshUserFolderSave({ id, parentId: folderId });
+              }
+            } else if (isUserMove) {
+              for (const id of itemIds) {
+                await api.sshUserSave({ id, folderId });
+              }
+            } else {
+              for (const id of itemIds) {
+                await api.sshConnectionSave({ id, folderId });
+              }
             }
-          } else if (isUserFolderMove) {
-            for (const id of itemIds) {
-              await api.sshUserFolderSave({ id, parentId: folderId });
-            }
-          } else if (isUserMove) {
-            for (const id of itemIds) {
-              await api.sshUserSave({ id, folderId });
-            }
-          } else {
-            for (const id of itemIds) {
-              await api.sshConnectionSave({ id, folderId });
-            }
-          }
-          clearSshSelection();
-          await refreshAll();
+            clearSshSelection();
+            await refreshAll();
+          },
         });
-        sshCtxFolderSubmenu.appendChild(btn);
       }
-
-      if (!hasGroups) {
-        const hint = document.createElement('button');
-        hint.textContent = App.__('sshCtxNoOtherFolders');
-        hint.style.color = 'var(--text-muted)';
-        hint.style.fontStyle = 'italic';
-        sshCtxFolderSubmenu.appendChild(hint);
+      const noFolders = entries.length === 0;
+      if (noFolders) {
+        // Nothing to move into: say so in place of the option list.
+        entries.push({ label: App.__('sshCtxNoOtherFolders'), onClick: () => {} });
+      }
+      App.Menus.buildSubmenu(sshCtxFolderSubmenu, entries);
+      if (noFolders) {
+        const hint = sshCtxFolderSubmenu.querySelector('.context-submenu-options button');
+        if (hint) {
+          hint.style.color = 'var(--text-muted)';
+          hint.style.fontStyle = 'italic';
+          hint.disabled = true;
+        }
       }
     }
 
@@ -1856,6 +1864,10 @@ import {
     if (result.error) {
       const msg = result.errorCode === 'CONNECTION_NOT_FOUND'
         ? App.__('errorConnectionNotFound')
+        : result.errorCode === 'SESSION_CONFIG_FAILED'
+        ? App.__('errorSessionConfig')
+        : result.errorCode === 'JUMP_CHAIN_INVALID'
+        ? App.__('errorJumpChainInvalid')
         : result.error;
       App.UI.showToast(App.__('toastSshError', { message: msg }));
       return;
@@ -1882,7 +1894,12 @@ import {
     for (const conn of result.connections) {
       const spawnResult = await api.sshConnect(conn.id);
       if (spawnResult.error) {
-        App.UI.showToast(App.__('toastSshErrorNamed', { name: conn.name, message: spawnResult.error }));
+        const message = spawnResult.errorCode === 'SESSION_CONFIG_FAILED'
+          ? App.__('errorSessionConfig')
+          : spawnResult.errorCode === 'JUMP_CHAIN_INVALID'
+          ? App.__('errorJumpChainInvalid')
+          : spawnResult.error;
+        App.UI.showToast(App.__('toastSshErrorNamed', { name: conn.name, message }));
         continue;
       }
       await App.Terminal.spawnSshTerminal(spawnResult);
@@ -2138,6 +2155,7 @@ import {
         : (importMode === 'update' ? App.__('sshImportUpdateTitle') : App.__('sshImportTitle'));
     }
     sshImportConfirm.textContent = importMode === 'update' ? App.__('sshImportBtnUpdate') : App.__('sshImportBtnImport');
+    sshImportConfirm.disabled = false;
     if (sshImportChooseIni) sshImportChooseIni.classList.toggle('hidden', !isWinScp);
 
     if (result.error) {
@@ -2151,6 +2169,7 @@ import {
         ? App.__('sshImportWinScpNoSites')
         : result.error;
       sshImportBody.innerHTML = `<div class="ssh-empty-hint">${escHtml(msg)}</div>`;
+      if (sshImportSelectAllBar) sshImportSelectAllBar.classList.add('hidden');
       sshImportDialog.classList.remove('hidden');
       return;
     }
@@ -2206,6 +2225,64 @@ import {
       sshImportBody.appendChild(globalOpts);
     }
 
+    // --- Import selection: host name → checked, kept for the dialog's lifetime
+    // so that re-rendering the list never discards the user's choices.
+    const importSelection = new Map<string, boolean>();
+
+    // --- Select-all master control and Filter box, in the bar between the
+    // header and the list. The filter only hides Import rows; it never changes
+    // the Import selection or which rows the master control toggles.
+    if (sshImportSelectAllBar) {
+      sshImportSelectAllBar.innerHTML = `
+        <label><input type="checkbox" name="importSelectAll" checked /> ${App.__('sshImportSelectAll')}</label>
+        <input id="sshImportFilter" class="ssh-import-filter" type="text" placeholder="${escHtml(App.__('sshImportFilterPlaceholder'))}" />
+      `;
+    }
+    const selectAllCb = sshImportSelectAllBar ? sshImportSelectAllBar.querySelector('input') as HTMLInputElement : null;
+    const importFilterInput = sshImportSelectAllBar
+      ? sshImportSelectAllBar.querySelector('#sshImportFilter') as HTMLInputElement
+      : null;
+    let importFilterQuery = '';
+
+    if (importFilterInput) {
+      importFilterInput.addEventListener('input', () => {
+        importFilterQuery = importFilterInput.value.trim().toLowerCase();
+        renderImportRows();
+      });
+      // Escape clears the filter first; an empty box lets the dialog's own
+      // Escape handler close the whole dialog.
+      importFilterInput.addEventListener('keydown', (e) => {
+        if (e.key !== 'Escape' || !importFilterInput.value) return;
+        e.preventDefault();
+        e.stopPropagation();
+        importFilterInput.value = '';
+        importFilterQuery = '';
+        renderImportRows();
+      });
+    }
+
+    // All / none / mixed, judged over the rows currently listed
+    function syncSelectAllState() {
+      const boxes = [...sshImportBody.querySelectorAll('input[name="importHost"]')] as HTMLInputElement[];
+      const checkedCount = boxes.filter(b => b.checked).length;
+      if (!selectAllCb) return;
+      selectAllCb.checked = boxes.length > 0 && checkedCount === boxes.length;
+      selectAllCb.indeterminate = checkedCount > 0 && checkedCount < boxes.length;
+      sshImportConfirm.disabled = checkedCount === 0;
+    }
+
+    if (selectAllCb) {
+      selectAllCb.addEventListener('change', () => {
+        for (const cb of [...sshImportBody.querySelectorAll('input[name="importHost"]')] as HTMLInputElement[]) {
+          cb.checked = selectAllCb.checked;
+          const row = cb.closest('.ssh-import-row') as any;
+          if (row && row._hostData) importSelection.set(row._hostData.name, cb.checked);
+        }
+        selectAllCb.indeterminate = false;
+        syncSelectAllState();
+      });
+    }
+
     // Whether a global update field is selected (missing checkbox = on)
     const isUpdateFieldOn = (id) => {
       const cb = document.getElementById(id);
@@ -2214,6 +2291,23 @@ import {
 
     // Sort hosts alphabetically by name
     hosts.sort((a, b) => (a.name || '').localeCompare(b.name || ''));
+
+    // Case-insensitive substring match over the details an Import row shows.
+    function hostMatchesFilter(host) {
+      if (!importFilterQuery) return true;
+      const target = host.user
+        ? `${host.user}@${host.host}:${host.port}`
+        : `${host.host}:${host.port}`;
+      const haystack = [
+        host.name,
+        host.host,
+        host.user,
+        target,
+        host.proxyJump,
+        host.folderPath,
+      ].filter(Boolean).join('\n').toLowerCase();
+      return haystack.includes(importFilterQuery);
+    }
 
     // --- Build / refresh the list based on the currently checked update fields
     function renderImportRows() {
@@ -2228,6 +2322,7 @@ import {
       const doOptions = isUpdateFieldOn('updGlobalOptions');
 
       let shown = 0;
+      let eligible = 0;
       for (const host of hosts) {
         const existing = existingConns.find(c => c.name.toLowerCase() === host.name.toLowerCase());
 
@@ -2235,8 +2330,12 @@ import {
         if (importMode === 'import' && existing) continue;
         if (importMode === 'update' && !existing) continue;
 
+        eligible++;
+        const matchesFilter = hostMatchesFilter(host);
+
         const row: any = document.createElement('label');
         row.className = 'ssh-import-row';
+        if (!matchesFilter) row.classList.add('hidden');
         const authInfo = host.identityFile
           ? App.__('sshImportAuthKeyfile', { file: escHtml(host.identityFile.split(/[\\/]/).pop() || host.identityFile) })
           : App.__('sshImportAuthPassword');
@@ -2290,8 +2389,9 @@ import {
           : '';
         const detailDisplay = `<span class="ssh-import-detail">${escHtml(target + folderInfo)}</span>`;
 
+        const checked = importSelection.get(host.name) !== false;
         row.innerHTML = `
-          <input type="checkbox" name="importHost" value="${escHtml(host.name)}" checked />
+          <input type="checkbox" name="importHost" value="${escHtml(host.name)}"${checked ? ' checked' : ''} />
           <div class="ssh-import-info">
             <div class="ssh-import-title-row">
               <span class="ssh-import-name">${escHtml(host.name)}</span>
@@ -2305,30 +2405,20 @@ import {
         row._hostData = host;
         row._importStatus = existing ? 'update' : 'new';
         row._existingConn = existing;
-        sshImportBody.appendChild(row);
-        shown++;
-      }
-
-      // Auto-check jump hosts: if a host is checked and has a proxyJump in the list, check it too
-      const allRows = sshImportBody.querySelectorAll('.ssh-import-row');
-      for (const row of allRows) {
-        const host = row._hostData;
-        const cb = row.querySelector('input[name="importHost"]');
-        if (!cb || !cb.checked || !host.proxyJump) continue;
-        // Find the jump host row
-        for (const jRow of allRows) {
-          if (jRow._hostData.name === host.proxyJump) {
-            const jCb = jRow.querySelector('input[name="importHost"]');
-            if (jCb && !jCb.checked) {
-              jCb.checked = true;
-              jCb.indeterminate = true; // visual hint it was auto-checked
-            }
-            break;
-          }
+        const rowCb = row.querySelector('input[name="importHost"]');
+        if (rowCb) {
+          rowCb.addEventListener('change', () => {
+            importSelection.set(host.name, rowCb.checked);
+            syncSelectAllState();
+          });
         }
+        sshImportBody.appendChild(row);
+        if (matchesFilter) shown++;
       }
 
-      if (shown === 0) {
+      if (sshImportSelectAllBar) sshImportSelectAllBar.classList.toggle('hidden', eligible === 0);
+
+      if (eligible === 0) {
         const msg = importMode === 'update'
           ? App.__('sshImportNoExistingToUpdate')
           : App.__('sshImportNoNewHosts');
@@ -2336,7 +2426,14 @@ import {
         hint.className = 'ssh-empty-hint';
         hint.innerHTML = escHtml(msg);
         sshImportBody.appendChild(hint);
+      } else if (shown === 0) {
+        const hint = document.createElement('div');
+        hint.className = 'ssh-empty-hint';
+        hint.innerHTML = escHtml(App.__('sshImportFilterNoMatch'));
+        sshImportBody.appendChild(hint);
       }
+
+      syncSelectAllState();
     }
 
     // --- Refresh the list when update fields are checked/unchecked
@@ -2350,6 +2447,7 @@ import {
     renderImportRows();
 
     sshImportDialog.classList.remove('hidden');
+    if (importFilterInput) importFilterInput.focus();
   }
 
   function bindImportDialog() {
@@ -2366,9 +2464,30 @@ import {
       });
     }
 
-    sshImportConfirm.addEventListener('click', async () => {
-      const checkboxes = sshImportBody.querySelectorAll('input[name="importHost"]:checked');
+    sshImportConfirm.addEventListener('click', () => {
+      const checkboxes = [...sshImportBody.querySelectorAll('input[name="importHost"]:checked')];
       const allRows = [...sshImportBody.querySelectorAll('.ssh-import-row')];
+      const selectedHosts = checkboxes
+        .map(cb => (cb.closest('.ssh-import-row') as any)?._hostData)
+        .filter(Boolean);
+
+      // Every Import/Update action is listed back to the user, including rows
+      // the Filter box currently hides.
+      const showImportConfirmation = () => {
+        const lines = selectedHosts.map(host => {
+          const target = host.user
+            ? `${host.user}@${host.host}:${host.port}`
+            : `${host.host}:${host.port}`;
+          return `${host.name} — ${target}`;
+        });
+        const messageKey = importMode === 'update' ? 'sshImportConfirmUpdate' : 'sshImportConfirmImport';
+        App.Menus.showConfirm(
+          App.__(messageKey, { count: selectedHosts.length, list: lines.join('\n') }),
+          () => doImportFromConfig(checkboxes),
+          null,
+          importMode === 'update' ? 'sshImportBtnUpdate' : 'sshImportBtnImport'
+        );
+      };
 
       // Warn if a checked host's jump host is not also checked
       const missingJumps = [];
@@ -2393,13 +2512,15 @@ import {
         const names = missingJumps.map(m => `"${m.host}" needs "${m.jump}"`).join('\n');
         App.Menus.showConfirm(
           App.__('confirmJumpHostsMissing', { names }),
-          () => doImportFromConfig(checkboxes),
+          // The confirm dialog clears its callback right after invoking it, so
+          // open the item list on the next tick as a separate confirmation.
+          () => setTimeout(showImportConfirmation, 0),
           'skipSshJumpWarn'
         );
         return;
       }
 
-      await doImportFromConfig(checkboxes);
+      showImportConfirmation();
     });
 
     // --- Import execution
@@ -2479,10 +2600,7 @@ import {
 
   // --- Generic Dialog
   function bindDialog() {
-    sshDialogCancel.addEventListener('click', () => {
-      pendingAdoptTarget = null;
-      sshDialog.classList.add('hidden');
-    });
+    sshDialogCancel.addEventListener('click', guardedCloseDialog);
 
     sshDialogSave.addEventListener('click', async () => {
       const form = sshDialogBody.querySelector('form');
@@ -2613,6 +2731,7 @@ import {
                 ? App.__('toastAdoptRollbackFailed', { failed: failedCount, total, message: rollbackErrors[0] })
                 : App.__('toastAdoptRolledBack', { failed: failedCount, total })
             );
+            disposeDialogSelects();
             sshDialog.classList.add('hidden');
             await refreshAll();
             return;
@@ -2629,18 +2748,76 @@ import {
         if (result.error) { App.UI.showToast(App.__('toastError', { message: result.error })); return; }
       }
 
+      disposeDialogSelects();
       sshDialog.classList.add('hidden');
       await refreshAll();
     });
 
-    // Close on Escape, submit on Enter
+    // Close on Escape, submit on Enter. While the unsaved-changes guard is
+    // asking, both stay inert: Escape must not stack a second prompt, and Enter
+    // must not save the form behind it.
     sshDialog.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape') { pendingAdoptTarget = null; sshDialog.classList.add('hidden'); }
+      if (discardPromptOpen) return;
+      if (e.key === 'Escape') guardedCloseDialog();
       if (e.key === 'Enter' && e.target.tagName === 'INPUT' && e.target.closest('form')) {
         e.preventDefault();
         sshDialogSave.click();
       }
     });
+  }
+
+  // ─── Unsaved changes guard ─────────────────────────────────────────────────
+  // Snapshot every named control's raw value when the dialog opens — hidden
+  // searchable-select inputs included — and compare the same way when it
+  // closes. Raw comparison, rather than an "input event fired" flag, keeps the
+  // edit-user dialog honest: its password field starts empty and empty means
+  // "keep existing", so typing then erasing must not read as a change.
+  function formValues(form) {
+    const values = new Map<string, string>();
+    for (const [name, value] of new FormData(form).entries()) {
+      values.set(name, String(value));
+    }
+    return values;
+  }
+
+  function captureDialogSnapshot() {
+    const form = sshDialogBody.querySelector('form');
+    sshDialogInitialValues = form ? formValues(form) : null;
+  }
+
+  function dialogHasUnsavedChanges() {
+    if (!sshDialogInitialValues) return false;
+    const form = sshDialogBody.querySelector('form');
+    if (!form) return false;
+    const current = formValues(form);
+    if (current.size !== sshDialogInitialValues.size) return true;
+    for (const [name, value] of sshDialogInitialValues) {
+      if (current.get(name) !== value) return true;
+    }
+    return false;
+  }
+
+  function closeDialogNow() {
+    sshDialogInitialValues = null;
+    pendingAdoptTarget = null;
+    disposeDialogSelects();
+    sshDialog.classList.add('hidden');
+  }
+
+  function guardedCloseDialog() {
+    if (!dialogHasUnsavedChanges()) {
+      closeDialogNow();
+      return;
+    }
+    discardPromptOpen = true;
+    App.Menus.showConfirm(
+      App.__('confirmDiscardChanges'),
+      () => { discardPromptOpen = false; closeDialogNow(); },
+      null,
+      'confirmDiscard',
+      'confirmKeepEditing',
+      () => { discardPromptOpen = false; focusFirstTextInput(sshDialog); }
+    );
   }
 
   // Focus the first visible text input inside a popup
@@ -2658,44 +2835,52 @@ import {
     if (type) el.dataset.type = type;
     el.classList.remove('hidden');
     focusFirstTextInput(el);
+    // The edit dialog's form is fully built and populated by now, so this is
+    // the point where "opened with" can be captured.
+    if (el === sshDialog) {
+      discardPromptOpen = false;
+      captureDialogSnapshot();
+    }
   }
 
-  // ─── Folder-tree dropdown helpers ─────────────────────────────────────────
-  // Shared tree rendering for every folder/user <select>. Box-drawing
-  // connectors (`├─`/`└─`/`│`) plus non-breaking-space indentation keep the
-  // nesting visible and uncollapsible inside native <select> dropdowns.
+  // ─── Searchable dropdowns ────────────────────────────────────────────────
+  // Every dialog dropdown whose rows come from saved data (users, folders,
+  // connections) is a Filter box over a height-capped option list — the same
+  // control the Context submenu uses (see CONTEXT.md "Filter box"). A native
+  // <select> cannot host an input, so each is a button trigger plus a popup
+  // attached to the document body; the chosen value is mirrored into a hidden
+  // input under the same `name` the save handler reads from FormData.
+  //
+  // Box-drawing connectors (`├─`/`└─`/`│`) plus non-breaking-space indentation
+  // keep folder nesting readable, exactly as in the "Move to Folder" submenu.
 
   const NBSP = '\u00A0';
 
-  // Folder-target selects: every folder is a selectable <option> in tree order.
-  // `excludedIds` (self + descendants when editing a folder's parent) render as
-  // disabled options so the tree stays intact while cycles are prevented.
-  function folderSelectOptionsHtml(folders, selectedId, excludedIds = null) {
-    // Labels and order come from the shared tree walk so the "Move to folder"
-    // submenu and every folder <select> render folder names identically.
-    return folderTreeLabelEntries(folders)
-      .map(({ id, label }) =>
-        `<option value="${escHtml(id)}" ${id === selectedId ? 'selected' : ''}${excludedIds && excludedIds.has(id) ? ' disabled' : ''}>${escHtml(label)}</option>`)
-      .join('');
+  // Folder-target rows: every folder is a selectable row in tree order.
+  // `excludedIds` (self + descendants when editing a folder's parent) become
+  // disabled rows so the tree stays intact while cycles are prevented.
+  function folderSelectRows(folders, excludedIds = null) {
+    // Labels and order come from the shared tree walk so the "Move to Folder"
+    // submenu and every folder dropdown render folder names identically.
+    return folderTreeLabelEntries(folders).map(({ id, label }) => ({
+      value: id,
+      label,
+      disabled: !!(excludedIds && excludedIds.has(id)),
+    }));
   }
 
-  // User-target selects: one optgroup per folder (all folders shown, even
-  // empty) with the folder's users indented to the folder-name column;
-  // ungrouped users get their own group. Folders are headers, not selectable.
-  function userSelectOptionsHtml(users, userFolders, selectedUserId) {
-    const userOptionHtml = (u, indent = '') =>
-      `<option value="${escHtml(u.id)}" ${selectedUserId === u.id ? 'selected' : ''}>${escHtml(indent + u.name)} (${escHtml(u.username)})</option>`;
+  // User-target rows: a non-selectable header row per folder (all folders shown,
+  // even empty) with the folder's users indented to the folder-name column;
+  // ungrouped users get their own header. Folders are headers, not selectable.
+  function userSelectRows(users, userFolders) {
+    const byName = (a, b) => (a.name || '').localeCompare(b.name || '');
+    const userRow = (u, indent = '') => ({ value: u.id, label: `${indent}${u.name} (${u.username})` });
 
-    if (userFolders.length === 0) {
-      return [...users]
-        .sort((a, b) => (a.name || '').localeCompare(b.name || ''))
-        .map(u => userOptionHtml(u))
-        .join('');
-    }
+    if (userFolders.length === 0) return [...users].sort(byName).map(u => userRow(u));
 
+    const rows = [];
     const children = buildFolderChildrenMap(userFolders);
     const usedUserIds = new Set();
-    let html = '';
     const visited = new Set();
     const walk = (parentId, prefix) => {
       // Cycle guard: a corrupt payload (folder cycles) must not recurse forever.
@@ -2705,27 +2890,323 @@ import {
       list.forEach((f, i) => {
         const last = i === list.length - 1;
         const connector = last ? '└─ ' : '├─ ';
-        const members = users
-          .filter(u => u.folderId === f.id)
-          .sort((a, b) => (a.name || '').localeCompare(b.name || ''));
+        const members = users.filter(u => u.folderId === f.id).sort(byName);
         members.forEach(u => usedUserIds.add(u.id));
-        html += `<optgroup label="${escHtml(prefix + connector + f.name)}">${members.map(u => userOptionHtml(u, prefix + NBSP.repeat(3))).join('')}</optgroup>`;
+        rows.push({ header: true, label: prefix + connector + f.name });
+        for (const u of members) rows.push(userRow(u, prefix + NBSP.repeat(3)));
         walk(f.id, prefix + (last ? NBSP.repeat(3) : '│' + NBSP.repeat(2)));
       });
     };
     walk('__root__', '');
 
-    const ungrouped = users
-      .filter(u => !usedUserIds.has(u.id))
-      .sort((a, b) => (a.name || '').localeCompare(b.name || ''));
+    const ungrouped = users.filter(u => !usedUserIds.has(u.id)).sort(byName);
     if (ungrouped.length > 0) {
-      html += `<optgroup label="${App.__('sshFormUserUngrouped')}">${ungrouped.map(u => userOptionHtml(u)).join('')}</optgroup>`;
+      rows.push({ header: true, label: App.__('sshFormUserUngrouped') });
+      for (const u of ungrouped) rows.push(userRow(u));
     }
-    return html;
+    return rows;
+  }
+
+  // Inline part of a searchable dropdown: the trigger plus the hidden value
+  // input. The popup is built separately and attached to the body-level layer
+  // so the dialog's scrolling body cannot clip it.
+  let sshSelectSeq = 0;
+  function searchableSelectHtml(name) {
+    const popupId = `sshSelectPopup${++sshSelectSeq}`;
+    return `<div class="ssh-select" data-select-name="${escHtml(name)}" data-select-popup="${popupId}">
+            <button type="button" class="ssh-select-trigger" role="combobox" aria-haspopup="listbox" aria-expanded="false" aria-controls="${popupId}">
+              <span class="ssh-select-label"></span>
+              <span class="ssh-select-arrow" aria-hidden="true">▾</span>
+            </button>
+            <input type="hidden" name="${escHtml(name)}" />
+          </div>`;
+  }
+
+  // Disposers for the dropdowns of the dialog currently open. Run on close so
+  // document-level listeners and body popups do not outlive the dialog.
+  let sshSelectDisposers = [];
+  const sshSelectClosers = new Map();
+
+  function disposeDialogSelects() {
+    for (const dispose of sshSelectDisposers) dispose();
+    sshSelectDisposers = [];
+    const layer = document.getElementById('sshSelectLayer');
+    if (layer) layer.innerHTML = '';
+  }
+
+  function ensureSelectLayer() {
+    let layer = document.getElementById('sshSelectLayer');
+    if (!layer) {
+      layer = document.createElement('div');
+      layer.id = 'sshSelectLayer';
+      layer.className = 'ssh-select-layer';
+      document.body.appendChild(layer);
+    }
+    return layer;
+  }
+
+  function closeOtherSelects(control) {
+    for (const [el, close] of sshSelectClosers) if (el !== control) close();
+  }
+
+  // Wire every `specs[name]` dropdown found in `root`: apply the initial
+  // selection, build its popup, and bind trigger/filter/row behaviour.
+  function wireSearchableSelects(root, specs) {
+    const layer = ensureSelectLayer();
+    for (const [name, spec] of Object.entries(specs)) {
+      const control = root.querySelector(`.ssh-select[data-select-name="${name}"]`);
+      if (control) sshSelectDisposers.push(createSearchableSelect(control, spec, layer));
+    }
+  }
+
+  function createSearchableSelect(control, spec, layer) {
+    const popupId = control.dataset.selectPopup;
+    const trigger = control.querySelector('.ssh-select-trigger');
+    const labelEl = control.querySelector('.ssh-select-label');
+    const hidden = control.querySelector('input[type="hidden"]');
+
+    // The placeholder ("None" / "Select user" …) is an always-present, selectable
+    // top row with value "" — the slot the native <select> gave it.
+    const entries = [{ value: '', label: spec.placeholder }, ...spec.rows];
+
+    const popup = document.createElement('div');
+    popup.className = 'ssh-select-popup hidden';
+    popup.id = popupId;
+    popup.setAttribute('role', 'listbox');
+
+    const filter = document.createElement('input');
+    filter.type = 'text';
+    filter.className = 'ssh-select-filter';
+    filter.placeholder = App.__('submenuFilterPlaceholder');
+    filter.setAttribute('aria-label', filter.placeholder);
+    filter.autocomplete = 'off';
+    filter.spellcheck = false;
+    filter.setAttribute('role', 'searchbox');
+    popup.appendChild(filter);
+
+    const list = document.createElement('div');
+    list.className = 'ssh-select-options';
+    entries.forEach((entry, i) => {
+      if (entry.header) {
+        const head = document.createElement('div');
+        head.className = 'ssh-select-header';
+        head.setAttribute('role', 'presentation');
+        head.textContent = entry.label;
+        list.appendChild(head);
+        return;
+      }
+      const row = document.createElement('button');
+      row.type = 'button';
+      row.className = 'ssh-select-option';
+      row.id = `${popupId}-o${i}`;
+      row.dataset.value = entry.value;
+      row.setAttribute('role', 'option');
+      row.setAttribute('aria-selected', 'false');
+      if (entry.disabled) {
+        row.classList.add('disabled');
+        row.setAttribute('aria-disabled', 'true');
+      }
+      row.textContent = entry.label;
+      list.appendChild(row);
+    });
+    popup.appendChild(list);
+
+    const empty = document.createElement('div');
+    empty.className = 'ssh-select-empty hidden';
+    empty.textContent = App.__('submenuFilterNoMatches');
+    empty.setAttribute('aria-live', 'polite');
+    popup.appendChild(empty);
+    layer.appendChild(popup);
+
+    const allOptions = () => [...list.querySelectorAll('.ssh-select-option')];
+    const selectableOptions = () => allOptions().filter(o => !o.classList.contains('disabled'));
+    const rowForValue = (value) => allOptions().find(o => o.dataset.value === value) || null;
+
+    let selectedValue = spec.selectedId == null ? '' : String(spec.selectedId);
+    // A stale id (the referenced row is gone) falls back to the placeholder,
+    // matching what a native <select> did when no option matched.
+    if (!rowForValue(selectedValue)) selectedValue = '';
+    hidden.value = selectedValue;
+    let highlighted = -1;
+
+    function renderSelection() {
+      const row = rowForValue(selectedValue);
+      labelEl.textContent = row ? row.textContent : spec.placeholder;
+      labelEl.classList.toggle('ssh-select-placeholder', !selectedValue);
+      for (const o of allOptions()) o.setAttribute('aria-selected', o === row ? 'true' : 'false');
+    }
+
+    function visibleOptions() {
+      return selectableOptions().filter(o => !o.classList.contains('hidden'));
+    }
+
+    function highlight(idx) {
+      const opts = visibleOptions();
+      for (const o of allOptions()) o.classList.remove('highlighted');
+      if (opts.length === 0) {
+        highlighted = -1;
+        filter.removeAttribute('aria-activedescendant');
+        return;
+      }
+      highlighted = Math.max(0, Math.min(idx, opts.length - 1));
+      const target = opts[highlighted];
+      target.classList.add('highlighted');
+      filter.setAttribute('aria-activedescendant', target.id);
+      if (target.scrollIntoView) target.scrollIntoView({ block: 'nearest' });
+    }
+
+    // Case-insensitive substring match over the visible labels (name + host /
+    // username / tree label); each header hides unless a row beneath it still
+    // matches. Mirrors the Context submenu's Filter box.
+    function applyFilter() {
+      const q = (filter.value || '').trim().toLowerCase();
+      for (const row of allOptions()) {
+        const match = !q || (!row.classList.contains('disabled') && (row.textContent || '').toLowerCase().includes(q));
+        row.classList.toggle('hidden', !match);
+      }
+      for (const head of list.querySelectorAll('.ssh-select-header')) {
+        let any = false;
+        for (let sib = head.nextElementSibling; sib && !sib.classList.contains('ssh-select-header'); sib = sib.nextElementSibling) {
+          if (!sib.classList.contains('hidden')) { any = true; break; }
+        }
+        head.classList.toggle('hidden', !any);
+      }
+      empty.classList.toggle('hidden', allOptions().some(o => !o.classList.contains('hidden')));
+      highlight(0);
+    }
+
+    function positionPopup() {
+      const rect = trigger.getBoundingClientRect();
+      popup.style.left = `${rect.left}px`;
+      popup.style.minWidth = `${rect.width}px`;
+      const below = rect.bottom + 4;
+      const height = popup.offsetHeight || 0;
+      const flip = height > 0 && below + height > window.innerHeight && rect.top - height > 0;
+      popup.style.top = `${flip ? rect.top - height - 4 : below}px`;
+    }
+
+    function open() {
+      closeOtherSelects(control);
+      filter.value = '';
+      popup.classList.remove('hidden');
+      trigger.setAttribute('aria-expanded', 'true');
+      applyFilter();
+      list.scrollTop = 0;
+      positionPopup();
+      filter.focus();
+    }
+
+    function close() {
+      if (popup.classList.contains('hidden')) return;
+      popup.classList.add('hidden');
+      trigger.setAttribute('aria-expanded', 'false');
+      filter.value = '';
+      filter.removeAttribute('aria-activedescendant');
+      highlighted = -1;
+    }
+
+    function choose(row) {
+      selectedValue = row.dataset.value;
+      hidden.value = selectedValue;
+      renderSelection();
+      close();
+      trigger.focus();
+    }
+
+    function onTriggerClick(e) {
+      e.preventDefault();
+      if (popup.classList.contains('hidden')) open();
+      else close();
+    }
+    function onTriggerKeydown(e) {
+      if (e.key === 'ArrowDown' || e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        open();
+      } else if (e.key === 'Escape') {
+        close();
+      }
+    }
+    function onFilterKeydown(e) {
+      const opts = visibleOptions();
+      switch (e.key) {
+        case 'ArrowDown':
+          e.preventDefault(); e.stopPropagation();
+          highlight(highlighted + 1);
+          break;
+        case 'ArrowUp':
+          e.preventDefault(); e.stopPropagation();
+          highlight(highlighted - 1);
+          break;
+        case 'Enter': {
+          e.preventDefault(); e.stopPropagation();
+          const target = highlighted >= 0 ? opts[highlighted] : opts[0];
+          if (target) choose(target);
+          break;
+        }
+        case 'Escape':
+          e.preventDefault(); e.stopPropagation();
+          if (filter.value) {
+            filter.value = '';
+            applyFilter();
+          } else {
+            close();
+            trigger.focus();
+          }
+          break;
+        case 'Tab':
+          close();
+          break;
+      }
+    }
+    function onListClick(e) {
+      const row = e.target.closest('.ssh-select-option');
+      if (!row || row.classList.contains('disabled')) return;
+      choose(row);
+    }
+    // Keep focus in the Filter box while interacting with the list: a click on a
+    // row must not blur the popup into closing.
+    function onPopupMousedown(e) {
+      if (e.target !== filter) e.preventDefault();
+    }
+    function onDocumentMousedown(e) {
+      if (!e.target.closest('.ssh-select-popup') && !e.target.closest('.ssh-select')) close();
+    }
+    function onDocumentScroll() {
+      if (!popup.classList.contains('hidden')) positionPopup();
+    }
+
+    trigger.addEventListener('click', onTriggerClick);
+    trigger.addEventListener('keydown', onTriggerKeydown);
+    filter.addEventListener('input', applyFilter);
+    filter.addEventListener('keydown', onFilterKeydown);
+    list.addEventListener('click', onListClick);
+    popup.addEventListener('mousedown', onPopupMousedown);
+    document.addEventListener('mousedown', onDocumentMousedown);
+    document.addEventListener('scroll', onDocumentScroll, true);
+    window.addEventListener('resize', onDocumentScroll);
+    sshSelectClosers.set(control, close);
+
+    renderSelection();
+
+    return function dispose() {
+      trigger.removeEventListener('click', onTriggerClick);
+      trigger.removeEventListener('keydown', onTriggerKeydown);
+      filter.removeEventListener('input', applyFilter);
+      filter.removeEventListener('keydown', onFilterKeydown);
+      list.removeEventListener('click', onListClick);
+      popup.removeEventListener('mousedown', onPopupMousedown);
+      document.removeEventListener('mousedown', onDocumentMousedown);
+      document.removeEventListener('scroll', onDocumentScroll, true);
+      window.removeEventListener('resize', onDocumentScroll);
+      sshSelectClosers.delete(control);
+      popup.remove();
+    };
   }
 
   async function showConnectionDialog(connId?, initialFolderId?) {
     editingConnectionId = connId || null;
+    // Drop the previous dialog's dropdown popups/listeners before rebuilding.
+    disposeDialogSelects();
     sshDialogTitle.textContent = connId ? App.__('sshDialogTitleEditConn') : App.__('sshDialogTitleNewConn');
 
     const connections = await api.sshConnectionList();
@@ -2736,19 +3217,14 @@ import {
     ]);
     const conn = connId ? connections.find(c => c.id === connId) : null;
 
-    // User dropdown: full user-folder tree as optgroup headers (all folders
-    // shown, even empty); only users are selectable.
-    const userOptions = userSelectOptionsHtml(users, userFolders, conn?.userId || null);
-
     const selectedFolderId = (conn && conn.folderId) || (!connId ? initialFolderId : null);
-    const groupOptions = folderSelectOptionsHtml(groups, selectedFolderId);
+    const selectedJumpConnId = conn && conn.jumpHost && conn.jumpHost.type === 'reference' ? conn.jumpHost.connectionId : null;
 
-    // Jump host options from existing connections (exclude self)
-    const jumpConnOptions = [...connections]
+    // Jump host reference rows from existing connections (exclude self)
+    const jumpRows = [...connections]
       .filter(c => c.id !== connId)
       .sort((a, b) => (a.name || '').localeCompare(b.name || ''))
-      .map(c => `<option value="${escHtml(c.id)}" ${conn && conn.jumpHost && conn.jumpHost.type === 'reference' && conn.jumpHost.connectionId === c.id ? 'selected' : ''}>${escHtml(c.name)} (${escHtml(c.host)})</option>`)
-      .join('');
+      .map(c => ({ value: c.id, label: `${c.name} (${c.host})` }));
 
     // Determine jump host state
     const jhType = conn && conn.jumpHost ? conn.jumpHost.type : 'none';
@@ -2760,16 +3236,10 @@ import {
         <label>${App.__('sshFormHost')} <input name="connHost" value="${escHtml(conn ? conn.host : '')}" required /></label>
         <label>${App.__('sshFormPort')} <input name="connPort" type="number" value="${conn ? conn.port : '22'}" /></label>
         <label>${App.__('sshFormUser')}
-          <select name="connUser">
-            <option value="">${App.__('sshFormSelectUser')}</option>
-            ${userOptions}
-          </select>
+          ${searchableSelectHtml('connUser')}
         </label>
         <label>${App.__('sshFolderOptional')}
-          <select name="connGroup">
-            <option value="">${App.__('sshFormNone')}</option>
-            ${groupOptions}
-          </select>
+          ${searchableSelectHtml('connGroup')}
         </label>
 
         <!-- Jump Host -->
@@ -2793,10 +3263,7 @@ import {
           <!-- Reference jump host (select connection) -->
           <div id="dialogJumpRef" class="${jhType === 'reference' ? '' : 'hidden'}">
             <label>${App.__('sshFormJumpViaConnection')}
-              <select name="connJumpRef">
-                <option value="">${App.__('sshFormSelectConnection')}</option>
-                ${jumpConnOptions}
-              </select>
+              ${searchableSelectHtml('connJumpRef')}
             </label>
           </div>
         </fieldset>
@@ -2823,6 +3290,12 @@ import {
       </form>
     `;
 
+    wireSearchableSelects(sshDialogBody, {
+      connUser: { rows: userSelectRows(users, userFolders), selectedId: conn?.userId || null, placeholder: App.__('sshFormSelectUser') },
+      connGroup: { rows: folderSelectRows(groups), selectedId: selectedFolderId, placeholder: App.__('sshFormNone') },
+      connJumpRef: { rows: jumpRows, selectedId: selectedJumpConnId, placeholder: App.__('sshFormSelectConnection') },
+    });
+
     // Toggle jump host fields when type changes
     const jumpTypeSelect = sshDialogBody.querySelector('#dialogJumpType');
     if (jumpTypeSelect) {
@@ -2847,22 +3320,19 @@ import {
 
   async function showUserDialog(userId?, initialFolderId?) {
     editingUserId = userId || null;
+    disposeDialogSelects();
     sshDialogTitle.textContent = userId ? App.__('sshDialogTitleEditUser') : App.__('sshDialogTitleNewUser');
 
     const [users, userFolders] = await Promise.all([api.sshUserList(), api.sshUserFolderList()]);
     const user = userId ? users.find(u => u.id === userId) : null;
     const selectedUserFolderId = (user && user.folderId) || (!userId ? initialFolderId : null);
-    const folderOptions = folderSelectOptionsHtml(userFolders, selectedUserFolderId);
 
     sshDialogBody.innerHTML = `
       <form>
         <label>${App.__('sshFormName')} <input name="userName" value="${escHtml(user ? user.name : '')}" required /></label>
         <label>${App.__('sshFormUsername')} <input name="userUsername" value="${escHtml(user ? user.username : '')}" required /></label>
         <label>${App.__('sshFormUserFolderOptional')}
-          <select name="userFolder">
-            <option value="">${App.__('sshFormNone')}</option>
-            ${folderOptions}
-          </select>
+          ${searchableSelectHtml('userFolder')}
         </label>
         <label>${App.__('sshFormAuthType')}
           <select name="userAuthType" id="dialogAuthType">
@@ -2918,11 +3388,16 @@ import {
       });
     }
 
+    wireSearchableSelects(sshDialogBody, {
+      userFolder: { rows: folderSelectRows(userFolders), selectedId: selectedUserFolderId, placeholder: App.__('sshFormNone') },
+    });
+
     showPopup(sshDialog, 'user');
   }
 
   async function showConnectionFolderDialog(groupId?, initialParentId?) {
     editingConnectionFolderId = groupId || null;
+    disposeDialogSelects();
     sshDialogTitle.textContent = groupId ? App.__('sshDialogTitleEditFolder') : App.__('sshDialogTitleNewFolder');
 
     const groups = await api.sshConnectionFolderList();
@@ -2945,24 +3420,26 @@ import {
     }
 
     const selectedParentId = (group && group.parentId) || (!groupId ? initialParentId : null);
-    const parentOptions = folderSelectOptionsHtml(groups, selectedParentId, excludedIds);
+    const parentRows = folderSelectRows(groups, excludedIds);
 
     sshDialogBody.innerHTML = `
       <form>
         <label>${App.__('sshFolderName')} <input name="groupName" value="${escHtml(group ? group.name : '')}" required /></label>
         <label>${App.__('sshFolderParent') || 'Parent folder'}
-          <select name="groupParent">
-            <option value="" ${!selectedParentId ? 'selected' : ''}>${App.__('sshFolderParentNone') || '(none — root level)'}</option>
-            ${parentOptions}
-          </select>
+          ${searchableSelectHtml('groupParent')}
         </label>
       </form>
     `;
+
+    wireSearchableSelects(sshDialogBody, {
+      groupParent: { rows: parentRows, selectedId: selectedParentId, placeholder: App.__('sshFolderParentNone') || '(none — root level)' },
+    });
     showPopup(sshDialog, 'connectionFolder');
   }
 
   async function showUserFolderDialog(folderId?, initialParentId?) {
     editingUserFolderId = folderId || null;
+    disposeDialogSelects();
     sshDialogTitle.textContent = folderId ? App.__('sshDialogTitleEditUserFolder') : App.__('sshDialogTitleNewUserFolder');
 
     const folders = await api.sshUserFolderList();
@@ -2984,39 +3461,34 @@ import {
     }
 
     const selectedParentId = (folder && folder.parentId) || (!folderId ? initialParentId : null);
-    const parentOptions = folderSelectOptionsHtml(folders, selectedParentId, excludedIds);
+    const parentRows = folderSelectRows(folders, excludedIds);
 
     sshDialogBody.innerHTML = `
       <form>
         <label>${App.__('sshUserFolderName')} <input name="userFolderName" value="${escHtml(folder ? folder.name : '')}" required /></label>
         <label>${App.__('sshUserFolderParent') || 'Parent user folder'}
-          <select name="userFolderParent">
-            <option value="" ${!selectedParentId ? 'selected' : ''}>${App.__('sshUserFolderParentNone') || '(none — root level)'}</option>
-            ${parentOptions}
-          </select>
+          ${searchableSelectHtml('userFolderParent')}
         </label>
       </form>
     `;
+
+    wireSearchableSelects(sshDialogBody, {
+      userFolderParent: { rows: parentRows, selectedId: selectedParentId, placeholder: App.__('sshUserFolderParentNone') || '(none — root level)' },
+    });
     showPopup(sshDialog, 'userFolder');
   }
 
-  // --- Keyboard Shortcut
-  function bindKeyboardShortcut() {
-    document.addEventListener('keydown', (e) => {
-      if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.code === 'KeyS') {
-        e.preventDefault();
-        if (sshSidebar) {
-          if (sshSidebar.classList.contains('collapsed')) {
-            sshSidebar.classList.remove('collapsed');
-            const savedWidth = localStorage.getItem('sshSidebarWidth');
-            sshSidebar.style.width = savedWidth ? savedWidth + 'px' : '';
-          } else {
-            sshSidebar.style.width = '';
-            sshSidebar.classList.add('collapsed');
-          }
-        }
-      }
-    });
+  // --- Sidebar toggle (Ctrl+Shift+S is bound by renderer/shortcuts.ts)
+  function toggleSidebar() {
+    if (!sshSidebar) return;
+    if (sshSidebar.classList.contains('collapsed')) {
+      sshSidebar.classList.remove('collapsed');
+      const savedWidth = localStorage.getItem('sshSidebarWidth');
+      sshSidebar.style.width = savedWidth ? savedWidth + 'px' : '';
+    } else {
+      sshSidebar.style.width = '';
+      sshSidebar.classList.add('collapsed');
+    }
   }
 
   // --- Sidebar resize handle
@@ -3151,7 +3623,7 @@ import {
   App.SshPanel = {
     init, refreshAll, connectSsh, openSshConnectionFolder,
     showConnectionDialog, showUserDialog, showConnectionFolderDialog, showUserFolderDialog,
-    showPasswordUnlock, showPasswordSetup, updatePasswordIcon,
+    showPasswordUnlock, showPasswordSetup, updatePasswordIcon, toggleSidebar,
   };
 })();
 

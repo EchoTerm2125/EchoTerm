@@ -355,6 +355,33 @@
     state.groupEchoTerminals.set(state.activeGroupId, new Set(groupIds));
   }
 
+  // The echo-enabled SSH panes the Reconnect button would act on. The batch
+  // reconnect applies the same SSH-only filter, and "echo enabled" is
+  // membership in the Echo selection — distinct from Selected tabs (CONTEXT.md).
+  function echoEnabledSshIds() {
+    return [...state.echoSelection].filter((id) => {
+      const ts = state.terminals.get(id);
+      return ts && ts.shell === 'ssh' && ts.connectionId;
+    });
+  }
+
+  // Reconnect every echo-enabled SSH pane. With nothing echo-enabled both
+  // empty cases hold at once, so both messages are shown together.
+  function reconnectEchoEnabled() {
+    const ids = [...state.echoSelection];
+    const message = ids.length === 0
+      ? App.__('echoReconnectNone') + '\n' + App.__('echoReconnectNoSsh')
+      : App.__('echoReconnectNoSsh');
+    if (echoEnabledSshIds().length === 0) {
+      App.Menus.showConfirm(message, () => {}, null, 'paneReconnectTitle');
+      return;
+    }
+    // The batch confirm's wording is echo-flavoured: "selected" names Selected
+    // tabs everywhere else, and its skipped-locals line appears only when the
+    // echo selection actually holds local shells.
+    App.Terminal.reconnectTabs(ids, 'confirmReconnectEcho');
+  }
+
   function setEchoButtonLabel(on) {
     if (on) {
       App.btnEchoMode.classList.remove('echo-mode-off');
@@ -367,7 +394,7 @@
     if (label) label.textContent = on ? App.__('echoLabelOn') : App.__('echoLabel');
 
     // Echo control buttons in the tab bar follow echo mode state
-    const echoBtns = [App.btnEchoAll, App.btnEchoToggle, App.btnEchoPaste];
+    const echoBtns = [App.btnEchoAll, App.btnEchoToggle, App.btnEchoPaste, App.btnEchoReconnect];
     for (const btn of echoBtns) {
       if (btn) btn.classList.toggle('hidden', !on);
     }
@@ -377,6 +404,7 @@
     if (App.btnEchoAll) App.btnEchoAll.addEventListener('click', () => toggleEchoAll());
     if (App.btnEchoToggle) App.btnEchoToggle.addEventListener('click', () => toggleEachEcho());
     if (App.btnEchoPaste) App.btnEchoPaste.addEventListener('click', () => pasteToAllEcho());
+    if (App.btnEchoReconnect) App.btnEchoReconnect.addEventListener('click', () => reconnectEchoEnabled());
   }
 
   function pasteToAllEcho() {
@@ -390,7 +418,7 @@
     fitAllTerminals,
     toggleEchoAll, toggleEachEcho, refocusEchoTerminal,
     enableEchoOnTerminal, soloEchoOnTerminal,
-    updateEchoAllButton, bindEchoControls,
+    updateEchoAllButton, reconnectEchoEnabled, bindEchoControls,
     setEchoButtonLabel
   };
 })();

@@ -11,6 +11,7 @@ import { FileUserRepository } from './src/main/infrastructure/file-user-reposito
 import { FileUpdateSettingsStore } from './src/main/infrastructure/file-update-settings';
 import { FileWindowBounds } from './src/main/infrastructure/file-window-bounds';
 import { NodePtyGateway } from './src/main/infrastructure/node-pty-gateway';
+import { TempSessionConfigStore } from './src/main/infrastructure/temp-session-config';
 import { WindowsShellDetector } from './src/main/infrastructure/windows-shell-detector';
 
 // Application use cases
@@ -45,6 +46,7 @@ const connectionRepo = new FileConnectionRepository(vault);
 const userFolderRepo = new FileUserFolderRepository(vault);
 const connectionFolderRepo = new FileConnectionFolderRepository(vault);
 const ptyGateway = new NodePtyGateway();
+const sessionConfigStore = new TempSessionConfigStore();
 const shellDetector = new WindowsShellDetector();
 const sessionRegistry = new SessionRegistry();
 
@@ -132,6 +134,10 @@ const gotTheLock = app.requestSingleInstanceLock();
 if (!gotTheLock) {
   app.quit();
 } else {
+  // Remove session configs left behind by a crash/kill (onExit never fired).
+  // Only the lock holder sweeps — a second instance must never wipe the live
+  // instance's session config dirs.
+  sessionConfigStore.sweep();
   app.on('second-instance', () => {
     // Focus the already-open window instead of opening a second one
     if (mainWindow) {
@@ -188,7 +194,7 @@ const sshController = new SshController(
   new DuplicateConnectionFolder(connectionFolderRepo),
   new OpenConnectionFolder(connectionRepo, connectionFolderRepo),
   new ExportSshConfig(connectionRepo, userRepo),
-  new SpawnSshSession(connectionRepo, ptyGateway),
+  new SpawnSshSession(connectionRepo, ptyGateway, sessionConfigStore),
   new ApplySshImport(vault, userRepo, connectionRepo, connectionFolderRepo),
   dialogs,
   sessionRegistry,
@@ -357,6 +363,7 @@ ipcMain.handle('ssh:connection-folder-save', (event, folderData) => sshControlle
 ipcMain.handle('ssh:connection-folder-delete', (event, folderId) => sshController.deleteConnectionFolder(folderId));
 ipcMain.handle('ssh:connection-folder-duplicate', (event, folderId) => sshController.duplicateConnectionFolder(folderId));
 ipcMain.handle('ssh:connect', (event, connectionId) => sshController.connect(connectionId));
+ipcMain.handle('ssh:reconnect', (event, sessionId, connectionId, size) => sshController.reconnect(sessionId, connectionId, size));
 ipcMain.handle('ssh:open-connection-folder', (event, folderId) => sshController.openConnectionFolder(folderId));
 ipcMain.handle('ssh:import-config', (event, customPath) => sshController.importConfig(customPath));
 ipcMain.handle('ssh:import-winscp', (event, chooseFile) => sshController.importWinScp(chooseFile));

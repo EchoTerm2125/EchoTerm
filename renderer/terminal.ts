@@ -116,7 +116,8 @@ import './icons';
       e.stopImmediatePropagation();
       const sel = term.getSelection();
       if (sel) {
-        navigator.clipboard.writeText(sel).catch(() => {});
+        const out = trimSelection(sel);
+        if (out) navigator.clipboard.writeText(out).catch(() => {});
         term.clearSelection();
         term.focus();
       } else {
@@ -310,19 +311,7 @@ import './icons';
 
     // SSH terminals: keep pane visible so user can see error output
     if (termState.shell === 'ssh') {
-      const label = termState.titlebar.querySelector('.pane-label');
-      const nameEl = label && label.querySelector('.pane-name');
-      if (nameEl) {
-        nameEl.textContent = '⏹ ' + nameEl.textContent.replace(/^⏹ /, '');
-        label.style.color = 'var(--text-muted)';
-      }
-      const closeBtn = termState.titlebar.querySelector('.pane-close');
-      if (closeBtn) {
-        closeBtn.setAttribute('data-i18n-title', 'paneDismissTitle');
-        closeBtn.title = App.__('paneDismissTitle');
-        closeBtn.style.color = 'var(--warning)';
-      }
-      state.terminals.set(id, { ...termState, _exited: true });
+      markSshPaneExited(termState);
       App.UI.updateStatusBar();
       return;
     }
@@ -377,6 +366,164 @@ import './icons';
       else state.activeTerminalId = null;
     }
     App.UI.updateStatusBar();
+  }
+
+  // ─── SSH pane state ────────────────────────────────────────────────────────
+  // A pane whose session ended is kept (so its output stays readable) until it
+  // is dismissed or reconnected.
+
+  function markSshPaneExited(termState) {
+    const next = { ...termState, _exited: true };
+    state.terminals.set(next.id, next);
+    const label = next.titlebar.querySelector('.pane-label');
+    if (label) label.style.color = 'var(--text-muted)';
+    const closeBtn = next.titlebar.querySelector('.pane-close');
+    if (closeBtn) {
+      closeBtn.setAttribute('data-i18n-title', 'paneDismissTitle');
+      closeBtn.title = App.__('paneDismissTitle');
+      closeBtn.style.color = 'var(--warning)';
+    }
+    renderPaneTitle(next);
+  }
+
+  function markSshPaneLive(termState) {
+    const next = { ...termState, _exited: false };
+    state.terminals.set(next.id, next);
+    const label = next.titlebar.querySelector('.pane-label');
+    if (label) label.style.color = '';
+    const closeBtn = next.titlebar.querySelector('.pane-close');
+    if (closeBtn) {
+      closeBtn.setAttribute('data-i18n-title', 'paneCloseTitle');
+      closeBtn.title = App.__('paneCloseTitle');
+      closeBtn.style.color = '';
+    }
+    renderPaneTitle(next);
+    return next;
+  }
+
+  // ─── Reconnect ─────────────────────────────────────────────────────────────
+  // A Reconnect swaps the ssh process behind a pane's id, so the pane keeps its
+  // xterm — and everything already displayed in it — and only the connection is
+  // new.
+
+  // Same error-code mapping the sidebar's connect path uses.
+  function sshErrorText(result) {
+    if (result.errorCode === 'CONNECTION_NOT_FOUND' || result.errorCode === 'SESSION_NOT_FOUND') {
+      return App.__('errorConnectionNotFound');
+    }
+    if (result.errorCode === 'SESSION_CONFIG_FAILED') return App.__('errorSessionConfig');
+    if (result.errorCode === 'JUMP_CHAIN_INVALID') return App.__('errorJumpChainInvalid');
+    return result.error;
+  }
+
+  function setReconnectBusy(termState, busy) {
+    const btn = termState.titlebar.querySelector('.pane-reconnect');
+    if (btn) btn.disabled = !!busy;
+  }
+
+  // Replace the pane's session in place. UI-free: callers decide on confirms
+  // and error reporting. `skipped` means there was nothing to reconnect.
+  async function reconnectTerminal(id) {
+    let termState = state.terminals.get(id);
+    if (!termState || termState.shell !== 'ssh' || !termState.connectionId) return { skipped: true };
+    if (termState._reconnecting) return { skipped: true };
+
+    termState._reconnecting = true;
+    setReconnectBusy(termState, true);
+    // Push the pane's content into the scrollback first: ConPTY renders the
+    // replacement session's output against its own fresh buffer with absolute
+    // cursor positions, so it must land on a blank viewport — otherwise those
+    // writes shred whatever the pane is showing.
+    termState.term.write('\x1b[999;1H' + '\n'.repeat(termState.term.rows));
+    // The pane's current geometry travels with the request so the replacement
+    // pty spawns at the right size — a resize after the fact would make ConPTY
+    // repaint over the content this pane keeps.
+    const { cols, rows } = termState.term;
+    const size = Number.isInteger(cols) && cols > 0 && Number.isInteger(rows) && rows > 0
+      ? { cols, rows }
+      : undefined;
+    let result;
+    try {
+      result = await api.sshReconnect(id, termState.connectionId, size);
+    } catch (err) {
+      // A rejected invoke must still clear the busy state below, or the pane's
+      // Reconnect stays disabled for the rest of the session.
+      result = { error: (err && err.message) || String(err) };
+    }
+
+    termState = state.terminals.get(id);
+    if (!termState) return { skipped: true }; // pane closed while reconnecting
+    termState._reconnecting = false;
+    setReconnectBusy(termState, false);
+
+    if (result && result.error) return { error: sshErrorText(result), errorCode: result.errorCode };
+
+    const live = markSshPaneLive(termState);
+    // Drop the superseded session's prompt/paste detection state. No resize
+    // here: the replacement pty already spawned at the pane's geometry, and
+    // any resize would make ConPTY repaint over the content this pane kept.
+    live.outBuf = '';
+    live.pwPrompt = false;
+    if (live.term.options) live.term.options.ignoreBracketedPasteMode = false;
+    return { success: true };
+  }
+
+  // Reconnect one pane. A session still connected asks first: reconnecting
+  // terminates it and everything running in it.
+  function requestReconnect(id) {
+    const termState = state.terminals.get(id);
+    if (!termState) return;
+    const run = () => {
+      reconnectTerminal(id).then((r) => {
+        if (r.error) App.UI.showToast(App.__('toastSshError', { message: r.error }));
+      });
+    };
+    if (termState._exited) {
+      run();
+      return;
+    }
+    App.Menus.showConfirm(App.__('confirmReconnect'), run, 'skipReconnectConfirm', 'paneReconnectTitle');
+  }
+
+  // Reconnect several panes: one confirm for the batch (so the local shells it
+  // will not touch are accounted for) and one summary of whatever failed. The
+  // batch confirm honours the same "don't show again" choice as the single-pane
+  // one; the failure summary is never suppressed. `confirmKey` names the
+  // confirm's first line; callers with a non-Selected-tabs target set pass
+  // their own wording.
+  function reconnectTabs(ids, confirmKey) {
+    const sshIds = ids.filter((tid) => {
+      const ts = state.terminals.get(tid);
+      return ts && ts.shell === 'ssh' && ts.connectionId;
+    });
+    if (sshIds.length === 0) return;
+    const skippedLocals = ids.length - sshIds.length;
+
+    let message = App._p(confirmKey || 'confirmReconnectSelected', sshIds.length);
+    if (skippedLocals > 0) message += '\n' + App._p('confirmReconnectSkipLocal', skippedLocals);
+
+    App.Menus.showConfirm(message, () => {
+      const failures = [];
+      const runAt = (i) => {
+        if (i >= sshIds.length) {
+          if (failures.length > 0) {
+            App.Menus.showConfirm(
+              App.__('reconnectFailedSummary', { names: failures.join('; ') }),
+              () => {}, null, 'confirmClose'
+            );
+          }
+          return;
+        }
+        const id = sshIds[i];
+        const ts = state.terminals.get(id);
+        const name = ts ? paneName(ts) : String(id);
+        reconnectTerminal(id).then((r) => {
+          if (r.error) failures.push(`${name}: ${r.error}`);
+          runAt(i + 1);
+        });
+      };
+      runAt(0);
+    }, 'skipReconnectConfirm', 'paneReconnectTitle');
   }
 
   function setSinglePane(id) {
@@ -484,6 +631,7 @@ import './icons';
     const displayName = label || `${host || App.__('shellSsh')}`;
     titlebar.innerHTML = `
       <span class="pane-label">🖥️ <span class="pane-name">${escHtml(displayName)}</span></span>
+      <button class="pane-reconnect" data-i18n-title="paneReconnectTitle" title="Reconnect">${App.Icons.refresh}</button>
       <button class="pane-paste" data-i18n-title="panePasteTitle" title="Paste">${App.Icons.clipboard}</button>
       <label class="pane-checkbox" data-i18n-title="paneEchoTitle" title="Echo input to this terminal" style="display:none">
         <input type="checkbox" />
@@ -552,7 +700,8 @@ import './icons';
       e.stopImmediatePropagation();
       const sel = term.getSelection();
       if (sel) {
-        navigator.clipboard.writeText(sel).catch(() => {});
+        const out = trimSelection(sel);
+        if (out) navigator.clipboard.writeText(out).catch(() => {});
         term.clearSelection();
         term.focus();
       } else {
@@ -562,11 +711,16 @@ import './icons';
 
     term.onResize(({ cols, rows }) => { api.resize(id, cols, rows); });
 
-    const termState = { id, shell: shellKey, term, fitAddon, paneEl, titlebar, customName: label || null, label, host, username, outBuf: '', pwPrompt: false };
+    const termState = { id, shell: shellKey, term, fitAddon, paneEl, titlebar, customName: label || null, label, host, username, connectionId: spawnResult.connectionId, outBuf: '', pwPrompt: false, _reconnecting: false };
     state.terminals.set(id, termState);
     state.paneOrder.push(id);
     state.activeTerminalId = id;
     renderPaneTitle(termState);
+    // A pane with no Connection to reconnect to keeps the button out of the way.
+    if (!termState.connectionId) {
+      const rc = titlebar.querySelector('.pane-reconnect');
+      if (rc) rc.style.display = 'none';
+    }
 
     const groupId = state.activeGroupId;
     state.terminalGroups.set(id, groupId);
@@ -613,13 +767,18 @@ import './icons';
 
     titlebar.querySelector('.pane-close').addEventListener('click', () => closeTerminal(id));
 
+    titlebar.querySelector('.pane-reconnect').addEventListener('click', (e) => {
+      e.stopPropagation();
+      requestReconnect(id);
+    });
+
     titlebar.querySelector('.pane-paste').addEventListener('click', (e) => {
       e.stopPropagation();
       pasteToTerminal(id);
     });
 
     paneEl.addEventListener('click', (e) => {
-      if (e.target.closest('.pane-checkbox') || e.target.closest('.pane-close') || e.target.closest('.pane-paste')) return;
+      if (e.target.closest('.pane-checkbox') || e.target.closest('.pane-close') || e.target.closest('.pane-paste') || e.target.closest('.pane-reconnect')) return;
       if (state.echoModeActive) {
         // A title-bar click is enable-then-activate: a deselected terminal is
         // added to the echo selection (never removed) and made the active
@@ -637,7 +796,7 @@ import './icons';
     // A double click on the title bar makes echo exclusive to this terminal:
     // it is enabled and every other terminal in the group is disabled.
     paneEl.addEventListener('dblclick', (e) => {
-      if (e.target.closest('.pane-checkbox') || e.target.closest('.pane-close') || e.target.closest('.pane-paste')) return;
+      if (e.target.closest('.pane-checkbox') || e.target.closest('.pane-close') || e.target.closest('.pane-paste') || e.target.closest('.pane-reconnect')) return;
       if (!state.echoModeActive) return;
       if (!e.target.closest('.pane-titlebar')) return;
       App.Echo.soloEchoOnTerminal(id);
@@ -817,13 +976,21 @@ import './icons';
     document.addEventListener('keydown', escHandler);
   }
 
+  // A copy of xterm's selectAll() spans the whole buffer, including the empty
+  // rows below the last output; pasting that would trail a run of blank lines.
+  // Drop that trailing whitespace run on every path to the clipboard.
+  function trimSelection(sel: string) {
+    return sel.replace(/\s+$/, '');
+  }
+
   // ─── Expose ─────────────────────────────────────────────────────────────────
   App.Terminal = {
     spawnTerminal, spawnSshTerminal, focusTerminal, closeTerminal, handleTerminalExit,
     setSinglePane, showOnlyPane, showAllPanes,
     setEchoCheckboxesVisible, cycleTerminal, pasteToTerminal, showPastePreview, noteOutput,
     paneName, connectionIdentity, paneTitle, renderPaneTitle,
-    refocus,
+    reconnectTerminal, requestReconnect, reconnectTabs,
+    refocus, trimSelection,
   };
 })();
 

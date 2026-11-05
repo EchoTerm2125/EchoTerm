@@ -11,7 +11,7 @@
 <body>
   <!-- ═══ Toolbar  ═══-->
   <header id="toolbar">
-    <button id="btnSidebarToggle" class="toolbar-btn" data-i18n-title="toolbarSidebarToggle" title="Sidebar (Ctrl+Shift+S)">
+    <button id="btnSidebarToggle" class="toolbar-btn" data-shortcut-title="toggleSidebar" title="Sidebar (Ctrl+Shift+S)">
       <svg width="15" height="15" viewBox="0 0 16 16" fill="none">
         <rect x="1.5" y="2.5" width="13" height="11" rx="1.5" stroke="currentColor" stroke-width="1.2"/>
         <path d="M6 2.5v11" stroke="currentColor" stroke-width="1.2"/>
@@ -126,7 +126,7 @@
     <div id="groupList" class="group-list">
       <!-- Groups are added dynamically by app.js -->
     </div>
-    <button id="btnNewGroup" class="tab-action-btn" data-i18n-title="newGroupTitle" title="New Group (Ctrl+Shift+N)">
+    <button id="btnNewGroup" class="tab-action-btn" data-shortcut-title="newGroup" title="New Group (Ctrl+Shift+N)">
       <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
         <path d="M8 3V13M3 8H13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
       </svg>
@@ -142,7 +142,8 @@
       <button id="btnEchoAll" class="tab-action-btn hidden" data-i18n-title="echoEnableAllTitle" data-i18n="echoEnableAll" title="Enable echo on all terminals" style="width:auto;padding:0 8px;font-size:calc(var(--app-font-size) * 0.769);">Enable All</button>
       <button id="btnEchoToggle" class="tab-action-btn hidden" data-i18n-title="echoToggleAllTitle" data-i18n="echoToggleAll" title="Toggle each terminal's echo state" style="width:auto;padding:0 8px;font-size:calc(var(--app-font-size) * 0.769);">Toggle All</button>
       <button id="btnEchoPaste" class="tab-action-btn hidden" data-i18n-title="echoPasteAllTitle" data-i18n="echoPasteAll" title="Paste to all echo-enabled terminals" style="width:auto;padding:0 8px;font-size:calc(var(--app-font-size) * 0.769);">Paste All</button>
-      <button id="btnNewTerminal" class="tab-action-btn" data-i18n-title="newTerminalTitle" title="New Terminal (Ctrl+N)">
+      <button id="btnEchoReconnect" class="tab-action-btn hidden" data-i18n-title="echoReconnectTitle" data-i18n="echoReconnect" title="Reconnect all echo-enabled SSH terminals" style="width:auto;padding:0 8px;font-size:calc(var(--app-font-size) * 0.769);">Reconnect Echo-enabled</button>
+      <button id="btnNewTerminal" class="tab-action-btn" data-shortcut-title="newTerminal" title="New Terminal (Ctrl+N)">
         <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
           <path d="M8 3V13M3 8H13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
         </svg>
@@ -211,20 +212,25 @@
 
   <!-- ═══ Context menu (hidden by default)  ═══-->
   <div id="contextMenu" class="context-menu hidden" data-overlay>
+    <button data-action="select-all"><span class="menu-item-label" data-i18n="ctxSelectAll">Select All</span><span class="context-shortcut" data-shortcut-id="selectAll" data-scope="target"></span></button>
     <button data-action="copy" data-i18n="ctxCopy">Copy</button>
     <button data-action="paste" data-i18n="ctxPaste">Paste</button>
     <button data-action="paste-all" id="ctxPasteAll" data-i18n="ctxPasteAll">Paste All</button>
     <div class="context-separator"></div>
-    <button data-action="echo" id="ctxEcho" data-i18n="ctxToggleEcho">Toggle Echo</button>
+    <button data-action="echo" id="ctxEcho"><span class="menu-item-label" data-i18n="ctxToggleEcho">Toggle Echo</span><span class="context-shortcut" data-shortcut-id="toggleEcho"></span></button>
     <div class="context-separator" id="ctxEchoSep"></div>
-    <button data-action="close" data-i18n="ctxClosePane">Close Pane</button>
+    <button data-action="reconnect" id="ctxReconnect" data-i18n="ctxReconnect">Reconnect</button>
+    <div class="context-separator" id="ctxReconnectSep"></div>
+    <button data-action="close"><span class="menu-item-label" data-i18n="ctxClosePane">Close Pane</span><span class="context-shortcut" data-shortcut-id="closeTerminal" data-scope="target"></span></button>
   </div>
 
   <!-- ═══Tab context menu  ═══-->
   <div id="tabContextMenu" class="context-menu hidden" data-overlay>
     <button data-action="tab-rename" data-i18n="tabCtxRename">Rename Tab</button>
     <div class="context-separator"></div>
-    <button data-action="tab-close" data-i18n="tabCtxClose">Close Tab</button>
+    <button data-action="tab-reconnect" id="tabCtxReconnect" data-i18n="tabCtxReconnect">Reconnect</button>
+    <div class="context-separator"></div>
+    <button data-action="tab-close"><span class="menu-item-label" data-i18n="tabCtxClose">Close Tab</span><span class="context-shortcut" data-shortcut-id="closeTerminal" data-scope="target"></span></button>
     <button data-action="tab-close-selected" id="btnCloseSelected" data-i18n="tabCtxCloseSelected">Close Selected</button>
     <div class="context-separator"></div>
     <button data-action="tab-close-others" data-i18n="tabCtxCloseOthers">Close Others</button>
@@ -289,6 +295,10 @@
           <button class="options-menu-item" data-options-target="mouse">
             <svg class="options-menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="2" width="14" height="20" rx="7"/><path d="M12 6v4"/></svg>
             <span data-i18n="optionsTitleMouse">Mouse</span>
+          </button>
+          <button class="options-menu-item" data-options-target="shortcuts">
+            <svg class="options-menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="M6 8h.001"/><path d="M10 8h.001"/><path d="M14 8h.001"/><path d="M18 8h.001"/><path d="M8 12h.001"/><path d="M12 12h.001"/><path d="M16 12h.001"/><path d="M7 16h10"/></svg>
+            <span data-i18n="optionsTitleShortcuts">Keyboard Shortcuts</span>
           </button>
           <button class="options-menu-item" data-options-target="language">
             <svg class="options-menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/></svg>
@@ -382,6 +392,11 @@
           <span class="options-toggle-slider"></span>
         </label>
         <label class="options-toggle">
+          <span class="options-toggle-label" data-i18n="optionsReconnectConfirm">Confirm before reconnecting a terminal</span>
+          <input type="checkbox" id="optReconnectConfirm" checked />
+          <span class="options-toggle-slider"></span>
+        </label>
+        <label class="options-toggle">
           <span class="options-toggle-label" data-i18n="optionsSshJumpWarn">Warn about unselected jump hosts on SSH import</span>
           <input type="checkbox" id="optSshJumpWarn" checked />
           <span class="options-toggle-slider"></span>
@@ -401,6 +416,12 @@
           <input type="checkbox" id="optRightClickPaste" />
           <span class="options-toggle-slider"></span>
         </label>
+      </div>
+    </div>
+    <div class="options-section" data-options-section="shortcuts">
+      <div class="options-section-title" data-i18n="optionsTitleShortcuts">Keyboard Shortcuts</div>
+      <div class="options-card options-card-shortcuts">
+        <div id="shortcutTable"></div>
       </div>
     </div>
     <div class="options-section" data-options-section="language">
@@ -484,15 +505,15 @@
   <!-- ═══SSH Connection Dialog (add/edit connections, users, groups)  ═══-->
   <div id="sshDialog" class="ssh-dialog-overlay hidden" data-overlay>
     <div class="ssh-dialog-box">
-      <div class="ssh-dialog-header">
+      <div class="ssh-dialog-header ssh-dialog-header-buttons">
         <span id="sshDialogTitle" data-i18n="sshDialogTitleNewConn">New Connection</span>
+        <div class="ssh-dialog-buttons">
+          <button id="sshDialogCancel" class="ssh-dialog-btn ssh-dialog-btn-cancel" data-i18n="sshDialogCancel">Cancel</button>
+          <button id="sshDialogSave" class="ssh-dialog-btn ssh-dialog-btn-save" data-i18n="sshDialogSave">Save</button>
+        </div>
       </div>
       <div id="sshDialogBody" class="ssh-dialog-body">
         <!-- Form injected by ssh-panel.js -->
-      </div>
-      <div class="ssh-dialog-buttons">
-        <button id="sshDialogCancel" class="ssh-dialog-btn ssh-dialog-btn-cancel" data-i18n="sshDialogCancel">Cancel</button>
-        <button id="sshDialogSave" class="ssh-dialog-btn ssh-dialog-btn-save" data-i18n="sshDialogSave">Save</button>
       </div>
     </div>
   </div>
@@ -531,6 +552,7 @@
           <button id="sshImportConfirm" class="ssh-dialog-btn ssh-dialog-btn-save" data-i18n="sshImportBtnImport">Import Selected</button>
         </div>
       </div>
+      <div id="sshImportSelectAllBar" class="ssh-import-selectall hidden"></div>
       <div id="sshImportBody" class="ssh-dialog-body"></div>
     </div>
   </div>

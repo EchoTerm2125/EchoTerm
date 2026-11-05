@@ -1,6 +1,6 @@
 // Unit tests for src/domain/services/ssh-config.ts
-import { parseSshConfigText, renderSshConfig } from '../../src/domain/services/ssh-config';
-import type { Connection, User } from '../../src/domain/entities/ssh';
+import { parseSshConfigText, renderSessionSshConfig, renderSshConfig } from '../../src/domain/services/ssh-config';
+import type { Connection, ResolvedConnection, User } from '../../src/domain/entities/ssh';
 
 const HOME_PREFIX = 'C:\\Users\\me\\';
 
@@ -175,7 +175,7 @@ describe('renderSshConfig', () => {
     expect(text).toContain('  Port 2222\n');
   });
 
-  it('renders manual jump host with default port 22', () => {
+  it('renders manual jump host without a port when it is 22', () => {
     const text = renderSshConfig(
       [makeConnection({
         name: 'via', host: 'via.local',
@@ -183,7 +183,30 @@ describe('renderSshConfig', () => {
       })],
       [],
     );
-    expect(text).toContain('  ProxyJump jump@bastion.local:22\n');
+    expect(text).toContain('  ProxyJump jump@bastion.local\n');
+  });
+
+  it('renders manual jump host custom port', () => {
+    const text = renderSshConfig(
+      [makeConnection({
+        name: 'via', host: 'via.local',
+        jumpHost: { type: 'manual', host: 'bastion.local', username: 'jump', port: 2200, authType: null, keyFilePath: null },
+      })],
+      [],
+    );
+    expect(text).toContain('  ProxyJump jump@bastion.local:2200\n');
+  });
+
+  it('omits the jump user when blank instead of emitting "@host"', () => {
+    const text = renderSshConfig(
+      [makeConnection({
+        name: 'via', host: 'via.local',
+        jumpHost: { type: 'manual', host: 'bastion.local', username: '', port: 22, authType: null, keyFilePath: null },
+      })],
+      [],
+    );
+    expect(text).toContain('  ProxyJump bastion.local\n');
+    expect(text).not.toContain('@');
   });
 
   it('renders reference jump host by the referenced connection name', () => {
@@ -241,5 +264,147 @@ describe('renderSshConfig', () => {
       '  Compression yes\n' +
       '\n',
     );
+  });
+});
+
+function makeResolved(overrides: Partial<ResolvedConnection> = {}): ResolvedConnection {
+  return {
+    id: 'c1', name: 'Test', host: 'example.com', port: 22, username: 'alice',
+    authType: 'password', password: null, keyFilePath: null, keyPassword: null,
+    resolvedJumpChain: [],
+    hostKeyAlgorithms: null, kexAlgorithms: null, pubkeyAcceptedAlgorithms: null,
+    ciphers: null, macs: null, caSignatureAlgorithms: null, compression: null,
+    ...overrides,
+  };
+}
+
+describe('renderSessionSshConfig', () => {
+  it('renders a direct connection with no jump host', () => {
+    const text = renderSessionSshConfig(makeResolved(), null);
+    expect(text).toBe('Host example.com\n  User alice\n');
+  });
+
+  it('omits default port, unknown user and IdentityFile for password auth', () => {
+    const text = renderSessionSshConfig(
+      makeResolved({ port: 22, username: '', authType: 'password' }),
+      null,
+    );
+    expect(text).toBe('Host example.com\n');
+  });
+
+  it('emits Port and IdentityFile when set', () => {
+    const text = renderSessionSshConfig(
+      makeResolved({ port: 2222, authType: 'keyfile', keyFilePath: 'C:\\keys\\id_rsa' }),
+      null,
+    );
+    expect(text).toContain('  Port 2222\n');
+    expect(text).toContain('  IdentityFile C:\\keys\\id_rsa\n');
+  });
+
+  it('renders a jump host as its own Host block chained via ProxyJump', () => {
+    const text = renderSessionSshConfig(makeResolved({
+      resolvedJumpChain: [{
+        host: 'bastion.example.com', username: 'jump', port: 2200,
+        authType: 'keyfile', keyFilePath: 'C:\\keys\\jh_rsa',
+        password: null, keyPassword: null,
+      }],
+    }), null);
+    expect(text).toBe(
+      'Host example.com\n' +
+      '  User alice\n' +
+      '  ProxyJump jump@bastion.example.com:2200\n' +
+      '\n' +
+      'Host bastion.example.com\n' +
+      '  Port 2200\n' +
+      '  User jump\n' +
+      '  IdentityFile C:\\keys\\jh_rsa\n',
+    );
+  });
+
+  it('renders a multi-hop chain as Host blocks, nearest hop first', () => {
+    const text = renderSessionSshConfig(makeResolved({
+      resolvedJumpChain: [
+        { host: 'hop1.example.com', username: 'u1', port: 22, authType: 'password', keyFilePath: null, password: null, keyPassword: null },
+        { host: 'hop2.example.com', username: 'u2', port: 22, authType: 'keyfile', keyFilePath: 'C:\\keys\\k2', password: null, keyPassword: null },
+      ],
+    }), null);
+    expect(text).toBe(
+      'Host example.com\n' +
+      '  User alice\n' +
+      '  ProxyJump u1@hop1.example.com\n' +
+      '\n' +
+      'Host hop1.example.com\n' +
+      '  User u1\n' +
+      '  ProxyJump u2@hop2.example.com\n' +
+      '\n' +
+      'Host hop2.example.com\n' +
+      '  User u2\n' +
+      '  IdentityFile C:\\keys\\k2\n',
+    );
+  });
+
+  it('appends the user Include last, behind a Host * reset', () => {
+    const text = renderSessionSshConfig(
+      makeResolved(), 'C:\\Users\\me\\.ssh\\config',
+    );
+    expect(text).toBe(
+      'Host example.com\n' +
+      '  User alice\n' +
+      '\n' +
+      'Host *\n' +
+      'Include C:\\Users\\me\\.ssh\\config\n',
+    );
+  });
+
+  it('omits HostName so a user config Host alias can remap the target', () => {
+    const text = renderSessionSshConfig(
+      makeResolved({ host: 'myserver' }), null,
+    );
+    expect(text).not.toContain('HostName');
+  });
+
+  it('renders algorithm overrides for legacy servers', () => {
+    const text = renderSessionSshConfig(
+      makeResolved({ hostKeyAlgorithms: '+ssh-rsa,ssh-dss', compression: 'yes' }),
+      null,
+    );
+    expect(text).toContain('  HostKeyAlgorithms +ssh-rsa,ssh-dss\n');
+    expect(text).toContain('  Compression yes\n');
+  });
+
+  it('rejects values containing newlines (directive injection)', () => {
+    const evil = makeResolved({ host: 'evil.example.com\n  ProxyCommand calc.exe' });
+    expect(() => renderSessionSshConfig(evil, null)).toThrow(/newlines/);
+  });
+
+  it('rejects values containing double quotes (whole config would be rejected)', () => {
+    const evil = makeResolved({ username: 'al"ice' });
+    expect(() => renderSessionSshConfig(evil, null)).toThrow(/double quotes/);
+  });
+
+  it('rejects an empty host (would emit a bare Host line)', () => {
+    expect(() => renderSessionSshConfig(makeResolved({ host: '' }), null)).toThrow(/empty/);
+  });
+
+  it('rejects a host containing pattern metacharacters', () => {
+    expect(() => renderSessionSshConfig(makeResolved({ host: 'a*' }), null)).toThrow(/metacharacters/);
+  });
+
+  it('rejects a jump hop containing pattern metacharacters', () => {
+    const withHop = makeResolved({
+      resolvedJumpChain: [{
+        host: 'bast?on', username: 'jump', port: 22, authType: null, keyFilePath: null,
+        password: null, keyPassword: null,
+      }],
+    });
+    expect(() => renderSessionSshConfig(withHop, null)).toThrow(/metacharacters/);
+  });
+
+  it('quotes values containing spaces', () => {
+    const text = renderSessionSshConfig(
+      makeResolved({ authType: 'keyfile', keyFilePath: 'C:\\keys\\my key id_rsa' }),
+      null,
+    );
+    expect(text).toContain('  IdentityFile "C:\\keys\\my key id_rsa"\n');
   });
 });

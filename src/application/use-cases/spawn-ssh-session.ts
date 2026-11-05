@@ -1,13 +1,16 @@
 /* ═══════════════════════════════════════════════════════════════════════════
    EchoTerm — Use case: spawn an SSH session for a stored connection
-   Resolves credentials, builds ssh arguments and wires prompt auto-injection.
+   Renders a per-session ssh config, spawns ssh.exe with -F and wires
+   prompt auto-injection.
    ═══════════════════════════════════════════════════════════════════════════ */
 
 import type { ConnectionRepository } from '../../domain/ports/connection-repository';
 import type { PtyGateway, PtyProcessHandle } from '../../domain/ports/pty-gateway';
+import type { SessionConfigStore } from '../../domain/ports/session-config-store';
 import type { SessionEvents } from '../session-events';
 import { buildSshArgs } from '../../domain/services/ssh-args';
-import { isPasswordPrompt, isPassphrasePrompt } from '../../domain/services/password-prompt';
+import { renderSessionSshConfig } from '../../domain/services/ssh-config';
+import { credentialForPrompt, type CredentialSlot } from '../../domain/services/password-prompt';
 
 export type SpawnSshSessionResult =
   | { id: number; shell: string; label: string; host: string; username: string | null; handle: PtyProcessHandle }
@@ -17,45 +20,92 @@ export class SpawnSshSession {
   constructor(
     private readonly connections: ConnectionRepository,
     private readonly pty: PtyGateway,
+    private readonly configStore: SessionConfigStore,
   ) {}
 
-  execute(connectionId: string, sessionId: number, cwd: string, events: SessionEvents): SpawnSshSessionResult {
+  execute(
+    connectionId: string,
+    sessionId: number,
+    cwd: string,
+    events: SessionEvents,
+    isSuperseded?: () => boolean,
+    size?: { cols: number; rows: number },
+  ): SpawnSshSessionResult {
     const target = this.connections.findResolvedById(connectionId);
     if (!target) return { error: 'Connection not found.', errorCode: 'CONNECTION_NOT_FOUND' };
+    if (target.jumpChainError) {
+      // Never connect through a broken jump chain (loop or deleted reference)
+      return {
+        error: 'Jump host chain is invalid: it loops or references a deleted connection.',
+        errorCode: 'JUMP_CHAIN_INVALID',
+      };
+    }
 
-    // Domain service builds the ssh.exe argument list (jump host, port, key file)
-    const args = buildSshArgs(target);
+    // Render + persist the per-session config file (adapter owns the path)
+    const alias = `echoterm-session-${sessionId}`;
+    let configPath: string;
+    try {
+      const text = renderSessionSshConfig(target, this.configStore.userConfigPath());
+      configPath = this.configStore.write(alias, text);
+    } catch (err) {
+      return { error: err.message, errorCode: 'SESSION_CONFIG_FAILED' };
+    }
 
     try {
-      const handle = this.pty.spawn('ssh.exe', args, { cols: 80, rows: 24, cwd });
+      // Spawn with the real host name (not the alias) so Host patterns in the
+      // user's own ssh config keep matching this connection. A Reconnect passes
+      // the pane's real geometry: spawning at the default 80x24 and resizing
+      // after would make ConPTY repaint over the content the pane kept.
+      const args = buildSshArgs(configPath, target.host);
+      const cols = size && Number.isInteger(size.cols) && size.cols > 0 ? size.cols : 80;
+      const rows = size && Number.isInteger(size.rows) && size.rows > 0 ? size.rows : 24;
+      const handle = this.pty.spawn('ssh.exe', args, { cols, rows, cwd });
 
-      // Auto-inject password if using password auth (for the TARGET host)
-      if (target.authType === 'password' && target.password) {
-        let passwordSent = false;
+      // Auto-inject stored credentials as ssh prompts for them. Jump hops
+      // authenticate before the target, and a ProxyJump chain is entered from
+      // its FARTHEST hop inward (each hop's Host block is reached through the
+      // next one), while resolvedJumpChain lists hops nearest-first — so the
+      // hop slots are reversed, keeping the target last. Slots must be in
+      // authentication order because the target's password prompts carry no
+      // hop identity to disambiguate them.
+      const slots: CredentialSlot[] = [
+        ...[...target.resolvedJumpChain].reverse().map(hop => ({
+          authType: hop.authType,
+          password: hop.password,
+          keyPassword: hop.keyPassword,
+          keyFilePath: hop.keyFilePath,
+          consumed: false,
+        })),
+        {
+          authType: target.authType,
+          password: target.password,
+          keyPassword: target.keyPassword,
+          keyFilePath: target.keyFilePath,
+          consumed: false,
+        },
+      ];
+      if (slots.some(slot => slot.password || slot.keyPassword)) {
         handle.onData((data) => {
-          if (!passwordSent && isPasswordPrompt(data)) {
-            handle.write(target.password + '\r');
-            passwordSent = true;
-          }
-        });
-      }
-
-      // Auto-inject key passphrase if using keyfile auth with stored passphrase
-      if (target.authType === 'keyfile' && target.keyPassword) {
-        let keyPassSent = false;
-        handle.onData((data) => {
-          if (!keyPassSent && isPassphrasePrompt(data)) {
-            handle.write(target.keyPassword + '\r');
-            keyPassSent = true;
-          }
+          const credential = credentialForPrompt(slots, data);
+          if (credential) handle.write(credential + '\r');
         });
       }
 
       handle.onData(events.onData);
-      handle.onExit(() => events.onExit());
+      handle.onExit(() => {
+        // Each spawn writes its own config file (write() mints a fresh path),
+        // so a superseded process must still delete its own. It must only skip
+        // reporting the exit — the replacement owns the pane now.
+        this.configStore.remove(configPath);
+        if (isSuperseded && isSuperseded()) return;
+        events.onExit();
+      });
 
       return { id: sessionId, shell: 'ssh', label: target.name, host: target.host, username: target.username, handle };
     } catch (err) {
+      // Spawn failed after the config file was written — clean it up now;
+      // onExit will never fire for a handle we never got
+      this.configStore.remove(configPath);
       return { error: err.message };
     }
   }

@@ -19,14 +19,12 @@
     shellSsh: 'SSH',
 
     // ── Toolbar ──────────────────────────────────────────────────────────────
-    toolbarSidebarToggle: '侧边栏 (Ctrl+Shift+S)',
     toolbarSettings: '设置',
     winMinimizeTitle: '最小化',
     winMaximizeTitle: '最大化',
     winRestoreTitle: '还原',
 
     // ── New Terminal Dropdown ────────────────────────────────────────────────
-    newTerminalTitle: '新建终端 (Ctrl+N)',
     newTermDropdownTitle: '选择终端类型',
     powershellLabel: 'PowerShell',
     cmdLabel: 'CMD',
@@ -43,10 +41,13 @@
     echoEnableAllTitle: '在所有终端上启用回显',
     echoToggleAllTitle: '切换每个终端的回显状态',
     echoPasteAllTitle: '粘贴到所有已启用回显的终端',
+    echoReconnect: '重新连接已启用回显',
+    echoReconnectTitle: '重新连接所有已启用回显的 SSH 终端',
+    echoReconnectNone: '没有已启用回显的终端。',
+    echoReconnectNoSsh: '没有已启用回显的 SSH 终端可供重新连接。',
 
     // ── Group bar ────────────────────────────────────────────────────────────
     groupDefaultName: '组 {n}',
-    newGroupTitle: '新建组 (Ctrl+Shift+N)',
     closeGroupTitle: '关闭组',
 
     // ── Tab ──────────────────────────────────────────────────────────────────
@@ -54,6 +55,7 @@
 
     // ── Pane titlebar ────────────────────────────────────────────────────────
     panePasteTitle: '粘贴',
+    paneReconnectTitle: '重新连接',
     paneEchoTitle: '向此终端回显输入',
     paneEchoLabel: '回显',
     paneCloseTitle: '关闭',
@@ -85,11 +87,15 @@
 
     // ── Context menus ────────────────────────────────────────────────────────
     ctxCopy: '复制',
+    ctxSelectAll: '全选',
     ctxPaste: '粘贴',
     ctxPasteAll: '全部粘贴',
-    ctxToggleEcho: '切换回显',
-    ctxClosePane: '关闭窗格',
+    ctxReconnect: '重新连接',
+    ctxToggleEcho: '切换 Echo 模式',
+    ctxClosePane: '关闭终端',
     tabCtxRename: '重命名标签',
+    tabCtxReconnect: '重新连接',
+    tabCtxReconnectSelected: '重新连接选中项',
     tabCtxClose: '关闭标签',
     tabCtxCloseSelected: '关闭选中',
     tabCtxCloseOthers: '关闭其他',
@@ -105,6 +111,9 @@
     confirmCancel: '取消',
     confirmClose: '关闭',
     confirmDelete: '删除',
+    confirmDiscard: '放弃',
+    confirmDiscardChanges: '放弃未保存的更改？',
+    confirmKeepEditing: '继续编辑',
     confirmDuplicate: '复制',
     confirmDontShowAgain: '不再显示',
     confirmCloseTerminal: '关闭此终端？\n会话将被终止。',
@@ -116,6 +125,11 @@
     confirmCloseGroupWithTerminals: '关闭组 "{name}"？\n{count} 个终端将被关闭。',
     confirmCloseApp: '关闭 EchoTerm？\n所有终端会话将被终止。',
     confirmCloseAllGroupTerminals: '关闭组 "{name}" 中的 {count} 个终端？\n所有会话将被终止。',
+    confirmReconnect: '重新连接此终端？\n当前会话将被终止。',
+    confirmReconnectSelected: '重新连接 {count} 个选中的终端？\n所有会话将被终止。',
+    confirmReconnectSkipLocal: '选中的 {count} 个本地 shell 将不会被重新连接。',
+    confirmReconnectEcho: '重新连接 {count} 个已启用回显的 SSH 终端？\n所有会话将被终止。',
+    reconnectFailedSummary: '无法重新连接：{names}',
     confirmDeleteSshConnection: '删除 SSH 连接 "{name}"？',
     confirmDeleteSshConnectionFolder: '删除连接文件夹 "{name}"？\n其中 {connections} 个连接和 {subfolders} 个子文件夹将被永久删除。',
     confirmDeleteMultiSshConnectionFolder: '这还将永久删除其中的 {connections} 个连接和 {subfolders} 个子文件夹。',
@@ -264,6 +278,11 @@
     sshImportJumpVia: '↪ 经由 {host}',
     sshImportJumpNotInConfig: '（不在配置中）',
     sshImportNoNewHosts: '未发现新主机。所有主机已导入。',
+    sshImportSelectAll: '全选',
+    sshImportFilterPlaceholder: '筛选...',
+    sshImportFilterNoMatch: '没有与筛选条件匹配的导入项。',
+    sshImportConfirmImport: '导入 {count} 项：\n\n{list}',
+    sshImportConfirmUpdate: '更新 {count} 项：\n\n{list}',
     sshImportNoExistingToUpdate: '未找到可更新的现有连接。',
     sshImportNoHosts: 'SSH 配置中未找到主机。',
     sshImportWinScpTitle: '从 WinSCP 导入',
@@ -294,6 +313,8 @@
     sshCtxDuplicate: '复制',
     sshCtxDuplicateSelected: '复制选中 ({count})',
     sshCtxNoOtherFolders: '没有其他文件夹',
+    submenuFilterPlaceholder: '筛选…',
+    submenuFilterNoMatches: '没有匹配项',
 
     // ── Settings / Options Panel ─────────────────────────────────────────────
     optionsTitleAppearance: '外观',
@@ -311,9 +332,22 @@
     optionsTabCloseConfirm: '关闭标签前确认',
     optionsWindowCloseConfirm: '关闭窗口前确认',
     optionsGroupCloseConfirm: '删除组前确认',
+    optionsReconnectConfirm: '重新连接终端前确认',
     optionsSshJumpWarn: 'SSH 导入时警告未选中的跳板机',
     optionsPastePreview: '粘贴多行内容前确认',
     optionsRightClickPaste: '右键复制 / 粘贴',
+    optionsTitleShortcuts: '键盘快捷键',
+    optionsShortcutColumnKeys: '快捷键',
+    optionsShortcutColumnAction: '操作',
+    optionsShortcutNewTerminal: '新建终端',
+    optionsShortcutNewGroup: '新建分组',
+    optionsShortcutCloseTerminal: '关闭活动终端',
+    optionsShortcutFind: '在活动终端中查找',
+    optionsShortcutSearchAll: '搜索所有可见终端',
+    optionsShortcutSelectAll: '全选活动终端中的文本',
+    optionsShortcutNextTerminal: '下一个终端',
+    optionsShortcutPrevTerminal: '上一个终端',
+    optionsShortcutToggleSidebar: '切换 SSH 侧边栏',
 
     // ── Danger Zone ──────────────────────────────────────────────────────────
     optionsTitleDanger: '危险区域',
@@ -384,6 +418,8 @@
     // ── Error messages ───────────────────────────────────────────────────────
     errorUnknownShell: '未知 Shell: {shell}',
     errorConnectionNotFound: '未找到连接。',
+    errorSessionConfig: '无法准备 SSH 会话配置。',
+    errorJumpChainInvalid: '跳板主机链无效：存在循环或引用了已删除的连接。',
     errorConnectionFolderNotFound: '未找到连接文件夹。',
     errorFieldBlank: '此字段不能为空。',
     errorConfigNotFound: '未找到配置文件: {path}',

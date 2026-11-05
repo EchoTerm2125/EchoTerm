@@ -19,14 +19,12 @@
     shellSsh: 'SSH',
 
     // ── Toolbar ──────────────────────────────────────────────────────────────
-    toolbarSidebarToggle: '側邊欄 (Ctrl+Shift+S)',
     toolbarSettings: '設定',
     winMinimizeTitle: '最小化',
     winMaximizeTitle: '最大化',
     winRestoreTitle: '還原',
 
     // ── New Terminal Dropdown ────────────────────────────────────────────────
-    newTerminalTitle: '新增終端機 (Ctrl+N)',
     newTermDropdownTitle: '選擇終端機類型',
     powershellLabel: 'PowerShell',
     cmdLabel: 'CMD',
@@ -43,10 +41,13 @@
     echoEnableAllTitle: '在所有終端機上啟用回顯',
     echoToggleAllTitle: '切換每個終端機的回顯狀態',
     echoPasteAllTitle: '貼上到所有已啟用回顯的終端機',
+    echoReconnect: '重新連線已啟用回顯',
+    echoReconnectTitle: '重新連線所有已啟用回顯的 SSH 終端機',
+    echoReconnectNone: '沒有已啟用回顯的終端機。',
+    echoReconnectNoSsh: '沒有已啟用回顯的 SSH 終端機可供重新連線。',
 
     // ── Group bar ────────────────────────────────────────────────────────────
     groupDefaultName: '群組 {n}',
-    newGroupTitle: '新增群組 (Ctrl+Shift+N)',
     closeGroupTitle: '關閉群組',
 
     // ── Tab ──────────────────────────────────────────────────────────────────
@@ -54,6 +55,7 @@
 
     // ── Pane titlebar ────────────────────────────────────────────────────────
     panePasteTitle: '貼上',
+    paneReconnectTitle: '重新連線',
     paneEchoTitle: '向此終端機回顯輸入',
     paneEchoLabel: '回顯',
     paneCloseTitle: '關閉',
@@ -85,11 +87,15 @@
 
     // ── Context menus ────────────────────────────────────────────────────────
     ctxCopy: '複製',
+    ctxSelectAll: '全選',
     ctxPaste: '貼上',
     ctxPasteAll: '全部貼上',
-    ctxToggleEcho: '切換回顯',
-    ctxClosePane: '關閉窗格',
+    ctxReconnect: '重新連線',
+    ctxToggleEcho: '切換 Echo 模式',
+    ctxClosePane: '關閉終端機',
     tabCtxRename: '重新命名標籤',
+    tabCtxReconnect: '重新連線',
+    tabCtxReconnectSelected: '重新連線已選取',
     tabCtxClose: '關閉標籤',
     tabCtxCloseSelected: '關閉已選取',
     tabCtxCloseOthers: '關閉其他',
@@ -105,6 +111,9 @@
     confirmCancel: '取消',
     confirmClose: '關閉',
     confirmDelete: '刪除',
+    confirmDiscard: '放棄',
+    confirmDiscardChanges: '放棄未儲存的變更？',
+    confirmKeepEditing: '繼續編輯',
     confirmDuplicate: '複製',
     confirmDontShowAgain: '不再顯示',
     confirmCloseTerminal: '關閉此終端機？\n工作階段將被終止。',
@@ -116,6 +125,11 @@
     confirmCloseGroupWithTerminals: '關閉群組「{name}」？\n{count} 個終端機將被關閉。',
     confirmCloseApp: '關閉 EchoTerm？\n所有終端機工作階段將被終止。',
     confirmCloseAllGroupTerminals: '關閉群組「{name}」中的 {count} 個終端機？\n所有工作階段將被終止。',
+    confirmReconnect: '重新連線此終端機？\n目前的工作階段將被終止。',
+    confirmReconnectSelected: '重新連線 {count} 個已選取的終端機？\n所有工作階段將被終止。',
+    confirmReconnectSkipLocal: '已選取範圍中的 {count} 個本地 shell 不會重新連線。',
+    confirmReconnectEcho: '重新連線 {count} 個已啟用回顯的 SSH 終端機？\n所有工作階段將被終止。',
+    reconnectFailedSummary: '無法重新連線：{names}',
     confirmDeleteSshConnection: '刪除 SSH 連線「{name}」？',
     confirmDeleteSshConnectionFolder: '刪除連線資料夾「{name}」？\n其中 {connections} 個連線和 {subfolders} 個子資料夾將被永久刪除。',
     confirmDeleteMultiSshConnectionFolder: '這亦會永久刪除當中的 {connections} 個連線和 {subfolders} 個子資料夾。',
@@ -264,6 +278,11 @@
     sshImportJumpVia: '↪ 經由 {host}',
     sshImportJumpNotInConfig: '（不在設定中）',
     sshImportNoNewHosts: '未發現新主機。所有主機已匯入。',
+    sshImportSelectAll: '全選',
+    sshImportFilterPlaceholder: '篩選...',
+    sshImportFilterNoMatch: '沒有與篩選條件相符的匯入項目。',
+    sshImportConfirmImport: '匯入 {count} 項：\n\n{list}',
+    sshImportConfirmUpdate: '更新 {count} 項：\n\n{list}',
     sshImportNoExistingToUpdate: '未找到可更新的現有連線。',
     sshImportNoHosts: 'SSH 設定中找不到主機。',
     sshImportWinScpTitle: '從 WinSCP 匯入',
@@ -294,6 +313,8 @@
     sshCtxDuplicate: '複製',
     sshCtxDuplicateSelected: '複製已選取 ({count})',
     sshCtxNoOtherFolders: '沒有其他資料夾',
+    submenuFilterPlaceholder: '篩選…',
+    submenuFilterNoMatches: '沒有符合項目',
 
     // ── Settings / Options Panel ─────────────────────────────────────────────
     optionsTitleAppearance: '外觀',
@@ -311,9 +332,22 @@
     optionsTabCloseConfirm: '關閉標籤前確認',
     optionsWindowCloseConfirm: '關閉視窗前確認',
     optionsGroupCloseConfirm: '刪除群組前確認',
+    optionsReconnectConfirm: '重新連線終端機前確認',
     optionsSshJumpWarn: 'SSH 匯入時警告未選取的跳板機',
     optionsPastePreview: '貼上多行內容前確認',
     optionsRightClickPaste: '右鍵複製 / 貼上',
+    optionsTitleShortcuts: '鍵盤快捷鍵',
+    optionsShortcutColumnKeys: '快捷鍵',
+    optionsShortcutColumnAction: '動作',
+    optionsShortcutNewTerminal: '新增終端機',
+    optionsShortcutNewGroup: '新增群組',
+    optionsShortcutCloseTerminal: '關閉使用中終端機',
+    optionsShortcutFind: '在使用中終端機中尋找',
+    optionsShortcutSearchAll: '搜尋所有可見終端機',
+    optionsShortcutSelectAll: '全選使用中終端機中的文字',
+    optionsShortcutNextTerminal: '下一個終端機',
+    optionsShortcutPrevTerminal: '上一個終端機',
+    optionsShortcutToggleSidebar: '切換 SSH 側邊欄',
 
     // ── Danger Zone ──────────────────────────────────────────────────────────
     optionsTitleDanger: '危險區域',
@@ -384,6 +418,8 @@
     // ── Error messages ───────────────────────────────────────────────────────
     errorUnknownShell: '未知 Shell: {shell}',
     errorConnectionNotFound: '找不到連線。',
+    errorSessionConfig: '無法準備 SSH 會話設定。',
+    errorJumpChainInvalid: '跳板主機鏈無效：存在循環或引用了已刪除的連線。',
     errorConnectionFolderNotFound: '找不到連線資料夾。',
     errorFieldBlank: '此欄位不能為空。',
     errorConfigNotFound: '找不到設定檔: {path}',

@@ -18,6 +18,9 @@ export interface SpawnResult {
   host?: string;
   /** SSH spawns only: the connection's username, shown as the pane identity. */
   username?: string | null;
+  /** SSH spawns only: the id of the Connection this pane was opened from, so
+   *  the renderer can ask for a Reconnect later. */
+  connectionId?: string;
   error?: string;
   errorCode?: 'GIT_BASH_NOT_FOUND' | 'UNKNOWN_SHELL' | 'CONNECTION_NOT_FOUND' | string;
 }
@@ -382,6 +385,11 @@ export interface WindowApi {
 
   // SSH actions
   sshConnect(connectionId: string): Promise<SpawnResult>;
+  /** Replace a live pane's session with a fresh one to the same Connection,
+   *  keeping the pane's id (and so its displayed content). `size` is the
+   *  pane's current geometry, so the replacement pty never needs the
+   *  resize that would make ConPTY repaint over the kept content. */
+  sshReconnect(sessionId: number, connectionId: string, size?: { cols: number; rows: number }): Promise<IpcOutcome>;
   sshOpenConnectionFolder(folderId: string): Promise<SshConnectionFolderOpen & { error?: string; errorCode?: string }>;
   sshImportConfig(filePath?: string): Promise<ImportConfigResult>;
   /** Read WinSCP's saved sites; `chooseFile` opens a picker for a WinSCP.ini. */

@@ -20,14 +20,12 @@
     shellSsh: 'SSH',
 
     // ── Toolbar ──────────────────────────────────────────────────────────────
-    toolbarSidebarToggle: 'Sidebar (Ctrl+Shift+S)',
     toolbarSettings: 'Settings',
     winMinimizeTitle: 'Minimize',
     winMaximizeTitle: 'Maximize',
     winRestoreTitle: 'Restore',
 
     // ── New Terminal Dropdown ────────────────────────────────────────────────
-    newTerminalTitle: 'New Terminal (Ctrl+N)',
     newTermDropdownTitle: 'Select terminal type',
     powershellLabel: 'PowerShell',
     cmdLabel: 'CMD',
@@ -44,10 +42,13 @@
     echoEnableAllTitle: 'Enable echo on all terminals',
     echoToggleAllTitle: 'Toggle each terminal\'s echo state',
     echoPasteAllTitle: 'Paste to all echo-enabled terminals',
+    echoReconnect: 'Reconnect Echo-enabled',
+    echoReconnectTitle: 'Reconnect all echo-enabled SSH terminals',
+    echoReconnectNone: 'No echo-enabled terminals.',
+    echoReconnectNoSsh: 'No echo-enabled SSH terminals to reconnect.',
 
     // ── Group bar ────────────────────────────────────────────────────────────
     groupDefaultName: 'Group {n}',
-    newGroupTitle: 'New Group (Ctrl+Shift+N)',
     closeGroupTitle: 'Close Group',
 
     // ── Tab ──────────────────────────────────────────────────────────────────
@@ -55,6 +56,7 @@
 
     // ── Pane titlebar ────────────────────────────────────────────────────────
     panePasteTitle: 'Paste',
+    paneReconnectTitle: 'Reconnect',
     paneEchoTitle: 'Echo input to this terminal',
     paneEchoLabel: 'Echo',
     paneCloseTitle: 'Close',
@@ -86,11 +88,15 @@
 
     // ── Context menus ────────────────────────────────────────────────────────
     ctxCopy: 'Copy',
+    ctxSelectAll: 'Select All',
     ctxPaste: 'Paste',
     ctxPasteAll: 'Paste All',
-    ctxToggleEcho: 'Toggle Echo',
-    ctxClosePane: 'Close Pane',
+    ctxReconnect: 'Reconnect',
+    ctxToggleEcho: 'Toggle Echo mode',
+    ctxClosePane: 'Close terminal',
     tabCtxRename: 'Rename Tab',
+    tabCtxReconnect: 'Reconnect',
+    tabCtxReconnectSelected: 'Reconnect Selected',
     tabCtxClose: 'Close Tab',
     tabCtxCloseSelected: 'Close Selected',
     tabCtxCloseOthers: 'Close Others',
@@ -106,6 +112,9 @@
     confirmCancel: 'Cancel',
     confirmClose: 'Close',
     confirmDelete: 'Delete',
+    confirmDiscard: 'Discard',
+    confirmDiscardChanges: 'Discard unsaved changes?',
+    confirmKeepEditing: 'Keep editing',
     confirmDuplicate: 'Duplicate',
     confirmDontShowAgain: 'Don\'t show this again',
     confirmCloseTerminal: 'Close this terminal?\nThe session will be terminated.',
@@ -117,6 +126,11 @@
     confirmCloseGroupWithTerminals: 'Close group "{name}"?\n{count} terminal{plural} will be closed.',
     confirmCloseApp: 'Close EchoTerm?\nAll terminal sessions will be terminated.',
     confirmCloseAllGroupTerminals: 'Close all {count} terminal{plural} in group "{name}"?\nAll sessions will be terminated.',
+    confirmReconnect: 'Reconnect this terminal?\nThe session will be terminated.',
+    confirmReconnectSelected: 'Reconnect {count} selected terminal{plural}?\nAll sessions will be terminated.',
+    confirmReconnectSkipLocal: '{count} local shell{plural} in the selection will not be reconnected.',
+    confirmReconnectEcho: 'Reconnect {count} echo-enabled SSH terminal{plural}?\nAll sessions will be terminated.',
+    reconnectFailedSummary: 'Could not reconnect: {names}',
     confirmDeleteSshConnection: 'Delete SSH connection "{name}"?',
     confirmDeleteSshConnectionFolder: 'Delete connection folder "{name}"?\n{connections} connection(s) inside it and {subfolders} sub-folder(s) will be permanently deleted.',
     confirmDeleteMultiSshConnectionFolder: 'This will also permanently delete {connections} connection(s) and {subfolders} sub-folder(s) inside them.',
@@ -265,6 +279,11 @@
     sshImportJumpVia: '↪ via {host}',
     sshImportJumpNotInConfig: ' (not in config)',
     sshImportNoNewHosts: 'No new hosts found. All are already imported.',
+    sshImportSelectAll: 'Select all',
+    sshImportFilterPlaceholder: 'Filter...',
+    sshImportFilterNoMatch: 'No import rows match the filter.',
+    sshImportConfirmImport: 'Import {count} item(s):\n\n{list}',
+    sshImportConfirmUpdate: 'Update {count} item(s):\n\n{list}',
     sshImportNoExistingToUpdate: 'No existing connections found to update.',
     sshImportNoHosts: 'No hosts found in SSH config.',
     sshImportWinScpTitle: 'Import from WinSCP',
@@ -295,6 +314,8 @@
     sshCtxDuplicate: 'Duplicate',
     sshCtxDuplicateSelected: 'Duplicate Selected ({count})',
     sshCtxNoOtherFolders: 'No other folders',
+    submenuFilterPlaceholder: 'Filter…',
+    submenuFilterNoMatches: 'No matches',
 
     // ── Settings / Options Panel ──────────────────────────────────────────────
     optionsTitleAppearance: 'Appearance',
@@ -312,9 +333,22 @@
     optionsTabCloseConfirm: 'Confirm before closing a tab',
     optionsWindowCloseConfirm: 'Confirm before closing window',
     optionsGroupCloseConfirm: 'Confirm before deleting a group',
+    optionsReconnectConfirm: 'Confirm before reconnecting a terminal',
     optionsSshJumpWarn: 'Warn about unselected jump hosts on SSH import',
     optionsPastePreview: 'Confirm before pasting multi-line content',
     optionsRightClickPaste: 'Right click to copy / paste',
+    optionsTitleShortcuts: 'Keyboard Shortcuts',
+    optionsShortcutColumnKeys: 'Shortcut',
+    optionsShortcutColumnAction: 'Action',
+    optionsShortcutNewTerminal: 'New terminal',
+    optionsShortcutNewGroup: 'New group',
+    optionsShortcutCloseTerminal: 'Close active terminal',
+    optionsShortcutFind: 'Find in active terminal',
+    optionsShortcutSearchAll: 'Search all visible terminals',
+    optionsShortcutSelectAll: 'Select all text in the active terminal',
+    optionsShortcutNextTerminal: 'Next terminal',
+    optionsShortcutPrevTerminal: 'Previous terminal',
+    optionsShortcutToggleSidebar: 'Toggle SSH sidebar',
 
     // ── Danger Zone ──────────────────────────────────────────────────────────
     optionsTitleDanger: 'Danger Zone',
@@ -359,6 +393,8 @@
     // ── Error messages ───────────────────────────────────────────────────────
     errorUnknownShell: 'Unknown shell: {shell}',
     errorConnectionNotFound: 'Connection not found.',
+    errorSessionConfig: 'Could not prepare the SSH session configuration.',
+    errorJumpChainInvalid: 'Jump host chain is invalid: it loops or references a deleted connection.',
     errorConnectionFolderNotFound: 'Connection folder not found.',
     errorFieldBlank: 'This field cannot be blank.',
     errorConfigNotFound: 'Config file not found: {path}',

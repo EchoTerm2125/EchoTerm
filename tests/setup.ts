@@ -30,6 +30,7 @@ class MockTerminal {
   focus() { this.textarea?.focus(); }
   write(_data) { /* noop in tests */ }
   getSelection() { return ''; }
+  selectAll() { /* noop in tests */ }
   dispose() { this._disposed = true; this.textarea?.remove?.(); }
   _fireData(data) { if (this._onData) this._onData(data); }
   _fireResize(cols, rows) { if (this._onResize) this._onResize({ cols, rows }); }
@@ -164,7 +165,8 @@ window.api = {
   sshUserFolderSave: vi.fn((folderData) => Promise.resolve({ success: true, folder: folderData })),
   sshUserFolderDelete: vi.fn(() => Promise.resolve({ success: true })),
   sshUserFolderDuplicate: vi.fn((folderId) => Promise.resolve({ success: true, folder: { id: `${folderId}-copy`, parentId: null } })),
-  sshConnect: vi.fn((connectionId) => Promise.resolve({ id: _nextApiId++, shell: 'ssh', label: connectionId })),
+  sshConnect: vi.fn((connectionId) => Promise.resolve({ id: _nextApiId++, shell: 'ssh', label: connectionId, connectionId })),
+  sshReconnect: vi.fn(() => Promise.resolve({ success: true })),
   sshOpenConnectionFolder: vi.fn(() => Promise.resolve({ name: '', connections: [] })),
   sshImportConfig: vi.fn(() => Promise.resolve({ canceled: true })),
   sshImportWinScp: vi.fn(() => Promise.resolve({ error: 'No WinSCP sites found.', errorCode: 'NO_SITES_FOUND' })),
@@ -203,15 +205,16 @@ const _localStore: Record<string, string> = {};
 const DOM_IDS = [
   'terminal-container', 'tabList', 'btnNewTerminal', 'btnNewTermDropdown',
   'newTermDropdown', 'btnEchoMode', 'btnEchoAll', 'btnEchoToggle',
-  'btnEchoPaste', 'groupList', 'btnNewGroup', 'gitBashStatus',
+  'btnEchoPaste', 'btnEchoReconnect', 'groupList', 'btnNewGroup', 'gitBashStatus',
   'statusTerminalCount', 'statusEcho', 'statusShell',
   'btnSettings', 'optionsPanel', 'optTabCloseConfirm', 'optWindowCloseConfirm',
-  'optGroupCloseConfirm', 'optSshJumpWarn', 'optPastePreview', 'optRightClickPaste',
+  'optGroupCloseConfirm', 'optReconnectConfirm', 'optSshJumpWarn', 'optPastePreview', 'optRightClickPaste',
   'optFolderAutoEcho',
   'tabCtxMoveSep', 'tabCtxMoveItem', 'tabCtxGroupSubmenu',
   'btnResetSettings', 'btnClearSshData', 'btnClearCache', 'btnClearAllData',
-  'contextMenu', 'tabContextMenu', 'groupContextMenu',
+  'contextMenu', 'tabContextMenu', 'groupContextMenu', 'sshContextMenu',
   'ctxEcho', 'ctxEchoSep', 'ctxPasteAll', 'btnCloseSelected',
+  'ctxReconnect', 'ctxReconnectSep', 'tabCtxReconnect',
   'confirmDialog', 'confirmMessage', 'confirmOk', 'confirmCancel',
   'confirmDontShowAgain', 'pastePreviewDialog', 'pasteLineCount',
   'pastePreviewText', 'pastePreviewDontShow', 'pastePreviewCancel',
@@ -241,6 +244,7 @@ function scaffoldDom() {
       el = document.createElement('button');
     } else if (id === 'confirmDontShowAgain' || id === 'optTabCloseConfirm' ||
                id === 'optWindowCloseConfirm' || id === 'optGroupCloseConfirm' ||
+               id === 'optReconnectConfirm' ||
                id === 'optSshJumpWarn' || id === 'optPastePreview' ||
                id === 'optRightClickPaste' || id === 'pastePreviewDontShow' ||
                id === 'optFolderAutoEcho' ||
@@ -253,6 +257,9 @@ function scaffoldDom() {
       el = document.createElement('div');
     }
     el.id = id;
+    if (['contextMenu', 'tabContextMenu', 'groupContextMenu', 'sshContextMenu'].includes(id)) {
+      el.className = 'context-menu';
+    }
     if (id === 'newTermDropdown' || id === 'optionsPanel') {
       el.classList.add('hidden');
     }
@@ -281,7 +288,8 @@ function scaffoldDom() {
     const tabActions = document.createElement('div');
     tabActions.className = 'tab-actions';
     for (const id of ['btnNewTerminal', 'btnNewTermDropdown', 'btnEchoMode',
-                      'btnEchoAll', 'btnEchoToggle', 'btnEchoPaste', 'newTermDropdown']) {
+                      'btnEchoAll', 'btnEchoToggle', 'btnEchoPaste', 'btnEchoReconnect',
+                      'newTermDropdown']) {
       const el = document.getElementById(id);
       if (el) tabActions.appendChild(el);
     }
@@ -324,9 +332,11 @@ export async function resetTestEnv() {
 
 /**
  * Load additional renderer modules. Each IIFE registers on window.App.
+ * 'ui' depends on the shortcut registry, which is loaded first.
  */
 export async function loadModules(...names) {
   for (const name of names) {
+    if (name === 'ui') await import('../renderer/shortcuts.ts');
     await import(`../renderer/${name}.ts`);
   }
 }

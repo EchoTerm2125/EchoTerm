@@ -14,6 +14,7 @@
   const SETTINGS_STORAGE_KEYS = [
     'appTheme', 'uiFontSize', 'termFontSize', 'maxRetainedLines', 'defaultShell',
     'skipTabCloseConfirm', 'skipCloseConfirm', 'skipGroupCloseConfirm',
+    'skipReconnectConfirm',
     'skipSshJumpWarn', 'skipPastePreview', 'skipRightClickPaste',
     'skipAutoEchoFolderOpen',
     'i18nLocale', 'sshSidebarWidth',
@@ -64,6 +65,12 @@
         App.newTermDropdown.classList.add('hidden');
       }
     });
+
+    // A right-click elsewhere dismisses the shell dropdown too, even where its
+    // target stops propagation — capture runs before the pane's own menu opens.
+    document.addEventListener('contextmenu', () => {
+      App.newTermDropdown.classList.add('hidden');
+    }, true);
 
     App.btnEchoMode.addEventListener('click', () => {
       App.Echo.toggleEchoMode();
@@ -185,6 +192,10 @@
     // Group delete confirm
     App.optGroupCloseConfirm.checked =
       localStorage.getItem('skipGroupCloseConfirm') !== 'true';
+
+    // Reconnect confirm
+    App.optReconnectConfirm.checked =
+      localStorage.getItem('skipReconnectConfirm') !== 'true';
 
     // SSH import jump host warning
     App.optSshJumpWarn.checked =
@@ -357,6 +368,15 @@
         localStorage.removeItem('skipGroupCloseConfirm');
       } else {
         localStorage.setItem('skipGroupCloseConfirm', 'true');
+      }
+    });
+
+    // Reconnect confirm toggle
+    App.optReconnectConfirm.addEventListener('change', () => {
+      if (App.optReconnectConfirm.checked) {
+        localStorage.removeItem('skipReconnectConfirm');
+      } else {
+        localStorage.setItem('skipReconnectConfirm', 'true');
       }
     });
 
@@ -594,18 +614,8 @@
   }
 
   function bindKeyboardShortcuts() {
-    // Capture phase so shortcuts fire before xterm.js consumes Ctrl+W / Ctrl+Tab
-    // (which map to control characters) from the focused terminal textarea.
-    document.addEventListener('keydown', (e) => {
-      const ctrl = e.ctrlKey || e.metaKey;
-      if (ctrl && !e.shiftKey && e.code === 'KeyN') { e.preventDefault(); e.stopPropagation(); App.Terminal.spawnTerminal(state.selectedShell); return; }
-      if (ctrl && e.shiftKey && e.code === 'KeyN') { e.preventDefault(); e.stopPropagation(); const count = state.groups.size + 1; const group = App.Groups.createGroup(App.__('groupDefaultName', { n: count })); App.Groups.switchGroup(group.id); App.Terminal.spawnTerminal(state.selectedShell); return; }
-      if (ctrl && e.shiftKey && e.code === 'KeyT') { e.preventDefault(); e.stopPropagation(); App.Echo.toggleEchoMode(); return; }
-      if (ctrl && !e.shiftKey && e.code === 'KeyW') { e.preventDefault(); e.stopPropagation(); if (state.activeTerminalId) App.Menus.showConfirm(App.__('confirmCloseTerminal'), () => App.Terminal.closeTerminal(state.activeTerminalId), 'skipTabCloseConfirm'); return; }
-      if (ctrl && !e.shiftKey && e.code === 'KeyF') { e.preventDefault(); e.stopPropagation(); App.Search.handleShortcut(false); return; }
-      if (ctrl && e.shiftKey && e.code === 'KeyF') { e.preventDefault(); e.stopPropagation(); App.Search.handleShortcut(true); return; }
-      if (ctrl && e.key === 'Tab') { e.preventDefault(); e.stopPropagation(); App.Terminal.cycleTerminal(e.shiftKey ? -1 : 1); return; }
-    }, true);
+    // Bindings and their display share one definition list (renderer/shortcuts.ts).
+    App.Shortcuts.bind();
   }
 
   function bindGlobalEvents() {

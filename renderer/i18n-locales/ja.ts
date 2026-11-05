@@ -19,14 +19,12 @@
     shellSsh: 'SSH',
 
     // ── Toolbar ──────────────────────────────────────────────────────────────
-    toolbarSidebarToggle: 'サイドバー (Ctrl+Shift+S)',
     toolbarSettings: '設定',
     winMinimizeTitle: '最小化',
     winMaximizeTitle: '最大化',
     winRestoreTitle: '元のサイズに戻す',
 
     // ── New Terminal Dropdown ────────────────────────────────────────────────
-    newTerminalTitle: '新しいターミナル (Ctrl+N)',
     newTermDropdownTitle: 'ターミナルの種類を選択',
     powershellLabel: 'PowerShell',
     cmdLabel: 'CMD',
@@ -43,10 +41,13 @@
     echoEnableAllTitle: 'すべてのターミナルでエコーを有効化',
     echoToggleAllTitle: '各ターミナルのエコー状態を切り替え',
     echoPasteAllTitle: 'エコーが有効なすべてのターミナルに貼り付け',
+    echoReconnect: 'エコー有効を再接続',
+    echoReconnectTitle: 'エコーが有効なすべての SSH ターミナルを再接続します',
+    echoReconnectNone: 'エコーが有効なターミナルがありません。',
+    echoReconnectNoSsh: 'エコーが有効な SSH ターミナルがないため、再接続できません。',
 
     // ── Group bar ────────────────────────────────────────────────────────────
     groupDefaultName: 'グループ {n}',
-    newGroupTitle: '新しいグループ (Ctrl+Shift+N)',
     closeGroupTitle: 'グループを閉じる',
 
     // ── Tab ──────────────────────────────────────────────────────────────────
@@ -54,6 +55,7 @@
 
     // ── Pane titlebar ────────────────────────────────────────────────────────
     panePasteTitle: '貼り付け',
+    paneReconnectTitle: '再接続',
     paneEchoTitle: 'このターミナルに入力をエコー',
     paneEchoLabel: 'エコー',
     paneCloseTitle: '閉じる',
@@ -85,11 +87,15 @@
 
     // ── Context menus ────────────────────────────────────────────────────────
     ctxCopy: 'コピー',
+    ctxSelectAll: 'すべて選択',
     ctxPaste: '貼り付け',
     ctxPasteAll: 'すべて貼り付け',
-    ctxToggleEcho: 'エコー切り替え',
-    ctxClosePane: 'ペインを閉じる',
+    ctxReconnect: '再接続',
+    ctxToggleEcho: 'Echo モードを切り替え',
+    ctxClosePane: 'ターミナルを閉じる',
     tabCtxRename: 'タブ名を変更',
+    tabCtxReconnect: '再接続',
+    tabCtxReconnectSelected: '選択したタブを再接続',
     tabCtxClose: 'タブを閉じる',
     tabCtxCloseSelected: '選択したタブを閉じる',
     tabCtxCloseOthers: '他のタブを閉じる',
@@ -105,6 +111,9 @@
     confirmCancel: 'キャンセル',
     confirmClose: '閉じる',
     confirmDelete: '削除',
+    confirmDiscard: '破棄',
+    confirmDiscardChanges: '保存されていない変更を破棄しますか？',
+    confirmKeepEditing: '編集を続ける',
     confirmDuplicate: '複製',
     confirmDontShowAgain: '今後表示しない',
     confirmCloseTerminal: 'このターミナルを閉じますか？\nセッションが終了します。',
@@ -116,6 +125,11 @@
     confirmCloseGroupWithTerminals: 'グループ「{name}」を閉じますか？\n{count} 台のターミナルが閉じられます。',
     confirmCloseApp: 'EchoTerm を閉じますか？\nすべてのターミナルセッションが終了します。',
     confirmCloseAllGroupTerminals: 'グループ「{name}」の {count} 台すべてのターミナルを閉じますか？\nすべてのセッションが終了します。',
+    confirmReconnect: 'このターミナルを再接続しますか？\n現在のセッションは終了します。',
+    confirmReconnectSelected: '選択した {count} 台のターミナルを再接続しますか？\nすべてのセッションが終了します。',
+    confirmReconnectSkipLocal: '選択範囲内の {count} 個のローカルシェルは再接続されません。',
+    confirmReconnectEcho: 'エコーが有効な {count} 台の SSH ターミナルを再接続しますか？\nすべてのセッションが終了します。',
+    reconnectFailedSummary: '再接続できませんでした: {names}',
     confirmDeleteSshConnection: 'SSH 接続「{name}」を削除しますか？',
     confirmDeleteSshConnectionFolder: '接続フォルダ「{name}」を削除しますか？\n{connections} 件の接続と {subfolders} 個のサブフォルダが完全に削除されます。',
     confirmDeleteMultiSshConnectionFolder: 'これにより、内部の {connections} 件の接続と {subfolders} 個のサブフォルダも完全に削除されます。',
@@ -264,6 +278,11 @@
     sshImportJumpVia: '↪ {host} 経由',
     sshImportJumpNotInConfig: ' （設定にありません）',
     sshImportNoNewHosts: '新しいホストはありません。すべてインポート済みです。',
+    sshImportSelectAll: 'すべて選択',
+    sshImportFilterPlaceholder: '絞り込み...',
+    sshImportFilterNoMatch: 'フィルターに一致するインポート行はありません。',
+    sshImportConfirmImport: 'インポート {count} 件:\n\n{list}',
+    sshImportConfirmUpdate: '更新 {count} 件:\n\n{list}',
     sshImportNoExistingToUpdate: '更新できる既存の接続が見つかりません。',
     sshImportNoHosts: 'SSH 設定にホストが見つかりません。',
     sshImportWinScpTitle: 'WinSCP からインポート',
@@ -294,6 +313,8 @@
     sshCtxDuplicate: '複製',
     sshCtxDuplicateSelected: '選択項目を複製 ({count})',
     sshCtxNoOtherFolders: '他のフォルダはありません',
+    submenuFilterPlaceholder: '絞り込み…',
+    submenuFilterNoMatches: '一致する項目がありません',
 
     // ── Settings / Options Panel ──────────────────────────────────────────────
     optionsTitleAppearance: '外観',
@@ -311,9 +332,22 @@
     optionsTabCloseConfirm: 'タブを閉じる前に確認',
     optionsWindowCloseConfirm: 'ウィンドウを閉じる前に確認',
     optionsGroupCloseConfirm: 'グループを削除する前に確認',
+    optionsReconnectConfirm: 'ターミナルを再接続する前に確認',
     optionsSshJumpWarn: 'SSH インポート時に未選択のジャンプホストを警告',
     optionsPastePreview: '複数行の内容を貼り付ける前に確認',
     optionsRightClickPaste: '右クリックでコピー / 貼り付け',
+    optionsTitleShortcuts: 'キーボードショートカット',
+    optionsShortcutColumnKeys: 'ショートカット',
+    optionsShortcutColumnAction: 'アクション',
+    optionsShortcutNewTerminal: '新しいターミナル',
+    optionsShortcutNewGroup: '新しいグループ',
+    optionsShortcutCloseTerminal: 'アクティブなターミナルを閉じる',
+    optionsShortcutFind: 'アクティブなターミナルで検索',
+    optionsShortcutSearchAll: '表示中のすべてのターミナルを検索',
+    optionsShortcutSelectAll: 'アクティブなターミナルのテキストをすべて選択',
+    optionsShortcutNextTerminal: '次のターミナル',
+    optionsShortcutPrevTerminal: '前のターミナル',
+    optionsShortcutToggleSidebar: 'SSH サイドバーを切り替え',
 
     // ── Danger Zone ──────────────────────────────────────────────────────────
     optionsTitleDanger: '危険ゾーン',
@@ -358,6 +392,8 @@
     // ── Error messages ───────────────────────────────────────────────────────
     errorUnknownShell: '不明なシェル: {shell}',
     errorConnectionNotFound: '接続が見つかりません。',
+    errorSessionConfig: 'SSH セッション設定の準備に失敗しました。',
+    errorJumpChainInvalid: 'ジャンプホストのチェーンが無効です（ループまたは削除された接続への参照があります）。',
     errorConnectionFolderNotFound: '接続フォルダが見つかりません。',
     errorFieldBlank: 'この項目は空白にできません。',
     errorConfigNotFound: '設定ファイルが見つかりません: {path}',

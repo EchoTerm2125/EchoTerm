@@ -19,14 +19,12 @@
     shellSsh: 'SSH',
 
     // ── Toolbar ──────────────────────────────────────────────────────────────
-    toolbarSidebarToggle: 'Боковая панель (Ctrl+Shift+S)',
     toolbarSettings: 'Настройки',
     winMinimizeTitle: 'Свернуть',
     winMaximizeTitle: 'Развернуть',
     winRestoreTitle: 'Восстановить',
 
     // ── New Terminal Dropdown ────────────────────────────────────────────────
-    newTerminalTitle: 'Новый терминал (Ctrl+N)',
     newTermDropdownTitle: 'Выберите тип терминала',
     powershellLabel: 'PowerShell',
     cmdLabel: 'CMD',
@@ -43,10 +41,13 @@
     echoEnableAllTitle: 'Включить эхо на всех терминалах',
     echoToggleAllTitle: 'Переключить состояние эхо на каждом терминале',
     echoPasteAllTitle: 'Вставить во все терминалы с включённым эхо',
+    echoReconnect: 'Переподключить с эхо',
+    echoReconnectTitle: 'Переподключить все SSH-терминалы с включённым эхо',
+    echoReconnectNone: 'Нет терминалов с включённым эхо.',
+    echoReconnectNoSsh: 'Нет SSH-терминалов с включённым эхо для переподключения.',
 
     // ── Group bar ────────────────────────────────────────────────────────────
     groupDefaultName: 'Группа {n}',
-    newGroupTitle: 'Новая группа (Ctrl+Shift+N)',
     closeGroupTitle: 'Закрыть группу',
 
     // ── Tab ──────────────────────────────────────────────────────────────────
@@ -54,6 +55,7 @@
 
     // ── Pane titlebar ────────────────────────────────────────────────────────
     panePasteTitle: 'Вставить',
+    paneReconnectTitle: 'Переподключить',
     paneEchoTitle: 'Эхо ввода в этот терминал',
     paneEchoLabel: 'Эхо',
     paneCloseTitle: 'Закрыть',
@@ -85,11 +87,15 @@
 
     // ── Context menus ────────────────────────────────────────────────────────
     ctxCopy: 'Копировать',
+    ctxSelectAll: 'Выделить всё',
     ctxPaste: 'Вставить',
     ctxPasteAll: 'Вставить во все',
-    ctxToggleEcho: 'Переключить эхо',
-    ctxClosePane: 'Закрыть панель',
+    ctxReconnect: 'Переподключить',
+    ctxToggleEcho: 'Переключить режим Echo',
+    ctxClosePane: 'Закрыть терминал',
     tabCtxRename: 'Переименовать вкладку',
+    tabCtxReconnect: 'Переподключить',
+    tabCtxReconnectSelected: 'Переподключить выбранные',
     tabCtxClose: 'Закрыть вкладку',
     tabCtxCloseSelected: 'Закрыть выбранные',
     tabCtxCloseOthers: 'Закрыть остальные',
@@ -105,6 +111,9 @@
     confirmCancel: 'Отмена',
     confirmClose: 'Закрыть',
     confirmDelete: 'Удалить',
+    confirmDiscard: 'Отменить',
+    confirmDiscardChanges: 'Отменить несохранённые изменения?',
+    confirmKeepEditing: 'Продолжить редактирование',
     confirmDuplicate: 'Дублировать',
     confirmDontShowAgain: 'Больше не показывать',
     confirmCloseTerminal: 'Закрыть этот терминал?\nСеанс будет завершён.',
@@ -116,6 +125,11 @@
     confirmCloseGroupWithTerminals: 'Закрыть группу «{name}»?\nБудет закрыто терминалов: {count}.',
     confirmCloseApp: 'Закрыть EchoTerm?\nВсе терминальные сеансы будут завершены.',
     confirmCloseAllGroupTerminals: 'Закрыть все терминалы ({count}) в группе «{name}»?\nВсе сеансы будут завершены.',
+    confirmReconnect: 'Переподключить этот терминал?\nСеанс будет завершён.',
+    confirmReconnectSelected: 'Переподключить выбранные терминалы ({count})?\nВсе сеансы будут завершены.',
+    confirmReconnectSkipLocal: 'Выбранные локальные оболочки ({count}) переподключены не будут.',
+    confirmReconnectEcho: 'Переподключить SSH-терминалы с включённым эхо ({count})?\nВсе сеансы будут завершены.',
+    reconnectFailedSummary: 'Не удалось переподключиться: {names}',
     confirmDeleteSshConnection: 'Удалить SSH-подключение «{name}»?',
     confirmDeleteSshConnectionFolder: 'Удалить папку подключений «{name}»?\n{connections} подключение(я) и {subfolders} вложенная(ые) папка(и) будут удалены навсегда.',
     confirmDeleteMultiSshConnectionFolder: 'При этом также будут навсегда удалены {connections} подключение(я) и {subfolders} вложенная(ые) папка(и) внутри.',
@@ -264,6 +278,11 @@
     sshImportJumpVia: '↪ через {host}',
     sshImportJumpNotInConfig: ' (нет в конфигурации)',
     sshImportNoNewHosts: 'Новые хосты не найдены. Все уже импортированы.',
+    sshImportSelectAll: 'Выбрать все',
+    sshImportFilterPlaceholder: 'Фильтр...',
+    sshImportFilterNoMatch: 'Ни одна строка импорта не соответствует фильтру.',
+    sshImportConfirmImport: 'Импортировать {count} элемент(ов):\n\n{list}',
+    sshImportConfirmUpdate: 'Обновить {count} элемент(ов):\n\n{list}',
     sshImportNoExistingToUpdate: 'Существующие подключения для обновления не найдены.',
     sshImportNoHosts: 'В конфигурации SSH не найдено хостов.',
     sshImportWinScpTitle: 'Импорт из WinSCP',
@@ -294,6 +313,8 @@
     sshCtxDuplicate: 'Дублировать',
     sshCtxDuplicateSelected: 'Дублировать выбранные ({count})',
     sshCtxNoOtherFolders: 'Других папок нет',
+    submenuFilterPlaceholder: 'Фильтр…',
+    submenuFilterNoMatches: 'Нет совпадений',
 
     // ── Settings / Options Panel ──────────────────────────────────────────────
     optionsTitleAppearance: 'Внешний вид',
@@ -311,9 +332,22 @@
     optionsTabCloseConfirm: 'Подтверждать закрытие вкладки',
     optionsWindowCloseConfirm: 'Подтверждать закрытие окна',
     optionsGroupCloseConfirm: 'Подтверждать удаление группы',
+    optionsReconnectConfirm: 'Подтверждать переподключение терминала',
     optionsSshJumpWarn: 'Предупреждать о невыбранных хостах перехода при импорте SSH',
     optionsPastePreview: 'Подтверждать вставку многострочного содержимого',
     optionsRightClickPaste: 'Правый клик для копирования / вставки',
+    optionsTitleShortcuts: 'Сочетания клавиш',
+    optionsShortcutColumnKeys: 'Сочетание',
+    optionsShortcutColumnAction: 'Действие',
+    optionsShortcutNewTerminal: 'Новый терминал',
+    optionsShortcutNewGroup: 'Новая группа',
+    optionsShortcutCloseTerminal: 'Закрыть активный терминал',
+    optionsShortcutFind: 'Найти в активном терминале',
+    optionsShortcutSearchAll: 'Поиск во всех видимых терминалах',
+    optionsShortcutSelectAll: 'Выделить весь текст активного терминала',
+    optionsShortcutNextTerminal: 'Следующий терминал',
+    optionsShortcutPrevTerminal: 'Предыдущий терминал',
+    optionsShortcutToggleSidebar: 'Переключить боковую панель SSH',
 
     // ── Danger Zone ──────────────────────────────────────────────────────────
     optionsTitleDanger: 'Опасная зона',
@@ -358,6 +392,8 @@
     // ── Error messages ───────────────────────────────────────────────────────
     errorUnknownShell: 'Неизвестная оболочка: {shell}',
     errorConnectionNotFound: 'Подключение не найдено.',
+    errorSessionConfig: 'Не удалось подготовить конфигурацию сеанса SSH.',
+    errorJumpChainInvalid: 'Цепочка прыжковых узлов недействительна: обнаружена петля или ссылка на удалённое подключение.',
     errorConnectionFolderNotFound: 'Папка подключений не найдена.',
     errorFieldBlank: 'Это поле не может быть пустым.',
     errorConfigNotFound: 'Файл конфигурации не найден: {path}',

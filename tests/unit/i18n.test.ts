@@ -54,7 +54,10 @@ describe('i18n locale parity', () => {
     await importAllLocales();
 
     const locales = getApp().i18n.locales;
-    const confirmKeys = ['confirmCancel', 'confirmClose', 'confirmDelete'];
+    const confirmKeys = [
+      'confirmCancel', 'confirmClose', 'confirmDelete',
+      'confirmDiscard', 'confirmDiscardChanges', 'confirmKeepEditing',
+    ];
     for (const code of Object.keys(locales)) {
       for (const key of confirmKeys) {
         expect(locales[code][key], `${code}.${key}`).toBeTruthy();

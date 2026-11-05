@@ -1,4 +1,5 @@
 // Unit tests for echo.js — grid layout, echo selection logic
+import { vi } from 'vitest';
 import { resetTestEnv, loadModules, getApp, injectTerminal, injectGroup } from '../setup.js';
 
 describe('Echo (echo.js)', () => {
@@ -122,6 +123,57 @@ describe('Echo (echo.js)', () => {
 
       App.Echo.updateEchoAllButton();
       expect(App.btnEchoAll.textContent).toBe(App.__('echoEnableAll'));
+    });
+  });
+
+  describe('reconnectEchoEnabled', () => {
+    function setupSsh(id) {
+      injectTerminal(id, { shell: 'ssh', connectionId: `conn-${id}` });
+      App.state.terminalGroups.set(id, 'g1');
+      App.state.groups.get('g1').terminalIds.add(id);
+    }
+
+    function setupLocal(id) {
+      injectTerminal(id);
+      App.state.terminalGroups.set(id, 'g1');
+      App.state.groups.get('g1').terminalIds.add(id);
+    }
+
+    beforeEach(() => {
+      App.Menus = { showConfirm: vi.fn() };
+      App.Terminal.reconnectTabs = vi.fn();
+    });
+
+    it('with nothing echo-enabled shows both empty messages and reconnects nothing', () => {
+      App.Echo.reconnectEchoEnabled();
+
+      expect(App.Menus.showConfirm).toHaveBeenCalledTimes(1);
+      const message = App.Menus.showConfirm.mock.calls[0][0];
+      expect(message).toBe(App.__('echoReconnectNone') + '\n' + App.__('echoReconnectNoSsh'));
+      expect(App.Terminal.reconnectTabs).not.toHaveBeenCalled();
+    });
+
+    it('with only local panes echo-enabled shows just the no-SSH message', () => {
+      setupLocal(1);
+      App.state.echoSelection.add(1);
+
+      App.Echo.reconnectEchoEnabled();
+
+      expect(App.Menus.showConfirm).toHaveBeenCalledTimes(1);
+      expect(App.Menus.showConfirm.mock.calls[0][0]).toBe(App.__('echoReconnectNoSsh'));
+      expect(App.Terminal.reconnectTabs).not.toHaveBeenCalled();
+    });
+
+    it('hands the whole echo selection to the batch reconnect with echo confirm wording', () => {
+      setupSsh(1);
+      setupLocal(2);
+      App.state.echoSelection.add(1);
+      App.state.echoSelection.add(2);
+
+      App.Echo.reconnectEchoEnabled();
+
+      expect(App.Menus.showConfirm).not.toHaveBeenCalled();
+      expect(App.Terminal.reconnectTabs).toHaveBeenCalledWith([1, 2], 'confirmReconnectEcho');
     });
   });
 

@@ -122,6 +122,123 @@ describe('Menus (menus.js)', () => {
     });
   });
 
+  describe('trimSelection', () => {
+    it('drops trailing whitespace-only rows but keeps the content', () => {
+      const App = getApp();
+      expect(App.Terminal.trimSelection('prompt\n$ \n\n\n   \n')).toBe('prompt\n$');
+    });
+
+    it('leaves a selection with no trailing whitespace untouched', () => {
+      const App = getApp();
+      expect(App.Terminal.trimSelection('a\nb')).toBe('a\nb');
+    });
+  });
+
+  describe('context submenu filter', () => {
+    function buildSub() {
+      const App = getApp();
+      const submenu = document.createElement('div');
+      submenu.className = 'context-submenu';
+      document.body.appendChild(submenu);
+      const clicked: string[] = [];
+      App.Menus.buildSubmenu(submenu, [
+        { label: 'Alpha', onClick: () => clicked.push('Alpha') },
+        { label: 'beta', onClick: () => clicked.push('beta') },
+        { label: 'Alpine', onClick: () => clicked.push('Alpine') },
+      ]);
+      return { App, submenu, clicked };
+    }
+
+    function options(submenu: HTMLElement) {
+      return [...submenu.querySelectorAll('.context-submenu-options button')];
+    }
+
+    afterEach(() => {
+      document.body.innerHTML = '';
+    });
+
+    it('builds a Filter box, an option list and hidden empty text', () => {
+      const { submenu } = buildSub();
+      expect(submenu.querySelector('.context-submenu-filter')).not.toBeNull();
+      expect(options(submenu).length).toBe(3);
+      const empty = submenu.querySelector('.context-submenu-empty') as HTMLElement;
+      expect(empty.classList.contains('hidden')).toBe(true);
+    });
+
+    it('filters options case-insensitively on substring', () => {
+      const { submenu } = buildSub();
+      const filter = submenu.querySelector('.context-submenu-filter') as HTMLInputElement;
+
+      filter.value = 'AL';
+      filter.dispatchEvent(new Event('input'));
+
+      const visible = options(submenu).filter((b) => !b.classList.contains('hidden'));
+      expect(visible.map((b) => b.textContent)).toEqual(['Alpha', 'Alpine']);
+      expect((submenu.querySelector('.context-submenu-empty') as HTMLElement).classList.contains('hidden')).toBe(true);
+    });
+
+    it('shows the empty text when nothing matches', () => {
+      const { submenu } = buildSub();
+      const filter = submenu.querySelector('.context-submenu-filter') as HTMLInputElement;
+
+      filter.value = 'zzz';
+      filter.dispatchEvent(new Event('input'));
+
+      expect(options(submenu).every((b) => b.classList.contains('hidden'))).toBe(true);
+      expect((submenu.querySelector('.context-submenu-empty') as HTMLElement).classList.contains('hidden')).toBe(false);
+    });
+
+    it('Enter activates the highlighted option, else the first visible one', () => {
+      const { submenu, clicked } = buildSub();
+      const filter = submenu.querySelector('.context-submenu-filter') as HTMLInputElement;
+
+      filter.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowDown', bubbles: true }));
+      filter.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowDown', bubbles: true }));
+      filter.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
+      expect(clicked).toEqual(['beta']);
+
+      // No highlight (e.g. after re-filtering) → Enter takes the first visible.
+      clicked.length = 0;
+      filter.dispatchEvent(new Event('input'));
+      filter.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
+      expect(clicked).toEqual(['Alpha']);
+    });
+
+    it('Escape clears the filter first, then closes the menu', () => {
+      const { submenu } = buildSub();
+      const filter = submenu.querySelector('.context-submenu-filter') as HTMLInputElement;
+
+      filter.value = 'zzz';
+      filter.dispatchEvent(new Event('input'));
+      filter.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
+      expect(filter.value).toBe('');
+      expect(options(submenu).every((b) => !b.classList.contains('hidden'))).toBe(true);
+      expect(submenu.classList.contains('hidden')).toBe(false);
+
+      filter.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
+      expect(submenu.classList.contains('hidden')).toBe(true);
+    });
+
+    it('closeSubmenu clears stale filter text on close', () => {
+      const { App, submenu } = buildSub();
+      const filter = submenu.querySelector('.context-submenu-filter') as HTMLInputElement;
+
+      filter.value = 'al';
+      filter.dispatchEvent(new Event('input'));
+      App.Menus.closeSubmenu(submenu);
+
+      expect(submenu.classList.contains('hidden')).toBe(true);
+      expect(filter.value).toBe('');
+      expect(options(submenu).every((b) => !b.classList.contains('hidden'))).toBe(true);
+    });
+
+    it('openSubmenu focuses the Filter box', () => {
+      const { App, submenu } = buildSub();
+      App.Menus.openSubmenu(submenu);
+      expect(document.activeElement).toBe(submenu.querySelector('.context-submenu-filter'));
+    });
+  });
+
   describe('positionSubmenu', () => {
     function makeSubmenu() {
       const trigger = document.createElement('div');
@@ -193,6 +310,77 @@ describe('Menus (menus.js)', () => {
 
       expect(submenu.style.left).toBe('');
       expect(submenu.style.top).toBe('');
+    });
+  });
+
+  describe('submenu hover pinning', () => {
+    const HOVER_DELAY = 200; // the 150ms hide timer plus slack
+
+    function bind() {
+      const App = getApp();
+      const trigger = document.createElement('div');
+      trigger.className = 'context-submenu-trigger';
+      const submenu = document.createElement('div');
+      submenu.className = 'context-submenu hidden';
+      trigger.appendChild(submenu);
+      document.body.appendChild(trigger);
+      App.Menus.buildSubmenu(submenu, [
+        { label: 'Alpha', onClick: () => {} },
+        { label: 'beta', onClick: () => {} },
+      ]);
+      App.Menus.bindSubmenuHover(trigger, submenu);
+      return { trigger, submenu };
+    }
+
+    const filterOf = (submenu: HTMLElement) =>
+      submenu.querySelector('.context-submenu-filter') as HTMLInputElement;
+
+    it('hover-open leaves the pane focused and still closes when the mouse leaves', async () => {
+      const { trigger, submenu } = bind();
+      const before = document.activeElement;
+
+      trigger.dispatchEvent(new MouseEvent('mouseenter'));
+      expect(submenu.classList.contains('hidden')).toBe(false);
+      // A hover-open must not steal keyboard focus from the pane's terminal.
+      expect(document.activeElement).toBe(before);
+      expect(document.activeElement).not.toBe(filterOf(submenu));
+
+      trigger.dispatchEvent(new MouseEvent('mouseleave'));
+      await new Promise((r) => setTimeout(r, HOVER_DELAY));
+
+      // …but hover-close must still work: no other menu item is hovered.
+      expect(submenu.classList.contains('hidden')).toBe(true);
+    });
+
+    it('typing into the Filter box pins the flyout open against hover-close', async () => {
+      const { trigger, submenu } = bind();
+
+      trigger.dispatchEvent(new MouseEvent('mouseenter'));
+      filterOf(submenu).value = 'al';
+      filterOf(submenu).dispatchEvent(new Event('input'));
+
+      trigger.dispatchEvent(new MouseEvent('mouseleave'));
+      await new Promise((r) => setTimeout(r, HOVER_DELAY));
+
+      expect(submenu.classList.contains('hidden')).toBe(false);
+    });
+
+    it('a later hover-open is hover-dismissable again after a typing pin', async () => {
+      const App = getApp();
+      const { trigger, submenu } = bind();
+
+      // Pin via typing, then close through the real path (which clears the pin).
+      trigger.dispatchEvent(new MouseEvent('mouseenter'));
+      filterOf(submenu).dispatchEvent(new Event('input'));
+      App.Menus.closeSubmenu(submenu);
+      expect(submenu.classList.contains('hidden')).toBe(true);
+
+      // Re-open by hovering only: no typing, so it must close on hover-out.
+      trigger.dispatchEvent(new MouseEvent('mouseenter'));
+      trigger.dispatchEvent(new MouseEvent('mouseleave'));
+      await new Promise((r) => setTimeout(r, HOVER_DELAY));
+
+      expect(submenu.classList.contains('hidden')).toBe(true);
     });
   });
 });

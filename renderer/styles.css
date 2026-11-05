@@ -327,6 +327,8 @@ html, body {
   flex-shrink: 0;
   gap: 0;
   padding: 0 calc(4px * var(--ui-scale));
+  /* Anchors the overlay strip slider, which must not scroll with the list. */
+  position: relative;
 }
 
 .group-list {
@@ -335,18 +337,15 @@ html, body {
   height: 100%;
   overflow-x: auto;
   overflow-y: hidden;
-  scrollbar-width: thin;
-  flex: 1;
+  /* Replaced by .strip-slider: a native bar would reserve layout height. */
+  scrollbar-width: none;
+  flex: 0 1 auto;
   min-width: 0;
   gap: calc(2px * var(--ui-scale));
 }
 
 .group-list::-webkit-scrollbar {
-  height: 2px;
-}
-.group-list::-webkit-scrollbar-thumb {
-  background: var(--border);
-  border-radius: 2px;
+  display: none;
 }
 
 .group-item {
@@ -456,7 +455,45 @@ html, body {
 
 #btnNewGroup {
   flex-shrink: 0;
-  margin-left: 2px;
+  margin-left: calc(4px * var(--ui-scale));
+}
+
+/* ═══ Strip Slider (Group bar & Tab bar) ═══ */
+/* Painted over the bottom edge of either strip rather than in a reserved lane,
+   mirroring the terminal's overlay slider (6px, terminal foreground at 20%
+   opacity). It appears on hover only, never widens on hover, and only the
+   thumb accepts pointer events, so clicks elsewhere reach the entry beneath. */
+.strip-slider {
+  position: absolute;
+  bottom: 0;
+  height: 6px;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity var(--transition);
+  z-index: 6;
+}
+
+.strip-slider.visible {
+  opacity: 1;
+}
+
+.strip-thumb {
+  position: absolute;
+  top: 0;
+  height: 6px;
+  background: color-mix(in srgb, var(--text-primary) 20%, transparent);
+}
+
+.strip-slider.visible .strip-thumb {
+  pointer-events: auto;
+}
+
+.strip-thumb:hover {
+  background: color-mix(in srgb, var(--text-primary) 40%, transparent);
+}
+
+.strip-thumb:active {
+  background: color-mix(in srgb, var(--text-primary) 60%, transparent);
 }
 
 /* ═══ Tab Bar ═══ */
@@ -469,6 +506,8 @@ html, body {
   overflow: visible;
   flex-shrink: 0;
   gap: 0;
+  /* Anchors the overlay strip slider, which must not scroll with the list. */
+  position: relative;
 }
 
 .tab-list {
@@ -477,7 +516,8 @@ html, body {
   height: 100%;
   overflow-x: auto;
   overflow-y: hidden;
-  scrollbar-width: thin;
+  /* Replaced by .strip-slider: a native bar would reserve layout height. */
+  scrollbar-width: none;
   padding: 0;
   flex: 1;
   min-width: 0;
@@ -537,11 +577,7 @@ html, body {
 }
 
 .tab-list::-webkit-scrollbar {
-  height: 3px;
-}
-.tab-list::-webkit-scrollbar-thumb {
-  background: var(--border);
-  border-radius: 2px;
+  display: none;
 }
 
 .tab-item {
@@ -859,7 +895,8 @@ html, body {
   color: white;
 }
 
-.pane .pane-titlebar .pane-paste {
+.pane .pane-titlebar .pane-paste,
+.pane .pane-titlebar .pane-reconnect {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -874,9 +911,15 @@ html, body {
   transition: all var(--transition);
 }
 
-.pane .pane-titlebar .pane-paste:hover {
+.pane .pane-titlebar .pane-paste:hover,
+.pane .pane-titlebar .pane-reconnect:hover:not(:disabled) {
   background: rgba(137, 180, 250, 0.2);
   color: var(--accent);
+}
+
+.pane .pane-titlebar .pane-reconnect:disabled {
+  cursor: default;
+  opacity: 0.4;
 }
 
 /* Terminal xterm container */
@@ -1015,6 +1058,26 @@ html, body {
   transform: translateX(calc(2px * var(--ui-scale)));
 }
 
+/* An item with a Shortcut hint lays its label left and its keys right. */
+.context-menu button:has(.context-shortcut) {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: calc(20px * var(--ui-scale));
+}
+
+.context-shortcut {
+  flex: none;
+  color: var(--text-muted);
+  font-size: calc(var(--app-font-size) * 0.769);
+  letter-spacing: 0.02em;
+}
+
+/* On a white surface the hint recedes further than --text-muted allows. */
+[data-theme="light"] .context-shortcut {
+  color: #9ca0b0;
+}
+
 .context-separator {
   height: 1px;
   background: var(--border);
@@ -1032,11 +1095,11 @@ html, body {
   align-items: center;
   justify-content: space-between;
   padding: calc(6px * var(--ui-scale)) calc(12px * var(--ui-scale));
-  border-radius: 4px;
+  border-radius: var(--radius-sm);
   font-size: calc(var(--app-font-size) * 0.923);
   color: var(--text-primary);
   cursor: pointer;
-  transition: background var(--transition);
+  transition: background var(--transition), color var(--transition);
   user-select: none;
 }
 
@@ -1044,10 +1107,23 @@ html, body {
   background: var(--bg-hover);
 }
 
+/* Keep the trigger lit with an accent wash while its flyout is open */
+.context-submenu-trigger:has(.context-submenu:not(.hidden)) {
+  background: var(--accent-wash);
+  color: var(--accent);
+}
+
 .submenu-arrow {
   font-size: calc(var(--app-font-size) * 0.692);
   color: var(--text-muted);
   margin-left: calc(16px * var(--ui-scale));
+  transition: color var(--transition), transform var(--transition);
+}
+
+.context-submenu-trigger:hover .submenu-arrow,
+.context-submenu-trigger:has(.context-submenu:not(.hidden)) .submenu-arrow {
+  color: var(--accent);
+  transform: translateX(calc(2px * var(--ui-scale)));
 }
 
 .context-submenu {
@@ -1057,16 +1133,23 @@ html, body {
   margin-left: 2px;
   background: var(--bg-surface);
   border: 1px solid var(--border);
-  border-radius: 10px;
-  padding: calc(4px * var(--ui-scale));
+  border-radius: var(--radius-lg);
+  padding: calc(5px * var(--ui-scale));
   z-index: 310;
-  min-width: calc(150px * var(--ui-scale));
+  min-width: calc(160px * var(--ui-scale));
   width: max-content;
   box-shadow: var(--shadow-lg), var(--top-highlight);
   display: flex;
   flex-direction: column;
-  gap: calc(2px * var(--ui-scale));
-  animation: menuPop 0.12s ease;
+  gap: calc(3px * var(--ui-scale));
+  transform-origin: top left;
+  animation: submenuPop 0.14s cubic-bezier(0.2, 0.9, 0.3, 1.2);
+}
+
+/* Flyout slides in from the parent trigger's edge */
+@keyframes submenuPop {
+  from { opacity: 0; transform: translateX(calc(-6px * var(--ui-scale))) scale(0.97); }
+  to   { opacity: 1; transform: translateX(0) scale(1); }
 }
 
 .context-submenu.hidden {
@@ -1085,13 +1168,238 @@ html, body {
   color: var(--text-primary);
   font-size: calc(var(--app-font-size) * 0.923);
   cursor: pointer;
-  transition: background var(--transition), transform var(--transition);
+  transition: background var(--transition), color var(--transition),
+              transform var(--transition), box-shadow var(--transition);
 }
 
 .context-submenu button:hover {
   background: var(--bg-hover);
   color: var(--text-primary);
+}
+
+/* Keyboard-highlighted option: accent wash + leading accent bar */
+.context-submenu button.highlighted {
+  background: var(--accent-wash);
+  color: var(--accent);
+  box-shadow: inset 2px 0 0 var(--accent);
   transform: translateX(calc(2px * var(--ui-scale)));
+}
+
+/* Pinned Filter box; only the option list below it scrolls */
+.context-submenu-filter {
+  width: 100%;
+  padding: calc(6px * var(--ui-scale)) calc(10px * var(--ui-scale));
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--bg-surface);
+  color: var(--text-primary);
+  font-size: calc(var(--app-font-size) * 0.923);
+  font-family: inherit;
+  outline: none;
+  box-sizing: border-box;
+  flex-shrink: 0;
+  transition: border-color var(--transition), box-shadow var(--transition);
+}
+.context-submenu-filter:hover:not(:focus) {
+  border-color: color-mix(in srgb, var(--accent) 40%, var(--border));
+}
+.context-submenu-filter:focus {
+  border-color: var(--accent);
+}
+.context-submenu-filter::placeholder {
+  color: var(--text-muted);
+}
+
+/* Height-capped option list: long submenus scroll instead of growing */
+.context-submenu-options {
+  display: flex;
+  flex-direction: column;
+  gap: calc(2px * var(--ui-scale));
+  overflow-y: auto;
+  /* Hybrid clamp: a fixed cap on large windows, viewport-relative on small */
+  max-height: calc(min(320px, 60vh) * var(--ui-scale));
+}
+
+/* Slim scrollbar inside the option list */
+.context-submenu-options::-webkit-scrollbar {
+  width: 4px;
+}
+.context-submenu-options::-webkit-scrollbar-thumb {
+  background: var(--border);
+}
+.context-submenu-options::-webkit-scrollbar-thumb:hover {
+  background: var(--text-muted);
+}
+
+.context-submenu-empty {
+  padding: calc(12px * var(--ui-scale)) calc(16px * var(--ui-scale));
+  color: var(--text-muted);
+  font-size: calc(var(--app-font-size) * 0.846);
+  font-style: italic;
+  text-align: center;
+}
+
+/* ═══ Searchable dialog dropdown ═══ */
+/* Same Filter box over a height-capped option list as .context-submenu, but the
+   popup lives in a body-level layer and is positioned `fixed`: the dialog box
+   scrolls (`overflow-y: auto`), so an inline popup would be clipped at its edge. */
+.ssh-select {
+  position: relative;
+}
+
+.ssh-select-trigger {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: calc(8px * var(--ui-scale));
+  width: 100%;
+  padding: calc(6px * var(--ui-scale)) calc(10px * var(--ui-scale));
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  font-size: calc(var(--app-font-size) * 0.923);
+  font-family: inherit;
+  text-align: left;
+  cursor: pointer;
+  outline: none;
+  transition: border-color var(--transition), box-shadow var(--transition);
+}
+.ssh-select-trigger:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-wash);
+}
+.ssh-select-label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.ssh-select-label.ssh-select-placeholder {
+  color: var(--text-muted);
+}
+.ssh-select-arrow {
+  flex-shrink: 0;
+  font-size: calc(var(--app-font-size) * 0.692);
+  color: var(--text-muted);
+  transition: color var(--transition), transform var(--transition);
+}
+.ssh-select-trigger[aria-expanded="true"] .ssh-select-arrow {
+  color: var(--accent);
+  transform: rotate(180deg);
+}
+
+.ssh-select-layer {
+  position: fixed;
+  inset: 0;
+  z-index: 320;
+  pointer-events: none;
+}
+
+.ssh-select-popup {
+  position: fixed;
+  z-index: 321;
+  min-width: calc(160px * var(--ui-scale));
+  display: flex;
+  flex-direction: column;
+  gap: calc(3px * var(--ui-scale));
+  padding: calc(5px * var(--ui-scale));
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg), var(--top-highlight);
+  pointer-events: auto;
+}
+
+/* Pinned Filter box; only the option list below it scrolls */
+.ssh-select-filter {
+  width: 100%;
+  padding: calc(6px * var(--ui-scale)) calc(10px * var(--ui-scale));
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--bg-surface);
+  color: var(--text-primary);
+  font-size: calc(var(--app-font-size) * 0.923);
+  font-family: inherit;
+  outline: none;
+  box-sizing: border-box;
+  flex-shrink: 0;
+  transition: border-color var(--transition), box-shadow var(--transition);
+}
+.ssh-select-filter:hover:not(:focus) {
+  border-color: color-mix(in srgb, var(--accent) 40%, var(--border));
+}
+.ssh-select-filter:focus {
+  border-color: var(--accent);
+}
+.ssh-select-filter::placeholder {
+  color: var(--text-muted);
+}
+
+.ssh-select-options {
+  display: flex;
+  flex-direction: column;
+  gap: calc(2px * var(--ui-scale));
+  overflow-y: auto;
+  max-height: calc(min(320px, 60vh) * var(--ui-scale));
+}
+.ssh-select-options::-webkit-scrollbar {
+  width: 4px;
+}
+.ssh-select-options::-webkit-scrollbar-thumb {
+  background: var(--border);
+}
+.ssh-select-options::-webkit-scrollbar-thumb:hover {
+  background: var(--text-muted);
+}
+
+.ssh-select-option {
+  display: block;
+  width: 100%;
+  text-align: left;
+  white-space: nowrap;
+  padding: calc(6px * var(--ui-scale)) calc(12px * var(--ui-scale));
+  border: none;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--text-primary);
+  font-size: calc(var(--app-font-size) * 0.923);
+  font-family: inherit;
+  cursor: pointer;
+  transition: background var(--transition), color var(--transition),
+              transform var(--transition), box-shadow var(--transition);
+}
+.ssh-select-option:hover {
+  background: var(--bg-hover);
+}
+/* Keyboard-highlighted option: accent wash + leading accent bar */
+.ssh-select-option.highlighted {
+  background: var(--accent-wash);
+  color: var(--accent);
+  box-shadow: inset 2px 0 0 var(--accent);
+  transform: translateX(calc(2px * var(--ui-scale)));
+}
+.ssh-select-option[aria-selected="true"] {
+  color: var(--accent);
+}
+.ssh-select-option.disabled {
+  color: var(--text-muted);
+  opacity: 0.55;
+  cursor: default;
+}
+
+.ssh-select-header {
+  padding: calc(4px * var(--ui-scale)) calc(12px * var(--ui-scale));
+  color: var(--text-muted);
+  font-size: calc(var(--app-font-size) * 0.846);
+  white-space: nowrap;
+}
+
+.ssh-select-empty {
+  padding: calc(12px * var(--ui-scale)) calc(16px * var(--ui-scale));
+  color: var(--text-muted);
+  font-size: calc(var(--app-font-size) * 0.846);
+  font-style: italic;
+  text-align: center;
 }
 
 /* ═══ Scrollbar ═══ */
@@ -1104,7 +1412,6 @@ html, body {
 }
 ::-webkit-scrollbar-thumb {
   background: var(--border);
-  border-radius: 3px;
 }
 ::-webkit-scrollbar-thumb:hover {
   background: var(--text-muted);
@@ -1113,10 +1420,41 @@ html, body {
 /* ═══ xterm overrides ═══ */
 .xterm {
   height: 100%;
-  padding: 0;
+  /* Right gutter for xterm's overlay scrollbar, so the thumb never sits on top
+     of the text. Must equal xterm's scrollbar width (overviewRuler?.width ||
+     14, see VerticalScrollbar's verticalScrollbarSize): a fixed JS constant
+     that does not scale with --ui-scale, hence the raw px. */
+  padding: 0 14px 0 0;
+  /* The gutter sits inside .xterm, so show the terminal background here rather
+     than the pane's (which is tinted in echo-selected panes). */
+  background-color: var(--bg-primary);
 }
-.xterm-viewport {
-  scrollbar-width: thin;
+.xterm .xterm-viewport {
+  /* xterm 6 scrolls through its own overlay scrollbar, so this element's native
+     one is redundant. xterm.css forces overflow-y: scroll on it, which keeps a
+     track painted even without content; it used to hide behind the opaque
+     .xterm-scrollable-element, but the right-hand gutter above exposes it, and
+     being narrower than the gutter it left the overlay thumb looking
+     off-centre. */
+  scrollbar-width: none;
+  /* xterm.css paints this element full-bleed black; it would show through the
+     gutter above. */
+  background-color: transparent;
+}
+/* xterm pins its overlay scrollbar to the right edge of
+   .xterm-scrollable-element (right: 0, set inline by JS). Move it into the
+   gutter. Only .slider gets inline layer hinting, so `transform` is free. */
+.xterm .xterm-scrollable-element > .scrollbar.vertical {
+  transform: translateX(14px);
+}
+/* Thin the painted thumb to 6px while keeping the full 14px drag target: under
+   the global border-box the transparent borders shrink the content box, and
+   background-clip keeps the colour inside it. Outranks the background rules
+   xterm injects for .slider. */
+.xterm .xterm-scrollable-element > .scrollbar.vertical > .slider {
+  border-left: 4px solid transparent;
+  border-right: 4px solid transparent;
+  background-clip: content-box;
 }
 .xterm-cursor {
   transition: none !important;
@@ -1578,6 +1916,67 @@ html, body {
 
 .options-card .options-shell-list .options-shell-option:not(:last-child) {
   border-bottom: 1px solid var(--border);
+}
+
+/* Keyboard Shortcuts table — one row per App-wide shortcut */
+.options-shortcut-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.options-shortcut-table th {
+  padding: calc(9px * var(--ui-scale)) calc(14px * var(--ui-scale));
+  border-bottom: 1px solid var(--border);
+  font-size: calc(var(--app-font-size) * 0.769);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  text-align: left;
+  color: var(--text-muted);
+}
+
+.options-shortcut-table th:first-child {
+  width: 45%;
+}
+
+.options-shortcut-table td {
+  padding: calc(9px * var(--ui-scale)) calc(14px * var(--ui-scale));
+  font-size: calc(var(--app-font-size) * 0.923);
+  vertical-align: middle;
+}
+
+.options-shortcut-table tbody tr:not(:last-child) td {
+  border-bottom: 1px solid var(--border);
+}
+
+.shortcut-table-action {
+  color: var(--text-primary);
+}
+
+.shortcut-keys {
+  display: inline-flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: calc(4px * var(--ui-scale));
+}
+
+.shortcut-keys kbd {
+  min-width: calc(22px * var(--ui-scale));
+  padding: calc(2px * var(--ui-scale)) calc(7px * var(--ui-scale));
+  border: 1px solid var(--border);
+  border-bottom-width: 2px;
+  border-radius: var(--radius-sm);
+  background: var(--bg-surface);
+  color: var(--text-primary);
+  font-family: 'Cascadia Mono', Consolas, monospace;
+  font-size: calc(var(--app-font-size) * 0.769);
+  line-height: 1.35;
+  text-align: center;
+}
+
+.shortcut-key-plus {
+  color: var(--text-muted);
+  font-size: calc(var(--app-font-size) * 0.769);
 }
 
 /* Theme picker tiles (Appearance section) */
@@ -2165,7 +2564,6 @@ html, body {
 .ssh-list::-webkit-scrollbar { width: 3px; }
 .ssh-list::-webkit-scrollbar-thumb {
   background: var(--border);
-  border-radius: 2px;
 }
 
 /* ── SSH Items ── */
@@ -2385,6 +2783,51 @@ html, body {
   font-size: calc(var(--app-font-size) * 0.769);
   color: var(--text-muted);
 }
+.ssh-import-selectall {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  gap: calc(10px * var(--ui-scale));
+  background: var(--bg-surface);
+  padding: calc(6px * var(--ui-scale)) calc(16px * var(--ui-scale)) calc(8px * var(--ui-scale));
+  border-bottom: 1px solid var(--border);
+}
+.ssh-import-selectall label {
+  flex: 0 0 auto;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: calc(6px * var(--ui-scale));
+  margin-bottom: 0;
+  font-size: calc(var(--app-font-size) * 0.846);
+  font-weight: 600;
+  color: var(--text-secondary);
+  cursor: pointer;
+}
+/* Mirrors the Search panel window's .panel-input (renderer/search-window.css) */
+.ssh-import-filter {
+  flex: 1 1 auto;
+  min-width: 0;
+  padding: calc(5px * var(--ui-scale)) calc(8px * var(--ui-scale));
+  font-family: inherit;
+  font-size: var(--app-font-size);
+  color: var(--text-primary);
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: calc(4px * var(--ui-scale));
+  outline: none;
+  box-sizing: border-box;
+}
+.ssh-import-filter:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-wash);
+}
+.ssh-import-filter::placeholder {
+  color: var(--text-muted);
+}
+.ssh-import-selectall input[type="checkbox"] {
+  margin: 0;
+}
 .ssh-import-row {
   display: flex;
   align-items: flex-start;
@@ -2467,7 +2910,6 @@ html, body {
   font-size: calc(var(--app-font-size) * 0.769);
   color: var(--text-muted);
   cursor: pointer;
-  grid-column: 2;
 }
 .ssh-update-field input[type="checkbox"] {
   margin: 0;
@@ -2475,7 +2917,7 @@ html, body {
 
 .ssh-update-global {
   display: grid;
-  grid-template-columns: auto 1fr;
+  grid-template-columns: 1fr 1fr;
   align-items: center;
   column-gap: calc(8px * var(--ui-scale));
   row-gap: calc(4px * var(--ui-scale));
@@ -2484,8 +2926,7 @@ html, body {
   border-bottom: 1px solid var(--border);
 }
 .ssh-update-global-title {
-  grid-row: 1;
-  grid-column: 1;
+  grid-column: 1 / -1;
   font-size: calc(var(--app-font-size) * 0.846);
   font-weight: 600;
   color: var(--text-secondary);
@@ -2509,7 +2950,9 @@ html, body {
   border-radius: 14px;
   width: calc(380px * var(--ui-scale));
   max-height: 80vh;
-  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
   box-shadow: var(--shadow-lg), var(--top-highlight);
   animation: dialogPop 0.18s ease;
 }
@@ -2524,6 +2967,7 @@ html, body {
 }
 
 .ssh-dialog-header {
+  flex: 0 0 auto;
   padding: calc(12px * var(--ui-scale)) calc(16px * var(--ui-scale)) calc(8px * var(--ui-scale));
   font-weight: 600;
   font-size: calc(var(--app-font-size) * 1.077);
@@ -2541,6 +2985,9 @@ html, body {
 }
 
 .ssh-dialog-body {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
   padding: calc(12px * var(--ui-scale)) calc(16px * var(--ui-scale));
 }
 
@@ -2586,6 +3033,12 @@ html, body {
   font-size: calc(var(--app-font-size) * 0.923);
   cursor: pointer;
   transition: all var(--transition);
+}
+
+.ssh-dialog-btn:disabled {
+  opacity: 0.5;
+  cursor: default;
+  pointer-events: none;
 }
 
 .ssh-dialog-btn-cancel {

@@ -59,22 +59,196 @@
     }
   }
 
-  // Hide any separator that no longer divides two visible items, so hiding a
-  // menu item never leaves a dangling or leading/trailing divider.
+  // A Shortcut hint is truthful only when the shortcut reaches the clicked
+  // target: Ctrl+W and Ctrl+Shift+A act on the Active pane, so their hints stay
+  // hidden on any other pane or tab. Bindings live in App.Shortcuts.
+  function syncShortcutHints(menu, targetIsActive) {
+    for (const hint of menu.querySelectorAll('.context-shortcut[data-scope="target"]')) {
+      hint.classList.toggle('hidden', !targetIsActive);
+    }
+  }
+
+  // Show a separator only when visible items sit on both sides of it. The child
+  // before it must be a visible item rather than another separator, so hiding a
+  // whole section never leaves two dividers back to back, a leading divider, or
+  // a dangling trailing one.
   function syncSeparators(menu) {
     const children = [...menu.children];
-    children.forEach((el, i) => {
-      if (!el.classList.contains('context-separator')) return;
-      const before = children.slice(0, i).some((c) => !c.classList.contains('hidden'));
-      const after = children.slice(i + 1).some((c) => !c.classList.contains('hidden'));
-      el.classList.toggle('hidden', !before || !after);
+    let hasVisibleBefore = false;
+    for (let i = 0; i < children.length; i++) {
+      const el = children[i];
+      if (el.classList.contains('context-separator')) {
+        const hasAfter = children.slice(i + 1)
+          .some((c) => !c.classList.contains('context-separator') && !c.classList.contains('hidden'));
+        el.classList.toggle('hidden', !(hasVisibleBefore && hasAfter));
+        hasVisibleBefore = false;
+      } else if (!el.classList.contains('hidden')) {
+        hasVisibleBefore = true;
+      }
+    }
+  }
+
+  // ── Shared submenu structure ──────────────────────────────────────────────
+  // Every context submenu is a pinned Filter box over a height-capped scrolling
+  // option list. buildSubmenu() rebuilds both from option entries; typing in the
+  // Filter box narrows the list to matching options.
+  const SUBMENU_FILTER = '.context-submenu-filter';
+  const SUBMENU_OPTIONS = '.context-submenu-options';
+  const SUBMENU_EMPTY = '.context-submenu-empty';
+
+  function buildSubmenu(submenu, entries) {
+    submenu.innerHTML = '';
+
+    const filter = document.createElement('input');
+    filter.type = 'text';
+    filter.className = 'context-submenu-filter';
+    filter.placeholder = App.__('submenuFilterPlaceholder');
+    filter.setAttribute('aria-label', filter.placeholder);
+    filter.autocomplete = 'off';
+    filter.spellcheck = false;
+    // A click here must not bubble to the document's close-all-menus listener.
+    // Clicking is also intent to type, so the flyout pins open (see bindSubmenuHover).
+    filter.addEventListener('click', (e) => {
+      e.stopPropagation();
+      setSubmenuPinned(submenu, true);
     });
+    filter.addEventListener('input', () => {
+      applySubmenuFilter(submenu);
+      // Typing is intent to use the flyout: pin it so a wandering mouse cannot
+      // close it mid-search (see bindSubmenuHover).
+      setSubmenuPinned(submenu, true);
+    });
+    filter.addEventListener('keydown', (e) => onSubmenuFilterKeydown(submenu, e));
+    submenu.appendChild(filter);
+
+    const list = document.createElement('div');
+    list.className = 'context-submenu-options';
+    for (const { label, onClick } of entries) {
+      const btn = document.createElement('button');
+      btn.textContent = label;
+      btn.addEventListener('click', onClick);
+      list.appendChild(btn);
+    }
+    submenu.appendChild(list);
+
+    const empty = document.createElement('div');
+    empty.className = 'context-submenu-empty hidden';
+    empty.textContent = App.__('submenuFilterNoMatches');
+    submenu.appendChild(empty);
+  }
+
+  // Case-insensitive substring match over the option labels; options that do
+  // not match are hidden and the empty text stands in for an empty list.
+  function applySubmenuFilter(submenu) {
+    const filter = submenu.querySelector(SUBMENU_FILTER);
+    const list = submenu.querySelector(SUBMENU_OPTIONS);
+    const empty = submenu.querySelector(SUBMENU_EMPTY);
+    if (!filter || !list || !empty) return;
+    const q = (filter.value || '').trim().toLowerCase();
+    let visible = 0;
+    for (const btn of list.children) {
+      const match = !q || (btn.textContent || '').toLowerCase().includes(q);
+      btn.classList.toggle('hidden', !match);
+      btn.classList.remove('highlighted');
+      if (match) visible++;
+    }
+    empty.classList.toggle('hidden', visible > 0);
+  }
+
+  function visibleSubmenuOptions(submenu) {
+    return [...submenu.querySelectorAll(`${SUBMENU_OPTIONS} button:not(.hidden)`)];
+  }
+
+  function highlightSubmenuOption(submenu, idx) {
+    const opts = visibleSubmenuOptions(submenu);
+    if (opts.length === 0) return;
+    const clamped = Math.max(0, Math.min(idx, opts.length - 1));
+    for (const o of opts) o.classList.remove('highlighted');
+    opts[clamped].classList.add('highlighted');
+    opts[clamped].scrollIntoView({ block: 'nearest' });
+  }
+
+  function onSubmenuFilterKeydown(submenu, e) {
+    const opts = visibleSubmenuOptions(submenu);
+    const idx = opts.findIndex((b) => b.classList.contains('highlighted'));
+    switch (e.key) {
+      case 'ArrowDown':
+        e.preventDefault();
+        highlightSubmenuOption(submenu, idx + 1);
+        break;
+      case 'ArrowUp':
+        e.preventDefault();
+        highlightSubmenuOption(submenu, idx - 1);
+        break;
+      case 'Enter': {
+        // The highlighted option, else the only/first visible one.
+        e.preventDefault();
+        const target = idx >= 0 ? opts[idx] : opts[0];
+        if (target) target.click();
+        break;
+      }
+      case 'Escape':
+        e.preventDefault();
+        if (e.currentTarget.value) {
+          e.currentTarget.value = '';
+          applySubmenuFilter(submenu);
+          highlightSubmenuOption(submenu, 0);
+        } else {
+          closeAllMenus();
+        }
+        break;
+    }
+  }
+
+  // Only a non-hover open takes focus: the hover path passes `pinned === false`
+  // and leaves focus on the pane's terminal, so sweeping the pointer across a
+  // submenu trigger never steals keyboard input. A caller that omits `pinned`
+  // (keyboard open) focuses the Filter box so typing filters right away, and
+  // the pin then follows the focus (see setSubmenuPinned).
+  function openSubmenu(submenu, pinned) {
+    submenu.classList.remove('hidden');
+    const focusFilter = pinned !== false;
+    const filter = submenu.querySelector(SUBMENU_FILTER);
+    if (focusFilter && filter) filter.focus();
+    const focusPinned = filter ? document.activeElement === filter : false;
+    setSubmenuPinned(submenu, typeof pinned === 'boolean' ? pinned : focusPinned);
+    applySubmenuFilter(submenu);
+    positionSubmenu(submenu);
+  }
+
+  // A closed submenu never keeps stale filter text: reopening always shows the
+  // full list. Focus is never left inside the hidden flyout, where keystrokes
+  // would vanish silently instead of reaching the terminal.
+  function closeSubmenu(submenu) {
+    if (!submenu) return;
+    submenu.classList.add('hidden');
+    setSubmenuPinned(submenu, false);
+    const active = document.activeElement as HTMLElement | null;
+    if (active && submenu.contains(active)) active.blur();
+    const filter = submenu.querySelector(SUBMENU_FILTER);
+    if (filter && filter.value) {
+      filter.value = '';
+      applySubmenuFilter(submenu);
+    }
+  }
+
+  // While a submenu is "pinned" open, hovering off it must not close it, so the
+  // user can type into the Filter box. A hover-opened flyout is never pinned;
+  // the pin only comes from the user clicking/typing into the box, or from a
+  // keyboard-only open.
+  const PINNED_SUBMENUS = new WeakSet();
+  function setSubmenuPinned(submenu, pinned) {
+    if (!submenu) return;
+    if (pinned) PINNED_SUBMENUS.add(submenu);
+    else PINNED_SUBMENUS.delete(submenu);
   }
 
   function bindContextMenu(paneEl, id) {
     const echoBtn = $('#ctxEcho');
     const echoSep = $('#ctxEchoSep');
     const pasteAllBtn = $('#ctxPasteAll');
+    const reconnectBtn = $('#ctxReconnect');
+    const reconnectSep = $('#ctxReconnectSep');
     const showMenu = (e) => {
       e.preventDefault(); e.stopPropagation();
       contextTargetId = id;
@@ -83,6 +257,12 @@
       if (echoBtn) echoBtn.classList.toggle('hidden', !show);
       if (echoSep) echoSep.classList.toggle('hidden', !show);
       if (pasteAllBtn) pasteAllBtn.classList.toggle('hidden', !show);
+      // Reconnect is an SSH-pane action; its separator goes with it.
+      const ts = state.terminals.get(id);
+      const showReconnect = !!ts && ts.shell === 'ssh';
+      if (reconnectBtn) reconnectBtn.classList.toggle('hidden', !showReconnect);
+      if (reconnectSep) reconnectSep.classList.toggle('hidden', !showReconnect);
+      syncShortcutHints(contextMenu, id === state.activeTerminalId);
       positionContextMenu(contextMenu, e.clientX, e.clientY);
     };
     paneEl.querySelector('.pane-titlebar').addEventListener('contextmenu', showMenu);
@@ -111,6 +291,18 @@
     // Single-target items disappear under a multi-selection.
     toggleMenuItems(tabContextMenu, ['tab-rename', 'tab-close'], multi);
 
+    // Reconnect targets SSH panes only; across a multi-selection it becomes a
+    // batch action over the SSH tabs in it.
+    const reconnectBtn = tabContextMenu.querySelector('[data-action="tab-reconnect"]');
+    if (reconnectBtn) {
+      const sshCount = [...state.selectedTabs]
+        .filter((tid) => state.terminals.get(tid)?.shell === 'ssh').length;
+      reconnectBtn.classList.toggle('hidden', sshCount === 0);
+      reconnectBtn.textContent = sshCount > 1
+        ? App.__('tabCtxReconnectSelected') + ` (${sshCount})`
+        : App.__('tabCtxReconnect');
+    }
+
     // "Close Others" is selection-relative and shows how many tabs it closes.
     const btnCloseOthers = tabContextMenu.querySelector('[data-action="tab-close-others"]');
     if (btnCloseOthers) {
@@ -127,35 +319,35 @@
     // Populate "Move to Group" submenu
     const currentGroupId = state.terminalGroups.get(id);
     const submenu = App.tabCtxGroupSubmenu;
-    submenu.innerHTML = '';
-    let hasOtherGroups = false;
+    const entries = [];
     for (const gid of state.groupOrder) {
       if (gid === currentGroupId) continue;
       const g = state.groups.get(gid);
       if (!g) continue;
-      hasOtherGroups = true;
-      const btn = document.createElement('button');
-      btn.textContent = g.name;
-      btn.addEventListener('click', () => {
-        closeAllMenus();
-        App.Tabs.setTabContextTargetId(null);
-        const toMove = state.selectedTabs.size > 0
-          ? [...state.selectedTabs]
-          : [id];
-        for (const tid of toMove) {
-          App.Groups.moveTerminalToGroup(tid, gid);
-        }
-        App.Tabs.clearTabSelection();
+      entries.push({
+        label: g.name,
+        onClick: () => {
+          closeAllMenus();
+          App.Tabs.setTabContextTargetId(null);
+          const toMove = state.selectedTabs.size > 0
+            ? [...state.selectedTabs]
+            : [id];
+          for (const tid of toMove) {
+            App.Groups.moveTerminalToGroup(tid, gid);
+          }
+          App.Tabs.clearTabSelection();
+        },
       });
-      submenu.appendChild(btn);
     }
+    buildSubmenu(submenu, entries);
 
-    const showMove = hasOtherGroups;
+    const showMove = entries.length > 0;
     if (App.tabCtxMoveSep) App.tabCtxMoveSep.classList.toggle('hidden', !showMove);
     if (App.tabCtxMoveItem) App.tabCtxMoveItem.classList.toggle('hidden', !showMove);
     // Ensure submenu starts hidden
     submenu.classList.add('hidden');
 
+    syncShortcutHints(tabContextMenu, id === state.activeTerminalId);
     syncSeparators(tabContextMenu);
     positionContextMenu(tabContextMenu, e.clientX, e.clientY);
   }
@@ -220,24 +412,52 @@
     contextMenu.classList.add('hidden');
     tabContextMenu.classList.add('hidden');
     groupContextMenu.classList.add('hidden');
-    if (App.tabCtxGroupSubmenu) App.tabCtxGroupSubmenu.classList.add('hidden');
+    // The SSH sidebar's menu is built by another module, but it must close with
+    // the rest so a right-click elsewhere never leaves two menus on screen.
+    const sshMenu = document.getElementById('sshContextMenu');
+    if (sshMenu) sshMenu.classList.add('hidden');
+    // Every open flyout, whoever built it (tab groups, SSH folders, …).
+    for (const sub of document.querySelectorAll('.context-submenu')) {
+      closeSubmenu(sub);
+    }
   }
 
-  function bindSubmenuHover() {
-    const trigger = App.tabCtxMoveItem;
-    const submenu = App.tabCtxGroupSubmenu;
+  // Wire one context-menu item to its flyout. Hovering the trigger opens it;
+  // leaving the trigger and its flyout closes it again — unless the flyout was
+  // opened by the keyboard (see setSubmenuPinned), in which case focus in the
+  // Filter box keeps it open for typing. Defaults to the tab "Move to Group"
+  // item; the SSH panel passes its own trigger/flyout pair.
+  function bindSubmenuHover(trigger = App.tabCtxMoveItem, submenu = App.tabCtxGroupSubmenu) {
     if (!trigger || !submenu) return;
 
     let hideTimer = null;
 
+    // Hovering off only closes a flyout that focus is not pinning open.
+    const hide = () => {
+      if (PINNED_SUBMENUS.has(submenu)) return;
+      // The flyout is a child of the trigger, so while the pointer is anywhere
+      // on the trigger the user is still hovering this item. The flyout's pop-in
+      // animation sweeps it left under the cursor, which can fire a stray
+      // mouseleave on the flyout right after opening; without this check that
+      // stray leave would close the flyout out from under the pointer.
+      if (trigger.matches(':hover')) return;
+      closeSubmenu(submenu);
+    };
+    const focusIsInside = () => submenu.contains(document.activeElement);
+
     trigger.addEventListener('mouseenter', () => {
       clearTimeout(hideTimer);
-      submenu.classList.remove('hidden');
-      positionSubmenu(submenu);
+      // A fresh hover-open never takes focus (see openSubmenu) and stays
+      // hover-dismissable. But when the user is already typing in the open
+      // flyout, crossing the trigger with the pointer must not drop the pin.
+      const typingHere = !submenu.classList.contains('hidden')
+        && PINNED_SUBMENUS.has(submenu)
+        && submenu.contains(document.activeElement);
+      if (!typingHere) openSubmenu(submenu, false);
     });
 
     trigger.addEventListener('mouseleave', () => {
-      hideTimer = setTimeout(() => submenu.classList.add('hidden'), 150);
+      hideTimer = setTimeout(hide, 150);
     });
 
     submenu.addEventListener('mouseenter', () => {
@@ -245,7 +465,17 @@
     });
 
     submenu.addEventListener('mouseleave', () => {
-      hideTimer = setTimeout(() => submenu.classList.add('hidden'), 150);
+      hideTimer = setTimeout(hide, 150);
+    });
+
+    // The flyout stays pinned open while it holds focus; once focus leaves, the
+    // next hover-out closes it normally.
+    submenu.addEventListener('focusout', () => {
+      setTimeout(() => {
+        if (!trigger.matches(':hover') && !submenu.matches(':hover') && !focusIsInside()) {
+          closeSubmenu(submenu);
+        }
+      }, 0);
     });
   }
 
@@ -259,10 +489,18 @@
         if (!id) return;
 
         switch (action) {
+          case 'select-all': {
+            const ts = state.terminals.get(id);
+            if (ts?.term) {
+              ts.term.selectAll();
+              ts.term.focus();
+            }
+            break;
+          }
           case 'copy': {
             const ts = state.terminals.get(id);
             if (ts?.term) {
-              const sel = ts.term.getSelection();
+              const sel = App.Terminal.trimSelection(ts.term.getSelection());
               if (sel) navigator.clipboard.writeText(sel).catch(() => {});
             }
             break;
@@ -273,6 +511,10 @@
           }
           case 'paste-all': {
             App.Terminal.pasteToTerminal(null);
+            break;
+          }
+          case 'reconnect': {
+            App.Terminal.requestReconnect(id);
             break;
           }
           case 'echo': {
@@ -318,6 +560,12 @@
           case 'tab-rename':
             App.Tabs.startTabRename(id);
             break;
+          case 'tab-reconnect': {
+            // Every selected SSH tab, or the single target.
+            if (state.selectedTabs.size > 1) App.Terminal.reconnectTabs([...state.selectedTabs]);
+            else App.Terminal.requestReconnect(id);
+            break;
+          }
           case 'tab-close':
             showConfirm(
               App.__('confirmCloseTerminal'),
@@ -418,18 +666,27 @@
       });
     });
 
-    document.addEventListener('click', () => {
+    // Capture, so a click outside closes the open menu even when the clicked
+    // control stops propagation (the SSH section "+" buttons do). A click on a
+    // menu item is left to that item's own handler, which hides the menu.
+    document.addEventListener('click', (e) => {
+      const target = e.target as Element | null;
+      if (target && typeof target.closest === 'function' && target.closest('.context-menu')) return;
       closeAllMenus();
-    });
+    }, true);
+    // Capture for the same reason: an outside right-click closes the open menu
+    // before the right-clicked surface's handler opens its own menu, so two
+    // context menus never stay on screen at once.
     document.addEventListener('contextmenu', () => {
       closeAllMenus();
-    });
+    }, true);
   }
 
   // ─── Reusable confirm dialog ───────────────────────────────────────────────
   let _confirmDialog, _confirmMessage, _confirmOk, _confirmCancel, _confirmDontShow;
   let _confirmCallback = null;
   let _confirmStorageKey = null;
+  let _confirmOnCancel = null;
 
   function initConfirmDialog() {
     if (_confirmDialog) return;
@@ -447,22 +704,27 @@
       if (_confirmCallback) _confirmCallback();
       _confirmCallback = null;
       _confirmStorageKey = null;
+      _confirmOnCancel = null;
     });
     _confirmCancel.addEventListener('click', () => {
       _confirmDialog.classList.add('hidden');
       _confirmCallback = null;
       _confirmStorageKey = null;
+      if (_confirmOnCancel) _confirmOnCancel();
+      _confirmOnCancel = null;
     });
     _confirmDialog.addEventListener('click', (e) => {
       if (e.target === _confirmDialog) {
         _confirmDialog.classList.add('hidden');
         _confirmCallback = null;
         _confirmStorageKey = null;
+        if (_confirmOnCancel) _confirmOnCancel();
+        _confirmOnCancel = null;
       }
     });
   }
 
-  function showConfirm(message, callback, storageKey, okLabelKey?) {
+  function showConfirm(message, callback, storageKey, okLabelKey?, cancelLabelKey?, onCancel?) {
     initConfirmDialog();
     if (storageKey && localStorage.getItem(storageKey) === 'true') {
       callback();
@@ -470,8 +732,10 @@
     }
     _confirmMessage.textContent = message;
     _confirmOk.textContent = App.__(okLabelKey || 'confirmClose');
+    _confirmCancel.textContent = App.__(cancelLabelKey || 'confirmCancel');
     _confirmCallback = callback;
     _confirmStorageKey = storageKey || null;
+    _confirmOnCancel = onCancel || null;
     if (_confirmDontShow) {
       _confirmDontShow.checked = false;
       // Without a storage key the dialog always warns — hide the now-pointless
@@ -498,6 +762,7 @@
   App.Menus = {
     bindContextMenu, showTabContextMenu, showGroupContextMenu, setupContextMenu,
     bindCloseConfirmDialog, showConfirm, bindSubmenuHover, positionContextMenu, positionSubmenu,
+    buildSubmenu, openSubmenu, closeSubmenu, applySubmenuFilter,
   };
 })();
 

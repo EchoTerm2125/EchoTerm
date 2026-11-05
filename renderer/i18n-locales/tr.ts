@@ -19,14 +19,12 @@
     shellSsh: 'SSH',
 
     // ── Toolbar ──────────────────────────────────────────────────────────────
-    toolbarSidebarToggle: 'Kenar Çubuğu (Ctrl+Shift+S)',
     toolbarSettings: 'Ayarlar',
     winMinimizeTitle: 'Küçült',
     winMaximizeTitle: 'Ekranı Kapla',
     winRestoreTitle: 'Geri Yükle',
 
     // ── New Terminal Dropdown ────────────────────────────────────────────────
-    newTerminalTitle: 'Yeni Terminal (Ctrl+N)',
     newTermDropdownTitle: 'Terminal türünü seç',
     powershellLabel: 'PowerShell',
     cmdLabel: 'CMD',
@@ -43,10 +41,13 @@
     echoEnableAllTitle: 'Tüm terminallerde yankıyı etkinleştir',
     echoToggleAllTitle: 'Her terminalin yankı durumunu değiştir',
     echoPasteAllTitle: 'Yankı etkin tüm terminallere yapıştır',
+    echoReconnect: 'Yankı etkin olanları yeniden bağla',
+    echoReconnectTitle: 'Yankı etkin tüm SSH terminallerini yeniden bağla',
+    echoReconnectNone: 'Yankı etkin terminal yok.',
+    echoReconnectNoSsh: 'Yeniden bağlanacak yankı etkin SSH terminali yok.',
 
     // ── Group bar ────────────────────────────────────────────────────────────
     groupDefaultName: 'Grup {n}',
-    newGroupTitle: 'Yeni Grup (Ctrl+Shift+N)',
     closeGroupTitle: 'Grubu Kapat',
 
     // ── Tab ──────────────────────────────────────────────────────────────────
@@ -54,6 +55,7 @@
 
     // ── Pane titlebar ────────────────────────────────────────────────────────
     panePasteTitle: 'Yapıştır',
+    paneReconnectTitle: 'Yeniden bağlan',
     paneEchoTitle: 'Girişi bu terminale yankıla',
     paneEchoLabel: 'Yankı',
     paneCloseTitle: 'Kapat',
@@ -85,11 +87,15 @@
 
     // ── Context menus ────────────────────────────────────────────────────────
     ctxCopy: 'Kopyala',
+    ctxSelectAll: 'Tümünü seç',
     ctxPaste: 'Yapıştır',
     ctxPasteAll: 'Tümüne Yapıştır',
-    ctxToggleEcho: 'Yankıyı Değiştir',
-    ctxClosePane: 'Bölmeyi Kapat',
+    ctxReconnect: 'Yeniden bağlan',
+    ctxToggleEcho: 'Echo modunu aç/kapat',
+    ctxClosePane: 'Terminali kapat',
     tabCtxRename: 'Sekmeyi Yeniden Adlandır',
+    tabCtxReconnect: 'Yeniden bağlan',
+    tabCtxReconnectSelected: 'Seçilenleri yeniden bağla',
     tabCtxClose: 'Sekmeyi Kapat',
     tabCtxCloseSelected: 'Seçilenleri Kapat',
     tabCtxCloseOthers: 'Diğerlerini Kapat',
@@ -105,6 +111,9 @@
     confirmCancel: 'İptal',
     confirmClose: 'Kapat',
     confirmDelete: 'Sil',
+    confirmDiscard: 'At',
+    confirmDiscardChanges: 'Kaydedilmemiş değişiklikler atılsın mı?',
+    confirmKeepEditing: 'Düzenlemeye devam et',
     confirmDuplicate: 'Çoğalt',
     confirmDontShowAgain: 'Bir daha gösterme',
     confirmCloseTerminal: 'Bu terminal kapatılsın mı?\nOturum sonlandırılacak.',
@@ -116,6 +125,11 @@
     confirmCloseGroupWithTerminals: '"{name}" grubu kapatılsın mı?\n{count} terminal kapatılacak.',
     confirmCloseApp: 'EchoTerm kapatılsın mı?\nTüm terminal oturumları sonlandırılacak.',
     confirmCloseAllGroupTerminals: '"{name}" grubundaki {count} terminalin tamamı kapatılsın mı?\nTüm oturumlar sonlandırılacak.',
+    confirmReconnect: 'Bu terminal yeniden bağlansın mı?\nOturum sonlandırılacak.',
+    confirmReconnectSelected: 'Seçili {count} terminal yeniden bağlansın mı?\nTüm oturumlar sonlandırılacak.',
+    confirmReconnectSkipLocal: 'Seçimdeki {count} yerel kabuk yeniden bağlanmayacak.',
+    confirmReconnectEcho: 'Yankı etkin {count} SSH terminali yeniden bağlansın mı?\nTüm oturumlar sonlandırılacak.',
+    reconnectFailedSummary: 'Yeniden bağlanılamadı: {names}',
     confirmDeleteSshConnection: 'SSH bağlantısı "{name}" silinsin mi?',
     confirmDeleteSshConnectionFolder: 'Bağlantı klasörü "{name}" silinsin mi?\nİçindeki {connections} bağlantı ve {subfolders} alt klasör kalıcı olarak silinecek.',
     confirmDeleteMultiSshConnectionFolder: 'Bu, içlerindeki {connections} bağlantının ve {subfolders} alt klasörün de kalıcı olarak silinmesini sağlar.',
@@ -264,6 +278,11 @@
     sshImportJumpVia: '↪ {host} üzerinden',
     sshImportJumpNotInConfig: ' (yapılandırmada yok)',
     sshImportNoNewHosts: 'Yeni sunucu bulunamadı. Tümü zaten içe aktarıldı.',
+    sshImportSelectAll: 'Tümünü seç',
+    sshImportFilterPlaceholder: 'Filtrele...',
+    sshImportFilterNoMatch: 'Filtreyle eşleşen içe aktarma satırı yok.',
+    sshImportConfirmImport: '{count} öğeyi içe aktar:\n\n{list}',
+    sshImportConfirmUpdate: '{count} öğeyi güncelle:\n\n{list}',
     sshImportNoExistingToUpdate: 'Güncellenecek mevcut bağlantı bulunamadı.',
     sshImportNoHosts: 'SSH yapılandırmasında sunucu bulunamadı.',
     sshImportWinScpTitle: 'WinSCP konumundan içe aktar',
@@ -294,6 +313,8 @@
     sshCtxDuplicate: 'Çoğalt',
     sshCtxDuplicateSelected: 'Seçilenleri Çoğalt ({count})',
     sshCtxNoOtherFolders: 'Başka klasör yok',
+    submenuFilterPlaceholder: 'Filtrele…',
+    submenuFilterNoMatches: 'Eşleşme yok',
 
     // ── Settings / Options Panel ──────────────────────────────────────────────
     optionsTitleAppearance: 'Görünüm',
@@ -311,9 +332,22 @@
     optionsTabCloseConfirm: 'Sekme kapatılmadan önce onayla',
     optionsWindowCloseConfirm: 'Pencere kapatılmadan önce onayla',
     optionsGroupCloseConfirm: 'Grup silinmeden önce onayla',
+    optionsReconnectConfirm: 'Terminal yeniden bağlanmadan önce onayla',
     optionsSshJumpWarn: 'SSH içe aktarımında seçilmemiş atlama sunucuları hakkında uyar',
     optionsPastePreview: 'Çok satırlı içerik yapıştırılmadan önce onayla',
     optionsRightClickPaste: 'Kopyalamak / yapıştırmak için sağ tıklayın',
+    optionsTitleShortcuts: 'Klavye kısayolları',
+    optionsShortcutColumnKeys: 'Kısayol',
+    optionsShortcutColumnAction: 'Eylem',
+    optionsShortcutNewTerminal: 'Yeni terminal',
+    optionsShortcutNewGroup: 'Yeni grup',
+    optionsShortcutCloseTerminal: 'Etkin terminali kapat',
+    optionsShortcutFind: 'Etkin terminalde bul',
+    optionsShortcutSearchAll: 'Görünen tüm terminallerde ara',
+    optionsShortcutSelectAll: 'Etkin terminaldeki tüm metni seç',
+    optionsShortcutNextTerminal: 'Sonraki terminal',
+    optionsShortcutPrevTerminal: 'Önceki terminal',
+    optionsShortcutToggleSidebar: 'SSH kenar çubuğunu aç/kapat',
 
     // ── Danger Zone ──────────────────────────────────────────────────────────
     optionsTitleDanger: 'Tehlikeli Bölge',
@@ -358,6 +392,8 @@
     // ── Error messages ───────────────────────────────────────────────────────
     errorUnknownShell: 'Bilinmeyen kabuk: {shell}',
     errorConnectionNotFound: 'Bağlantı bulunamadı.',
+    errorSessionConfig: 'SSH oturum yapılandırması hazırlanamadı.',
+    errorJumpChainInvalid: 'Atlama ana bilgisayar zinciri geçersiz: döngü var veya silinmiş bir bağlantıya referans veriyor.',
     errorConnectionFolderNotFound: 'Bağlantı klasörü bulunamadı.',
     errorFieldBlank: 'Bu alan boş bırakılamaz.',
     errorConfigNotFound: 'Yapılandırma dosyası bulunamadı: {path}',

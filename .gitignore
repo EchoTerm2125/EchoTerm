@@ -8,7 +8,7 @@ coverage/
 test-results/
 playwright-report/
 *.tsbuildinfo
-.trae/
+.trae*/
 
 # OS junk
 .DS_Store
