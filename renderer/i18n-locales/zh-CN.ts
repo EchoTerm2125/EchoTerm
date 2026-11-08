@@ -395,6 +395,7 @@
     updCheckFailedGeneric: '检查更新失败，请稍后重试。',
     updSmartScreenHint: '如果 Windows SmartScreen 阻止了更新，未签名版本出现此情况是正常的——请点击“更多信息”，然后选择“仍要运行”。',
     updGetUpdate: '获取更新',
+    updUpdateLabel: '更新',
     updInstallUpdate: '安装更新',
     updInstallConfirmBody: '更新已准备就绪。关闭 EchoTerm 将结束所有终端会话。现在安装吗？',
 

@@ -422,6 +422,7 @@
     updCheckFailedGeneric: 'Güncelleme kontrolü başarısız oldu. Lütfen daha sonra tekrar deneyin.',
     updSmartScreenHint: 'Windows SmartScreen güncellemeyi engellerse, imzasız derlemelerde bu beklenen bir durumdur — "Diğer bilgiler" ve ardından "Yine de çalıştır" seçeneğine tıklayın.',
     updGetUpdate: 'Güncellemeyi al',
+    updUpdateLabel: 'Güncelleme',
     updInstallUpdate: 'Güncellemeyi kur',
     updInstallConfirmBody: 'Bir güncelleme hazır. EchoTerm kapatıldığında tüm terminal oturumları sona erecek. Şimdi kurulsun mu?',
 

@@ -423,6 +423,7 @@
     updCheckFailedGeneric: 'Update check failed. Please try again later.',
     updSmartScreenHint: 'If Windows SmartScreen blocks the update, it is expected for unsigned builds — click "More info", then "Run anyway".',
     updGetUpdate: 'Get update',
+    updUpdateLabel: 'Update',
     updInstallUpdate: 'Install update',
     updInstallConfirmBody: 'An update is ready. Closing EchoTerm will end all terminal sessions. Install now?',
 

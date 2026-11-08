@@ -124,15 +124,17 @@ import type { UpdateSettings } from '../shared/ipc';
   // opens the GitHub page); installed builds only after the installer is
   // downloaded (clicking installs). An install-start failure keeps the buttons
   // visible while the installer is still downloaded so the user can retry.
+  // The visible label is the short noun; the tooltip names the action in full.
   function updateInstallButtons() {
     const show = isPortable
       ? statusState === 'available'
       : statusState === 'ready' || (statusState === 'error' && updateDownloaded);
-    const label = isPortable ? App.__('updGetUpdate') : App.__('updInstallUpdate');
+    const label = isPortable ? App.__('updGetUpdate') : App.__('updUpdateLabel');
+    const tooltip = isPortable ? label : App.__('updInstallUpdate');
     for (const btn of [btnInstallUpdate, btnInstallBanner]) {
       if (!btn) continue;
       btn.classList.toggle('hidden', !show);
-      if (show) btn.title = label;
+      if (show) btn.title = tooltip;
     }
     if (show && btnInstallUpdateLabel) btnInstallUpdateLabel.textContent = label;
     if (show && btnInstallBannerLabel) btnInstallBannerLabel.textContent = label;

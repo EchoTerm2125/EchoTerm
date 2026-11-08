@@ -422,6 +422,7 @@
     updCheckFailedGeneric: '업데이트 확인에 실패했습니다. 나중에 다시 시도해 주세요.',
     updSmartScreenHint: 'Windows SmartScreen이 업데이트를 차단하면 서명되지 않은 빌드에서 예상된 동작입니다. "추가 정보" → "실행"을 클릭하세요.',
     updGetUpdate: '업데이트 받기',
+    updUpdateLabel: '업데이트',
     updInstallUpdate: '업데이트 설치',
     updInstallConfirmBody: '업데이트가 준비되었습니다. EchoTerm을 닫으면 모든 터미널 세션이 종료됩니다. 지금 설치할까요?',
 

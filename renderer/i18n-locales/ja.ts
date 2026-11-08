@@ -422,6 +422,7 @@
     updCheckFailedGeneric: '更新の確認に失敗しました。後でもう一度お試しください。',
     updSmartScreenHint: 'Windows SmartScreen が更新をブロックした場合、未署名ビルドでは想定どおりです。「詳細情報」→「実行」を選択してください。',
     updGetUpdate: '更新を取得',
+    updUpdateLabel: '更新',
     updInstallUpdate: '更新をインストール',
     updInstallConfirmBody: '更新の準備ができました。EchoTerm を閉じるとすべてのターミナルセッションが終了します。今すぐインストールしますか？',
 

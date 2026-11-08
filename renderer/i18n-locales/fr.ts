@@ -422,6 +422,7 @@
     updCheckFailedGeneric: 'Échec de la vérification des mises à jour. Réessayez plus tard.',
     updSmartScreenHint: 'Si Windows SmartScreen bloque la mise à jour, c’est normal pour les versions non signées — cliquez sur « Plus d’infos », puis « Exécuter quand même ».',
     updGetUpdate: 'Obtenir la mise à jour',
+    updUpdateLabel: 'Mise à jour',
     updInstallUpdate: 'Installer la mise à jour',
     updInstallConfirmBody: 'Une mise à jour est prête. Fermer EchoTerm mettra fin à toutes les sessions de terminal. Installer maintenant ?',
 

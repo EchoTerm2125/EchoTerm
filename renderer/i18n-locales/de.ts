@@ -422,6 +422,7 @@
     updCheckFailedGeneric: 'Update-Prüfung fehlgeschlagen. Bitte versuchen Sie es später erneut.',
     updSmartScreenHint: 'Wenn Windows SmartScreen das Update blockiert, ist das bei unsignierten Builds zu erwarten — klicken Sie auf „Weitere Informationen“ und dann auf „Trotzdem ausführen“.',
     updGetUpdate: 'Update abrufen',
+    updUpdateLabel: 'Update',
     updInstallUpdate: 'Update installieren',
     updInstallConfirmBody: 'Ein Update ist bereit. Das Schließen von EchoTerm beendet alle Terminalsitzungen. Jetzt installieren?',
 
