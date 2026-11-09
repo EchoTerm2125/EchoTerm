@@ -146,6 +146,7 @@
       state.activeGroupId = id;
       tab.classList.add('active');
     }
+    App.Session?.scheduleSave?.();
     return group;
   }
 
@@ -220,6 +221,7 @@
     }
     App.UI.updateStatusBar();
     if (App.Search) App.Search.onActiveGroupChanged();
+    App.Session?.scheduleSave?.();
   }
 
   function deleteGroup(groupId) {
@@ -337,6 +339,7 @@
     if (replacementId) {
       App.Terminal.spawnTerminal(state.selectedShell);
     }
+    App.Session?.scheduleSave?.();
   }
 
   function getGroupTerminalIds(groupId) {
@@ -429,6 +432,7 @@
       if (visibleId !== undefined) App.Terminal.showOnlyPane(visibleId);
     }
     App.UI.updateStatusBar();
+    App.Session?.scheduleSave?.();
   }
 
   function reorderGroups(draggedId, targetId) {
@@ -453,6 +457,7 @@
         App.groupList.insertBefore(draggedEl, targetEl);
       }
     }
+    App.Session?.scheduleSave?.();
   }
 
   function toggleGroupSelection(gid) {
@@ -557,6 +562,24 @@
       const nameEl = group._tabEl.querySelector('.group-name');
       if (nameEl) nameEl.textContent = newName;
     }
+    App.Session?.scheduleSave?.();
+  }
+
+  // Restore replaces the bootstrap group wholesale: it builds the remembered
+  // Groups itself, so the default one must leave no state behind.
+  function resetForRestore() {
+    for (const [, g] of state.groups) {
+      if (g._tabEl) g._tabEl.remove();
+    }
+    state.groups.clear();
+    state.groupOrder.length = 0;
+    state.groupEchoActive.clear();
+    state.groupEchoSelection.clear();
+    state.groupEchoTerminals.clear();
+    state.groupActiveTerminal.clear();
+    state.selectedGroups.clear();
+    state.lastClickedGroupId = null;
+    state.activeGroupId = null;
   }
 
   App.Groups = {
@@ -566,6 +589,7 @@
     toggleGroupSelection, clearGroupSelection, selectGroupRange,
     reorderGroupsMulti,
     startGroupRename, renameGroup,
+    resetForRestore,
   };
 })();
 

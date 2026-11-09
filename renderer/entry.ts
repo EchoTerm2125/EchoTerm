@@ -32,6 +32,7 @@ import './menus';
 import './ssh-panel';
 import './tabs';
 import './terminal';
+import './session';
 import './search';
 import './update';
 import './app';

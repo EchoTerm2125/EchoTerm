@@ -258,8 +258,12 @@ export class SshController {
 
   // ── Sessions ──
 
-  connect(connectionId: string) {
-    return this.startSession(connectionId, this.registry.createId());
+  connect(connectionId: string, sessionId?: number) {
+    // Restore reserves ids for Panes it creates before their session starts.
+    const id = Number.isInteger(sessionId) && (sessionId as number) > 0
+      ? (sessionId as number)
+      : this.registry.createId();
+    return this.startSession(connectionId, id);
   }
 
   /**

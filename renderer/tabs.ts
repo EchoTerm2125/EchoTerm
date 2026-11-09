@@ -308,6 +308,30 @@
     }
 
     App.Terminal.renderPaneTitle(termState);
+    App.Session?.scheduleSave?.();
+  }
+
+  // Re-render a Tab's name and identity from its Pane. A restored Pane learns
+  // its Connection identity only when it connects.
+  function refreshTitle(termState) {
+    const tab = tabCache.get(termState.id);
+    if (!tab) return;
+    tab.querySelector('.tab-name').textContent = App.Terminal.paneName(termState);
+
+    const labelEl = tab.querySelector('.tab-label');
+    let identityEl = labelEl.querySelector('.tab-identity');
+    const identity = App.Terminal.connectionIdentity(termState);
+    if (!identity) {
+      if (identityEl) identityEl.remove();
+    } else {
+      if (!identityEl) {
+        identityEl = document.createElement('span');
+        identityEl.className = 'tab-identity';
+        labelEl.appendChild(identityEl);
+      }
+      identityEl.textContent = `(${identity})`;
+    }
+    refreshTabTooltip(tab);
   }
 
   App.Tabs = {
@@ -315,7 +339,7 @@
     toggleTabSelection, clearTabSelection, selectTabRange,
     getTabCache, getTabContextTargetId, setTabContextTargetId,
     reorderTabs, reorderTabsMulti,
-    startTabRename, renameTab,
+    startTabRename, renameTab, refreshTitle,
   };
 })();
 

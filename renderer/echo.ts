@@ -152,6 +152,7 @@
     state.groupEchoActive.set(state.activeGroupId, state.echoModeActive);
     if (state.echoModeActive) enterEchoMode();
     else exitEchoMode();
+    App.Session?.scheduleSave?.();
   }
 
   function enterEchoMode() {
@@ -177,7 +178,9 @@
       const checked = savedSelection
         ? (savedSelection.has(id) || (savedTerminals && !savedTerminals.has(id)))
         : true;
-      if (checked) {
+      // A Dormant pane has no session to echo into; it joins when it connects.
+      const effective = checked && !t._dormant;
+      if (effective) {
         state.echoSelection.add(id);
         t.paneEl.classList.add('echo-selected');
         const cb = t.titlebar.querySelector('.pane-checkbox');
@@ -188,7 +191,7 @@
         if (cb) cb.classList.remove('selected');
       }
       const chk = t.titlebar.querySelector('input[type="checkbox"]');
-      if (chk) chk.checked = checked;
+      if (chk) chk.checked = effective;
     }
 
     updateEchoAllButton();
@@ -202,6 +205,9 @@
       if (t) t.term.focus();
     }, 120);
     App.UI.updateStatusBar();
+    // Every pane of the group is visible now, so Restore's lazy Panes start.
+    App.Terminal.autoConnectVisible();
+    App.Session?.scheduleSave?.();
   }
 
   function exitEchoMode() {
@@ -223,6 +229,7 @@
     const activeId = state.activeTerminalId || groupIds[0];
     if (activeId) App.Terminal.focusTerminal(activeId);
     App.UI.updateStatusBar();
+    App.Session?.scheduleSave?.();
   }
 
   function toggleEchoAll() {

@@ -81,7 +81,11 @@ import {
 
   // --- Initialization
   async function init() {
-    if (!sshSidebar) return;
+    if (!sshSidebar) {
+      // No panel to lock: nothing may wait on a startup unlock outcome forever.
+      settleUnlock('unavailable');
+      return;
+    }
 
     // Toggle sidebar
     if (sidebarToggleBtn) {
@@ -111,6 +115,14 @@ import {
         await showPasswordSetup();
       }
     }
+
+    // --- Password lock state: the panel stays visible but inert while locked ---
+    bindLockedNotice();
+    await updateLockState();
+
+    // The startup dialogs have been answered by now, or none was needed.
+    const settledStatus = await api.sshPasswordStatus();
+    if (settledStatus.unlocked) settleUnlock('unlocked');
 
     // --- Load data
     await refreshAll();
@@ -190,6 +202,45 @@ import {
 
   let importMode: 'import' | 'update' = 'import';
   let importSource: 'sshconfig' | 'winscp' = 'sshconfig';
+
+  // --- Startup unlock outcome
+  // Restore waits for this: the layout is only read back once the vault is
+  // unlocked, and a cancellation means "skip Restore for this launch" (ADR 0017).
+  let settleStartupUnlock = null;
+  let startupUnlockOutcome = null;
+  const startupUnlockSettled = new Promise((resolve) => { settleStartupUnlock = resolve; });
+
+  function settleUnlock(outcome) {
+    if (startupUnlockOutcome) return;
+    startupUnlockOutcome = outcome;
+    if (settleStartupUnlock) settleStartupUnlock(outcome);
+  }
+
+  function unlockSettled() {
+    return startupUnlockSettled;
+  }
+
+  // --- SSH panel lockout
+  // While the SSH data is locked the panel keeps its shape — so the user can see
+  // the feature exists — but every action is inert except unlocking (ADR 0017).
+  async function updateLockState() {
+    let unlocked: boolean;
+    try {
+      const status = await api.sshPasswordStatus();
+      unlocked = !!status.unlocked;
+    } catch {
+      unlocked = false;
+    }
+    const locked = !unlocked;
+    if (sshSidebar) sshSidebar.classList.toggle('ssh-locked', locked);
+    const notice = document.getElementById('sshLockedNotice');
+    if (notice) notice.classList.toggle('hidden', !locked);
+  }
+
+  function bindLockedNotice() {
+    const btn = document.getElementById('btnSshLockedUnlock');
+    if (btn) btn.addEventListener('click', () => showPasswordUnlock());
+  }
 
   async function updatePasswordIcon() {
     const btn = $('#btnSshPassword');
@@ -384,7 +435,9 @@ import {
       const finish = async () => {
         sshPasswordDialog.classList.add('hidden');
         await updatePasswordIcon();
+        await updateLockState();
         await refreshAll();
+        settleUnlock('unlocked');
       };
 
       if (passwordMode === 'setup') {
@@ -449,7 +502,9 @@ import {
           }
           App.UI.showToast(App.__('toastUseDefaultEncryption'));
           await updatePasswordIcon();
+          await updateLockState();
           await refreshAll();
+          settleUnlock('unlocked');
         },
         'skipDefaultEncryptionConfirm',
         'confirmUseDefaultEncryptionOk'
@@ -459,6 +514,7 @@ import {
     if (sshPasswordCancel) {
       sshPasswordCancel.addEventListener('click', () => {
         sshPasswordDialog.classList.add('hidden');
+        settleUnlock('cancelled');
       });
     }
 
@@ -3624,6 +3680,7 @@ import {
     init, refreshAll, connectSsh, openSshConnectionFolder,
     showConnectionDialog, showUserDialog, showConnectionFolderDialog, showUserFolderDialog,
     showPasswordUnlock, showPasswordSetup, updatePasswordIcon, toggleSidebar,
+    unlockSettled,
   };
 })();
 

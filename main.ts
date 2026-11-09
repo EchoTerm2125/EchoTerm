@@ -9,6 +9,7 @@ import { FileConnectionRepository } from './src/main/infrastructure/file-connect
 import { FileUserFolderRepository } from './src/main/infrastructure/file-user-folder-repository';
 import { FileUserRepository } from './src/main/infrastructure/file-user-repository';
 import { FileUpdateSettingsStore } from './src/main/infrastructure/file-update-settings';
+import { FileSessionSnapshotStore } from './src/main/infrastructure/file-session-snapshot';
 import { FileWindowBounds } from './src/main/infrastructure/file-window-bounds';
 import { NodePtyGateway } from './src/main/infrastructure/node-pty-gateway';
 import { TempSessionConfigStore } from './src/main/infrastructure/temp-session-config';
@@ -49,6 +50,9 @@ const ptyGateway = new NodePtyGateway();
 const sessionConfigStore = new TempSessionConfigStore();
 const shellDetector = new WindowsShellDetector();
 const sessionRegistry = new SessionRegistry();
+const sessionSnapshotStore = new FileSessionSnapshotStore(
+  path.join(app.getPath('userData'), 'session.json'),
+);
 
 let mainWindow = null;
 
@@ -285,6 +289,8 @@ ipcMain.handle('app:clear-all-data', async () => {
     await session.defaultSession.clearStorageData();
     // Wipe the encrypted SSH store (users, connections, folders)
     vault.resetData();
+    // Forget the last layout as well: a first launch must not restore it
+    sessionSnapshotStore.clear();
     // Terminate pty sessions before exiting
     sessionRegistry.killAll();
     app.relaunch();
@@ -336,7 +342,7 @@ app.on('window-all-closed', () => {
 // ─── IPC handlers ────────────────────────────────────────────────────────────
 ipcMain.handle('shell:get-default', () => terminalController.getDefaultShells());
 ipcMain.handle('shell:locate-gitbash', () => terminalController.locateGitBash());
-ipcMain.handle('terminal:spawn', (event, shellKey) => terminalController.spawn(shellKey));
+ipcMain.handle('terminal:spawn', (event, shellKey, sessionId) => terminalController.spawn(shellKey, sessionId));
 ipcMain.on('terminal:write', (event, id, data) => terminalController.write(id, data));
 ipcMain.on('terminal:resize', (event, id, cols, rows) => terminalController.resize(id, cols, rows));
 ipcMain.on('terminal:kill', (event, id) => terminalController.kill(id));
@@ -362,13 +368,29 @@ ipcMain.handle('ssh:connection-folder-list', () => sshController.listConnectionF
 ipcMain.handle('ssh:connection-folder-save', (event, folderData) => sshController.saveConnectionFolder(folderData));
 ipcMain.handle('ssh:connection-folder-delete', (event, folderId) => sshController.deleteConnectionFolder(folderId));
 ipcMain.handle('ssh:connection-folder-duplicate', (event, folderId) => sshController.duplicateConnectionFolder(folderId));
-ipcMain.handle('ssh:connect', (event, connectionId) => sshController.connect(connectionId));
+ipcMain.handle('ssh:connect', (event, connectionId, sessionId) => sshController.connect(connectionId, sessionId));
 ipcMain.handle('ssh:reconnect', (event, sessionId, connectionId, size) => sshController.reconnect(sessionId, connectionId, size));
 ipcMain.handle('ssh:open-connection-folder', (event, folderId) => sshController.openConnectionFolder(folderId));
 ipcMain.handle('ssh:import-config', (event, customPath) => sshController.importConfig(customPath));
 ipcMain.handle('ssh:import-winscp', (event, chooseFile) => sshController.importWinScp(chooseFile));
 ipcMain.handle('ssh:import-apply', (event, request) => sshController.importApply(request));
 ipcMain.handle('ssh:export-config', () => sshController.exportConfig());
+
+// ── Session snapshot (Restore) ──
+ipcMain.handle('session:load', () => sessionSnapshotStore.load());
+ipcMain.handle('session:reserve-ids', (event, count) => {
+  const n = Math.max(0, Math.min(500, Math.floor(Number(count) || 0)));
+  return sessionRegistry.reserveIds(n);
+});
+ipcMain.on('session:save', (event, snapshot) => {
+  try {
+    sessionSnapshotStore.save(snapshot);
+  } catch (err) {
+    // Best-effort persistence: tell the renderer once so it can warn, and keep
+    // the app running — restore is never worth interrupting work for.
+    sendToRenderer('session:save-error', (err && err.message) || String(err));
+  }
+});
 
 // ─── Search panel IPC (Ctrl+Shift+F) ────────────────────────────────────────
 // The panel window runs its own page; every search it triggers is relayed to

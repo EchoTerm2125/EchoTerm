@@ -19,11 +19,17 @@
     + '<path d="M21 3v5h-5"/>'
     + '</svg>';
 
+  // Play triangle — used by a Dormant Pane's Connect control (ADR 0017).
+  const play = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">'
+    + '<polygon points="6 4 20 12 6 20 6 4"/>'
+    + '</svg>';
+
   // ─── Expose on window.App ───────────────────────────────────────────────────
   window.App = window.App || ({} as AppGlobal);
   App.Icons = {
     clipboard,
     refresh,
+    play,
   };
 })();
 

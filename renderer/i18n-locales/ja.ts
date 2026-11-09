@@ -60,6 +60,15 @@
     paneEchoLabel: 'エコー',
     paneCloseTitle: '閉じる',
     paneDismissTitle: '閉じる',
+    paneConnectTitle: '接続',
+    paneDormantNotice: '復元済み — 未接続',
+    paneDeletedConnection: '削除された接続',
+    toastRestoreSkippedLocked: '今回は復元しませんでした: SSH データがロックされています。',
+    toastRestoreFailed: '前回のセッションを復元できませんでした。新規に開始します。',
+    toastSnapshotSaveFailed: 'セッションを保存できませんでした。次回起動時に完全に復元されない可能性があります。',
+    optionsTitleStartup: '起動',
+    optionsRestoreSession: '起動時にターミナルを復元',
+    sshPanelLocked: 'SSH データをロック解除すると接続とユーザーを使用できます。',
 
     // ── Status bar ───────────────────────────────────────────────────────────
     statusTerminalCount: '{count} 台のターミナル',

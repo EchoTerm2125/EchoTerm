@@ -180,6 +180,12 @@ window.api = {
   onPanelClosed: vi.fn(() => vi.fn()),
   panelPushTheme: vi.fn(),
   panelShowResults: vi.fn(),
+  // Session snapshot (Restore)
+  sessionLoad: vi.fn(() => Promise.resolve({ snapshot: null })),
+  sessionSave: vi.fn(),
+  sessionReserveIds: vi.fn((count) => Promise.resolve(
+    Array.from({ length: count }, (_, i) => _nextApiId + i))),
+  onSessionSaveError: vi.fn(() => vi.fn()),
 } as unknown as WindowApi;
 // Inject the fake through the renderer IPC gateway
 setIpcClient(window.api);
@@ -209,7 +215,7 @@ const DOM_IDS = [
   'statusTerminalCount', 'statusEcho', 'statusShell',
   'btnSettings', 'optionsPanel', 'optTabCloseConfirm', 'optWindowCloseConfirm',
   'optGroupCloseConfirm', 'optReconnectConfirm', 'optSshJumpWarn', 'optPastePreview', 'optRightClickPaste',
-  'optFolderAutoEcho',
+  'optFolderAutoEcho', 'optRestoreSession',
   'tabCtxMoveSep', 'tabCtxMoveItem', 'tabCtxGroupSubmenu',
   'btnResetSettings', 'btnClearSshData', 'btnClearCache', 'btnClearAllData',
   'contextMenu', 'tabContextMenu', 'groupContextMenu', 'sshContextMenu',
@@ -247,7 +253,7 @@ function scaffoldDom() {
                id === 'optReconnectConfirm' ||
                id === 'optSshJumpWarn' || id === 'optPastePreview' ||
                id === 'optRightClickPaste' || id === 'pastePreviewDontShow' ||
-               id === 'optFolderAutoEcho' ||
+               id === 'optFolderAutoEcho' || id === 'optRestoreSession' ||
                id === 'optCheckUpdates' || id === 'optIncludePrerelease') {
       el = document.createElement('input');
       el.type = 'checkbox';

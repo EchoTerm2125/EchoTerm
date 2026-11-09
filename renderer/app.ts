@@ -41,7 +41,7 @@
 
     // ── Bootstrap ──
     App.Groups.createGroup(App.__('groupDefaultName', { n: 1 }), true);
-    await App.Terminal.spawnTerminal(state.selectedShell);
+    const initialPaneId = await App.Terminal.spawnTerminal(state.selectedShell);
 
     // ── Wire UI ──
     App.UI.bindToolbar();
@@ -76,6 +76,13 @@
 
     // ── Close confirmation dialog ──
     App.Menus.bindCloseConfirmDialog();
+
+    // ── Restore the last layout ──
+    // Waits for the startup unlock dialog: the layout is read back only once the
+    // vault is unlocked, and cancelling means "skip Restore for this launch".
+    // Panes come back Dormant; only those visible in the Active group connect.
+    if (App.SshPanel && App.SshPanel.unlockSettled) await App.SshPanel.unlockSettled();
+    if (App.Session) await App.Session.restore(initialPaneId);
 
     // ── Locale change listener (re-render dynamic UI when language switches) ──
     App.i18n.onLocaleChange(() => {

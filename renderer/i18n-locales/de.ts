@@ -60,6 +60,15 @@
     paneEchoLabel: 'Echo',
     paneCloseTitle: 'Schließen',
     paneDismissTitle: 'Schließen',
+    paneConnectTitle: 'Verbinden',
+    paneDormantNotice: 'Wiederhergestellt — noch nicht verbunden',
+    paneDeletedConnection: 'Gelöschte Verbindung',
+    toastRestoreSkippedLocked: 'Wiederherstellung für diesen Start übersprungen: SSH-Daten sind gesperrt.',
+    toastRestoreFailed: 'Die letzte Sitzung konnte nicht wiederhergestellt werden. Neustart.',
+    toastSnapshotSaveFailed: 'Sitzung konnte nicht gespeichert werden. Beim nächsten Start wird evtl. nicht alles wiederhergestellt.',
+    optionsTitleStartup: 'Start',
+    optionsRestoreSession: 'Terminals beim Start wiederherstellen',
+    sshPanelLocked: 'SSH-Daten entsperren, um Verbindungen und Benutzer zu nutzen.',
 
     // ── Status bar ───────────────────────────────────────────────────────────
     statusTerminalCount: 'Terminals: {count}',

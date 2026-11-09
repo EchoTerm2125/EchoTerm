@@ -16,7 +16,7 @@
     'skipTabCloseConfirm', 'skipCloseConfirm', 'skipGroupCloseConfirm',
     'skipReconnectConfirm',
     'skipSshJumpWarn', 'skipPastePreview', 'skipRightClickPaste',
-    'skipAutoEchoFolderOpen',
+    'skipAutoEchoFolderOpen', 'restoreSession',
     'i18nLocale', 'sshSidebarWidth',
   ];
 
@@ -214,6 +214,13 @@
       ? App.Echo.isFolderAutoEchoEnabled()
       : localStorage.getItem('skipAutoEchoFolderOpen') !== 'true';
 
+    // Restore the last layout on startup (default: on)
+    if (App.optRestoreSession) {
+      App.optRestoreSession.checked = App.Session
+        ? App.Session.isEnabled()
+        : localStorage.getItem('restoreSession') !== 'false';
+    }
+
     // Language page — rebuild list and reflect current locale
     const langSearch = document.getElementById('langSearchInput');
     if (langSearch) langSearch.value = '';
@@ -410,6 +417,16 @@
       else if (App.optFolderAutoEcho.checked) localStorage.removeItem('skipAutoEchoFolderOpen');
       else localStorage.setItem('skipAutoEchoFolderOpen', 'true');
     });
+
+    // Restore terminals on startup toggle. Turning it back on records the
+    // current layout right away, so "on" never means "from the next change".
+    if (App.optRestoreSession) {
+      App.optRestoreSession.addEventListener('change', () => {
+        const enabled = App.optRestoreSession.checked;
+        localStorage.setItem('restoreSession', enabled ? 'true' : 'false');
+        if (enabled) App.Session?.saveNow?.();
+      });
+    }
 
     // ── Danger Zone: reset all settings ──
     const btnResetSettings = document.getElementById('btnResetSettings');

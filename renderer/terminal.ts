@@ -12,42 +12,40 @@ import './icons';
 
   let lastAutoRespawnAt = 0; // debounce auto-respawn to avoid a spawn→exit loop
   let _pasteEscHandler = null; // current paste-preview document keydown handler
+  // Restore builds its Panes before it is ready to connect any of them; while
+  // this is set, becoming visible must not start a session.
+  let _suppressAutoConnect = false;
 
-  // ─── Spawn terminal ─────────────────────────────────────────────────────────
-  async function spawnTerminal(shell) {
-    const shellKey = shell || state.selectedShell;
+  // ─── Pane mounting ─────────────────────────────────────────────────────────
+  // A Pane's tab, box and xterm exist from the moment the Pane does. Only a live
+  // Pane has a session behind it: a Dormant pane (Restore) starts one on Connect
+  // or the first time it becomes visible. Both paths share this builder so their
+  // DOM and event wiring cannot drift apart.
 
-    if (shellKey === 'gitbash' && !App.gitBashPath) {
-      const located = await App.UI.promptLocateGitBash();
-      if (!located) {
-        App.UI.showToast(App.__('toastGitBashNotFound'));
-        return null;
-      }
-    }
+  function mountPane(spec) {
+    const id = spec.id;
+    const shell = spec.shell;
+    const dormant = !!spec.dormant;
+    const label = spec.label || null;
+    const host = spec.host || null;
+    const username = spec.username || null;
+    const connectionId = spec.connectionId || null;
+    const groupId = spec.groupId || state.activeGroupId;
 
-    const result = await api.spawnTerminal(shellKey);
-    if (result.error) {
-      const msg = result.errorCode === 'UNKNOWN_SHELL'
-        ? App.__('errorUnknownShell', { shell: shellKey })
-        : result.errorCode === 'GIT_BASH_NOT_FOUND'
-        ? App.__('toastGitBashNotFound')
-        : result.error;
-      App.UI.showToast(App.__('toastError', { message: msg }));
-      return null;
-    }
-
-    const { id } = result;
-
-    // Create pane element
     const paneEl = document.createElement('div');
-    paneEl.className = 'pane';
+    paneEl.className = dormant ? 'pane pane-dormant' : 'pane';
     paneEl.dataset.termId = String(id);
 
-    // Title bar
+    // Title bar — a Dormant pane offers Connect where a live SSH pane offers
+    // Reconnect, and a local Pane offers neither.
     const titlebar = document.createElement('div');
     titlebar.className = 'pane-titlebar';
+    const hasConnectControl = shell === 'ssh' || dormant;
     titlebar.innerHTML = `
-      <span class="pane-label"><span class="pane-name">${App.getShellName(shellKey)}</span></span>
+      <span class="pane-label">${shell === 'ssh' ? '🖥️ ' : ''}<span class="pane-name"></span></span>
+      ${hasConnectControl
+        ? `<button class="pane-reconnect" data-i18n-title="${dormant ? 'paneConnectTitle' : 'paneReconnectTitle'}" title="${dormant ? 'Connect' : 'Reconnect'}">${dormant ? App.Icons.play : App.Icons.refresh}</button>`
+        : ''}
       <button class="pane-paste" data-i18n-title="panePasteTitle" title="Paste">${App.Icons.clipboard}</button>
       <label class="pane-checkbox" data-i18n-title="paneEchoTitle" title="Echo input to this terminal" style="display:none">
         <input type="checkbox" />
@@ -61,6 +59,13 @@ import './icons';
     const xtermDiv = document.createElement('div');
     xtermDiv.className = 'xterm-container';
     paneEl.appendChild(xtermDiv);
+
+    if (dormant) {
+      const notice = document.createElement('div');
+      notice.className = 'pane-dormant-notice';
+      notice.textContent = App.__('paneDormantNotice');
+      paneEl.appendChild(notice);
+    }
 
     // Initialize xterm
     const term = new Terminal({
@@ -127,12 +132,26 @@ import './icons';
 
     term.onResize(({ cols, rows }) => { api.resize(id, cols, rows); });
 
-    const termState = { id, shell: shellKey, term, fitAddon, paneEl, titlebar, customName: null, outBuf: '', pwPrompt: false };
+    const termState = {
+      id, shell, term, fitAddon, paneEl, titlebar,
+      customName: spec.customName || (shell === 'ssh' ? label : null),
+      label, host, username, connectionId,
+      outBuf: '', pwPrompt: false, _reconnecting: false,
+      _dormant: dormant,
+      // A restored Pane rejoins the Echo selection once its session is up.
+      _restoreEcho: !!spec.echo,
+    };
     state.terminals.set(id, termState);
     state.paneOrder.push(id);
-    state.activeTerminalId = id;
+    if (!dormant) state.activeTerminalId = id;
+    renderPaneTitle(termState);
 
-    const groupId = state.activeGroupId;
+    // A live SSH pane with no Connection to reconnect to keeps the button away.
+    const reconnectBtn = titlebar.querySelector('.pane-reconnect');
+    if (shell === 'ssh' && !dormant && !connectionId && reconnectBtn) {
+      reconnectBtn.style.display = 'none';
+    }
+
     state.terminalGroups.set(id, groupId);
     if (state.groups.has(groupId)) {
       state.groups.get(groupId).terminalIds.add(id);
@@ -142,6 +161,9 @@ import './icons';
     App.container.appendChild(paneEl);
 
     term.onData((data) => {
+      // A Dormant pane has nothing to write to; its keystrokes are not queued.
+      const live = state.terminals.get(id);
+      if (!live || live._dormant) return;
       if (state.echoModeActive) {
         if (state.echoSelection.has(id)) {
           api.write(id, data);
@@ -177,13 +199,27 @@ import './icons';
 
     titlebar.querySelector('.pane-close').addEventListener('click', () => closeTerminal(id));
 
+    if (reconnectBtn) {
+      reconnectBtn.addEventListener('click', async (e) => {
+        e.stopPropagation();
+        const current = state.terminals.get(id);
+        if (current && current._dormant) {
+          const connected = await connectPane(id);
+          if (connected) focusTerminal(id);
+          return;
+        }
+        requestReconnect(id);
+      });
+    }
+
     titlebar.querySelector('.pane-paste').addEventListener('click', (e) => {
       e.stopPropagation();
       pasteToTerminal(id);
     });
 
     paneEl.addEventListener('click', (e) => {
-      if (e.target.closest('.pane-checkbox') || e.target.closest('.pane-close') || e.target.closest('.pane-paste')) return;
+      if (e.target.closest('.pane-checkbox') || e.target.closest('.pane-close') ||
+          e.target.closest('.pane-paste') || e.target.closest('.pane-reconnect')) return;
       if (state.echoModeActive) {
         // A title-bar click is enable-then-activate: a deselected terminal is
         // added to the echo selection (never removed) and made the active
@@ -201,7 +237,8 @@ import './icons';
     // A double click on the title bar makes echo exclusive to this terminal:
     // it is enabled and every other terminal in the group is disabled.
     paneEl.addEventListener('dblclick', (e) => {
-      if (e.target.closest('.pane-checkbox') || e.target.closest('.pane-close') || e.target.closest('.pane-paste')) return;
+      if (e.target.closest('.pane-checkbox') || e.target.closest('.pane-close') ||
+          e.target.closest('.pane-paste') || e.target.closest('.pane-reconnect')) return;
       if (!state.echoModeActive) return;
       if (!e.target.closest('.pane-titlebar')) return;
       App.Echo.soloEchoOnTerminal(id);
@@ -209,25 +246,193 @@ import './icons';
     });
 
     App.Menus.bindContextMenu(paneEl, id);
-    App.Tabs.addTab(id, shellKey);
+    App.Tabs.addTab(id, shell, paneName(termState), connectionIdentity(termState));
 
-    if (state.echoModeActive) {
+    if (!dormant && state.echoModeActive) {
       state.echoSelection.add(id);
       paneEl.classList.add('echo-selected');
       const chk = titlebar.querySelector('input[type="checkbox"]');
       if (chk) chk.checked = true;
       const cbLabel = titlebar.querySelector('.pane-checkbox');
       if (cbLabel) { cbLabel.style.display = ''; cbLabel.classList.add('selected'); }
+    }
+
+    return termState;
+  }
+
+  // ─── Spawn terminal ─────────────────────────────────────────────────────────
+  async function spawnTerminal(shell) {
+    const shellKey = shell || state.selectedShell;
+
+    if (shellKey === 'gitbash' && !App.gitBashPath) {
+      const located = await App.UI.promptLocateGitBash();
+      if (!located) {
+        App.UI.showToast(App.__('toastGitBashNotFound'));
+        return null;
+      }
+    }
+
+    const result = await api.spawnTerminal(shellKey);
+    if (result.error) {
+      App.UI.showToast(App.__('toastError', { message: connectErrorText(shellKey, result) }));
+      return null;
+    }
+
+    const termState = mountPane({ id: result.id, shell: shellKey });
+    afterLiveMount(termState);
+    return result.id;
+  }
+
+  // A live Pane's post-mount behaviour: reveal it, then focus and size it.
+  function afterLiveMount(termState) {
+    const id = termState.id;
+    if (state.echoModeActive) {
       showAllPanes();
       App.Echo.applyGridLayout();
     } else if (!state.splitInstance && state.gridSplits.length === 0) {
       setSinglePane(id);
     }
-
     focusTerminal(id);
-    setTimeout(() => fitAddon.fit(), 300);
+    setTimeout(() => termState.fitAddon.fit(), 300);
     App.UI.updateStatusBar();
-    return id;
+  }
+
+  // ─── Dormant panes ─────────────────────────────────────────────────────────
+  // A Dormant pane has an id but no session. Connecting it starts one under that
+  // same id, so tabs, echo selection and search keep working unchanged.
+
+  function setConnectBusy(termState, busy) {
+    const btn = termState.titlebar.querySelector('.pane-reconnect');
+    if (btn) btn.disabled = !!busy;
+  }
+
+  function connectErrorText(shellKey, result) {
+    if (result.errorCode === 'GIT_BASH_NOT_FOUND') return App.__('toastGitBashNotFound');
+    if (result.errorCode === 'UNKNOWN_SHELL') return App.__('errorUnknownShell', { shell: shellKey });
+    if (result.errorCode === 'CONNECTION_NOT_FOUND' || result.errorCode === 'SESSION_NOT_FOUND') {
+      return App.__('errorConnectionNotFound');
+    }
+    if (result.errorCode === 'SESSION_CONFIG_FAILED') return App.__('errorSessionConfig');
+    if (result.errorCode === 'JUMP_CHAIN_INVALID') return App.__('errorJumpChainInvalid');
+    return result.error;
+  }
+
+  // Returns true when the Pane is live afterwards. Failures are reported here:
+  // both the Connect button and Reconnect drive this path.
+  async function connectPane(id) {
+    const termState = state.terminals.get(id);
+    if (!termState || !termState._dormant || termState._connecting) return false;
+
+    termState._connecting = true;
+    setConnectBusy(termState, true);
+
+    const fail = (message) => {
+      const current = state.terminals.get(id);
+      if (current) {
+        current._connecting = false;
+        setConnectBusy(current, false);
+      }
+      App.UI.showToast(App.__(
+        termState.shell === 'ssh' ? 'toastSshError' : 'toastError',
+        { message },
+      ));
+      return false;
+    };
+
+    try {
+      if (termState.shell === 'gitbash' && !App.gitBashPath) {
+        const located = await App.UI.promptLocateGitBash();
+        if (!located) {
+          const current = state.terminals.get(id);
+          if (current) { current._connecting = false; setConnectBusy(current, false); }
+          App.UI.showToast(App.__('toastGitBashNotFound'));
+          return false;
+        }
+      }
+
+      const result = termState.shell === 'ssh'
+        ? await api.sshConnect(termState.connectionId, id)
+        : await api.spawnTerminal(termState.shell, id);
+
+      if (result && result.error) return fail(connectErrorText(termState.shell, result));
+
+      const current = state.terminals.get(id);
+      if (!current) return false; // Pane closed while connecting
+      current._connecting = false;
+      setConnectBusy(current, false);
+      markPaneLive(current, result);
+      return true;
+    } catch (err) {
+      return fail((err && err.message) || String(err));
+    }
+  }
+
+  // Turn a Dormant pane into a live one, keeping its id, tab and displayed text.
+  function markPaneLive(termState, result) {
+    termState._dormant = false;
+    termState._exited = false;
+    termState.paneEl.classList.remove('pane-dormant');
+    const notice = termState.paneEl.querySelector('.pane-dormant-notice');
+    if (notice) notice.remove();
+
+    const reconnectBtn = termState.titlebar.querySelector('.pane-reconnect');
+    if (reconnectBtn) {
+      // A local Pane has nothing to reconnect to; the control was only there
+      // because this Pane arrived Dormant.
+      if (termState.shell !== 'ssh') {
+        reconnectBtn.style.display = 'none';
+      } else {
+        reconnectBtn.setAttribute('data-i18n-title', 'paneReconnectTitle');
+        reconnectBtn.title = App.__('paneReconnectTitle');
+      }
+    }
+
+    if (termState.shell === 'ssh' && result) {
+      termState.label = result.label || termState.label;
+      termState.host = result.host || termState.host;
+      if (result.username !== undefined) termState.username = result.username;
+      if (!termState.connectionId && result.connectionId) termState.connectionId = result.connectionId;
+    }
+
+    renderPaneTitle(termState);
+    App.Tabs.refreshTitle(termState);
+
+    // The Echo selection is restored per Pane, but only once a session exists:
+    // a Dormant pane must never receive echo input it cannot deliver.
+    if (state.echoModeActive && termState._restoreEcho &&
+        state.terminalGroups.get(termState.id) === state.activeGroupId) {
+      App.Echo.enableEchoOnTerminal(termState.id);
+    }
+    delete termState._restoreEcho;
+
+    setTimeout(() => termState.fitAddon.fit(), 50);
+    App.UI.updateStatusBar();
+  }
+
+  // Connect every Dormant pane of the Active group that is currently shown.
+  function autoConnectVisible() {
+    if (_suppressAutoConnect) return;
+    const activeGroup = state.activeGroupId;
+    for (const [id, t] of state.terminals) {
+      if (!t._dormant) continue;
+      if (state.terminalGroups.get(id) !== activeGroup) continue;
+      if (t.paneEl.style.display === 'none') continue;
+      connectPane(id);
+    }
+  }
+
+  // ─── SSH Terminal Spawning ─────────────────────────────────────────────────
+  async function spawnSshTerminal(spawnResult) {
+    const termState = mountPane({
+      id: spawnResult.id,
+      shell: 'ssh',
+      label: spawnResult.label,
+      host: spawnResult.host,
+      username: spawnResult.username,
+      connectionId: spawnResult.connectionId,
+    });
+    afterLiveMount(termState);
+    return spawnResult.id;
   }
 
   function focusTerminal(id) {
@@ -251,6 +456,8 @@ import './icons';
       if (!state.isRenaming) termState.term.focus();
     }, 20);
     App.Tabs.updateTabSelection(id);
+    autoConnectVisible();
+    App.Session?.scheduleSave?.();
   }
 
   function closeTerminal(id) {
@@ -303,6 +510,7 @@ import './icons';
       }
     }
     App.UI.updateStatusBar();
+    App.Session?.scheduleSave?.();
   }
 
   function handleTerminalExit(id) {
@@ -366,6 +574,7 @@ import './icons';
       else state.activeTerminalId = null;
     }
     App.UI.updateStatusBar();
+    App.Session?.scheduleSave?.();
   }
 
   // ─── SSH pane state ────────────────────────────────────────────────────────
@@ -425,7 +634,15 @@ import './icons';
   // and error reporting. `skipped` means there was nothing to reconnect.
   async function reconnectTerminal(id) {
     let termState = state.terminals.get(id);
-    if (!termState || termState.shell !== 'ssh' || !termState.connectionId) return { skipped: true };
+    if (!termState) return { skipped: true };
+
+    // A Dormant pane has nothing to replace: connecting it is the whole job.
+    if (termState._dormant) {
+      const connected = await connectPane(id);
+      return connected ? { success: true } : { skipped: true };
+    }
+
+    if (termState.shell !== 'ssh' || !termState.connectionId) return { skipped: true };
     if (termState._reconnecting) return { skipped: true };
 
     termState._reconnecting = true;
@@ -478,7 +695,7 @@ import './icons';
         if (r.error) App.UI.showToast(App.__('toastSshError', { message: r.error }));
       });
     };
-    if (termState._exited) {
+    if (termState._exited || termState._dormant) {
       run();
       return;
     }
@@ -613,221 +830,6 @@ import './icons';
     }
     identityEl.textContent = `(${identity})`;
     labelEl.title = paneTitle(termState);
-  }
-
-  // ─── SSH Terminal Spawning ─────────────────────────────────────────────────
-  async function spawnSshTerminal(spawnResult) {
-    const { id, label, host, username } = spawnResult;
-    const shellKey = 'ssh';
-
-    // Create pane element
-    const paneEl = document.createElement('div');
-    paneEl.className = 'pane';
-    paneEl.dataset.termId = String(id);
-
-    // Title bar
-    const titlebar = document.createElement('div');
-    titlebar.className = 'pane-titlebar';
-    const displayName = label || `${host || App.__('shellSsh')}`;
-    titlebar.innerHTML = `
-      <span class="pane-label">🖥️ <span class="pane-name">${escHtml(displayName)}</span></span>
-      <button class="pane-reconnect" data-i18n-title="paneReconnectTitle" title="Reconnect">${App.Icons.refresh}</button>
-      <button class="pane-paste" data-i18n-title="panePasteTitle" title="Paste">${App.Icons.clipboard}</button>
-      <label class="pane-checkbox" data-i18n-title="paneEchoTitle" title="Echo input to this terminal" style="display:none">
-        <input type="checkbox" />
-        <span data-i18n="paneEchoLabel">Echo</span>
-      </label>
-      <button class="pane-close" data-i18n-title="paneCloseTitle" title="Close">×</button>
-    `;
-    paneEl.appendChild(titlebar);
-
-    // xterm container
-    const xtermDiv = document.createElement('div');
-    xtermDiv.className = 'xterm-container';
-    paneEl.appendChild(xtermDiv);
-
-    // Initialize xterm
-    const term = new Terminal({
-      cursorBlink: true,
-      cursorStyle: 'bar',
-      fontSize: App.Theme.getTermFontSize(),
-      scrollback: App.Theme.getMaxRetainedLines(),
-      fontFamily: "'Cascadia Code', 'Fira Code', 'Consolas', 'Courier New', 'Microsoft YaHei', 'Noto Sans Mono CJK SC', 'Noto Sans CJK SC', 'PingFang SC', 'WenQuanYi Micro Hei', monospace",
-      bracketedPasteMode: true,
-      // Reflow the line under the cursor on resize (default is to truncate it).
-      // Echo-mode grid resizes constantly; truncating the input line corrupts
-      // long commands so copying the wrapped text yields stray newlines.
-      reflowCursorLine: true,
-      // Required by @xterm/addon-search's decorations (registerDecoration is
-      // still an experimental xterm API).
-      allowProposedApi: true,
-      theme: App.Theme.getXtermTheme(),
-    } as any);
-
-    const FitAddonClass: any = FitAddon.FitAddon || FitAddon;
-    const fitAddon = new FitAddonClass();
-    term.loadAddon(fitAddon);
-    term.open(xtermDiv);
-
-    // Intercept paste event for multi-line preview / echo paste-all
-    xtermDiv.addEventListener('paste', (e) => {
-      if (fromFindBar(e)) return;
-      // Normalize here, not just in pasteToTerminal(): the echo-mode branch below
-      // writes this text straight to the pty and never passes through
-      // pasteToTerminal(), so this is its only CRLF guard.
-      const text = normalizeNewlines(e.clipboardData ? e.clipboardData.getData('text') : '');
-      if (!text) return;
-      if (state.echoModeActive) {
-        e.preventDefault();
-        e.stopPropagation();
-        if (text.includes('\n') && localStorage.getItem('skipPastePreview') !== 'true') showPastePreview(null, text);
-        else for (const bid of state.echoSelection) api.write(bid, bracketFor(bid, text));
-        return;
-      }
-      if (text.includes('\n')) {
-        e.preventDefault();
-        e.stopPropagation();
-        if (localStorage.getItem('skipPastePreview') === 'true') pasteToTerminal(id, text);
-        else showPastePreview(id, text);
-      }
-    }, true);
-
-    // Right-click copy/paste
-    xtermDiv.addEventListener('contextmenu', (e) => {
-      if (fromFindBar(e)) return;
-      if (localStorage.getItem('skipRightClickPaste') !== 'false') return;
-      e.preventDefault();
-      e.stopImmediatePropagation();
-      const sel = term.getSelection();
-      if (sel) {
-        const out = trimSelection(sel);
-        if (out) navigator.clipboard.writeText(out).catch(() => {});
-        term.clearSelection();
-        term.focus();
-      } else {
-        pasteToTerminal(state.echoModeActive ? null : id);
-      }
-    }, true);
-
-    term.onResize(({ cols, rows }) => { api.resize(id, cols, rows); });
-
-    const termState = { id, shell: shellKey, term, fitAddon, paneEl, titlebar, customName: label || null, label, host, username, connectionId: spawnResult.connectionId, outBuf: '', pwPrompt: false, _reconnecting: false };
-    state.terminals.set(id, termState);
-    state.paneOrder.push(id);
-    state.activeTerminalId = id;
-    renderPaneTitle(termState);
-    // A pane with no Connection to reconnect to keeps the button out of the way.
-    if (!termState.connectionId) {
-      const rc = titlebar.querySelector('.pane-reconnect');
-      if (rc) rc.style.display = 'none';
-    }
-
-    const groupId = state.activeGroupId;
-    state.terminalGroups.set(id, groupId);
-    if (state.groups.has(groupId)) {
-      state.groups.get(groupId).terminalIds.add(id);
-    }
-    App.Groups.updateGroupTabs();
-
-    App.container.appendChild(paneEl);
-
-    term.onData((data) => {
-      if (state.echoModeActive) {
-        if (state.echoSelection.has(id)) {
-          api.write(id, data);
-          for (const bid of state.echoSelection) {
-            if (bid !== id) api.write(bid, data);
-          }
-        }
-      } else {
-        api.write(id, data);
-      }
-    });
-
-    setTimeout(() => fitAddon.fit(), 50);
-
-    // Titlebar events
-    const checkbox = titlebar.querySelector('input[type="checkbox"]');
-    checkbox.addEventListener('change', () => {
-      if (checkbox.checked) {
-        state.echoSelection.add(id);
-        paneEl.classList.add('echo-selected');
-        titlebar.querySelector('.pane-checkbox').classList.add('selected');
-        App.Terminal.focusTerminal(id);
-        App.Echo.refocusEchoTerminal();
-      } else {
-        state.echoSelection.delete(id);
-        paneEl.classList.remove('echo-selected');
-        titlebar.querySelector('.pane-checkbox').classList.remove('selected');
-        App.Echo.refocusEchoTerminal();
-      }
-      if (state.echoModeActive) App.Echo.updateEchoAllButton();
-      App.UI.updateStatusBar();
-    });
-
-    titlebar.querySelector('.pane-close').addEventListener('click', () => closeTerminal(id));
-
-    titlebar.querySelector('.pane-reconnect').addEventListener('click', (e) => {
-      e.stopPropagation();
-      requestReconnect(id);
-    });
-
-    titlebar.querySelector('.pane-paste').addEventListener('click', (e) => {
-      e.stopPropagation();
-      pasteToTerminal(id);
-    });
-
-    paneEl.addEventListener('click', (e) => {
-      if (e.target.closest('.pane-checkbox') || e.target.closest('.pane-close') || e.target.closest('.pane-paste') || e.target.closest('.pane-reconnect')) return;
-      if (state.echoModeActive) {
-        // A title-bar click is enable-then-activate: a deselected terminal is
-        // added to the echo selection (never removed) and made the active
-        // terminal. Body clicks on a deselected terminal remain a dead zone.
-        if (e.target.closest('.pane-titlebar')) {
-          App.Echo.enableEchoOnTerminal(id);
-          focusTerminal(id);
-          return;
-        }
-        if (!state.echoSelection.has(id)) return;
-      }
-      focusTerminal(id);
-    });
-
-    // A double click on the title bar makes echo exclusive to this terminal:
-    // it is enabled and every other terminal in the group is disabled.
-    paneEl.addEventListener('dblclick', (e) => {
-      if (e.target.closest('.pane-checkbox') || e.target.closest('.pane-close') || e.target.closest('.pane-paste') || e.target.closest('.pane-reconnect')) return;
-      if (!state.echoModeActive) return;
-      if (!e.target.closest('.pane-titlebar')) return;
-      App.Echo.soloEchoOnTerminal(id);
-      focusTerminal(id);
-    });
-
-    App.Menus.bindContextMenu(paneEl, id);
-    App.Tabs.addTab(id, shellKey, paneName(termState), connectionIdentity(termState));
-
-    if (state.echoModeActive) {
-      state.echoSelection.add(id);
-      paneEl.classList.add('echo-selected');
-      const chk = titlebar.querySelector('input[type="checkbox"]');
-      if (chk) chk.checked = true;
-      const cbLabel = titlebar.querySelector('.pane-checkbox');
-      if (cbLabel) { cbLabel.style.display = ''; cbLabel.classList.add('selected'); }
-      showAllPanes();
-      App.Echo.applyGridLayout();
-    } else if (!state.splitInstance && state.gridSplits.length === 0) {
-      setSinglePane(id);
-    }
-
-    focusTerminal(id);
-    setTimeout(() => fitAddon.fit(), 300);
-    App.UI.updateStatusBar();
-    return id;
-  }
-
-  function escHtml(str) {
-    if (!str) return '';
-    return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
   }
 
   // The find bar lives inside the pane (its terminal screen) but is not a
@@ -983,6 +985,12 @@ import './icons';
     return sel.replace(/\s+$/, '');
   }
 
+  // Restore builds the whole layout before anything connects; it flips this off
+  // once the layout is in place and instead asks for visible Panes directly.
+  function setSuppressAutoConnect(value) {
+    _suppressAutoConnect = !!value;
+  }
+
   // ─── Expose ─────────────────────────────────────────────────────────────────
   App.Terminal = {
     spawnTerminal, spawnSshTerminal, focusTerminal, closeTerminal, handleTerminalExit,
@@ -991,6 +999,7 @@ import './icons';
     paneName, connectionIdentity, paneTitle, renderPaneTitle,
     reconnectTerminal, requestReconnect, reconnectTabs,
     refocus, trimSelection,
+    mountPane, connectPane, autoConnectVisible, setSuppressAutoConnect,
   };
 })();
 

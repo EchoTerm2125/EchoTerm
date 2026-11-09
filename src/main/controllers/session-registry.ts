@@ -20,6 +20,16 @@ export class SessionRegistry {
     return this.nextId++;
   }
 
+  /**
+   * Hand out ids for Panes that do not have a session yet (Restore). Advancing
+   * the counter keeps later spawns from colliding with the reserved range.
+   */
+  reserveIds(count: number): number[] {
+    const ids: number[] = [];
+    for (let i = 0; i < count; i++) ids.push(this.nextId++);
+    return ids;
+  }
+
   register(id: number, session: Session): void {
     this.sessions.set(id, session);
   }

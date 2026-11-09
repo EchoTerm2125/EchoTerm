@@ -25,6 +25,40 @@ export interface SpawnResult {
   errorCode?: 'GIT_BASH_NOT_FOUND' | 'UNKNOWN_SHELL' | 'CONNECTION_NOT_FOUND' | string;
 }
 
+// ─── Session snapshot (Restore) ──────────────────────────────────────────────
+/** One remembered Pane. Deliberately holds no host or user name. */
+export interface SessionPaneRecord {
+  shell: string;
+  /** SSH panes: the Connection this Pane was opened from. */
+  connectionId?: string | null;
+  /** A user-given Pane name, when it differs from the Connection's. */
+  customName?: string | null;
+  /** Whether the Pane was part of its Group's Echo selection. */
+  echo?: boolean;
+}
+
+export interface SessionGroupRecord {
+  name: string;
+  /** Index into `panes` of the Pane the Group last showed. */
+  activePane?: number | null;
+  echoActive?: boolean;
+  panes: SessionPaneRecord[];
+}
+
+/** The last layout, as persisted for Restore. */
+export interface SessionSnapshot {
+  version: 1;
+  /** Index into `groups` of the Active group. */
+  activeGroup?: number;
+  groups: SessionGroupRecord[];
+}
+
+export interface SessionLoadResult {
+  snapshot: SessionSnapshot | null;
+  /** The stored file existed but could not be read; main has deleted it. */
+  corrupt?: boolean;
+}
+
 // ─── SSH models ──────────────────────────────────────────────────────────────
 export type SshAuthType = 'password' | 'keyfile';
 
@@ -307,7 +341,8 @@ export interface WindowApi {
   locateGitBash(): Promise<{ path: string | null }>;
 
   // Terminal lifecycle
-  spawnTerminal(shell: string): Promise<SpawnResult>;
+  /** `sessionId` starts the session under an already reserved id (Restore). */
+  spawnTerminal(shell: string, sessionId?: number): Promise<SpawnResult>;
   write(id: number, data: string): void;
   resize(id: number, cols: number, rows: number): void;
   killTerminal(id: number): void;
@@ -384,7 +419,8 @@ export interface WindowApi {
   sshConnectionFolderDuplicate(folderId: string): Promise<IpcOutcome & { folder?: SshConnectionFolder }>;
 
   // SSH actions
-  sshConnect(connectionId: string): Promise<SpawnResult>;
+  /** `sessionId` starts the session under an already reserved id (Restore). */
+  sshConnect(connectionId: string, sessionId?: number): Promise<SpawnResult>;
   /** Replace a live pane's session with a fresh one to the same Connection,
    *  keeping the pane's id (and so its displayed content). `size` is the
    *  pane's current geometry, so the replacement pty never needs the
@@ -411,4 +447,12 @@ export interface WindowApi {
   panelPushTheme(info: SearchPanelTheme): void;
   /** Push the active group's last search (null when it has none). */
   panelShowResults(state: PanelGroupState | null): void;
+
+  // Session snapshot (Restore)
+  sessionLoad(): Promise<SessionLoadResult>;
+  /** Fire-and-forget: the last write wins, and the quit flush must not wait. */
+  sessionSave(snapshot: SessionSnapshot): void;
+  /** Reserve pane ids for the restored Panes that have no session yet. */
+  sessionReserveIds(count: number): Promise<number[]>;
+  onSessionSaveError(callback: (message: string) => void): () => void;
 }

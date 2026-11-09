@@ -60,6 +60,15 @@
     paneEchoLabel: '回显',
     paneCloseTitle: '关闭',
     paneDismissTitle: '关闭',
+    paneConnectTitle: '连接',
+    paneDormantNotice: '已恢复 — 尚未连接',
+    paneDeletedConnection: '已删除的连接',
+    toastRestoreSkippedLocked: '本次启动未恢复：SSH 数据未解锁。',
+    toastRestoreFailed: '无法恢复上次的工作阶段，已重新开始。',
+    toastSnapshotSaveFailed: '无法保存工作阶段，下次启动可能无法完整恢复。',
+    optionsTitleStartup: '启动',
+    optionsRestoreSession: '启动时恢复终端',
+    sshPanelLocked: '解锁 SSH 数据后才能使用连接和用户。',
 
     // ── Status bar ───────────────────────────────────────────────────────────
     statusTerminalCount: '{count} 个终端',

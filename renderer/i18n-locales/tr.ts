@@ -60,6 +60,15 @@
     paneEchoLabel: 'Yankı',
     paneCloseTitle: 'Kapat',
     paneDismissTitle: 'Kapat',
+    paneConnectTitle: 'Bağlan',
+    paneDormantNotice: 'Geri yüklendi — henüz bağlanmadı',
+    paneDeletedConnection: 'Silinmiş bağlantı',
+    toastRestoreSkippedLocked: 'Bu açılışta geri yükleme atlandı: SSH verileri kilitli.',
+    toastRestoreFailed: 'Son oturum geri yüklenemedi. Yeni baştan başlatılıyor.',
+    toastSnapshotSaveFailed: 'Oturum kaydedilemedi. Sonraki açılışta her şey geri yüklenmeyebilir.',
+    optionsTitleStartup: 'Başlangıç',
+    optionsRestoreSession: 'Açılışta terminalleri geri yükle',
+    sshPanelLocked: 'Bağlantıları ve kullanıcıları kullanmak için SSH verilerinin kilidini açın.',
 
     // ── Status bar ───────────────────────────────────────────────────────────
     statusTerminalCount: 'Terminal: {count}',

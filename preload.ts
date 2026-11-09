@@ -8,7 +8,7 @@ const api: WindowApi = {
   locateGitBash: () => ipcRenderer.invoke('shell:locate-gitbash'),
 
   // ─── Terminal lifecycle ─────────────────────────────────────────────────────
-  spawnTerminal: (shell) => ipcRenderer.invoke('terminal:spawn', shell),
+  spawnTerminal: (shell, sessionId) => ipcRenderer.invoke('terminal:spawn', shell, sessionId),
   write: (id, data) => ipcRenderer.send('terminal:write', id, data),
   resize: (id, cols, rows) => ipcRenderer.send('terminal:resize', id, cols, rows),
   killTerminal: (id) => ipcRenderer.send('terminal:kill', id),
@@ -118,7 +118,7 @@ const api: WindowApi = {
   sshConnectionFolderDelete: (folderId) => ipcRenderer.invoke('ssh:connection-folder-delete', folderId),
   sshConnectionFolderDuplicate: (folderId) => ipcRenderer.invoke('ssh:connection-folder-duplicate', folderId),
 
-  sshConnect: (connectionId) => ipcRenderer.invoke('ssh:connect', connectionId),
+  sshConnect: (connectionId, sessionId) => ipcRenderer.invoke('ssh:connect', connectionId, sessionId),
   sshReconnect: (sessionId, connectionId, size) => ipcRenderer.invoke('ssh:reconnect', sessionId, connectionId, size),
   sshOpenConnectionFolder: (folderId) => ipcRenderer.invoke('ssh:open-connection-folder', folderId),
   sshImportConfig: (filePath) => ipcRenderer.invoke('ssh:import-config', filePath),
@@ -147,6 +147,16 @@ const api: WindowApi = {
   },
   panelPushTheme: (info) => ipcRenderer.send('panel:theme-push', info),
   panelShowResults: (state) => ipcRenderer.send('panel:show', state),
+
+  // ─── Session snapshot (Restore) ────────────────────────────────────────────
+  sessionLoad: () => ipcRenderer.invoke('session:load'),
+  sessionSave: (snapshot) => ipcRenderer.send('session:save', snapshot),
+  sessionReserveIds: (count) => ipcRenderer.invoke('session:reserve-ids', count),
+  onSessionSaveError: (callback) => {
+    const listener = (_event: unknown, message: string) => callback(message);
+    ipcRenderer.on('session:save-error', listener);
+    return () => ipcRenderer.removeListener('session:save-error', listener);
+  },
 };
 
 contextBridge.exposeInMainWorld('api', api);

@@ -40,8 +40,12 @@ export class TerminalController {
     return { path: null };
   }
 
-  spawn(shellKey: string) {
-    const id = this.registry.createId();
+  spawn(shellKey: string, sessionId?: number) {
+    // Restore reserves ids for Panes it creates before their session starts;
+    // starting under that id is what keeps the Pane's identity stable.
+    const id = Number.isInteger(sessionId) && (sessionId as number) > 0
+      ? (sessionId as number)
+      : this.registry.createId();
     const events = sessionEvents(this.registry, id, this.send);
     const result = this.spawnShellSession.execute(shellKey, id, os.homedir(), events);
     if ('error' in result) return { error: result.error, errorCode: result.errorCode };

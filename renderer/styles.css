@@ -930,6 +930,24 @@ html, body {
   padding: calc(4px * var(--ui-scale));
 }
 
+/* Restored but not connected yet (docs/adr/0017) */
+.pane.pane-dormant .xterm-container {
+  opacity: 0.35;
+}
+
+.pane-dormant-notice {
+  position: absolute;
+  inset: calc(28px * var(--ui-scale)) 0 0 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: calc(16px * var(--ui-scale));
+  text-align: center;
+  font-size: calc(12px * var(--ui-scale));
+  color: var(--text-muted);
+  pointer-events: none;
+}
+
 /* Echo selected pane */
 .pane.echo-selected {
   box-shadow: inset 0 0 0 2px var(--echo-selected-border),
@@ -2313,6 +2331,35 @@ html, body {
 .ssh-sidebar.collapsed {
   width: 0;
   min-width: 0;
+}
+
+/* SSH panel lockout: visible but inert until the SSH data is unlocked */
+.ssh-sidebar.ssh-locked .ssh-search-bar,
+.ssh-sidebar.ssh-locked .ssh-sidebar-scroll > :not(.ssh-locked-notice),
+.ssh-sidebar.ssh-locked .ssh-header-actions > *:not(.ssh-password-btn) {
+  pointer-events: none;
+  opacity: 0.4;
+}
+
+.ssh-locked-notice {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: calc(10px * var(--ui-scale));
+  padding: calc(28px * var(--ui-scale)) calc(16px * var(--ui-scale));
+  text-align: center;
+}
+
+.ssh-locked-icon {
+  font-size: calc(26px * var(--ui-scale));
+  opacity: 0.7;
+}
+
+.ssh-locked-text {
+  margin: 0;
+  font-size: calc(12px * var(--ui-scale));
+  color: var(--text-muted);
+  line-height: 1.5;
 }
 
 .ssh-sidebar-header {

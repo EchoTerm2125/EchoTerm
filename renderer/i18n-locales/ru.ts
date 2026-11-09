@@ -60,6 +60,15 @@
     paneEchoLabel: 'Эхо',
     paneCloseTitle: 'Закрыть',
     paneDismissTitle: 'Закрыть',
+    paneConnectTitle: 'Подключить',
+    paneDormantNotice: 'Восстановлено — ещё не подключено',
+    paneDeletedConnection: 'Удалённое подключение',
+    toastRestoreSkippedLocked: 'Восстановление пропущено: данные SSH заблокированы.',
+    toastRestoreFailed: 'Не удалось восстановить прошлый сеанс. Начинаем заново.',
+    toastSnapshotSaveFailed: 'Не удалось сохранить сеанс. При следующем запуске восстановится не всё.',
+    optionsTitleStartup: 'Запуск',
+    optionsRestoreSession: 'Восстанавливать терминалы при запуске',
+    sshPanelLocked: 'Разблокируйте данные SSH, чтобы использовать подключения и пользователей.',
 
     // ── Status bar ───────────────────────────────────────────────────────────
     statusTerminalCount: 'Терминалов: {count}',

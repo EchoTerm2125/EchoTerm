@@ -60,6 +60,15 @@
     paneEchoLabel: '回顯',
     paneCloseTitle: '關閉',
     paneDismissTitle: '關閉',
+    paneConnectTitle: '連線',
+    paneDormantNotice: '已還原 — 尚未連線',
+    paneDeletedConnection: '已刪除的連線',
+    toastRestoreSkippedLocked: '本次啟動未還原：SSH 資料未解鎖。',
+    toastRestoreFailed: '無法還原上次的工作階段，已重新開始。',
+    toastSnapshotSaveFailed: '無法儲存工作階段，下次啟動可能無法完整還原。',
+    optionsTitleStartup: '啟動',
+    optionsRestoreSession: '啟動時還原終端機',
+    sshPanelLocked: '解鎖 SSH 資料後才能使用連線與使用者。',
 
     // ── Status bar ───────────────────────────────────────────────────────────
     statusTerminalCount: '{count} 個終端機',

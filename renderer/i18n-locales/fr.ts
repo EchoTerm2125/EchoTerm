@@ -60,6 +60,15 @@
     paneEchoLabel: 'Écho',
     paneCloseTitle: 'Fermer',
     paneDismissTitle: 'Fermer',
+    paneConnectTitle: 'Connecter',
+    paneDormantNotice: 'Restauré — pas encore connecté',
+    paneDeletedConnection: 'Connexion supprimée',
+    toastRestoreSkippedLocked: 'Restauration ignorée pour ce lancement : les données SSH sont verrouillées.',
+    toastRestoreFailed: 'Impossible de restaurer la dernière session. Nouveau départ.',
+    toastSnapshotSaveFailed: "Impossible d'enregistrer la session. Le prochain lancement pourrait ne pas tout restaurer.",
+    optionsTitleStartup: 'Démarrage',
+    optionsRestoreSession: 'Restaurer les terminaux au démarrage',
+    sshPanelLocked: 'Déverrouillez les données SSH pour utiliser les connexions et les utilisateurs.',
 
     // ── Status bar ───────────────────────────────────────────────────────────
     statusTerminalCount: 'Terminaux : {count}',

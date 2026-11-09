@@ -60,6 +60,15 @@
     paneEchoLabel: 'Tiếng vọng',
     paneCloseTitle: 'Đóng',
     paneDismissTitle: 'Đóng',
+    paneConnectTitle: 'Kết nối',
+    paneDormantNotice: 'Đã khôi phục — chưa kết nối',
+    paneDeletedConnection: 'Kết nối đã xóa',
+    toastRestoreSkippedLocked: 'Bỏ qua khôi phục lần này: dữ liệu SSH đang bị khóa.',
+    toastRestoreFailed: 'Không thể khôi phục phiên trước. Bắt đầu lại.',
+    toastSnapshotSaveFailed: 'Không thể lưu phiên. Lần mở tiếp theo có thể không khôi phục đầy đủ.',
+    optionsTitleStartup: 'Khởi động',
+    optionsRestoreSession: 'Khôi phục terminal khi khởi động',
+    sshPanelLocked: 'Mở khóa dữ liệu SSH để dùng kết nối và người dùng.',
 
     // ── Status bar ───────────────────────────────────────────────────────────
     statusTerminalCount: 'Terminal: {count}',

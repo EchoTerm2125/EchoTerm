@@ -60,6 +60,15 @@
     paneEchoLabel: '에코',
     paneCloseTitle: '닫기',
     paneDismissTitle: '닫기',
+    paneConnectTitle: '연결',
+    paneDormantNotice: '복원됨 — 아직 연결되지 않음',
+    paneDeletedConnection: '삭제된 연결',
+    toastRestoreSkippedLocked: '이번 실행에서는 복원하지 않았습니다: SSH 데이터가 잠겨 있습니다.',
+    toastRestoreFailed: '지난 세션을 복원하지 못했습니다. 새로 시작합니다.',
+    toastSnapshotSaveFailed: '세션을 저장하지 못했습니다. 다음 실행에서 완전히 복원되지 않을 수 있습니다.',
+    optionsTitleStartup: '시작',
+    optionsRestoreSession: '시작 시 터미널 복원',
+    sshPanelLocked: 'SSH 데이터를 잠금 해제해야 연결과 사용자를 사용할 수 있습니다.',
 
     // ── Status bar ───────────────────────────────────────────────────────────
     statusTerminalCount: '터미널 {count}개',

@@ -60,6 +60,15 @@
     paneEchoLabel: 'Echo',
     paneCloseTitle: 'Zamknij',
     paneDismissTitle: 'Zamknij',
+    paneConnectTitle: 'Połącz',
+    paneDormantNotice: 'Przywrócono — jeszcze nie połączono',
+    paneDeletedConnection: 'Usunięte połączenie',
+    toastRestoreSkippedLocked: 'Pominięto przywracanie w tym uruchomieniu: dane SSH są zablokowane.',
+    toastRestoreFailed: 'Nie udało się przywrócić poprzedniej sesji. Zaczynamy od nowa.',
+    toastSnapshotSaveFailed: 'Nie udało się zapisać sesji. Następne uruchomienie może nie przywrócić wszystkiego.',
+    optionsTitleStartup: 'Uruchamianie',
+    optionsRestoreSession: 'Przywracaj terminale przy uruchomieniu',
+    sshPanelLocked: 'Odblokuj dane SSH, aby używać połączeń i użytkowników.',
 
     // ── Status bar ───────────────────────────────────────────────────────────
     statusTerminalCount: 'Terminali: {count}',

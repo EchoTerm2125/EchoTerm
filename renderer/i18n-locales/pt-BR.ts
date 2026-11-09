@@ -60,6 +60,15 @@
     paneEchoLabel: 'Eco',
     paneCloseTitle: 'Fechar',
     paneDismissTitle: 'Fechar',
+    paneConnectTitle: 'Conectar',
+    paneDormantNotice: 'Restaurado — ainda não conectado',
+    paneDeletedConnection: 'Conexão excluída',
+    toastRestoreSkippedLocked: 'Restauração ignorada nesta inicialização: os dados SSH estão bloqueados.',
+    toastRestoreFailed: 'Não foi possível restaurar a última sessão. Iniciando do zero.',
+    toastSnapshotSaveFailed: 'Não foi possível salvar a sessão. A próxima inicialização pode não restaurar tudo.',
+    optionsTitleStartup: 'Inicialização',
+    optionsRestoreSession: 'Restaurar terminais ao iniciar',
+    sshPanelLocked: 'Desbloqueie os dados SSH para usar conexões e usuários.',
 
     // ── Status bar ───────────────────────────────────────────────────────────
     statusTerminalCount: 'Terminais: {count}',

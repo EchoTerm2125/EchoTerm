@@ -752,7 +752,7 @@
     const unsubClose = App.api.onConfirmClose(() => {
       showConfirm(
         App.__('confirmCloseApp'),
-        () => App.api.confirmClose(),
+        () => { App.Session?.saveNow?.(); App.api.confirmClose(); },
         'skipCloseConfirm'
       );
     });

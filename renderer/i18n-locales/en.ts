@@ -61,6 +61,15 @@
     paneEchoLabel: 'Echo',
     paneCloseTitle: 'Close',
     paneDismissTitle: 'Dismiss',
+    paneConnectTitle: 'Connect',
+    paneDormantNotice: 'Restored — not connected yet',
+    paneDeletedConnection: 'Deleted connection',
+    toastRestoreSkippedLocked: 'Restore skipped for this launch: SSH data is locked.',
+    toastRestoreFailed: 'Could not restore the last session. Starting fresh.',
+    toastSnapshotSaveFailed: 'Could not save the session. The next launch may not restore everything.',
+    optionsTitleStartup: 'Startup',
+    optionsRestoreSession: 'Restore terminals on startup',
+    sshPanelLocked: 'Unlock SSH data to use connections and users.',
 
     // ── Status bar ───────────────────────────────────────────────────────────
     statusTerminalCount: '{count} terminal{plural}',
