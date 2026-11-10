@@ -498,6 +498,9 @@ import {
           const result = await api.sshUseSafeStorage();
           if (result.error) {
             App.UI.showToast(App.__('toastError', { message: result.error }));
+            // The dialog is gone and nothing unlocked: the startup outcome must
+            // still settle, or Restore waits for an unlock that already failed.
+            settleUnlock('cancelled');
             return;
           }
           App.UI.showToast(App.__('toastUseDefaultEncryption'));

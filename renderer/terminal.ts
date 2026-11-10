@@ -405,7 +405,13 @@ import './icons';
     }
     delete termState._restoreEcho;
 
-    setTimeout(() => termState.fitAddon.fit(), 50);
+    // The session spawned at the pty's default 80x24: fit() only resizes when
+    // the xterm's own dimensions change, which a Pane fitted before it had a
+    // session never does. Send the pane's geometry explicitly.
+    setTimeout(() => {
+      termState.fitAddon.fit();
+      api.resize(termState.id, termState.term.cols, termState.term.rows);
+    }, 50);
     App.UI.updateStatusBar();
   }
 

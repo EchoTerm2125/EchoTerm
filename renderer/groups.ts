@@ -568,6 +568,14 @@
   // Restore replaces the bootstrap group wholesale: it builds the remembered
   // Groups itself, so the default one must leave no state behind.
   function resetForRestore() {
+    // Panes left over from the bootstrap (the default one is closed already)
+    // would lose their Group in the wipe below and linger invisible with a live
+    // session, so close them first.
+    for (const id of [...state.terminals.keys()]) {
+      App.Terminal.closeTerminal(id);
+    }
+    state.activeTerminalId = null;
+
     for (const [, g] of state.groups) {
       if (g._tabEl) g._tabEl.remove();
     }
