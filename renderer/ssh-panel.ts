@@ -516,8 +516,39 @@ import {
 
     if (sshPasswordCancel) {
       sshPasswordCancel.addEventListener('click', () => {
-        sshPasswordDialog.classList.add('hidden');
-        settleUnlock('cancelled');
+        const decline = () => {
+          sshPasswordDialog.classList.add('hidden');
+          settleUnlock('cancelled');
+        };
+
+        // Declining at startup throws away the Restore this launch would have
+        // performed: warn first when a layout actually exists to lose (ADR
+        // 0018). Setup mode and the panel's later unlock have nothing at stake.
+        if (startupUnlockOutcome || passwordMode !== 'unlock' || !App.Session?.wouldRestore) {
+          decline();
+          return;
+        }
+
+        App.Session.wouldRestore().then((wouldRestore) => {
+          if (!wouldRestore) {
+            decline();
+            return;
+          }
+          // The password dialog goes away while the warning is up so its
+          // Enter/Escape handling cannot fire behind the confirm dialog.
+          sshPasswordDialog.classList.add('hidden');
+          App.Menus.showConfirm(
+            App.__('confirmSkipRestore'),
+            () => settleUnlock('cancelled'),
+            null,
+            'confirmSkipRestoreOk',
+            'confirmSkipRestoreBack',
+            () => {
+              sshPasswordDialog.classList.remove('hidden');
+              sshPasswordInput.focus();
+            }
+          );
+        });
       });
     }
 

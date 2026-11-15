@@ -22,6 +22,35 @@
   let restoreAttempted = false;
   let lastWrittenJson = '';
 
+  // The snapshot is read at most once per launch: the startup unlock warning
+  // asks whether Restore would do anything before restore() runs, and the
+  // corrupt notice must keep coming from that same single read (loading a
+  // corrupt file deletes it, so a second read would look like "no snapshot").
+  let snapshotLoad: ReturnType<typeof api.sessionLoad> | null = null;
+
+  function loadSnapshot() {
+    if (!snapshotLoad) {
+      snapshotLoad = api.sessionLoad().catch(() => null);
+    }
+    return snapshotLoad;
+  }
+
+  /**
+   * True when this launch would actually rebuild something once the vault
+   * unlocks: the setting is on and the snapshot holds at least one Pane.
+   * Asked before a startup decline, so first launches and opted-out settings
+   * do not get warned about a layout that does not exist.
+   */
+  async function wouldRestore() {
+    if (restoreAttempted || !isEnabled()) return false;
+    const loaded = await loadSnapshot();
+    const snapshot = loaded && loaded.snapshot;
+    if (!snapshot || !Array.isArray(snapshot.groups)) return false;
+    return snapshot.groups.some(
+      (record) => Array.isArray(record && record.panes) && record.panes.length > 0,
+    );
+  }
+
   // Turning the setting off stops the recording too (ADR 0017): a snapshot the
   // user opted out of is not rewritten behind their back.
   function isEnabled() {
@@ -79,6 +108,12 @@
 
   function writeSnapshot() {
     if (!isEnabled()) return;
+    // Startup is a no-write window for the snapshot file. The bootstrap Group
+    // and Pane schedule a save of their own, and a password-protected vault
+    // keeps Restore waiting on the unlock dialog far longer than the debounce:
+    // writing that bootstrap layout would replace the remembered one before
+    // Restore ever reads it. Writes resume once Restore has run (ADR 0017).
+    if (!restoreAttempted || restoring) return;
     try {
       const snapshot = buildSnapshot();
       const json = JSON.stringify(snapshot);
@@ -139,146 +174,147 @@
     restoreAttempted = true;
     if (!isEnabled()) return;
 
-    let loaded;
-    try {
-      loaded = await api.sessionLoad();
-    } catch {
-      return;
-    }
-    if (loaded && loaded.corrupt) {
-      App.UI.showToast(App.__('toastRestoreFailed'));
-      return;
-    }
-
-    const snapshot = loaded && loaded.snapshot;
-    if (!snapshot || !Array.isArray(snapshot.groups) || snapshot.groups.length === 0) return;
-
-    // Q20: Restore only once the SSH data is readable. Cancelling the unlock
-    // dialog is a deliberate "skip this launch", so say so once.
-    let status;
-    try {
-      status = await api.sshPasswordStatus();
-    } catch {
-      return;
-    }
-    if (!status || !status.unlocked) {
-      App.UI.showToast(App.__('toastRestoreSkippedLocked'));
-      return;
-    }
-
-    const groups = snapshot.groups.slice(0, MAX_GROUPS).map((record) => {
-      const panes = Array.isArray(record && record.panes)
-        ? record.panes.slice(0, MAX_PANES_PER_GROUP)
-        : [];
-      return { record, panes };
-    });
-
-    const totalPanes = Math.min(
-      groups.reduce((sum, entry) => sum + entry.panes.length, 0),
-      MAX_PANES_TOTAL,
-    );
-    if (totalPanes === 0) return;
-
-    // Titles come from live Connection data — the snapshot holds only ids.
-    let connections: ConnectionView[];
-    try {
-      connections = await api.sshConnectionList();
-    } catch {
-      connections = [];
-    }
-    const byId = new Map((connections || []).map(c => [c.id, c]));
-
-    let ids;
-    try {
-      ids = await api.sessionReserveIds(totalPanes);
-    } catch {
-      return;
-    }
-    if (!Array.isArray(ids) || ids.length < totalPanes) return;
-
+    // Hold the no-write window for the whole Restore, reads included: a
+    // debounced save scheduled before Restore must not land here and replace
+    // the snapshot being read back. Every early return still releases it.
     restoring = true;
-    App.Terminal.setSuppressAutoConnect(true);
     try {
-      if (defaultPaneId !== null && defaultPaneId !== undefined) {
-        App.Terminal.closeTerminal(defaultPaneId);
+      const loaded = await loadSnapshot();
+      if (loaded && loaded.corrupt) {
+        App.UI.showToast(App.__('toastRestoreFailed'));
+        return;
       }
-      App.Groups.resetForRestore();
 
-      const groupIds = groups.map((entry, index) =>
-        App.Groups.createGroup(groupName(entry.record, index), index === 0));
+      const snapshot = loaded && loaded.snapshot;
+      if (!snapshot || !Array.isArray(snapshot.groups) || snapshot.groups.length === 0) return;
 
-      let cursor = 0;
-      groups.forEach((entry, index) => {
-        const gid = groupIds[index].id;
-        const mounted = [];
+      // Q20: Restore only once the SSH data is readable. Cancelling the unlock
+      // dialog is a deliberate "skip this launch", so say so once.
+      let status;
+      try {
+        status = await api.sshPasswordStatus();
+      } catch {
+        return;
+      }
+      if (!status || !status.unlocked) {
+        App.UI.showToast(App.__('toastRestoreSkippedLocked'));
+        return;
+      }
 
-        for (const pane of entry.panes) {
-          if (cursor >= totalPanes) break;
-          const shell = normalizeShell(pane && pane.shell);
-          const id = ids[cursor++];
-
-          let label = null;
-          let host = null;
-          let username = null;
-          let connectionId = null;
-          if (shell === 'ssh') {
-            connectionId = pane && typeof pane.connectionId === 'string' ? pane.connectionId : null;
-            const conn = connectionId ? byId.get(connectionId) : null;
-            if (conn) {
-              label = conn.name || null;
-              host = conn.host || null;
-              username = conn.username || null;
-            } else {
-              // The Connection was deleted after the snapshot was written; the
-              // Pane keeps its place until the user closes it.
-              label = App.__('paneDeletedConnection');
-            }
-          }
-
-          App.Terminal.mountPane({
-            id,
-            shell,
-            label,
-            host,
-            username,
-            connectionId,
-            customName: pane && typeof pane.customName === 'string' ? pane.customName : null,
-            dormant: true,
-            groupId: gid,
-            echo: !pane || pane.echo !== false,
-          });
-          mounted.push({ id, echo: !pane || pane.echo !== false });
-        }
-
-        state.groupEchoActive.set(gid, !!(entry.record && entry.record.echoActive) && mounted.length >= 2);
-
-        const activeIdx = entry.record && Number.isInteger(entry.record.activePane)
-          ? entry.record.activePane
-          : 0;
-        const active = mounted[activeIdx] || mounted[0];
-        if (active) state.groupActiveTerminal.set(gid, active.id);
-
-        // Expressed in the new ids so Echo can restore this Group's selection.
-        state.groupEchoSelection.set(gid, new Set(mounted.filter(p => p.echo).map(p => p.id)));
-        state.groupEchoTerminals.set(gid, new Set(mounted.map(p => p.id)));
+      const groups = snapshot.groups.slice(0, MAX_GROUPS).map((record) => {
+        const panes = Array.isArray(record && record.panes)
+          ? record.panes.slice(0, MAX_PANES_PER_GROUP)
+          : [];
+        return { record, panes };
       });
 
-      const activeIdx = Number.isInteger(snapshot.activeGroup) ? snapshot.activeGroup : 0;
-      const targetGroup = (groupIds[activeIdx] || groupIds[0]).id;
-      // Force switchGroup to run its restore path.
-      state.activeGroupId = null;
-      App.Groups.switchGroup(targetGroup);
-      App.Groups.updateGroupTabs();
-    } catch (err) {
-      console.error('Restore failed:', err);
+      const totalPanes = Math.min(
+        groups.reduce((sum, entry) => sum + entry.panes.length, 0),
+        MAX_PANES_TOTAL,
+      );
+      if (totalPanes === 0) return;
+
+      // Titles come from live Connection data — the snapshot holds only ids.
+      let connections: ConnectionView[];
+      try {
+        connections = await api.sshConnectionList();
+      } catch {
+        connections = [];
+      }
+      const byId = new Map((connections || []).map(c => [c.id, c]));
+
+      let ids;
+      try {
+        ids = await api.sessionReserveIds(totalPanes);
+      } catch {
+        return;
+      }
+      if (!Array.isArray(ids) || ids.length < totalPanes) return;
+
+      App.Terminal.setSuppressAutoConnect(true);
+      try {
+        if (defaultPaneId !== null && defaultPaneId !== undefined) {
+          App.Terminal.closeTerminal(defaultPaneId);
+        }
+        App.Groups.resetForRestore();
+
+        const groupIds = groups.map((entry, index) =>
+          App.Groups.createGroup(groupName(entry.record, index), index === 0));
+
+        let cursor = 0;
+        groups.forEach((entry, index) => {
+          const gid = groupIds[index].id;
+          const mounted = [];
+
+          for (const pane of entry.panes) {
+            if (cursor >= totalPanes) break;
+            const shell = normalizeShell(pane && pane.shell);
+            const id = ids[cursor++];
+
+            let label = null;
+            let host = null;
+            let username = null;
+            let connectionId = null;
+            if (shell === 'ssh') {
+              connectionId = pane && typeof pane.connectionId === 'string' ? pane.connectionId : null;
+              const conn = connectionId ? byId.get(connectionId) : null;
+              if (conn) {
+                label = conn.name || null;
+                host = conn.host || null;
+                username = conn.username || null;
+              } else {
+                // The Connection was deleted after the snapshot was written; the
+                // Pane keeps its place until the user closes it.
+                label = App.__('paneDeletedConnection');
+              }
+            }
+
+            App.Terminal.mountPane({
+              id,
+              shell,
+              label,
+              host,
+              username,
+              connectionId,
+              customName: pane && typeof pane.customName === 'string' ? pane.customName : null,
+              dormant: true,
+              groupId: gid,
+              echo: !pane || pane.echo !== false,
+            });
+            mounted.push({ id, echo: !pane || pane.echo !== false });
+          }
+
+          state.groupEchoActive.set(gid, !!(entry.record && entry.record.echoActive) && mounted.length >= 2);
+
+          const activeIdx = entry.record && Number.isInteger(entry.record.activePane)
+            ? entry.record.activePane
+            : 0;
+          const active = mounted[activeIdx] || mounted[0];
+          if (active) state.groupActiveTerminal.set(gid, active.id);
+
+          // Expressed in the new ids so Echo can restore this Group's selection.
+          state.groupEchoSelection.set(gid, new Set(mounted.filter(p => p.echo).map(p => p.id)));
+          state.groupEchoTerminals.set(gid, new Set(mounted.map(p => p.id)));
+        });
+
+        const activeIdx = Number.isInteger(snapshot.activeGroup) ? snapshot.activeGroup : 0;
+        const targetGroup = (groupIds[activeIdx] || groupIds[0]).id;
+        // Force switchGroup to run its restore path.
+        state.activeGroupId = null;
+        App.Groups.switchGroup(targetGroup);
+        App.Groups.updateGroupTabs();
+      } catch (err) {
+        console.error('Restore failed:', err);
+      } finally {
+        App.Terminal.setSuppressAutoConnect(false);
+      }
+
+      // Only now may the visible Panes of the Active group start their sessions.
+      App.Terminal.autoConnectVisible();
+      App.UI.updateStatusBar();
     } finally {
       restoring = false;
-      App.Terminal.setSuppressAutoConnect(false);
     }
-
-    // Only now may the visible Panes of the Active group start their sessions.
-    App.Terminal.autoConnectVisible();
-    App.UI.updateStatusBar();
     scheduleSave();
   }
 
@@ -307,6 +343,7 @@
     scheduleSave,
     saveNow,
     restore,
+    wouldRestore,
   };
 })();
 

@@ -57,9 +57,11 @@ describe('Session snapshot (session.js)', () => {
     expect(pane.customName).toBeUndefined();
   });
 
-  it('writes the snapshot once after the debounce', () => {
+  it('writes the snapshot once after the debounce', async () => {
     vi.useFakeTimers();
     try {
+      // Past the startup no-write window: Restore has run (nothing to restore).
+      await App.Session.restore(null);
       addGroupWithPanes();
       vi.advanceTimersByTime(500); // flush the writes the setup itself scheduled
       (window.api as any).sessionSave.mockClear();
@@ -73,6 +75,69 @@ describe('Session snapshot (session.js)', () => {
       vi.advanceTimersByTime(500);
       expect((window.api as any).sessionSave).toHaveBeenCalledTimes(1);
       expect((window.api as any).sessionSave.mock.calls[0][0].groups[0].name).toBe('Renamed');
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it('does not write a snapshot before Restore has run', () => {
+    vi.useFakeTimers();
+    try {
+      // The bootstrap Group and Pane each schedule a debounced save.
+      addGroupWithPanes();
+      vi.advanceTimersByTime(500);
+      expect((window.api as any).sessionSave).not.toHaveBeenCalled();
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it('does not flush the snapshot when the window closes before Restore has run', () => {
+    addGroupWithPanes();
+    window.dispatchEvent(new Event('beforeunload'));
+    expect((window.api as any).sessionSave).not.toHaveBeenCalled();
+  });
+
+  it('restores the remembered layout when the unlock outlasts the debounce', async () => {
+    (window.api as any).sessionLoad.mockResolvedValue({
+      snapshot: {
+        version: 1,
+        activeGroup: 0,
+        groups: [{
+          name: 'Servers', activePane: 0, echoActive: false,
+          panes: [{ shell: 'ssh', connectionId: 'c1', echo: true }],
+        }],
+      },
+    });
+    (window.api as any).sshConnectionList.mockResolvedValue([
+      { id: 'c1', name: 'Prod', host: 'h1', username: 'u' },
+    ]);
+    (window.api as any).sshConnect.mockResolvedValue({
+      id: 101, shell: 'ssh', label: 'Prod', host: 'h1', username: 'u', connectionId: 'c1',
+    });
+    (window.api as any).sessionReserveIds.mockResolvedValue([101]);
+
+    vi.useFakeTimers();
+    try {
+      // Bootstrap happens before the unlock dialog is answered.
+      App.Groups.createGroup('Default', true);
+      const defaultId = await App.Terminal.spawnTerminal('powershell');
+
+      // The user is still typing the master password when the debounce fires.
+      vi.advanceTimersByTime(500);
+      expect((window.api as any).sessionSave).not.toHaveBeenCalled();
+
+      await App.Session.restore(defaultId);
+
+      expect([...App.state.groups.values()].map(g => g.name)).toEqual(['Servers']);
+      expect(App.state.terminals.has(defaultId)).toBe(false);
+
+      // Once Restore has run, the rebuilt layout is what gets written.
+      vi.advanceTimersByTime(500);
+      const saved = (window.api as any).sessionSave.mock.calls
+        .map((call) => call[0]).at(-1);
+      expect(saved.groups[0].name).toBe('Servers');
+      expect(saved.groups[0].panes).toEqual([{ shell: 'ssh', connectionId: 'c1', echo: true }]);
     } finally {
       vi.useRealTimers();
     }
