@@ -402,6 +402,39 @@ describe('Integration: Context Menus', () => {
     });
   });
 
+  describe('context menu — Paste All refocus', () => {
+    // Regression: with the multi-line paste preview disabled, Paste All wrote
+    // to every echoed pane but left focus on the (now hidden) menu item.
+    it('refocuses an echoed terminal when no paste preview is shown', async () => {
+      localStorage.setItem('skipPastePreview', 'true');
+      (navigator.clipboard.readText as any).mockResolvedValue('line1\nline2');
+
+      const one = App.state.terminals.get(1);
+      const two = App.state.terminals.get(2);
+      one.term.open(one.paneEl.querySelector('.xterm-container'));
+      two.term.open(two.paneEl.querySelector('.xterm-container'));
+      App.state.echoModeActive = true;
+      App.state.echoSelection.add(1);
+      App.state.echoSelection.add(2);
+      App.state.activeTerminalId = 2;
+
+      const menu = document.getElementById('contextMenu') as HTMLElement;
+      menu.innerHTML = `<button data-action="paste-all"></button>`;
+      App.Menus.setupContextMenu();
+      App.Menus.bindContextMenu(one.paneEl, 1);
+      one.paneEl.querySelector('.xterm-container').dispatchEvent(
+        new MouseEvent('contextmenu', { bubbles: true, clientX: 10, clientY: 10 })
+      );
+
+      const btn = menu.querySelector('[data-action="paste-all"]') as HTMLElement;
+      btn.focus();
+      btn.click();
+      await new Promise((r) => setTimeout(r, 40));
+
+      expect(document.activeElement).toBe(two.term.textarea);
+    });
+  });
+
   describe('context menu — Shortcut hints', () => {
     function hint(menu: HTMLElement, action: string): HTMLElement {
       return menu.querySelector(`[data-action="${action}"] .context-shortcut`) as HTMLElement;

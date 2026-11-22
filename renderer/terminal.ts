@@ -874,6 +874,9 @@ import './icons';
       text = normalizeNewlines(text);
       if (id === null) {
         for (const bid of state.echoSelection) api.write(bid, bracketFor(bid, text));
+        // Paste All can come from the context menu, whose click took focus off
+        // the xterm textarea; with no preview dialog to hand it back, do it here.
+        refocus();
       } else {
         api.write(id, bracketFor(id, text));
       }
@@ -891,6 +894,7 @@ import './icons';
         showPastePreview(id, text);
       } else if (id === null) {
         for (const bid of state.echoSelection) api.write(bid, bracketFor(bid, text));
+        refocus();
       } else {
         api.write(id, bracketFor(id, text));
         if (!state.echoModeActive) {
@@ -920,7 +924,7 @@ import './icons';
   // after dialogs close and (via App.Terminal.refocus) after any tab-bar
   // action click: in echo mode prefer a terminal still in the echo selection,
   // otherwise fall back to the active terminal of the current group.
-  function refocus(targetId) {
+  function refocus(targetId?) {
     const groupIds = App.Groups.getGroupTerminalIds(state.activeGroupId);
     if (state.echoModeActive) {
       const focusId = state.echoSelection.has(state.activeTerminalId)
