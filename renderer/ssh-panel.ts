@@ -48,6 +48,9 @@ import {
   const sshDialogCancel = $('#sshDialogCancel');
 
   let passwordMode = 'unlock'; // 'setup' | 'unlock'
+  // True while an unlock request is in flight: the startup Cancel warning must
+  // not describe a launch whose unlock is already being answered.
+  let unlockInFlight = false;
   let sshContextTarget = null; // { type: 'connFolder'|'userFolder'|'connection'|'user'|'empty', id }
   let pendingAdoptTarget = null; // { type: 'connFolder'|'userFolder'|'connection'|'user', ids: string[] } — set by "Add Parent Folder"
   let editingConnectionId = null;
@@ -470,24 +473,29 @@ import {
       }
 
       // unlock
-      const result = await api.sshUnlock(pw);
-      if (result.error || !result.success) {
-        const msg = result.errorCode === 'NO_MASTER_PASSWORD'
-          ? App.__('errorNoMasterPassword')
-          : result.errorCode === 'INCORRECT_PASSWORD'
-          ? App.__('sshPasswordIncorrect')
-          : result.errorCode === 'DECRYPT_FAILED'
-          ? App.__('sshPasswordDecryptFailed')
-          : result.errorCode === 'MASTER_PASSWORD_REQUIRED'
-          ? App.__('sshMasterPasswordRequired')
-          : result.error || App.__('sshPasswordIncorrect');
-        sshPasswordError.textContent = msg;
-        sshPasswordError.classList.remove('hidden');
-        sshPasswordInput.value = '';
-        sshPasswordInput.focus();
-        return;
+      unlockInFlight = true;
+      try {
+        const result = await api.sshUnlock(pw);
+        if (result.error || !result.success) {
+          const msg = result.errorCode === 'NO_MASTER_PASSWORD'
+            ? App.__('errorNoMasterPassword')
+            : result.errorCode === 'INCORRECT_PASSWORD'
+            ? App.__('sshPasswordIncorrect')
+            : result.errorCode === 'DECRYPT_FAILED'
+            ? App.__('sshPasswordDecryptFailed')
+            : result.errorCode === 'MASTER_PASSWORD_REQUIRED'
+            ? App.__('sshMasterPasswordRequired')
+            : result.error || App.__('sshPasswordIncorrect');
+          sshPasswordError.textContent = msg;
+          sshPasswordError.classList.remove('hidden');
+          sshPasswordInput.value = '';
+          sshPasswordInput.focus();
+          return;
+        }
+        await finish();
+      } finally {
+        unlockInFlight = false;
       }
-      await finish();
     });
 
     sshPasswordSkip.addEventListener('click', () => {
@@ -515,6 +523,9 @@ import {
     });
 
     if (sshPasswordCancel) {
+      // True while a Cancel click waits on wouldRestore(): a second click must
+      // not stack a second warning.
+      let checkingSkip = false;
       sshPasswordCancel.addEventListener('click', () => {
         const decline = () => {
           sshPasswordDialog.classList.add('hidden');
@@ -523,20 +534,29 @@ import {
 
         // Declining at startup throws away the Restore this launch would have
         // performed: warn first when a layout actually exists to lose (ADR
-        // 0018). Setup mode and the panel's later unlock have nothing at stake.
+        // 0018). Setup mode's SSH payload is already unrecoverable, and the
+        // panel's later unlock settles no startup outcome: both stay silent.
         if (startupUnlockOutcome || passwordMode !== 'unlock' || !App.Session?.wouldRestore) {
           decline();
           return;
         }
+        // A click that lands while the previous check or an unlock request is
+        // in flight decides nothing here.
+        if (checkingSkip || unlockInFlight) return;
+        checkingSkip = true;
 
+        // The password dialog goes away before the check so its Enter/Escape
+        // handling and Unlock button cannot start an unlock behind the warning.
+        // "Go back" brings it back unchanged.
+        sshPasswordDialog.classList.add('hidden');
         App.Session.wouldRestore().then((wouldRestore) => {
-          if (!wouldRestore) {
+          checkingSkip = false;
+          // The launch settled while the check ran: a warning now would
+          // describe a decision that has already been made.
+          if (!wouldRestore || startupUnlockOutcome || unlockInFlight) {
             decline();
             return;
           }
-          // The password dialog goes away while the warning is up so its
-          // Enter/Escape handling cannot fire behind the confirm dialog.
-          sshPasswordDialog.classList.add('hidden');
           App.Menus.showConfirm(
             App.__('confirmSkipRestore'),
             () => settleUnlock('cancelled'),

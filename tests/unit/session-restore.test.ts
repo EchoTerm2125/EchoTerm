@@ -98,6 +98,58 @@ describe('Session snapshot (session.js)', () => {
     expect((window.api as any).sessionSave).not.toHaveBeenCalled();
   });
 
+  it('reports that Restore would rebuild a saved layout, reading the snapshot once', async () => {
+    (window.api as any).sessionLoad.mockResolvedValue({
+      snapshot: {
+        version: 1,
+        activeGroup: 0,
+        groups: [{ name: 'Work', panes: [{ shell: 'powershell', echo: true }] }],
+      },
+    });
+
+    await expect(App.Session.wouldRestore()).resolves.toBe(true);
+    await expect(App.Session.wouldRestore()).resolves.toBe(true);
+    expect((window.api as any).sessionLoad).toHaveBeenCalledTimes(1);
+  });
+
+  it('reports nothing to restore for a snapshot without panes', async () => {
+    (window.api as any).sessionLoad.mockResolvedValue({
+      snapshot: { version: 1, activeGroup: 0, groups: [{ name: 'Empty', panes: [] }] },
+    });
+
+    await expect(App.Session.wouldRestore()).resolves.toBe(false);
+  });
+
+  it('reports nothing to restore while the setting is off', async () => {
+    localStorage.setItem('restoreSession', 'false');
+    (window.api as any).sessionLoad.mockResolvedValue({
+      snapshot: {
+        version: 1,
+        activeGroup: 0,
+        groups: [{ name: 'Work', panes: [{ shell: 'powershell', echo: true }] }],
+      },
+    });
+
+    await expect(App.Session.wouldRestore()).resolves.toBe(false);
+    expect((window.api as any).sessionLoad).not.toHaveBeenCalled();
+  });
+
+  it('stops reporting a Restore once it has run', async () => {
+    (window.api as any).sessionLoad.mockResolvedValue({
+      snapshot: {
+        version: 1,
+        activeGroup: 0,
+        groups: [{ name: 'Work', panes: [{ shell: 'powershell', echo: true }] }],
+      },
+    });
+    App.Groups.createGroup('Default', true);
+    const defaultId = await App.Terminal.spawnTerminal('powershell');
+
+    await App.Session.restore(defaultId);
+
+    await expect(App.Session.wouldRestore()).resolves.toBe(false);
+  });
+
   it('restores the remembered layout when the unlock outlasts the debounce', async () => {
     (window.api as any).sessionLoad.mockResolvedValue({
       snapshot: {

@@ -2122,3 +2122,136 @@ describe('SshPanel folder auto-echo (ssh-panel.ts)', () => {
     expect(getApp().state.echoModeActive).toBe(false);
   });
 });
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Declining the startup unlock discards the remembered layout: warn first
+// (docs/adr/0018). The warning only exists while the startup outcome is still
+// unsettled, so this block boots with a locked vault whose dialog is showing.
+// ─────────────────────────────────────────────────────────────────────────────
+describe('SshPanel startup skip-restore warning (ssh-panel.ts)', () => {
+  async function setupLockedStartup(wouldRestore?) {
+    await resetTestEnv();
+    scaffoldSshDom();
+
+    const api = window.api;
+    vi.mocked(api.sshPasswordStatus).mockResolvedValue({ masterPasswordSet: true, unlocked: false });
+    vi.mocked(api.sshConnectionList).mockResolvedValue([]);
+    vi.mocked(api.sshConnectionFolderList).mockResolvedValue([]);
+    vi.mocked(api.sshUserFolderList).mockResolvedValue([]);
+    vi.mocked(api.sshUserList).mockResolvedValue([]);
+
+    await loadModules('menus', 'ssh-panel');
+    const App = getApp();
+    App.UI = { showToast: () => {} };
+    App.Session = { wouldRestore: wouldRestore || vi.fn().mockResolvedValue(true) };
+    // Shows the unlock dialog and leaves the launch undecided.
+    await App.SshPanel.init();
+    return App;
+  }
+
+  function els() {
+    return {
+      passwordDialog: document.getElementById('sshPasswordDialog'),
+      cancel: document.getElementById('sshPasswordCancel'),
+      unlock: document.getElementById('sshPasswordBtn'),
+      input: document.getElementById('sshPasswordInput') as HTMLInputElement,
+      confirm: getConfirmElements(),
+    };
+  }
+
+  it('warns before a startup Cancel discards a saved layout', async () => {
+    const App = await setupLockedStartup();
+    const { passwordDialog, cancel, confirm } = els();
+
+    cancel.click();
+    await flush();
+    await flush();
+
+    expect(passwordDialog.classList.contains('hidden')).toBe(true);
+    expect(confirm.dialog.classList.contains('hidden')).toBe(false);
+    expect(confirm.message.textContent).toBe(App.__('confirmSkipRestore'));
+    expect(confirm.ok.textContent).toBe(App.__('confirmSkipRestoreOk'));
+    expect(confirm.cancel.textContent).toBe(App.__('confirmSkipRestoreBack'));
+
+    confirm.ok.click();
+    await flush();
+    await expect(App.SshPanel.unlockSettled()).resolves.toBe('cancelled');
+  });
+
+  it('declines silently when there is nothing to restore', async () => {
+    const App = await setupLockedStartup(vi.fn().mockResolvedValue(false));
+    const { passwordDialog, cancel, confirm } = els();
+
+    cancel.click();
+    await flush();
+    await flush();
+
+    expect(passwordDialog.classList.contains('hidden')).toBe(true);
+    expect(confirm.dialog.classList.contains('hidden')).toBe(true);
+    await expect(App.SshPanel.unlockSettled()).resolves.toBe('cancelled');
+  });
+
+  it('hides the dialog before the snapshot check and only warns once', async () => {
+    let finishCheck;
+    const wouldRestore = vi.fn(() => new Promise<any>((resolve) => { finishCheck = resolve; }));
+    await setupLockedStartup(wouldRestore);
+    const { passwordDialog, cancel, confirm } = els();
+
+    cancel.click();
+    // Gone before the check resolves, so Enter/Unlock cannot slip in behind it.
+    expect(passwordDialog.classList.contains('hidden')).toBe(true);
+    cancel.click();
+    await flush();
+    expect(wouldRestore).toHaveBeenCalledTimes(1);
+
+    finishCheck(true);
+    await flush();
+    await flush();
+
+    expect(confirm.dialog.classList.contains('hidden')).toBe(false);
+  });
+
+  it('returns to the unlock dialog on Go back and keeps the launch open', async () => {
+    const App = await setupLockedStartup();
+    const { passwordDialog, cancel, input, confirm } = els();
+
+    cancel.click();
+    await flush();
+    await flush();
+    confirm.cancel.click();
+    await flush();
+
+    expect(passwordDialog.classList.contains('hidden')).toBe(false);
+    expect(document.activeElement).toBe(input);
+    expect(confirm.dialog.classList.contains('hidden')).toBe(true);
+
+    let settled = false;
+    App.SshPanel.unlockSettled().then(() => { settled = true; });
+    await flush();
+    expect(settled).toBe(false);
+  });
+
+  it('ignores Cancel while an unlock request is already in flight', async () => {
+    const wouldRestore = vi.fn().mockResolvedValue(true);
+    const App = await setupLockedStartup(wouldRestore);
+    let finishUnlock;
+    vi.mocked(window.api.sshUnlock).mockReturnValue(
+      new Promise<any>((resolve) => { finishUnlock = resolve; })
+    );
+    const { passwordDialog, cancel, unlock, input } = els();
+
+    input.value = 'secret';
+    unlock.click();
+    await flush();
+    cancel.click();
+    await flush();
+
+    expect(wouldRestore).not.toHaveBeenCalled();
+    expect(passwordDialog.classList.contains('hidden')).toBe(false);
+
+    finishUnlock({ success: true });
+    await flush();
+    await flush();
+    await expect(App.SshPanel.unlockSettled()).resolves.toBe('unlocked');
+  });
+});
