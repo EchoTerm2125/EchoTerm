@@ -411,7 +411,7 @@ describe('Integration: Context Menus', () => {
       const menu = document.getElementById('contextMenu') as HTMLElement;
       menu.innerHTML = `
         <button data-action="select-all"><span class="menu-item-label">Select All</span><span class="context-shortcut" data-scope="target">Ctrl+Shift+A</span></button>
-        <button data-action="echo"><span class="menu-item-label">Toggle Echo</span><span class="context-shortcut">Ctrl+Shift+T</span></button>
+        <button data-action="echo"><span class="menu-item-label">Toggle Echo</span></button>
         <button data-action="close"><span class="menu-item-label">Close Pane</span><span class="context-shortcut" data-scope="target">Ctrl+W</span></button>
       `;
       return menu;
@@ -432,7 +432,6 @@ describe('Integration: Context Menus', () => {
       openPaneMenu(entry.paneEl, 1);
 
       expect(hint(menu, 'select-all').classList.contains('hidden')).toBe(false);
-      expect(hint(menu, 'echo').classList.contains('hidden')).toBe(false);
       expect(hint(menu, 'close').classList.contains('hidden')).toBe(false);
     });
 
@@ -445,8 +444,18 @@ describe('Integration: Context Menus', () => {
 
       expect(hint(menu, 'select-all').classList.contains('hidden')).toBe(true);
       expect(hint(menu, 'close').classList.contains('hidden')).toBe(true);
-      // Toggle Echo is app-wide, so its hint never depends on the target.
-      expect(hint(menu, 'echo').classList.contains('hidden')).toBe(false);
+    });
+
+    it('shows no hint on the pane-level echo toggle', () => {
+      const menu = buildPaneMenu();
+      const entry = App.state.terminals.get(1);
+      App.state.activeTerminalId = 1;
+
+      openPaneMenu(entry.paneEl, 1);
+
+      // The toggle only affects the clicked pane; Ctrl+Shift+T switches Echo
+      // mode for the whole group, so it must not be advertised here.
+      expect(hint(menu, 'echo')).toBeNull();
     });
 
     it('shows Ctrl+W on Close Tab only when that tab is Active', () => {

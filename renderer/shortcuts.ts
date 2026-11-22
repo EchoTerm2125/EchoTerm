@@ -44,7 +44,7 @@
       id: 'toggleEcho',
       code: 'KeyT',
       shift: true,
-      labelKey: 'ctxToggleEcho',
+      labelKey: 'optionsShortcutToggleEcho',
       run: () => App.Echo.toggleEchoMode(),
     },
     {

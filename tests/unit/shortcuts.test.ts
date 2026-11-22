@@ -23,6 +23,7 @@ describe('Shortcut registry', () => {
     const byId = Object.fromEntries(App.Shortcuts.DEFS.map((d) => [d.id, d]));
     expect(App.Shortcuts.format(byId.newTerminal)).toBe('Ctrl+N');
     expect(App.Shortcuts.format(byId.newGroup)).toBe('Ctrl+Shift+N');
+    expect(App.Shortcuts.format(byId.toggleEcho)).toBe('Ctrl+Shift+T');
     expect(App.Shortcuts.format(byId.nextTerminal)).toBe('Ctrl+Tab');
     expect(App.Shortcuts.format(byId.toggleSidebar)).toBe('Ctrl+Shift+S');
   });
@@ -41,11 +42,14 @@ describe('Shortcut registry', () => {
     hint.dataset.shortcutId = 'closeTerminal';
     const btn = document.createElement('button');
     btn.dataset.shortcutTitle = 'newTerminal';
-    document.body.append(hint, btn);
+    const echoBtn = document.createElement('button');
+    echoBtn.dataset.shortcutTitle = 'toggleEcho';
+    document.body.append(hint, btn, echoBtn);
 
     App.Shortcuts.hydrate();
 
     expect(hint.textContent).toBe('Ctrl+W');
     expect(btn.getAttribute('title')).toBe('New terminal (Ctrl+N)');
+    expect(echoBtn.getAttribute('title')).toBe('Toggle Echo mode (Ctrl+Shift+T)');
   });
 });
