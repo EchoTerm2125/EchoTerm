@@ -635,14 +635,25 @@
     App.Shortcuts.bind();
   }
 
+  // Refit every terminal after the terminal container changes size. A window
+  // resize is only one cause: the SSH sidebar collapsing/expanding (animated
+  // width transition) or being dragged resizes #terminal-container without
+  // firing window resize, which left xterm on its old cols (blank space on the
+  // right, pty still on the old grid). Debounced so a transition or drag only
+  // refits once it settles instead of spamming pty resizes every frame.
+  let fitTimer;
+  function fitAllTerminals() {
+    clearTimeout(fitTimer);
+    fitTimer = setTimeout(() => {
+      for (const [, t] of state.terminals) t.fitAddon.fit();
+    }, 100);
+  }
+
   function bindGlobalEvents() {
-    let resizeTimer;
-    window.addEventListener('resize', () => {
-      clearTimeout(resizeTimer);
-      resizeTimer = setTimeout(() => {
-        for (const [, t] of state.terminals) t.fitAddon.fit();
-      }, 100);
-    });
+    window.addEventListener('resize', fitAllTerminals);
+    if (typeof ResizeObserver !== 'undefined') {
+      new ResizeObserver(fitAllTerminals).observe(App.container);
+    }
 
     // Helper: check whether any overlay/dialog/menu is currently visible
     function _anyOverlayOpen() {
