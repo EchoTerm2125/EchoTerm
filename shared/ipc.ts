@@ -59,6 +59,13 @@ export interface SessionLoadResult {
   corrupt?: boolean;
 }
 
+/** Outcome of a snapshot write. The renderer records a layout as written only
+ *  once this reports success, so a failed write is retried by the next flush. */
+export interface SessionSaveResult {
+  success?: boolean;
+  error?: string;
+}
+
 // ─── SSH models ──────────────────────────────────────────────────────────────
 export type SshAuthType = 'password' | 'keyfile';
 
@@ -450,9 +457,9 @@ export interface WindowApi {
 
   // Session snapshot (Restore)
   sessionLoad(): Promise<SessionLoadResult>;
-  /** Fire-and-forget: the last write wins, and the quit flush must not wait. */
-  sessionSave(snapshot: SessionSnapshot): void;
+  /** Written by main before this settles; callers do not await it, so the quit
+   *  flush is never delayed. */
+  sessionSave(snapshot: SessionSnapshot): Promise<SessionSaveResult>;
   /** Reserve pane ids for the restored Panes that have no session yet. */
   sessionReserveIds(count: number): Promise<number[]>;
-  onSessionSaveError(callback: (message: string) => void): () => void;
 }

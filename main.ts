@@ -382,13 +382,15 @@ ipcMain.handle('session:reserve-ids', (event, count) => {
   const n = Math.max(0, Math.min(500, Math.floor(Number(count) || 0)));
   return sessionRegistry.reserveIds(n);
 });
-ipcMain.on('session:save', (event, snapshot) => {
+ipcMain.handle('session:save', (event, snapshot) => {
   try {
     sessionSnapshotStore.save(snapshot);
+    return { success: true };
   } catch (err) {
-    // Best-effort persistence: tell the renderer once so it can warn, and keep
-    // the app running — restore is never worth interrupting work for.
-    sendToRenderer('session:save-error', (err && err.message) || String(err));
+    // Best-effort persistence: the renderer warns once and keeps the app
+    // running — restore is never worth interrupting work for. Reporting the
+    // failure here also keeps the renderer from recording the write as done.
+    return { error: (err && err.message) || String(err) };
   }
 });
 

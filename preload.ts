@@ -150,13 +150,8 @@ const api: WindowApi = {
 
   // ─── Session snapshot (Restore) ────────────────────────────────────────────
   sessionLoad: () => ipcRenderer.invoke('session:load'),
-  sessionSave: (snapshot) => ipcRenderer.send('session:save', snapshot),
+  sessionSave: (snapshot) => ipcRenderer.invoke('session:save', snapshot),
   sessionReserveIds: (count) => ipcRenderer.invoke('session:reserve-ids', count),
-  onSessionSaveError: (callback) => {
-    const listener = (_event: unknown, message: string) => callback(message);
-    ipcRenderer.on('session:save-error', listener);
-    return () => ipcRenderer.removeListener('session:save-error', listener);
-  },
 };
 
 contextBridge.exposeInMainWorld('api', api);

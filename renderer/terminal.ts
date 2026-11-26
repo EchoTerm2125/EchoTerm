@@ -138,6 +138,9 @@ import './icons';
       label, host, username, connectionId,
       outBuf: '', pwPrompt: false, _reconnecting: false,
       _dormant: dormant,
+      // Set when an automatic Connect fails, so showing the Pane again does not
+      // retry it (and re-report the same error) on every focus.
+      _connectFailed: false,
       // A restored Pane rejoins the Echo selection once its session is up.
       _restoreEcho: !!spec.echo,
     };
@@ -324,12 +327,16 @@ import './icons';
     if (!termState || !termState._dormant || termState._connecting) return false;
 
     termState._connecting = true;
+    termState._connectFailed = false;
     setConnectBusy(termState, true);
 
     const fail = (message) => {
       const current = state.terminals.get(id);
       if (current) {
         current._connecting = false;
+        // Auto-connect backs off after a failure; the Connect control calls
+        // connectPane() directly, which clears this again.
+        current._connectFailed = true;
         setConnectBusy(current, false);
       }
       App.UI.showToast(App.__(
@@ -344,7 +351,11 @@ import './icons';
         const located = await App.UI.promptLocateGitBash();
         if (!located) {
           const current = state.terminals.get(id);
-          if (current) { current._connecting = false; setConnectBusy(current, false); }
+          if (current) {
+            current._connecting = false;
+            current._connectFailed = true;
+            setConnectBusy(current, false);
+          }
           App.UI.showToast(App.__('toastGitBashNotFound'));
           return false;
         }
@@ -357,7 +368,12 @@ import './icons';
       if (result && result.error) return fail(connectErrorText(termState.shell, result));
 
       const current = state.terminals.get(id);
-      if (!current) return false; // Pane closed while connecting
+      if (!current) {
+        // Closed while connecting: the session that just started has no Pane
+        // left to show it, so end it instead of leaving an orphan process.
+        api.killTerminal(id);
+        return false;
+      }
       current._connecting = false;
       setConnectBusy(current, false);
       markPaneLive(current, result);
@@ -420,7 +436,7 @@ import './icons';
     if (_suppressAutoConnect) return;
     const activeGroup = state.activeGroupId;
     for (const [id, t] of state.terminals) {
-      if (!t._dormant) continue;
+      if (!t._dormant || t._connectFailed) continue;
       if (state.terminalGroups.get(id) !== activeGroup) continue;
       if (t.paneEl.style.display === 'none') continue;
       connectPane(id);

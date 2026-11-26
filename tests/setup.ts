@@ -182,10 +182,9 @@ window.api = {
   panelShowResults: vi.fn(),
   // Session snapshot (Restore)
   sessionLoad: vi.fn(() => Promise.resolve({ snapshot: null })),
-  sessionSave: vi.fn(),
+  sessionSave: vi.fn(() => Promise.resolve({ success: true })),
   sessionReserveIds: vi.fn((count) => Promise.resolve(
     Array.from({ length: count }, (_, i) => _nextApiId + i))),
-  onSessionSaveError: vi.fn(() => vi.fn()),
 } as unknown as WindowApi;
 // Inject the fake through the renderer IPC gateway
 setIpcClient(window.api);

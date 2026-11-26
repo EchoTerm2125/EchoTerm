@@ -118,12 +118,30 @@
       const snapshot = buildSnapshot();
       const json = JSON.stringify(snapshot);
       if (json === lastWrittenJson) return;
-      lastWrittenJson = json;
-      api.sessionSave(snapshot);
+      // Record the layout only once main confirms the write: a failed one must
+      // leave the previous value in place so the next flush sends it again.
+      api.sessionSave(snapshot).then((result) => {
+        if (result && result.error) {
+          reportSaveFailure(result.error);
+          return;
+        }
+        lastWrittenJson = json;
+      }).catch((err) => {
+        reportSaveFailure((err && err.message) || String(err));
+      });
     } catch (err) {
       // Snapshotting must never break the UI it is recording.
       console.error('Session snapshot failed:', err);
     }
+  }
+
+  // A failed write is reported once per launch: the same full disk or locked
+  // file must not toast on every layout change.
+  function reportSaveFailure(detail) {
+    if (warnedSaveFailure) return;
+    warnedSaveFailure = true;
+    console.error('Session snapshot save failed:', detail);
+    App.UI.showToast(App.__('toastSnapshotSaveFailed'));
   }
 
   function scheduleSave() {
@@ -319,16 +337,6 @@
   }
 
   // ─── Wiring ────────────────────────────────────────────────────────────────
-  // A failed write is reported once per launch: the same full disk or locked
-  // file must not toast on every layout change.
-  if (api.onSessionSaveError) {
-    state.dataUnsubscribers.push(api.onSessionSaveError(() => {
-      if (warnedSaveFailure) return;
-      warnedSaveFailure = true;
-      App.UI.showToast(App.__('toastSnapshotSaveFailed'));
-    }));
-  }
-
   window.addEventListener('beforeunload', () => {
     if (saveTimer) {
       clearTimeout(saveTimer);
